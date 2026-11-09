@@ -75,9 +75,10 @@ only, so a simulated organ cannot yet be scored against them. Closing this
 needs the 1 to 6 um zoom volumes.
 
 **Self-averaging depends on the closure mode, not only on the observable.**
-Under exhaustion, unit number concentrates; under saturation the same quantity
-can disperse, because saturation is the only mode that reads a supply the
-vasculature disperses.
+Under exhaustion, unit number concentrates with a = 1.00 exactly, which is
+dilution of a constant spread rather than averaging; under saturation the
+spread itself falls. Reporting a single exponent per observable hides that
+difference.
 
 **Three of six invariants survive correction.** The left-right asymmetry in
 human kidneys is tested by paired Wilcoxon with Bonferroni over six invariants
