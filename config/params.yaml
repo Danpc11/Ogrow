@@ -1,0 +1,67 @@
+# All parameters and seeds used in the manuscript. Nothing is set elsewhere.
+engine:
+  days: 70
+  n_attractors: 9000
+  max_units: 4200
+  beta: 2.2              # tissue demand -> distal conductance
+  g0: 0.30               # initial unit growth rate
+  tau_g: 12.0            # proliferative decay, days
+  C0: 14.0               # root conductance at t=0
+  alpha_allometric: 1.155
+  tau_body: 16.0
+
+identity:                # the single parameter that distinguishes organs
+  liver:    {mode: saturation, R: 190, lam: 7.4, nu: 400.0, c_set: 0.055}
+  kidney:   {mode: exhaustion, R: 150, lam: 6.0, iota: 0.165, decay: 0.952}
+  pancreas: {mode: pool,       R: 165, lam: 6.6, draw: 0.075}
+  # the lung is the only exchange organ whose organising tree carries the
+  # exchange medium (air); a second tree runs alongside it as a bundle
+  lung:     {mode: exhaustion, R: 175, lam: 6.2, iota: 0.110, decay: 0.930,
+             vessels: bundle}
+
+disorder:
+  sigma_init: 0.60       # spread of the seeded initial condition
+  sigma_param: 0.04      # quenched spread of per-individual parameters
+
+seeds:                   # every figure is reproducible from these
+  fig2_representative: 0
+  fig2_replicates: [1, 10]        # range, inclusive-exclusive
+  fig3_main: [300, 316]
+  fig3_sweep: [600, 612]
+  fig4_scaling: [900, 912]
+  fig5_identifiability: [2000, 2005]
+  fig6_convergence: [7000, 7005]
+  fig6_degradation: [8000, 8006]
+  fig4_scaling_probe: 0            # fixed probe grid, shared by all replicates
+
+sweeps:
+  sigma_param: [0.0, 0.02, 0.04, 0.07, 0.12]
+  resolution: [600, 1500, 3500, 9000, 20000]
+  scaling_days: [12, 20, 30, 45, 70]
+
+hoa:
+  target_um: {kidney: 200, heart: 450, lung: 300}
+  max_slices: {kidney: 260, heart: 150, lung: 200}
+  invariants: [volume_mm3, surface_mm2, sphericity, elong, flat,
+               dark_largest_frac, intensity_cv, intensity_skew]
+  log_scaled: [volume_mm3, surface_mm2]
+  qc:
+    mask_fraction: [0.03, 0.60]
+    min_solidity: 0.80
+    max_border_touch: 0.12
+    volume_mm3: [30000, 400000]
+  outlier_z: 3.0
+
+organs:                  # which identities enter which figure
+  growth_series: [liver, kidney, pancreas, lung]
+  closure_test:  [liver, kidney, pancreas, lung]
+  scaling:       liver
+  identifiability: liver
+
+human:                   # cohorts used in figure 6
+  kidney_hipct: results/hoa_kidney.json
+  kidney_ct:    results/trusted_split.json
+  lung_hipct:   results/hoa_lung.json
+  invariants_hipct: [volume_mm3, surface_mm2, sphericity, elong, flat,
+                     intensity_cv, intensity_skew]
+  invariants_ct:    [volume_cm3, surface_cm2, sphericity, elong, flat, surf_vol]

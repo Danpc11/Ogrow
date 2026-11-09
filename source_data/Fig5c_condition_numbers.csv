@@ -1,0 +1,5 @@
+observable_set,rank,n_parameters,condition_number
+Final N only,1,5,1.0
+N trajectory,5,5,705.066305333392
+N + per-unit supply,5,5,109.85544560408401
+N + supply + vessels,5,5,109.85544560408401

@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.venv/
+data/hoa/
+results/*
+!results/.gitkeep
+figures/out/*
+!figures/out/.gitkeep
