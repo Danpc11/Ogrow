@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from organgrow import sdf
+from organgrow import grow, sdf
 
 from organgrow import figstyle as F
 from organgrow.config import CFG, seeds
@@ -22,29 +22,14 @@ ORG = [("liver", "Liver", K["liver"], 190),
        ("lung", "Lung", K["lung"], 175),
        ("pancreas", "Pancreas", K["pancreas"], 165)]
 SNAP = (10, 25, 45, 70)
-
-# everything drawn here was computed by scripts/01_ensembles.py; the figure
-# does not run the engine, so it cannot drift from the source data
-_ens = np.load(RES / "ens_main.npz")
-_rep = np.load(RES / "rep_main.npz")
-_snaps = np.load(RES / "ens_snapshots.npy", allow_pickle=True).item()
-
-
-class _Trace:
-    pass
-
+NREP = 10
 
 runs, reps = {}, {}
 for kind, _, _, _ in ORG:
-    tr = _Trace()
-    tr.t, tr.N, tr.P, tr.cu = (_rep[f"{kind}_t"], _rep[f"{kind}_N"],
-                               _rep[f"{kind}_P"], _rep[f"{kind}_cu"])
-    tr.snapshots = _snaps[kind]
-    runs[kind] = (None, _rep[f"{kind}_m"], None, None, tr)
-    R = []
-    for row_N, row_H in zip(_ens[f"{kind}_N"], _ens[f"{kind}_hypo"]):
-        r = _Trace(); r.N = row_N; r.hypo = row_H; R.append(r)
-    reps[kind] = R
+    runs[kind] = grow(kind, seed=0, days=70, snap_at=SNAP)
+    reps[kind] = [grow(kind, seed=s, days=70, snap_at=(),
+                              sigma_init=d['sigma_init'], sigma_param=d['sigma_param'])[4]
+                  for s in range(1, NREP + 1)]
 
 fig = plt.figure(figsize=(F.WIDTH_FULL, 180 * F.MM))
 gs = fig.add_gridspec(5, 4, height_ratios=[1, 1, 1, 1, 1.22],

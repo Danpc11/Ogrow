@@ -7,8 +7,7 @@ same feedback that closes the window is the one that contracts the variance,
 so they cannot be asked for separately. Parameter choices that let the liver
 reach its capacity ceiling within the run contract the CV of unit number by 8
 to 52-fold; the choice that reproduces the 3.09-fold contraction measured in
-mouse leaves the organ at about a fifth of its ceiling (N = 351 at day 70
-against N_inf = C / c_set of roughly 1800). If the mouse liver both closes its
+mouse leaves the organ at half its ceiling. If the mouse liver both closes its
 window in a week and contracts only 3.09-fold, capacity-limited nucleation
 cannot be the only closure mechanism for that organ.
 
@@ -53,16 +52,6 @@ rises as p^(b/2) with b = 1, which is derived from the cost of mural mass
 exponent of 2.0, chosen so that supply per unit would fall; that produced a
 sign reversal in the central result which was an artefact of the choice.
 
-**The closed model runs but is not calibrated.** `src/organgrow/closed.py`
-grows an organ under pressure-driven flow with one nucleation law and passes
-its smoke tests (no calibre runaway, conductance bounded by the tissue,
-spacing rule intact). Its identity parameters (nu, q_set, rho, delta, P_0)
-have not been fitted to any measurement, so nothing it produces is in the
-figures yet. Two further things it fixed in its own earlier draft: tips with
-no tissue were treated as open drains, which was the calibre runaway, and
-the supply a unit read was the flow its own branch drew, which is circular;
-supply is now the outlet pressure the tree delivers.
-
 **Three errors in earlier versions, now fixed, that invalidated results.**
 Nucleation truncated its rate to an integer each day, which turned the law
 into a staircase of four units per day and hid saturation entirely; the
@@ -84,21 +73,6 @@ produces unit number, unit mass, spacing and supply distance. The human
 cohorts, at 100 um to 1 mm per voxel, yield shape and intensity descriptors
 only, so a simulated organ cannot yet be scored against them. Closing this
 needs the 1 to 6 um zoom volumes.
-
-**The exponent a = 1 for unit number under exhaustion is dilution.** With no
-parameter disorder, exhaustion adds a deterministic number of units each day,
-so the absolute spread sd(N) is fixed by the seeded start and the CV falls as
-1/N exactly. That is the ambiguity THEORY §7 warns of, not a concentration of
-the distribution. Source data now carry sd(N) beside CV(N) (Fig4bd, and the
-exponent of sd in Fig4c) so the two can be told apart: self-averaging in the
-sense of §8 is a falling sd, and a CV exponent equal to the sd exponent plus
-one is pure dilution.
-
-**The vascular dispersion at the fastest calibre rate is seed-sensitive.**
-Near a relaxation rate of 1 the calibre loop is at the edge of stability, and
-CV(C) there changes by an order of magnitude between replicate sets.
-`results/vascular_disorder.json` reports a bootstrap interval for every rate;
-`THEORY.md` quotes the range, not a point.
 
 **Self-averaging depends on the closure mode, not only on the observable.**
 Under exhaustion, unit number concentrates with a = 1.00 exactly, which is

@@ -63,7 +63,7 @@ axa.text(50, 11.5, "absolute s.d. of $N$ across replicates, day 1 vs day 70",
 # -------------------------------------------------- b  per-replicate values
 axb = fig.add_subplot(gs[0, 1])
 rng = np.random.default_rng(0)
-pos = {"liver": (0.8, 2.0), "kidney": (3.4, 4.6)}
+pos = {"liver": (1, 2), "kidney": (3.4, 4.4)}
 for kind, col in [("liver", K["liver"]), ("kidney", K["kidney"])]:
     M = ens[kind]
     for j, d in enumerate([D0, D1]):
@@ -72,14 +72,13 @@ for kind, col in [("liver", K["liver"]), ("kidney", K["kidney"])]:
         axb.scatter(x, v, s=5, c=col, lw=0, alpha=0.70)
         axb.plot([pos[kind][j] - 0.22, pos[kind][j] + 0.22], [0, 0],
                  color=K["ink"], lw=1.1)
-        axb.text(pos[kind][j], 21.5, "%.1f" % M[:, d].std(ddof=1),
-                 ha="center", va="bottom", fontsize=5.6, color=col)
-axb.text(0.05, 24.5, "s.d. of $N$", ha="left", va="bottom", fontsize=5.4, color=K["grey"])
-axb.set_xlim(0.0, 5.3); axb.set_ylim(-20, 29)
-axb.set_xticks([0.8, 2.0, 3.4, 4.6])
+        axb.text(pos[kind][j], 20.5, "s.d.\n%.1f" % M[:, d].std(ddof=1),
+                 ha="center", va="bottom", fontsize=5.8, color=col)
+axb.set_xticks([1, 2, 3.4, 4.4])
 axb.set_xticklabels(["day 1", "day 70", "day 1", "day 70"],
                     fontsize=F.SZ["small"])
 axb.set_ylabel("$N$ $-$ mean")
+axb.set_ylim(-20, 27)
 axb.text(1.5, -18, "Saturation", ha="center", fontsize=6.2, color=K["liver"])
 axb.text(3.9, -18, "Exhaustion", ha="center", fontsize=6.2, color=K["kidney"])
 
@@ -117,15 +116,11 @@ axd.bar(x - w, lin, width=w, color=K["pale"], lw=0, label="dilution, $N_f/N_i$")
 axd.bar(x, meas, width=w, color=cols, lw=0, label="measured")
 axd.bar(x + w, quad, width=w, color="none", lw=0.9, edgecolor=K["ink"],
         label="bound, $(N_f/N_i)^2$")
-axd.set_yscale("log"); axd.set_xticks(x)
-short = {"Saturation": "Sat.", "Exhaustion (kidney)": "Exh.\n(kidney)",
-         "Exhaustion (lung)": "Exh.\n(lung)", "Limiting pool": "Pool"}
-axd.set_xticklabels(["Sat.", "Exh.\n(kidney)", "Exh.\n(lung)", "Pool"][:len(names)],
+axd.set_yscale("log"); axd.set_xticks(x); axd.set_xticklabels([n.replace(" (", "\n(") for n in names],
                     fontsize=F.SZ["small"] - 1)
-axd.set_ylim(top=axd.get_ylim()[1] * 8)
 axd.set_ylabel("Contraction of CV")
 axd.legend(frameon=False, handlelength=1.1, borderpad=0.1, labelspacing=0.22,
-           handletextpad=0.4, loc="upper left", fontsize=5.3)
+           handletextpad=0.4, loc="upper left", fontsize=5.6)
 
 # --------------------------------------------- e  sweep of parameter disorder
 axe = fig.add_subplot(gs[1, 1])
@@ -147,10 +142,8 @@ for sw, col, name in [(swL, K["liver"], "Saturation"), (swK, K["kidney"], "Exhau
     A = sw["N"]
     cf = np.array([cv(A[i][:, D1]) for i in range(len(sig))])  # terminal CV
     axf.plot(sig, cf, "o-", color=col, ms=3.2, mew=0, lw=1.1, label=name)
-# the dashed line is the parameter disorder itself, for reference: the terminal
-# CV equals it only when the window has closed on the parameter that carries it
 axf.plot(sig, sig, ls=(0, (3, 2)), color=K["ink"], lw=0.7)
-axf.text(0.055, 0.082, "$\\sigma_{param}$ (reference)", fontsize=6.0,
+axf.text(0.055, 0.082, "$\\mathrm{CV}_\\infty=\\sigma_{param}$", fontsize=6.0,
          color=K["ink"], rotation=36)
 axf.set_xlabel("Parameter disorder, $\\sigma_{param}$")
 axf.set_ylabel("Terminal CV of $N$")
@@ -166,18 +159,20 @@ VD = json.load(open(vd_path))
 axg = fig.add_subplot(gs[0, 3])
 sw = VD["eta_sweep"]
 eta = np.array([r["rate"] for r in sw])
-cvg = np.array([r["cv"] for r in sw])
-lo = np.array([r.get("cv_lo", r["cv"]) for r in sw])
-hi = np.array([r.get("cv_hi", r["cv"]) for r in sw])
-axg.fill_between(eta, lo, hi, color=K["kidney"], alpha=0.18, lw=0)
-axg.plot(eta, cvg, "o-", color=K["kidney"], ms=3.0, mew=0, lw=1.1)
+cv = np.array([r["cv"] for r in sw])
+axg.plot(eta, cv, "o-", color=K["kidney"], ms=3.0, mew=0, lw=1.1)
+k = int(np.argmax(cv))
+axg.plot(eta[k], cv[k], "o", color=K["liver"], ms=5.0, mew=0, zorder=3)
+axg.annotate("peak at $\\eta$ = %.2f" % eta[k],
+             xy=(eta[k], cv[k]), xytext=(eta[k] + 0.22, cv[k] * 0.96),
+             fontsize=F.SZ["small"], color=K["liver"],
+             arrowprops=dict(arrowstyle="-", lw=0.6, color=K["liver"]))
 axg.set_xlabel("Calibre relaxation rate, $\\eta$")
 axg.set_ylabel("CV of supply across replicates")
-axg.text(0.03, 0.95, "fixed $N$, no seeded disorder:\nall spread is the tree's\n"
-         "band: 90% bootstrap over replicates",
+axg.text(0.03, 0.95, "fixed $N$, no seeded disorder:\nall spread is the tree's",
          transform=axg.transAxes, fontsize=F.SZ["small"], va="top",
          color=K["grey"], style="italic")
-axg.set_ylim(0, max(hi) * 1.25)
+axg.set_ylim(0, max(cv) * 1.25)
 
 # ------------------------------------------ h  it settles, it does not diverge
 axh = fig.add_subplot(gs[1, 3])
@@ -190,7 +185,7 @@ axh.plot(dd, [r["cv_N"] for r in ot], "s-", color=K["liver"], ms=2.6, mew=0,
 axh.set_xlabel("Day"); axh.set_ylabel("CV across replicates")
 axh.legend(loc="upper left")
 g = VD["gamma"]["liver"]["mean"]
-axh.text(0.97, 0.60, "$\\mathbb{C}\\sim N^{%.2f}$, so no runaway" % g,
+axh.text(0.97, 0.05, "$\\mathbb{C}\\sim N^{%.2f}$, so no runaway" % g,
          transform=axh.transAxes, ha="right", fontsize=F.SZ["small"],
          color=K["grey"], style="italic")
 

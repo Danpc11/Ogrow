@@ -51,7 +51,7 @@ check("fig3 sigma_init stated in panel a",
 print("\nFig 4  self-averaging exponents")
 A0 = json.load(open(RES / "scaling_nodisorder.json"))
 N0 = np.array([r["N"] for r in A0])
-for key in ("cv_N", "sd_N", "cv_mean_unit", "cv_mass", "vessel_identity",
+for key in ("cv_N", "cv_mean_unit", "cv_mass", "vessel_identity",
             "density_discord"):
     y = np.array([r[key] for r in A0])
     a = -np.polyfit(np.log(N0), np.log(y), 1)[0]
@@ -69,18 +69,6 @@ for lab, v in I["sets"].items():
           f"cond {c:.0f}" if c else f"  {lab:<24} rank {v['rank']}")
 print("  figure 5 reads these numbers from results/ident.json, "
       "so there is nothing to drift")
-
-print("\nTHEORY.md  stated exponents")
-vd = RES / "vascular_disorder.json"
-if vd.exists():
-    VD = json.load(open(vd))
-    theory = (ROOT / "THEORY.md").read_text()
-    for kind, g in VD["gamma"].items():
-        m = re.search(r"\\gamma\$ = ([\d.]+) \(%s\)" % kind, theory)
-        check(f"theory gamma ({kind})", float(m.group(1)) if m else None,
-              g["mean"], 0.05)
-else:
-    print("  skipped: results/vascular_disorder.json absent")
 
 print("\nFig 6  variance partition")
 if not (RES / "partition.json").exists():

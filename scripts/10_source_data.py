@@ -72,13 +72,11 @@ for tag in ("nodisorder", "disorder"):
     for r in A:
         rows.append([tag, r["days"], r["N"], r["cv_N"], r["cv_mean_unit"],
                      r["cv_mass"], r["cv_dissipation"],
-                     r["vessel_identity"], r["density_discord"],
-                     r.get("sd_N", np.nan), r.get("sd_mass", np.nan)])
+                     r["vessel_identity"], r["density_discord"]])
 write("Fig4bd_scaling_with_organ_size.csv",
       ["parameter_disorder", "days", "units", "cv_unit_number",
        "cv_mean_unit_mass", "cv_total_mass", "cv_dissipation",
-       "vessel_identity_disagreement", "density_pattern_discord",
-       "sd_unit_number", "sd_total_mass"], rows)
+       "vessel_identity_disagreement", "density_pattern_discord"], rows)
 
 ct = RES / "scaling_contrast.json"
 if ct.exists():
@@ -88,10 +86,7 @@ if ct.exists():
     for key, nm in [("cv_N", "unit number"), ("cv_mean_unit", "mean unit mass"),
                     ("cv_mass", "total mass"),
                     ("vessel_identity", "vessel identity"),
-                    ("density_discord", "local density pattern"),
-                    ("sd_N", "sd of unit number (absolute)")]:
-        if key not in CT[0]:
-            continue
+                    ("density_discord", "local density pattern")]:
         y = np.array([r[key] for r in CT])
         g, cov = np.polyfit(np.log(Nc), np.log(y), 1, cov=True)
         rows.append([nm, -g[0], float(np.sqrt(cov[0, 0]))])
@@ -104,10 +99,7 @@ rows = []
 for key, nm in [("cv_N", "unit number"), ("cv_mean_unit", "mean unit mass"),
                 ("cv_mass", "total mass"),
                 ("vessel_identity", "vessel identity"),
-                ("density_discord", "local density pattern"),
-                ("sd_N", "sd of unit number (absolute)")]:
-    if key not in A0[0]:
-        continue
+                ("density_discord", "local density pattern")]:
     y = np.array([r[key] for r in A0])
     g, cov = np.polyfit(np.log(N0), np.log(y), 1, cov=True)
     rows.append([nm, -g[0], float(np.sqrt(cov[0, 0]))])

@@ -24,9 +24,7 @@ class VascularTree:
     """
 
     __slots__ = ("parent", "start", "end", "radius", "length",
-                 "flow", "shear", "is_tip",
-                 "pressure_in", "pressure_out", "conductance_total",
-                 "r_crit", "below")
+                 "flow", "shear", "is_tip")
 
     def __init__(self, root_start, root_end, r0):
         self.parent = [-1]
@@ -38,11 +36,6 @@ class VascularTree:
         self.flow = np.zeros(1)
         self.shear = np.zeros(1)
         self.is_tip = [True]
-        self.pressure_in = np.zeros(1)
-        self.pressure_out = np.zeros(1)
-        self.conductance_total = 0.0
-        self.r_crit = np.zeros(1)
-        self.below = np.zeros(1)
 
     def __len__(self):
         return len(self.parent)
@@ -158,22 +151,10 @@ class VascularTree:
             below[int(k)] += float(c)
         eff = np.zeros(n)
         for k in range(n - 1, -1, -1):              # leaves to root
-            # a tip with nothing below it is a dead end, not an open drain:
-            # its conductance is zero, otherwise it would discharge to zero
-            # pressure, its shear would rise with its radius and the calibre
-            # loop would run away
-            eff[k] = 0.0 if below[k] <= 0 else 1.0 / (1.0 / own[k] +
-                                                      1.0 / below[k])
+            eff[k] = own[k] if below[k] <= 0 else 1.0 / (1.0 / own[k] +
+                                                         1.0 / below[k])
             if par[k] >= 0:
                 below[par[k]] += eff[k]
-        # the critical radius of each segment in series with everything
-        # below it: shear peaks at (3 l / R_below)^(1/4); under it the
-        # calibre feedback is positive, so it is the floor the segment may
-        # not cross (Eq. in CLOSED_MODEL.md). Dead ends get the root's value.
-        r_crit = np.where(below > 0, (3.0 * l * np.maximum(below, 1e-12)) ** 0.25, 0.0)
-        r_crit[below <= 0] = 0.0
-        self.r_crit = r_crit
-        self.below = below
 
         kids = [[] for _ in range(n)]
         for k in range(1, n):
@@ -181,23 +162,19 @@ class VascularTree:
 
         f = np.zeros(n)
         p = np.zeros(n)
-        pout = np.zeros(n)
         f[0] = dP * eff[0]
         p[0] = dP
         for k in range(n):                          # root to leaves
             drop = f[k] / max(own[k], 1e-12)
-            pout[k] = p[k] - drop
+            p_out = p[k] - drop
             cs = kids[k]
             if cs:
                 tot = sum(eff[c] for c in cs)
                 for c in cs:
                     f[c] = f[k] * (eff[c] / max(tot, 1e-12))
-                    p[c] = pout[k]
+                    p[c] = p_out
         self.flow = f
         self.shear = f / np.maximum(r, 1e-6) ** 3
-        self.pressure_in = p
-        self.pressure_out = pout             # what the tissue at a tip sees
-        self.conductance_total = float(eff[0])
         return f, p, float(eff[0])
 
     # -------------------------------------------------------------- calibres

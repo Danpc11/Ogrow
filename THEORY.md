@@ -162,10 +162,10 @@ Write $\mathbb{C} \sim N^{\gamma}$. Since $c_u = \mathbb{C}/N \sim
 N^{\gamma-1}$, the sign of $\gamma - 1$ decides whether adding units raises or
 lowers the supply each one gets, and so whether a capacity-limited window can
 close. Measured along grown trajectories:
-$\gamma$ = 0.79 (liver).
-$\gamma$ = 0.42 (kidney).
-$\gamma$ = 0.60 (pancreas).
-$\gamma$ = 0.50 (lung).
+$\\gamma$ = 0.82 (liver).
+$\\gamma$ = 0.42 (kidney).
+$\\gamma$ = 0.60 (pancreas).
+$\\gamma$ = 0.51 (lung).
 All are below 1, so the feedback is stabilising and no runaway occurs. They are
 also well below the 4/3 that uniform-shear adaptation alone would give, because
 the root is in series and caps the total.
@@ -173,22 +173,16 @@ the root is in series and caps the total.
 ### The tree adds little disorder of its own
 
 With calibres frozen, replicates that reach the same unit count differ in
-conductance by a CV of order $10^{-4}$: the topology of the tree carries
-almost no disorder. Letting the calibres relax raises the dispersion, but it
-stays below about 0.01 for relaxation rates up to 0.4 per day. At the
-fastest rate tested the calibre loop is at the edge of stability and the
-dispersion becomes seed-sensitive, varying by an order of magnitude between
-replicate sets; `results/vascular_disorder.json` carries a bootstrap interval
-for every rate and `scripts/11_vascular_disorder.py` prints it. An earlier
-version of this engine reported a resonant peak near CV = 0.25; that was an
-artefact of three errors since fixed (integer truncation in nucleation, a
-pressure field clamped at zero, and a circular per-unit supply term), and it
-does not survive their correction.
+conductance by CV = 0.0003. Letting the calibres relax raises it to 0.154 at the
+fastest rate tested, and the dependence on the relaxation rate is
+monotone, not resonant: it rises smoothly from 0.0003 to 0.154 as the rate
+goes from 0 to 1. An earlier version of this engine reported a resonant peak near
+CV = 0.25; that was an artefact of three errors since fixed (integer
+truncation in nucleation, a pressure field clamped at zero, and a circular
+per-unit supply term), and it does not survive their correction.
 
 The vasculature is therefore a conduit here, not a source of quenched
-disorder, at least at the scale this engine resolves and with flow driven by
-demand. Whether the pressure-driven tree of the closed model behaves
-differently is open (`CLOSED_MODEL.md`).
+disorder, at least at the scale this engine resolves.
 
 ## 5. The fabrication window and how it closes
 

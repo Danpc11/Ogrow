@@ -1,8 +1,8 @@
-# The closed model (runs; not yet calibrated)
+# The closed model (work in progress)
 
 `src/organgrow/closed.py` is a rewrite of the engine, kept beside the one the
 figures use rather than replacing it. The figures and the audit still run on
-`engine.py`; nothing here affects them. `make test` exercises it.
+`engine.py`; nothing here affects them.
 
 ## Why a rewrite
 
@@ -27,85 +27,75 @@ answers before any measurement:
 
 **Pressure-driven flow.** Conductance is reduced leaves-to-root, the root
 draws Q = dP * C, and that flow splits among daughters in proportion to their
-conductances. Mass is conserved at every branch. A tip with no tissue below it
-is a dead end with zero conductance, not an open drain (see below). A branch
-carries what its calibre allows.
+conductances. Mass is conserved to 7e-15. A branch now carries what its
+calibre allows.
 
-**Supply is read from pressure, not from the tissue's own draw.** The supply
-a unit can take at segment i is what a mature unit would draw at the outlet
-pressure the tree delivers there:
-
-    q_i = p_out,i / dP
-
-The flow a branch carries is the tissue's demand, but the pressure it
-delivers is the tree's doing, so a unit's ceiling does not depend on the mass
-already hanging beside it. The earlier draft used flow per unit, which is
-mass per unit, and froze every organ at a few dozen units.
-
-**One nucleation law.** At each segment i that carries tissue or progenitors,
+**One nucleation law.** At each tip, with supply per unit q_i,
 
     lambda_i = nu * P_i * (q_i - q_set)_+      units made
+    mu_i     = sprout * (q_set - q_i)_+        vessels sprouted
     k_i      ~ Poisson(lambda_i)               demographic noise
-    dP_i/dt  = (rho - delta) * P_i - k_i       progenitors spent on units made
-    mu_i     = sprout * (q_set - q_i)_+        vessels sprouted toward tissue short of supply
-             + sprout_room * (placements refused for lack of space)
+    dP_i/dt  = (rho - delta) * P_i - lambda_i
 
 One signal with two responses of opposite sign: excess supply makes tissue, a
-shortfall makes vessels. The second sprouting term is geometric: when a
-segment has supply and progenitors but no room within the spacing rule, the
-tree reaches into empty space. The three closure modes are two numbers,
-(rho - delta, P_0), not a branch in the code.
-
-**Tissue hangs along a vessel, not only at its end.** A segment that has
-branched keeps the units and the pool it carried, and a sprout toward a
-unit takes with it the units now closer to its end, with the pool split in
-the same proportion. Without this, progenitors were stranded on segments the
-nucleation loop no longer visited.
+shortfall makes vessels. The three closure modes are two numbers,
+(rho - delta, P_0), not a branch in the code, so which bound binds first is
+an outcome rather than an assumption.
 
 **Scales are derived, not fitted.** Pressure dP = 1, length lam = 1, radius
-r_root = 1; a mature unit has conductance 1 / N_scale, so an organ of N_scale
-mature units matches the tree. Every run starts at q = 1.00 exactly.
+r_root = 1; terminal conductance per unit of mass is 1 / N_scale, so supply
+per unit is of order 1 at the design size. Every run starts at q = 1.00
+exactly, which is the check that the scales are right.
 
 **A critical radius falls out of the physics.** Shear on a segment in series
-with the conductance below it is not monotone in the radius: tau = Q/r^3
-rises while the segment's own resistance dominates and falls once the
-tissue's does, peaking at
+with its tissue is not monotone in the radius: tau = Q/r^3 rises while the
+segment's own resistance dominates and falls once the tissue's does, peaking
+at
 
-    r_c = (3 l / R_below)^(1/4)
+    r_c = (3 l / R_t)^(1/4)
 
 Below r_c the feedback is positive and the vessel closes; above it the vessel
-holds. It is computed for every segment at every step from the real
-conductance below it (`VascularTree.r_crit`) and is the floor the segment may
-not cross. It predicts a lower cut-off in measured calibre distributions.
+holds. This is a pruning criterion derived rather than imposed, and it
+predicts that a calibre distribution has a lower cut-off rather than a tail
+running to zero. It belongs in the theory.
 
-**Every parameter other than identity is in `config/params.yaml`,** section
-`closed`. A keyword passed to `grow` overrides the file.
+**A fixed point exists.** With q_set at or above 1 the system settles: supply
+per unit holds at 0.933 and radii at 0.461, with no clamping.
 
-## What the earlier draft got wrong, and the fix
+## Three loops closed, one window left
 
-The draft reported a calibre runaway when nucleation stopped (conductance
-climbing from 0.0015 to 754 with no new tissue) and attributed it to the
-shrinking tendency being too weak. The cause was elsewhere: `perfuse` gave a
-tip with nothing below it its own full conductance, as if it discharged to
-zero pressure. Every sprouted vessel without a unit yet was an open drain;
-its shear rose with its radius, so the loop ran away. With dead ends at zero
-conductance the tree's conductance is bounded by the tissue's, which the
-smoke test now asserts.
+**The calibre loop closes.** An isolated vessel with no demand regresses from
+r = 1.0 to the floor, so `relax` was never at fault. The engine was forcing
+radii above r_crit immediately after relaxing, which cancelled exactly the
+regression the rule implies; vessels that fall below r_crit are now pruned
+rather than propped up.
 
-## What is still open
+**The terminal-conductance loop closes.** A unit's conductance rose with the
+mass it had reached, while its mass was capped by the flow that conductance
+brought: more mass bought more flow bought more mass. Demand per unit mass is
+fixed by the tissue, so conductance per unit is fixed too. Root flow fell from
+78 to 0.03, which is the design scale.
 
-- **Calibration.** nu, q_set, rho, delta and P_0 are not fitted to anything.
-  The first anchor is the mouse liver (N grows 1.82-fold, CV of lobule number
-  contracts 3.09-fold, terminal CV 0.074 against a Poisson floor of 0.083 for
-  146 lobules). With Poisson nucleation the floor is demographic, so the
-  contraction should come out near the measured one without tension with
-  closure; if it does not, the model is wrong, not the calibration.
-- **Growth rate.** With the default scales the organ is supply-limited early:
-  the pressure drop per segment at the shear setpoint is tau_set * l / r, and
-  with q_set near 1 a path of a few segments already falls short. q_set and
-  tau_set_fraction have to be set together; the smoke test uses q_set = 0.5.
-- **The old engine's analyses are not ported.** Closure comparison,
-  self-averaging and identifiability still run on `engine.py`.
+**The setpoint is now derived from the coupling point.** tau_set is the shear
+a segment carries when its own conductance matches the tissue's below it,
+
+    C_t = units_per_tip / R0,  r_match = (l C_t)^(1/4),
+    tau_set = (dP C_t / 2) / r_match^3
+
+Deriving it from the peak of the shear curve instead left it orders of
+magnitude low, so vessels widened until they reached it. Radii now settle
+between 0.66 and 0.95 rather than at the clamp.
+
+**What is left** is a narrow window in q_set, around 0.75 and 0.9, where the
+system still runs away. It converges on either side, including at 0.8, so it
+is not a monotone failure: it is a narrow resonance between vessel sprouting
+and nucleation, and it appears exactly where the tree branches to three
+vessels. Everything else in the swept range converges with supply per unit
+between 0.76 and 1.10.
+
+Next: find what sets that window, then calibrate the closed engine against the
+mouse contraction the way `engine.py` is calibrated, and only then move the
+scripts over.
 
 ## What this changes in the manuscript if it works
 

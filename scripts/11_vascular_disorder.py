@@ -18,6 +18,7 @@ OUT.mkdir(exist_ok=True)
 d = CFG["disorder"]
 DAYS = CFG["engine"]["days"]
 RATES = CFG["sweeps"]["calibre_rate"]
+NREP = 12
 
 res = {}
 
@@ -26,8 +27,8 @@ print("exponent of supply against unit count")
 res["gamma"] = {}
 for kind in CFG["organs"]["growth_series"]:
     g = []
-    for s in seeds("vascular_gamma"):
-        U, m, T, V, tr = grow(kind, seed=s, days=DAYS, snap_at=())
+    for s in range(6):
+        U, m, T, V, tr = grow(kind, seed=200 + s, days=DAYS, snap_at=())
         N = np.asarray(tr.N, float)
         C = np.asarray(tr.cu, float) * N
         ok = (N > 20) & (C > 0)
@@ -41,35 +42,26 @@ for kind in CFG["organs"]["growth_series"]:
 print("\ndispersion of supply against calibre relaxation rate")
 base = E._ENG["calibre_rate"]
 res["eta_sweep"] = []
-try:
-    for rate in RATES:
-        E._ENG["calibre_rate"] = rate
-        C = []
-        for s in seeds("vascular_eta"):
-            # pancreas: unit count fixed by its budget, no seeded disorder, so
-            # anything that disperses must come from the tree
-            U, m, T, V, tr = grow("pancreas", seed=s, days=DAYS, snap_at=(),
-                                  sigma_init=0.0, sigma_param=0.0)
-            C.append(float(np.asarray(tr.cu, float)[-1] * np.asarray(tr.N, float)[-1]))
-        C = np.array(C)
-        # the dispersion itself is uncertain: a bootstrap over replicates
-        rng_b = np.random.default_rng(0)
-        boot = [np.std(x, ddof=1) / np.mean(x) for x in
-                (rng_b.choice(C, len(C), replace=True) for _ in range(400))]
-        res["eta_sweep"].append(dict(rate=float(rate),
-                                     cv=float(C.std(ddof=1) / C.mean()),
-                                     cv_lo=float(np.percentile(boot, 5)),
-                                     cv_hi=float(np.percentile(boot, 95)),
-                                     C=[float(x) for x in C]))
-        print(f"  eta = {rate:<5} CV(C) = {C.std(ddof=1)/C.mean():.4f}  "
-              f"[{np.percentile(boot, 5):.4f}, {np.percentile(boot, 95):.4f}]")
-finally:
-    E._ENG["calibre_rate"] = base      # whatever happens, the engine is restored
+for rate in RATES:
+    E._ENG["calibre_rate"] = rate
+    C = []
+    for s in range(NREP):
+        # pancreas: unit count fixed by its budget, no seeded disorder, so
+        # anything that disperses must come from the tree
+        U, m, T, V, tr = grow("pancreas", seed=500 + s, days=DAYS, snap_at=(),
+                              sigma_init=0.0, sigma_param=0.0)
+        C.append(float(np.asarray(tr.cu, float)[-1] * np.asarray(tr.N, float)[-1]))
+    C = np.array(C)
+    res["eta_sweep"].append(dict(rate=float(rate),
+                                 cv=float(C.std(ddof=1) / C.mean()),
+                                 C=[float(x) for x in C]))
+    print(f"  eta = {rate:<5} CV(C) = {C.std(ddof=1)/C.mean():.4f}")
+E._ENG["calibre_rate"] = base
 
 # -- time: does it diverge or settle? ---------------------------------------
 print("\ndisorder over time")
-R = [grow("liver", seed=s, days=100, snap_at=(),
-          sigma_init=d["sigma_init"], sigma_param=0.0)[4] for s in seeds("vascular_time")]
+R = [grow("liver", seed=300 + s, days=100, snap_at=(),
+          sigma_init=d["sigma_init"], sigma_param=0.0)[4] for s in range(14)]
 res["over_time"] = []
 for day in range(5, 101, 5):
     N = np.array([tr.N[day - 1] for tr in R], float)
