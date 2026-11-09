@@ -1,4 +1,4 @@
-"""Flow, shear and calibre on a vascular tree.
+"""Flow, shear and calibre on a vascular tree, under a volume budget.
 
 A tree has analytic resistance, so no linear system is needed: demand is
 accumulated from the leaves to the root in one pass, and conductance is
@@ -55,6 +55,28 @@ class VascularTree:
         return len(self.parent) - 1
 
     # ------------------------------------------------------------------ flow
+    def pressures(self, p_in=1.0):
+        """Pressure at each segment, from the root down.
+
+        Shear-only adaptation is unstable: at a uniform setpoint r^3 is
+        proportional to f, so conductance follows flow^(4/3), and with a fixed
+        perfusion pressure the two reinforce each other without bound. The
+        drop along the tree is what breaks the loop, because a segment's
+        setpoint rises with the pressure it carries.
+        """
+        n = len(self.parent)
+        f = np.asarray(self.flow)
+        r = np.asarray(self.radius)
+        l = np.asarray(self.length)
+        w = r ** 4 / np.maximum(l, 1e-6)
+        drop = f / np.maximum(w, 1e-12)
+        p = np.zeros(n)
+        p[0] = p_in
+        par = np.asarray(self.parent)
+        for k in range(1, n):                 # parents precede daughters
+            p[k] = p[par[k]] - drop[k]
+        return np.maximum(p, 0.0)
+
     def solve(self, tip_demand):
         """Accumulate demand to the root, then set flow and shear per segment.
 
@@ -98,7 +120,14 @@ class VascularTree:
         return float(eff[0])
 
     # -------------------------------------------------------------- calibres
-    def relax(self, tau_set, rate=0.12, r_min=0.25, r_max=60.0):
+    def volume(self):
+        """Volume the vessels occupy, which the parenchyma cannot use."""
+        r = np.asarray(self.radius)
+        l = np.asarray(self.length)
+        return float(np.pi * np.sum(r ** 2 * l))
+
+    def relax(self, tau_set, rate=0.12, r_min=0.25, r_max=60.0,
+              volume_budget=None, crowding=1.0, pressure_exp=0.0, p_in=1.0):
         """Move each radius toward the one that would put shear at setpoint.
 
         With tau proportional to f / r^3, the radius satisfying the setpoint is
@@ -107,7 +136,18 @@ class VascularTree:
         """
         f = np.asarray(self.flow)
         r = np.asarray(self.radius)
-        r_target = np.where(f > 0, (f / max(tau_set, 1e-9)) ** (1.0 / 3.0), r_min)
+        if pressure_exp:
+            # the setpoint rises with transmural pressure, which follows from
+            # the cost of mural mass at constant homeostatic wall stress
+            p = self.pressures(p_in)
+            tau_set = tau_set * np.maximum(p / max(p_in, 1e-9), 1e-3) ** pressure_exp
+        if volume_budget:
+            # mural mass costs space the parenchyma needs, so a crowded organ
+            # runs its vessels at higher shear rather than widening them
+            phi = min(self.volume() / volume_budget, 0.999)
+            tau_set = tau_set / max(1.0 - phi, 1e-3) ** crowding
+        ts = np.maximum(np.asarray(tau_set, float), 1e-9)
+        r_target = np.where(f > 0, (f / ts) ** (1.0 / 3.0), r_min)
         r_new = r + rate * (r_target - r)
         self.radius = list(np.clip(r_new, r_min, r_max))
         return np.asarray(self.radius)

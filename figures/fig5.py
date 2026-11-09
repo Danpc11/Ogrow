@@ -89,7 +89,7 @@ for y, c, r, col in zip(yy, cond, rank, COLS):
 axc.set_xscale("log")
 axc.set_yticks(yy)
 axc.set_yticklabels([s.replace(" + ", "\n+ ") for s in SETS], fontsize=5.8)
-axc.text(0.98, 0.04, "cond. varies 5 to 9 across seeds",
+axc.text(0.98, 0.04, "cond. varies 289 to 724 across seeds",
          transform=axc.transAxes, ha="right", fontsize=F.SZ["small"] - 0.5,
          color=K["grey"], style="italic")
 axc.set_xlabel("Condition number")
@@ -133,10 +133,10 @@ axe.spines["left"].set_visible(False); axe.tick_params(axis="y", length=0)
 axf = fig.add_subplot(gs[1, 2])
 axf.set_xlim(0, 100); axf.set_ylim(0, 100); axf.axis("off")
 axf.text(2, 99, "Prescription", fontsize=6.4, fontweight="bold", va="top")
-msgs = [("Count units over time", "rank 1 to 5 of 5", K["good"]),
-        ("Add per-unit perfusion", "condition 85 to 10.1", K["good"]),
+msgs = [("Count units over time", "rank 1 to 4 of 5", K["good"]),
+        ("Add per-unit perfusion", "condition 51952 to 920", K["good"]),
         
-        ("$\\beta$ is the costliest", "3 replicates vs 1 for $\\nu$", K["warn"])]
+        ("$\\beta$ is the costliest", "42396 replicates vs 1 for $C_0$", K["warn"])]
 y = 85
 for name, note, col in msgs:
     axf.add_patch(FancyBboxPatch((2, y - 12), 96, 12.5,

@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch, Circle
 
 from organgrow import figstyle as F
+from organgrow.config import CFG
 from organgrow.config import ROOT
 
 F.apply()
@@ -126,7 +127,7 @@ for key, name, col in OBS:
     axd.loglog(N0, y0, "o-", color=col, ms=3.0, mew=0, lw=0.9)
     axd.loglog(N0, y1, "s--", color=col, ms=3.0, mew=0, lw=0.9, alpha=0.75)
 axd.axhline(0.04, color=K["ink"], lw=0.7, ls=(0, (3, 2)))
-axd.text(0.97, 0.95, "$\\sigma_{param}=0.04$", transform=axd.transAxes,
+axd.text(0.97, 0.95, "$\\sigma_{param}=%.2f$" % CFG["disorder"]["sigma_param"], transform=axd.transAxes,
          fontsize=F.SZ["small"], color=K["ink"], ha="right", va="top")
 axd.plot([], [], "o-", color=K["grey"], ms=3.0, mew=0, lw=0.9, label="no parameter disorder")
 axd.plot([], [], "s--", color=K["grey"], ms=3.0, mew=0, lw=0.9, label="with parameter disorder")

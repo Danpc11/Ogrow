@@ -11,12 +11,25 @@ engine:
   tau_body: 16.0
   max_vessels: 1200        # cap on the second tree
   root_radius: 12.0        # radius of the root segment
-  tau_set: 0.42            # wall-shear setpoint the calibres relax toward
+  tau_set: 0.15            # wall-shear setpoint at root pressure
   calibre_rate: 0.12       # fraction of the gap closed per day
+  vascular_fraction: 0.08  # share of the domain the vessels may occupy
+  crowding: 1.0            # how sharply the setpoint rises as that fills
+  # the shear setpoint rises as p^(b/2) with b the metabolic cost exponent
+  # (Taber 1998; Pries, Reglin & Secomb). b = 1 is Murray's case, where cost
+  # is blood volume, and is the critical exponent of irrigability in d = 3,
+  # so b/2 = 0.5 is derived, not fitted.
+  cost_exponent_b: 1.0
+  pressure_exp: 0.5
+  consumption_per_mass: 1.0  # demand drawn per unit of tissue mass
   attenuation_length: 58.0 # supply falls as exp(-d / this)
+  kappa: 5.0               # unit mass supported per unit of local supply
 
 identity:                # the single parameter that distinguishes organs
-  liver:    {mode: saturation, R: 190, lam: 7.4, nu: 400.0, c_set: 0.055}
+  # nu is calibrated against the measured postnatal contraction in mouse
+  # liver (Azizoglu et al. 2025): N grows 1.82x and the CV of lobule number
+  # contracts 3.09-fold. nu = 400 contracted 7.6-fold, far too strongly.
+  liver:    {mode: saturation, R: 190, lam: 7.4, nu: 20.0, c_set: 0.055}
   kidney:   {mode: exhaustion, R: 150, lam: 6.0, iota: 0.165, decay: 0.952}
   pancreas: {mode: pool,       R: 165, lam: 6.6, draw: 0.075}
   # the lung is the only exchange organ whose organising tree carries the
@@ -26,7 +39,7 @@ identity:                # the single parameter that distinguishes organs
 
 disorder:
   sigma_init: 0.60       # spread of the seeded initial condition
-  sigma_param: 0.04      # quenched spread of per-individual parameters
+  sigma_param: 0.15        # set by the same calibration
 
 seeds:                   # every figure is reproducible from these
   fig2_representative: 0

@@ -107,6 +107,10 @@ def grow(kind, seed=0, days=None, P0=620.0, C0=None, snap_at=(10, 25, 45, 70),
         C0 = C0 * float(np.exp(rng.normal(0, sigma_param * 0.35)))
     n_seed_i = max(1, int(round(n_seed * np.exp(rng.normal(0, sigma_init)))))
     R, lam = cfg["R"], cfg["lam"]
+    # lam sets the minimum spacing between units. The tree's own scale is
+    # kept separate so that the exclusion rule can be varied on its own;
+    # they coincide by default.
+    tree_lam = cfg.get("tree_lam", lam)
     lam2 = lam * lam
 
     def inside(p):
@@ -146,7 +150,7 @@ def grow(kind, seed=0, days=None, P0=620.0, C0=None, snap_at=(10, 25, 45, 70),
     for _ in range(n_seed_i):
         for _try in range(60):
             d = rng.normal(size=3); d /= np.linalg.norm(d)
-            cand = s0 + d * rng.uniform(lam * 1.2, lam * 3.0)
+            cand = s0 + d * rng.uniform(tree_lam * 1.2, tree_lam * 3.0)
             if not inside(cand):
                 continue
             if U and np.min(((np.asarray(U) - cand) ** 2).sum(-1)) < lam * lam:
@@ -154,13 +158,18 @@ def grow(kind, seed=0, days=None, P0=620.0, C0=None, snap_at=(10, 25, 45, 70),
             U.append(cand); m.append(0.12)
             T.append((s0.copy(), cand.copy())); tips.append(cand.copy())
             break
-    kill = lam * 1.25
-    infl = lam * 16.0
+    kill = tree_lam * 1.25
+    infl = tree_lam * 16.0
 
     P = float(P0)
-    vt = VascularTree(s0, s0 + np.array([0.0, lam * 2.1, 0.0]),
+    vt = VascularTree(s0, s0 + np.array([0.0, tree_lam * 2.1, 0.0]),
                       _ENG['root_radius'])
     tau_set = _ENG['tau_set']
+    # the domain's volume, estimated by sampling, sets how much room the
+    # vasculature may take before it starts competing with the parenchyma
+    _box = np.prod(2.0 * box)
+    _frac_in = float(np.mean(sdf(kind, *(rng.uniform(-1, 1, (4000, 3)) * box).T) < 0))
+    _vol_budget = _ENG['vascular_fraction'] * _box * max(_frac_in, 1e-3)
     tr = Trace()
 
     for day in range(1, days + 1):
@@ -209,7 +218,7 @@ def grow(kind, seed=0, days=None, P0=620.0, C0=None, snap_at=(10, 25, 45, 70),
                 nv = np.linalg.norm(v)
                 if nv < 1e-9:
                     continue
-                cand = tips[ti] + v / nv * (lam * 2.1)
+                cand = tips[ti] + v / nv * (tree_lam * 2.1)
                 if not inside(cand):
                     continue
                 if ("exclusion" in rules and utree is not None
@@ -247,7 +256,7 @@ def grow(kind, seed=0, days=None, P0=620.0, C0=None, snap_at=(10, 25, 45, 70),
                 # alongside each new primary-tree segment
                 for seg in T[len(vt):len(vt) + 5]:
                     a, b = np.asarray(seg[0]), np.asarray(seg[1])
-                    off = rng.normal(0, lam * 0.35, 3)
+                    off = rng.normal(0, tree_lam * 0.35, 3)
                     j = int(cKDTree(vt.endpoints()).query((a + off)[None, :],
                                                           k=1)[1][0])
                     vt.add(j, a + off, b + off, vt.radius[j] * 0.79)
@@ -265,12 +274,17 @@ def grow(kind, seed=0, days=None, P0=620.0, C0=None, snap_at=(10, 25, 45, 70),
         if len(U):
             near = cKDTree(ends).query(np.asarray(U), k=1)[1]
             demand = {}
+            # tissue consumes at a fixed rate per unit mass: a hepatocyte
+            # draws what it draws, so demand is q * mass, not an outcome
+            q = _ENG["consumption_per_mass"]
             for idx, mj in zip(near, m):
-                demand[int(idx)] = demand.get(int(idx), 0.0) + float(mj)
+                demand[int(idx)] = demand.get(int(idx), 0.0) + q * float(mj)
         else:
             demand = {0: 1.0}
         vt.solve(demand)
-        vt.relax(tau_set, rate=_ENG["calibre_rate"])
+        vt.relax(tau_set, rate=_ENG["calibre_rate"],
+                 volume_budget=_vol_budget, crowding=_ENG["crowding"],
+                 pressure_exp=_ENG["pressure_exp"])
         _sh = np.asarray(vt.shear)[np.asarray(vt.flow) > 0]
         tr.shear_cv.append(float(_sh.std(ddof=1) / max(_sh.mean(), 1e-9))
                            if len(_sh) > 1 else 0.0)
@@ -281,11 +295,18 @@ def grow(kind, seed=0, days=None, P0=620.0, C0=None, snap_at=(10, 25, 45, 70),
         Varr = vt.endpoints()
         Uarr = np.asarray(U)
         _dv, _vi = cKDTree(Varr).query(Uarr, k=1)
-        _rv = vt.radii()[_vi] / _ENG["root_radius"]
-        sup = cu * (np.exp(-_dv / _ENG["attenuation_length"]) * _rv ** 0.5
+        # what reaches a unit is the flow its feeding branch carries, shared
+        # among the units that hang from it. Terminal branches are thin in any
+        # tree, so a radius taken relative to the root would penalise every
+        # unit for being where it has to be; flow per unit is the right
+        # quantity, and at the shear fixed point f ~ r^3.
+        _fv = np.asarray(vt.flow)[_vi]
+        _nper = np.bincount(_vi, minlength=len(vt))[_vi]
+        _rv = (_fv / np.maximum(_nper, 1)) / max(np.mean(m), 1e-9)
+        sup = cu * (np.exp(-_dv / _ENG["attenuation_length"]) * _rv
                     if "shear" in rules else 1.0)
         marr = np.asarray(m)
-        marr = marr + g0 * np.exp(-day / tau_g) * marr * (1 - marr / np.maximum(0.85 * sup, 1e-4))
+        marr = marr + g0 * np.exp(-day / tau_g) * marr * (1 - marr / np.maximum(_ENG['kappa'] * sup, 1e-4))
         m = list(np.maximum(marr, 0.02))
 
         tr.t.append(day)
