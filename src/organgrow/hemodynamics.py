@@ -71,11 +71,17 @@ class VascularTree:
         w = r ** 4 / np.maximum(l, 1e-6)
         drop = f / np.maximum(w, 1e-12)
         p = np.zeros(n)
-        p[0] = p_in
         par = np.asarray(self.parent)
         for k in range(1, n):                 # parents precede daughters
             p[k] = p[par[k]] - drop[k]
-        return np.maximum(p, 0.0)
+        # rescale so the root-to-tip span is [p_in, p_in/span]: the absolute
+        # drop depends on units, only the profile along the tree is physical
+        lo = p.min()
+        if lo < p[0]:
+            p = (p - lo) / (p[0] - lo)
+        else:
+            p = np.ones(n)
+        return p_in * np.maximum(p, 1e-2)
 
     def solve(self, tip_demand):
         """Accumulate demand to the root, then set flow and shear per segment.

@@ -165,6 +165,11 @@ one the model predicts rather than measures.
 **Organ identity is one parameter: the closure mode.** Everything else in the
 engine is shared.
 
+> **Open point.** The closure-mode table below assigns the liver to signal
+> decay (venous sprouting, about one postnatal week), while this equation
+> replaces that window with capacity. The engine shows the two are not
+> interchangeable: see `KNOWN_LIMITATIONS.md`.
+
 **Equation 10 — capacity saturation (liver).**
 
 $$\dot N = \nu\left(\frac{\mathbb{C}}{N} - c_{\text{set}}\right)_{+}$$

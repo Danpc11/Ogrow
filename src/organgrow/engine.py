@@ -162,6 +162,7 @@ def grow(kind, seed=0, days=None, P0=620.0, C0=None, snap_at=(10, 25, 45, 70),
     infl = tree_lam * 16.0
 
     P = float(P0)
+    carry = 0.0
     vt = VascularTree(s0, s0 + np.array([0.0, tree_lam * 2.1, 0.0]),
                       _ENG['root_radius'])
     tau_set = _ENG['tau_set']
@@ -188,7 +189,13 @@ def grow(kind, seed=0, days=None, P0=620.0, C0=None, snap_at=(10, 25, 45, 70),
                 drive = cu - cfg["c_set"]
             else:
                 drive = C - cfg["c_set"] * N
-            k = int(min(max(cfg["nu"] * drive, 0.0), 90))
+            # the rate is not an integer; truncating it each day turns a
+            # smooth law into a staircase and hides saturation entirely, so
+            # the fractional part is carried over to the next day
+            rate = min(max(cfg["nu"] * drive, 0.0), _ENG["max_nucleation"])
+            carry += rate
+            k = int(carry)
+            carry -= k
         elif cfg["mode"] == "exhaustion":
             k = int(min(cfg["iota"] * P, 90))
             P *= cfg["decay"]
@@ -295,15 +302,12 @@ def grow(kind, seed=0, days=None, P0=620.0, C0=None, snap_at=(10, 25, 45, 70),
         Varr = vt.endpoints()
         Uarr = np.asarray(U)
         _dv, _vi = cKDTree(Varr).query(Uarr, k=1)
-        # what reaches a unit is the flow its feeding branch carries, shared
-        # among the units that hang from it. Terminal branches are thin in any
-        # tree, so a radius taken relative to the root would penalise every
-        # unit for being where it has to be; flow per unit is the right
-        # quantity, and at the shear fixed point f ~ r^3.
-        _fv = np.asarray(vt.flow)[_vi]
-        _nper = np.bincount(_vi, minlength=len(vt))[_vi]
-        _rv = (_fv / np.maximum(_nper, 1)) / max(np.mean(m), 1e-9)
-        sup = cu * (np.exp(-_dv / _ENG["attenuation_length"]) * _rv
+        # Flow here is demand-driven, so the flow a branch carries is the
+        # mass hanging from it: using it as a per-unit supply term would make
+        # a unit's ceiling proportional to its own mass. Only the distance to
+        # the nearest vessel enters locally; the tree acts through C.
+        _rv = 1.0
+        sup = cu * (np.exp(-_dv / _ENG["attenuation_length"])
                     if "shear" in rules else 1.0)
         marr = np.asarray(m)
         marr = marr + g0 * np.exp(-day / tau_g) * marr * (1 - marr / np.maximum(_ENG['kappa'] * sup, 1e-4))

@@ -29,12 +29,7 @@ sphericity, `config/params.yaml: hoa.outlier_z`).
 ## Audit
 
 `scripts/09_audit.py` prints, for every figure, the value shown beside the
-value computed, and exits non-zero on any mismatch. Current state:
-
-| Figure | Checked |
-| --- | --- |
-| 1 | tree-traversal cost is linear; sparse solve is 9.8 to 12.5x slower |
-| 3 | sd(N) 5.01 to 1.05 under saturation; 7.24 unchanged under the other three; sigma_init matches config |
-| 4 | exponents 0.96, 1.48, 1.26 additive; -0.01 and -0.22 topological; sigma_param matches config |
-| 5 | rank 1/5 from final N; condition 705 to 110; 287 replicates for lambda, 41 for beta |
-| 6 | 96 kidneys, 48 donors; ratio 1.541, P = 0.0005; all six invariants systematic |
+value computed, and exits non-zero on any mismatch. It runs before the figures
+in `make all`, so a caption cannot drift from the data. Run it to see the
+current numbers; they are not reproduced here, because a table in a document
+is exactly what goes stale.

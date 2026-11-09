@@ -20,7 +20,8 @@ No install step is needed: `make` puts `src` on `PYTHONPATH` and picks up
 `python3` when `python` is not on the path. To force an interpreter, use
 `make all PY=/path/to/python`. `pip install -e .` also works if you prefer it.
 
-Python 3.10+, Linux or macOS. A full run takes about 40 min on one core.
+Python 3.10+, Linux or macOS. A full run takes roughly 1.5 h on one core; the vascular sweep in
+`scripts/11_vascular_disorder.py` is the longest step.
 `make all` runs the analyses, checks every number the figures state against
 the pipeline, and writes `figures/out/Fig1.pdf` to `Fig6.pdf`.
 
