@@ -11,6 +11,7 @@ echo "== simulation =="
 "$PY" scripts/02_closure.py
 "$PY" scripts/03_selfaveraging.py
 "$PY" scripts/04_identifiability.py
+"$PY" scripts/11_vascular_disorder.py
 
 echo "== human cohorts (needs data/hoa and data/trusted; see data/README.md) =="
 for organ in kidney lung; do

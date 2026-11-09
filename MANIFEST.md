@@ -8,7 +8,7 @@ rebuilt without repeating the ensembles.
 | --- | --- | --- | --- | --- |
 | 1 | `python figures/fig1.py` | none (timings median of 7 after warm-up) | `results/cost.json` | `figures/out/Fig1.pdf` |
 | 2 | `python scripts/01_ensembles.py && python figures/fig2.py` | representative 0; replicates 1-10 | `config/params.yaml` | `results/ens_main.npz` |
-| 3 | `python scripts/02_closure.py && python figures/fig3.py` | 300-315; sweep 600-611 | `config/params.yaml` | `results/f3_main.npz`, `results/f3_sweep_*.npz` |
+| 3 | `python scripts/02_closure.py && python scripts/11_vascular_disorder.py && python figures/fig3.py` | 300-315; sweep 600-611 | `config/params.yaml` | `results/f3_main.npz`, `results/f3_sweep_*.npz` |
 | 4 | `python scripts/03_selfaveraging.py && python figures/fig4.py` | 900-911 | `config/params.yaml` | `results/scaling_*.json` |
 | 5 | `python scripts/04_identifiability.py && python figures/fig5.py` | 2000-2004 | `config/params.yaml` | `results/ident.json`, `results/sens.npz` |
 | 6 | `python scripts/07_trusted.py && python scripts/08_partition.py && python figures/fig6.py` | none (no simulation) | `data/trusted/CT_masks/` | `results/partition.json` |

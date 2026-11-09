@@ -25,7 +25,8 @@ Python 3.10+, Linux or macOS. A full run takes about 40 min on one core.
 the pipeline, and writes `figures/out/Fig1.pdf` to `Fig6.pdf`.
 
 The human cohorts are not redistributed; `data/README.md` gives the DOI and the
-layout for each. Figures 1 to 5 need no external data.
+layout for each. Figures 1 to 5 need no external data; Figure 6 is skipped with
+a message when the cohort is absent, and the build continues.
 
 ## Layout
 

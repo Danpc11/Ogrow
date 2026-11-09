@@ -11,6 +11,7 @@ analyses:
 	$(PY) scripts/02_closure.py
 	$(PY) scripts/03_selfaveraging.py
 	$(PY) scripts/04_identifiability.py
+	$(PY) scripts/11_vascular_disorder.py
 	$(PY) scripts/05_hoa.py kidney
 	$(PY) scripts/05_hoa.py lung
 	$(PY) scripts/07_trusted.py
@@ -24,7 +25,9 @@ source_data: audit
 
 figures: source_data
 	mkdir -p figures/out
-	for f in figures/fig*.py; do $(PY) $$f; done
+	@for f in figures/fig*.py; do \
+	  $(PY) $$f || echo "  $$f skipped"; \
+	done
 
 clean:
 	rm -rf results/* figures/out/* source_data/*

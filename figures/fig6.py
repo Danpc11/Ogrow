@@ -17,6 +17,8 @@ MM = F.MM
 
 
 
+if not (RES / "partition.json").exists():
+    raise SystemExit("Fig6 skipped: needs the human cohort (see data/README.md)")
 P = json.load(open(RES / "partition.json"))
 D = json.load(open(RES / "trusted_split.json"))
 PRETTY = {"volume_cm3": "Volume", "surface_cm2": "Surface",

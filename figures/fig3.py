@@ -42,7 +42,7 @@ axa.add_patch(FancyBboxPatch((4, 72), 92, 22, boxstyle="round,pad=0.6,rounding_s
 axa.text(50, 88, "Identical input", ha="center", fontsize=6.4, fontweight="bold")
 axa.text(50, 79, "same seeds · $\\sigma_{init}=0.6$ · $\\sigma_{param}=0$",
          ha="center", fontsize=6.0, color=K["grey"])
-for i, (nm, mech, col) in enumerate([("Saturation", "$\mathbb{C}/N\to c_{set}$", K["liver"]),
+for i, (nm, mech, col) in enumerate([("Saturation", r"$\mathbb{C}/N \to c_{set}$", K["liver"]),
                                      ("Exhaustion", "$P_i\\to 0$", K["kidney"])]):
     x = 8 + i * 48
     axa.add_patch(FancyArrowPatch((50, 71), (x + 18, 56),
@@ -151,7 +151,11 @@ axf.legend(frameon=False, handlelength=1.4, borderpad=0.15, labelspacing=0.25,
            handletextpad=0.45, loc="upper left")
 
 # ------------------------------------- d  the tree injects its own disorder
-VD = json.load(open(RES / "vascular_disorder.json"))
+vd_path = RES / "vascular_disorder.json"
+if not vd_path.exists():
+    raise SystemExit("Fig3 needs results/vascular_disorder.json; "
+                     "run scripts/11_vascular_disorder.py first")
+VD = json.load(open(vd_path))
 axg = fig.add_subplot(gs[0, 3])
 sw = VD["eta_sweep"]
 eta = np.array([r["rate"] for r in sw])
