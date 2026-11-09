@@ -32,7 +32,7 @@ def probe_points(rng, kind=None, n=1500):
 
 def observables(U, m, V):
     Varr = np.asarray([v[1] for v in V])
-    sup = np.exp(-cKDTree(Varr).query(U, k=1)[0] / 58.0)
+    sup = np.exp(-cKDTree(Varr).query(U, k=1)[0] / CFG["engine"]["attenuation_length"])
     return dict(N=float(len(m)), mass=float(np.sum(m)),
                 mean_unit=float(np.mean(m)),
                 dissipation=float(np.sum(np.asarray(m) / np.maximum(sup, 1e-6))))
@@ -60,6 +60,9 @@ def main(sigma_param, kind=None):
         for k in obs[0]:
             v = np.array([o[k] for o in obs])
             row["cv_" + k] = float(v.std(ddof=1) / v.mean())
+            # the absolute spread as well: a CV that falls as 1/N with a
+            # constant sd is dilution, not self-averaging (THEORY §7)
+            row["sd_" + k] = float(v.std(ddof=1))
         row["vessel_identity"] = float(np.mean(
             [np.mean(labels[i] != labels[j])
              for i in range(len(labels)) for j in range(i + 1, len(labels))]))

@@ -42,11 +42,13 @@ def segment(vol, debug=False):
         sz = ndi.sum(msk, lab2, range(1, n2 + 1))
         msk = lab2 == (np.argmax(sz) + 1)
     msk = ndi.binary_fill_holes(msk)
-    return (msk, x, (thr, float(background.mean()))) if debug else (msk, x)
+    return (msk, x, (thr, float(x[~msk].mean()) if (~msk).any() else float('nan'))) if debug else (msk, x)
 
 
-def invariants(vol, dxy, dz):
-    msk, x = segment(vol)
+def invariants(vol, dxy, dz, seg=None):
+    """Coarse-scale invariants of one volume. `seg` may pass a segmentation
+    computed already (the pair `segment` returns) so it is not redone."""
+    msk, x = segment(vol) if seg is None else seg
     vox = dxy * dxy * dz * 1e-9          # mm^3 per voxel
     V = msk.sum() * vox
     # surface by counting mask boundary faces
