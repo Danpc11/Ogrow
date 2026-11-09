@@ -94,6 +94,11 @@ human:                   # cohorts used in figure 6
   invariants_ct:    [volume_cm3, surface_cm2, sphericity, elong, flat, surf_vol]
 
 closed:                  # src/organgrow/closed.py, the closed model (not yet in the figures)
+  # nu and q_set are calibrated against the measured postnatal contraction in
+  # mouse liver (Azizoglu 2025): unit number grows 1.82-fold while the CV of
+  # lobule number contracts 3.09-fold. At nu = 8, q_set = 0.6 over 140 steps
+  # the engine contracts 2.63-fold with the window closed. See
+  # scripts/12_calibrate_closed.py.
   # scales: dP = 1, lam = 1 (unit spacing), r_root = 1; everything else is a ratio
   N_scale: 650.0         # unit count at which tree and tissue resistance match
   m0: 0.02               # mass a unit is born with (mature mass is 1)
@@ -110,10 +115,15 @@ closed:                  # src/organgrow/closed.py, the closed model (not yet in
   sprout_reach: 0.55     # a sprout covers this fraction of the way to the unit that called it
   sprout: 4.0            # sprouts per day per unit of supply deficit
   sprout_room: 0.3       # sprouts per day per placement refused for lack of space
+  sprout_load: 0.5       # a tip carrying more tissue than one terminal branch
+                         # serves divides, with or without a supply deficit
   vascular_fraction: 0.08
   crowding: 1.0
   l_root: 2.1            # root length in units of lam
   l_sprout: 3.0          # length of a sprout that reaches for empty space, in units of lam
   nucleation_spread: 0.8 # a new unit lands within this many lam of the segment end
+  n_seed: 24             # units present before day 1, so the run does not hinge
+                         # on the first Poisson draw (an empty start left 2 in 16
+                         # replicates frozen, dominating the spread)
   max_units: 4000
   max_vessels: 1200
