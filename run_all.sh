@@ -2,7 +2,7 @@
 # Full reproduction. See MANIFEST.md for what each step produces.
 set -euo pipefail
 PY="${PY:-$(command -v python3 || command -v python)}"
-export PYTHONPATH="${PYTHONPATH:-}:$(pwd)/src"
+export PYTHONPATH="$(cd "$(dirname "$0")" && pwd)/src:${PYTHONPATH:-}"
 mkdir -p results figures/out
 
 echo "== simulation =="

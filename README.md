@@ -13,11 +13,12 @@ what is contingent.
 ## Install and reproduce
 
     python3 -m venv .venv && source .venv/bin/activate
-    python3 -m pip install -r requirements.txt && python3 -m pip install -e .
+    python3 -m pip install -r requirements.txt
     make all
 
-On a system where `python` is not on the path, `make` picks up `python3`
-automatically; to force an interpreter use `make all PY=/path/to/python`.
+No install step is needed: `make` puts `src` on `PYTHONPATH` and picks up
+`python3` when `python` is not on the path. To force an interpreter, use
+`make all PY=/path/to/python`. `pip install -e .` also works if you prefer it.
 
 Python 3.10+, Linux or macOS. A full run takes about 40 min on one core.
 `make all` runs the analyses, checks every number the figures state against

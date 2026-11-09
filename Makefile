@@ -1,5 +1,7 @@
 .PHONY: all clean figures analyses audit source_data
 PY ?= $(shell command -v python3 2>/dev/null || command -v python)
+# the package is importable from src without installing anything
+export PYTHONPATH := $(CURDIR)/src:$(PYTHONPATH)
 
 all: figures
 
