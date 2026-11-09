@@ -13,6 +13,8 @@ from dataclasses import dataclass, field
 import numpy as np
 from scipy.spatial import cKDTree
 
+from .hemodynamics import VascularTree
+
 # --------------------------------------------------------------- domains
 def sdf(kind, x, y, z):
     """Signed distance to the tissue domain boundary; negative inside."""
@@ -64,6 +66,9 @@ class Trace:
     cu: list = field(default_factory=list)
     hypo: list = field(default_factory=list)
     snapshots: dict = field(default_factory=dict)
+    r_eff: float = 0.0                       # <r^5>/<r^4> at the end
+    vessel_radii: object = None              # calibres at the end
+    shear_cv: list = field(default_factory=list)   # spread of wall shear
 
 
 def root_supply(day, C0=None, tau_b=None, alpha=None):
@@ -153,11 +158,16 @@ def grow(kind, seed=0, days=None, P0=620.0, C0=None, snap_at=(10, 25, 45, 70),
     infl = lam * 16.0
 
     P = float(P0)
+    vt = VascularTree(s0, s0 + np.array([0.0, lam * 2.1, 0.0]),
+                      _ENG['root_radius'])
+    tau_set = _ENG['tau_set']
     tr = Trace()
 
     for day in range(1, days + 1):
         N = max(len(U), 1)
-        Cd = beta * float(np.sum(m)) + 6.0 if m else 6.0
+        # distal conductance is the tree's own, by series-parallel
+        # reduction over its radii (hemodynamics.conductance)
+        Cd = beta * vt.conductance()
         C = 1.0 / (1.0 / root_supply(day, C0) + 1.0 / Cd)
         cu = C / N
 
@@ -226,31 +236,54 @@ def grow(kind, seed=0, days=None, P0=620.0, C0=None, snap_at=(10, 25, 45, 70),
             tr.t.append(day); tr.N.append(0); tr.P.append(P); tr.cu.append(cu); tr.hypo.append(0.0)
             continue
 
-        # ---- second tree ----
+        # ---- second tree: flow, shear and calibre ----
         # "demand": vessels grow toward poorly supplied units (liver, kidney,
         # pancreas, where the supply tree is also the exchange tree).
         # "bundle": vessels follow the primary tree segment by segment, as the
         # pulmonary artery follows the bronchus (lung).
-        if len(V) < 1200:
+        if len(vt) < _ENG["max_vessels"]:
             if cfg.get("vessels") == "bundle":
-                for seg in T[len(V):len(V) + 5]:
+                # the pulmonary artery follows the bronchus: a daughter is laid
+                # alongside each new primary-tree segment
+                for seg in T[len(vt):len(vt) + 5]:
                     a, b = np.asarray(seg[0]), np.asarray(seg[1])
-                    off = rng.normal(0, lam * 0.35, 3)      # runs alongside
-                    V.append((a + off, b + off))
+                    off = rng.normal(0, lam * 0.35, 3)
+                    j = int(cKDTree(vt.endpoints()).query((a + off)[None, :],
+                                                          k=1)[1][0])
+                    vt.add(j, a + off, b + off, vt.radius[j] * 0.79)
             else:
-                Varr = np.asarray([v[1] for v in V])
+                # vessels pursue demand: a daughter grows toward a unit
                 for _ in range(5):
                     u = U[rng.integers(len(U))]
-                    j = int(cKDTree(Varr).query(u[None, :], k=1)[1][0])
-                    b = Varr[j]
-                    V.append((b.copy(), b + (u - b) * 0.55))
-                    Varr = np.asarray([v[1] for v in V])
+                    j = int(cKDTree(vt.endpoints()).query(u[None, :], k=1)[1][0])
+                    b = vt.end[j]
+                    vt.add(j, b.copy(), b + (u - b) * 0.55,
+                           vt.radius[j] * 0.79)   # Murray-like daughter ratio
+
+        # demand drawn at each tip is the mass of the units nearest to it
+        ends = vt.endpoints()
+        if len(U):
+            near = cKDTree(ends).query(np.asarray(U), k=1)[1]
+            demand = {}
+            for idx, mj in zip(near, m):
+                demand[int(idx)] = demand.get(int(idx), 0.0) + float(mj)
+        else:
+            demand = {0: 1.0}
+        vt.solve(demand)
+        vt.relax(tau_set, rate=_ENG["calibre_rate"])
+        _sh = np.asarray(vt.shear)[np.asarray(vt.flow) > 0]
+        tr.shear_cv.append(float(_sh.std(ddof=1) / max(_sh.mean(), 1e-9))
+                           if len(_sh) > 1 else 0.0)
 
         # ---- unit growth limited by local supply ----
-        Varr = np.asarray([v[1] for v in V])
+        # supply reaching a unit falls with its distance to the nearest
+        # vessel and rises with that vessel's calibre
+        Varr = vt.endpoints()
         Uarr = np.asarray(U)
-        _dv = cKDTree(Varr).query(Uarr, k=1)[0]
-        sup = cu * (np.exp(-_dv / 58.0) if 'shear' in rules else 1.0)
+        _dv, _vi = cKDTree(Varr).query(Uarr, k=1)
+        _rv = vt.radii()[_vi] / _ENG["root_radius"]
+        sup = cu * (np.exp(-_dv / _ENG["attenuation_length"]) * _rv ** 0.5
+                    if "shear" in rules else 1.0)
         marr = np.asarray(m)
         marr = marr + g0 * np.exp(-day / tau_g) * marr * (1 - marr / np.maximum(0.85 * sup, 1e-4))
         m = list(np.maximum(marr, 0.02))
@@ -264,4 +297,7 @@ def grow(kind, seed=0, days=None, P0=620.0, C0=None, snap_at=(10, 25, 45, 70),
             tr.snapshots[day] = (np.asarray(U).copy(), np.asarray(m).copy(),
                                  [tuple(map(np.asarray, e)) for e in T])
 
+    V = [(vt.start[k], vt.end[k]) for k in range(len(vt))]
+    tr.r_eff = vt.r_eff()
+    tr.vessel_radii = vt.radii()
     return np.asarray(U), np.asarray(m), T, V, tr

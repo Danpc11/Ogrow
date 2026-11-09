@@ -2,12 +2,16 @@
 
 Stated once, here, rather than hedged throughout.
 
-**The engine is not hemodynamic.** It carries no segment radii, no Poiseuille
-conductance and no shear-driven calibre relaxation. Supply is a single lumped
-conductance attenuated by distance to the nearest vessel (`THEORY.md` Eq. 5).
-The benchmark in Figure 1E shows that a tree solve would be affordable at this
-scale; it is not part of the growth loop. Adding radii and a shear setpoint is
-the natural next version and would change which architectures are reachable.
+**Flow is solved on a tree, not a network.** Anastomoses, pulsatility and
+non-Newtonian rheology are absent, and pressure is implicit rather than carried
+as a variable. Murray's law emerges rather than being imposed, which is a check
+on the implementation, not a validation against measured calibres.
+
+**The central result changed when hemodynamics were added.** With a lumped
+conductance proportional to mass, capacity saturation destroyed variance. With
+calibres that relax toward a shear setpoint, it amplifies it, because the tree
+disperses supply between replicates and saturation is the only closure mode
+that reads supply. Results from the earlier engine are not comparable.
 
 **Spatial exclusion is enforced against the previous step, not within it.**
 Candidates in one colonisation iteration are tested against the units that

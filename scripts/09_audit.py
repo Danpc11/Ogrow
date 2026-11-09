@@ -67,15 +67,17 @@ for lab, v in I["sets"].items():
           f"cond {c:.0f}" if c else f"  {lab:<24} rank {v['rank']}")
 c1 = I["sets"]["N trajectory"]["cond"]
 c2 = I["sets"]["N + per-unit supply"]["cond"]
-shown = re.search(r"condition (\d+) to (\d+)", (FIGS / "fig5.py").read_text())
+shown = re.search(r"condition ([\d.]+) to ([\d.]+)", (FIGS / "fig5.py").read_text())
 check("fig5 condition before", float(shown.group(1)) if shown else None, c1, 0.01)
 check("fig5 condition after", float(shown.group(2)) if shown else None, c2, 0.01)
 nrep = I["sets"]["N + per-unit supply"]["nrep"]
-lam = nrep[I["params"].index("lam")]
-beta = nrep[I["params"].index("beta")]
+worst = I["params"][int(max(range(len(nrep)), key=lambda i: nrep[i]))]
+best = I["params"][int(min(range(len(nrep)), key=lambda i: nrep[i]))]
+lam = nrep[I["params"].index(worst)]
+beta = nrep[I["params"].index(best)]
 shown = re.search(r"(\d+) replicates vs (\d+)", (FIGS / "fig5.py").read_text())
-check("fig5 replicates for lambda", float(shown.group(1)) if shown else None, lam, 0.01)
-check("fig5 replicates for beta", float(shown.group(2)) if shown else None, beta, 0.01)
+check("fig5 replicates, costliest parameter", float(shown.group(1)) if shown else None, lam, 0.01)
+check("fig5 replicates, cheapest parameter", float(shown.group(2)) if shown else None, beta, 0.01)
 
 print("\nFig 6  variance partition")
 if not (RES / "partition.json").exists():

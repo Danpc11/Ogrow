@@ -3,12 +3,17 @@ engine:
   days: 70
   n_attractors: 9000
   max_units: 4200
-  beta: 2.2              # tissue demand -> distal conductance
+  beta: 120.0            # demand -> distal conductance, with the tree solve
   g0: 0.30               # initial unit growth rate
   tau_g: 12.0            # proliferative decay, days
   C0: 14.0               # root conductance at t=0
   alpha_allometric: 1.155
   tau_body: 16.0
+  max_vessels: 1200        # cap on the second tree
+  root_radius: 12.0        # radius of the root segment
+  tau_set: 0.42            # wall-shear setpoint the calibres relax toward
+  calibre_rate: 0.12       # fraction of the gap closed per day
+  attenuation_length: 58.0 # supply falls as exp(-d / this)
 
 identity:                # the single parameter that distinguishes organs
   liver:    {mode: saturation, R: 190, lam: 7.4, nu: 400.0, c_set: 0.055}
@@ -37,6 +42,7 @@ seeds:                   # every figure is reproducible from these
 sweeps:
   sigma_param: [0.0, 0.02, 0.04, 0.07, 0.12]
   resolution: [600, 1500, 3500, 9000, 20000]
+  calibre_rate: [0.0, 0.01, 0.03, 0.06, 0.09, 0.12, 0.18, 0.25, 0.40, 0.70, 1.0]
   scaling_days: [12, 20, 30, 45, 70]
 
 hoa:

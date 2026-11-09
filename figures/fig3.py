@@ -1,4 +1,5 @@
 """Figure 3 — window closure determines whether unit-number variance contracts."""
+import json
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -26,8 +27,8 @@ def cv(a, axis=0):
     return a.std(axis=axis, ddof=1) / a.mean(axis=axis)
 
 
-fig = plt.figure(figsize=(F.WIDTH_FULL, 100 * F.MM))
-gs = fig.add_gridspec(2, 3, height_ratios=[0.90, 1.0], hspace=0.42, wspace=0.44,
+fig = plt.figure(figsize=(F.WIDTH_FULL, 104 * F.MM))
+gs = fig.add_gridspec(2, 4, height_ratios=[0.90, 1.0], hspace=0.46, wspace=0.52,
                       left=0.065, right=0.985, top=0.945, bottom=0.085)
 
 
@@ -41,7 +42,7 @@ axa.add_patch(FancyBboxPatch((4, 72), 92, 22, boxstyle="round,pad=0.6,rounding_s
 axa.text(50, 88, "Identical input", ha="center", fontsize=6.4, fontweight="bold")
 axa.text(50, 79, "same seeds · $\\sigma_{init}=0.6$ · $\\sigma_{param}=0$",
          ha="center", fontsize=6.0, color=K["grey"])
-for i, (nm, mech, col) in enumerate([("Saturation", "$\\mathbb{C}/N\\to c_{set}$", K["liver"]),
+for i, (nm, mech, col) in enumerate([("Saturation", "$\mathbb{C}/N\to c_{set}$", K["liver"]),
                                      ("Exhaustion", "$P_i\\to 0$", K["kidney"])]):
     x = 8 + i * 48
     axa.add_patch(FancyArrowPatch((50, 71), (x + 18, 56),
@@ -74,7 +75,8 @@ for kind, col in [("liver", K["liver"]), ("kidney", K["kidney"])]:
         axb.text(pos[kind][j], 20.5, "s.d.\n%.1f" % M[:, d].std(ddof=1),
                  ha="center", va="bottom", fontsize=5.8, color=col)
 axb.set_xticks([1, 2, 3.4, 4.4])
-axb.set_xticklabels(["day 1", "day 70", "day 1", "day 70"])
+axb.set_xticklabels(["day 1", "day 70", "day 1", "day 70"],
+                    fontsize=F.SZ["small"])
 axb.set_ylabel("$N$ $-$ mean")
 axb.set_ylim(-20, 27)
 axb.text(1.5, -18, "Saturation", ha="center", fontsize=6.2, color=K["liver"])
@@ -91,12 +93,12 @@ for kind, name, col in [("liver", "Saturation", K["liver"]),
     axc.plot(t, A.std(axis=0, ddof=1) / A[:, 0].std(ddof=1), color=col, lw=1.1,
              label=name)
 axc.axhline(1, color=K["grey"], lw=0.6, ls=(0, (2, 2)))
-axc.text(2, 1.05, "variance conserved", fontsize=5.8, color=K["grey"], ha="left")
+axc.text(2, 1.05, "", fontsize=5.8, color=K["grey"], ha="left")
 axc.set_xlabel("Day")
+axc.set_yscale("log")
 axc.set_ylabel("s.d. of $N$, relative to day 1")
-axc.legend(frameon=False, handlelength=1.4, borderpad=0.15, labelspacing=0.25,
-           handletextpad=0.45, loc="center right")
-axc.set_ylim(0, 1.35)
+axc.legend(loc="lower right", fontsize=F.SZ["small"] - 0.5)
+axc.set_ylim(0.05, 20)
 
 # ------------------------------------------- d  contraction vs growth ratio
 axd = fig.add_subplot(gs[1, 0])
@@ -114,7 +116,8 @@ axd.bar(x - w, lin, width=w, color=K["pale"], lw=0, label="dilution, $N_f/N_i$")
 axd.bar(x, meas, width=w, color=cols, lw=0, label="measured")
 axd.bar(x + w, quad, width=w, color="none", lw=0.9, edgecolor=K["ink"],
         label="bound, $(N_f/N_i)^2$")
-axd.set_yscale("log"); axd.set_xticks(x); axd.set_xticklabels(names, fontsize=5.3)
+axd.set_yscale("log"); axd.set_xticks(x); axd.set_xticklabels([n.replace(" (", "\n(") for n in names],
+                    fontsize=F.SZ["small"] - 1)
 axd.set_ylabel("Contraction of CV")
 axd.legend(frameon=False, handlelength=1.1, borderpad=0.1, labelspacing=0.22,
            handletextpad=0.4, loc="upper left", fontsize=5.6)
@@ -127,7 +130,7 @@ for sw, col, name in [(swL, K["liver"], "Saturation"), (swK, K["kidney"], "Exhau
                   for i in range(len(sig))])
     axe.plot(sig, c, "o-", color=col, ms=3.2, mew=0, lw=1.1, label=name)
 axe.axhline(1, color=K["grey"], lw=0.6)
-axe.text(0.98, 0.06, "variance conserved", transform=axe.transAxes,
+axe.text(0.98, 0.06, "", transform=axe.transAxes,
          fontsize=F.SZ["small"], color=K["grey"], ha="right", va="bottom")
 axe.set_xlabel("Parameter disorder, $\\sigma_{param}$")
 axe.set_ylabel("Final / initial s.d. of $N$")
@@ -147,8 +150,47 @@ axf.set_ylabel("Terminal CV of $N$")
 axf.legend(frameon=False, handlelength=1.4, borderpad=0.15, labelspacing=0.25,
            handletextpad=0.45, loc="upper left")
 
-F.panel_grid(fig, [[axa, axb, axc], [axd, axe, axf]],
-             ["a", "b", "c", "d", "e", "f"])
+# ------------------------------------- d  the tree injects its own disorder
+VD = json.load(open(RES / "vascular_disorder.json"))
+axg = fig.add_subplot(gs[0, 3])
+sw = VD["eta_sweep"]
+eta = np.array([r["rate"] for r in sw])
+cv = np.array([r["cv"] for r in sw])
+axg.plot(eta, cv, "o-", color=K["kidney"], ms=3.0, mew=0, lw=1.1)
+k = int(np.argmax(cv))
+axg.plot(eta[k], cv[k], "o", color=K["liver"], ms=5.0, mew=0, zorder=3)
+axg.annotate("peak at $\\eta$ = %.2f" % eta[k],
+             xy=(eta[k], cv[k]), xytext=(eta[k] + 0.22, cv[k] * 0.96),
+             fontsize=F.SZ["small"], color=K["liver"],
+             arrowprops=dict(arrowstyle="-", lw=0.6, color=K["liver"]))
+axg.set_xlabel("Calibre relaxation rate, $\\eta$")
+axg.set_ylabel("CV of supply across replicates")
+axg.text(0.03, 0.95, "fixed $N$, no seeded disorder:\nall spread is the tree's",
+         transform=axg.transAxes, fontsize=F.SZ["small"], va="top",
+         color=K["grey"], style="italic")
+axg.set_ylim(0, max(cv) * 1.25)
+
+# ------------------------------------------ h  it settles, it does not diverge
+axh = fig.add_subplot(gs[1, 3])
+ot = VD["over_time"]
+dd = np.array([r["day"] for r in ot])
+axh.plot(dd, [r["cv_C"] for r in ot], "o-", color=K["kidney"], ms=2.6, mew=0,
+         lw=1.1, label="supply, $\\mathbb{C}$")
+axh.plot(dd, [r["cv_N"] for r in ot], "s-", color=K["liver"], ms=2.6, mew=0,
+         lw=1.1, label="unit number, $N$")
+axh.set_xlabel("Day"); axh.set_ylabel("CV across replicates")
+axh.legend(loc="upper left")
+g = VD["gamma"]["liver"]["mean"]
+axh.text(0.97, 0.05, "$\\mathbb{C}\\sim N^{%.2f}$, so no runaway" % g,
+         transform=axh.transAxes, ha="right", fontsize=F.SZ["small"],
+         color=K["grey"], style="italic")
+
+axc.text(0.03, 0.96, "only saturation reads $\\mathbb{C}$,\nso only it is exposed",
+         transform=axc.transAxes, ha="left", va="top",
+         fontsize=F.SZ["small"], color=K["liver"], style="italic")
+
+F.panel_grid(fig, [[axa, axb, axc, axg], [axd, axe, axf, axh]],
+             ["a", "b", "c", "d", "e", "f", "g", "h"])
 fig.savefig(str(OUTDIR / "Fig3.pdf"), dpi=600, bbox_inches="tight")
 fig.savefig(str(OUTDIR / "Fig3.png"), dpi=400, bbox_inches="tight")
 print("ok")

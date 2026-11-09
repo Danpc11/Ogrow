@@ -73,62 +73,99 @@ the code this is the parameter `vessels`: `"demand"` for the other three,
 
 ---
 
-## 4. Supply
+## 4. Supply: flow, shear and calibre on the tree
 
-The engine does **not** solve a flow problem. It carries a single lumped
-conductance for the organ and attenuates it locally by distance to the nearest
-vessel. This is a deliberate simplification, and the model's results are
-properties of that simplification, not of a hemodynamic solve.
+A tree has analytic resistance, so no linear system is needed. Demand is
+accumulated from the leaves to the root in one pass and conductance combined
+in another, both at cost $\mathcal{O}(E)$ in the number of edges
+(`hemodynamics.py`).
 
-**Equation 2 — supply in series.** Root and distal tree are in series, so
+**Equation 2 — Poiseuille conductance.**
 
-$$\mathbb{C}(t) = \left(\frac{1}{C_{\text{root}}(t)} + \frac{1}{C_{\text{distal}}(t)}\right)^{-1},
-\qquad C_{\text{distal}} = \beta \sum_j m_j + C_{0}^{\text{distal}}$$
+$$w_k = \frac{r_k^{4}}{\ell_k}$$
 
-with $\beta$ the **demand coefficient**: how much conductance a unit of tissue
-mass calls into being. Accumulated demand therefore feeds back into supply.
-There are no segment radii and no per-segment flows in the state.
+**Equation 3 — series-parallel reduction.** Walking leaves to root, each
+segment's downstream conductance is its own in series with the parallel sum of
+its daughters',
 
-**Equation 3 — the root grows with the body.**
+$$\mathbb{C}_k = \left(\frac{1}{w_k} + \frac{1}{\sum_{c\,\in\,\text{daughters}(k)} \mathbb{C}_c}\right)^{-1}$$
+
+and $\mathbb{C}_0$ is the organ's distal conductance. The root is in series
+with it,
+
+$$\mathbb{C}(t) = \left(\frac{1}{C_{\text{root}}(t)} + \frac{1}{\beta\,\mathbb{C}_0(t)}\right)^{-1}$$
+
+so the root caps the total however wide the distal tree becomes.
+
+**Equation 4 — the root grows with the body.**
 
 $$C_{\text{root}}(t) = C_0\left(1 + \frac{t}{\tau_b}\right)^{\alpha}, \qquad \alpha = 1.155$$
 
 The exponent is the measured developmental allometry of organ mass against
-body mass, not the 3/4 of metabolic scaling: during development the organ
-grows nearly isometrically with the body.
+body mass, not the 3/4 of metabolic scaling.
 
-**Equation 4 — supply per unit.**
+**Equation 5 — flow and wall shear.** Demand drawn at each tip is the mass of
+the units nearest to it; flows accumulate to the root. For Poiseuille flow,
+
+$$\tau_k \;\propto\; \frac{f_k}{r_k^{3}}$$
+
+**Equation 6 — calibre relaxation toward a shear setpoint.** The radius that
+would put a segment at its setpoint is $(f_k/\tau_{\text{set}})^{1/3}$, and
+each calibre moves a fixed fraction $\eta$ of the way there per day,
+
+$$r_k \leftarrow r_k + \eta\left[\left(\frac{f_k}{\tau_{\text{set}}}\right)^{1/3} - r_k\right]$$
+
+Murray's law is **not imposed**. It emerges: at the fixed point every segment
+carries the same shear, so $r^3 \propto f$, and since flow is conserved at a
+bifurcation, $r_p^{3} = \sum_c r_c^{3}$. Measured over 52 bifurcations in the
+grown trees, the ratio $r_p^{3}/\sum_c r_c^{3}$ is 1.00.
+
+**Equation 7 — supply per unit.**
 
 $$c_u(t) = \frac{\mathbb{C}(t)}{N(t)}$$
 
-This is the quantity the organ regulates, and the one the identifiability
-analysis shows must be measured.
+**Equation 8 — what reaches one unit.** Supply falls with distance $d_j$ to
+the nearest vessel and rises with that vessel's calibre,
 
-**Equation 5 — local attenuation.** The supply reaching unit $j$ falls with
-its distance $d_j$ to the nearest vessel,
+$$c_{u,j} = c_u \, e^{-d_j/\ell_a} \sqrt{r_{v(j)}/r_{\text{root}}}$$
 
-$$c_{u,j} = c_u\,e^{-d_j/\ell_a}$$
+**Equation 9 — homogenised shear.** For a population of calibres,
 
-with $\ell_a$ the attenuation length. This stands in for the pressure drop
-along a real vascular path. It is a proximity term, not a hemodynamic
-calculation: it has no radii, no shear and no Poiseuille law.
+$$r_{\text{eff}} = \frac{\langle r^{5}\rangle}{\langle r^{4}\rangle}$$
 
-### What a flow solve would add, and why it is not here
+exact, with no closure assumption, but dependent on the whole distribution and
+not its mean. For a log-normal of width $\sigma$, $r_{\text{eff}} =
+r_m e^{9\sigma^{2}/2}$: at $\sigma = 1$ the factor is 90, so the width
+dominates any exponent.
 
-A full treatment would carry a radius $r_k$ per segment, conductance
-$w_k = r_k^4/\ell_k$, and relaxation of each calibre toward a wall-shear
-setpoint. That machinery changes which architectures are reachable and is the
-natural next version of the engine. It is **absent** from this one. The
-benchmark in Figure 1E times a tree traversal against a sparse assembly to
-show that such a solve would be affordable at this scale; it is not part of
-the growth loop.
+### Why the tree is a source of disorder, not only a conduit
+
+Write $\mathbb{C} \sim N^{\gamma}$. Since $c_u = \mathbb{C}/N \sim
+N^{\gamma-1}$, the sign of $\gamma - 1$ decides whether adding units raises or
+lowers the supply each one gets, and therefore whether the window closes.
+Measured along grown trajectories, $\gamma = 0.03$ to $0.31$ across the four
+organs: well below 1, so the feedback is stabilising and no runaway occurs.
+
+The tree nevertheless injects **new** quenched disorder. With calibres frozen
+($\eta = 0$) the conductance of replicates that reach the same unit count
+differs by $\mathrm{CV} = 0.0004$: stochastic topology alone disperses
+nothing. With calibres relaxing it reaches $\mathrm{CV} = 0.25$. The
+dispersion is **resonant** in $\eta$, peaking near $\eta = 0.12$ and falling
+on both sides, because it is a two-timescale effect: much slower than tree
+growth and every calibre lags equally; much faster and each reaches its
+setpoint before the flow changes, erasing the history. Dispersion is largest
+when the two rates are comparable, since the calibre then remembers the order
+in which demand arrived, and that order differs between individuals.
+
+This is a fourth source of variation alongside the three of §10, and the only
+one the model predicts rather than measures.
 
 ## 5. The fabrication window and how it closes
 
 **Organ identity is one parameter: the closure mode.** Everything else in the
 engine is shared.
 
-**Equation 6 — capacity saturation (liver).**
+**Equation 10 — capacity saturation (liver).**
 
 $$\dot N = \nu\left(\frac{\mathbb{C}}{N} - c_{\text{set}}\right)_{+}$$
 
@@ -153,7 +190,7 @@ $\mathbb{C} - c_{\text{set}}N$ is not cosmetic. The second form is a linear
 relaxation whose variance behaviour differs, and the two are distinguished by
 the variance test of §7, not by any fit to the mass curve.
 
-**Equation 7 — progenitor exhaustion (kidney, lung).**
+**Equation 11 — progenitor exhaustion (kidney, lung).**
 
 $$\dot N_i = \iota P_i, \qquad \dot P_i = -(\iota + \delta - \rho)P_i$$
 
@@ -162,14 +199,14 @@ closes when $P_i \to 0$. The closure time is an **output**, not a parameter,
 and it is asynchronous between individuals because each starts from its own
 $P_i(0)$.
 
-**Equation 8 — limiting pool (pancreas).** A fixed budget set aside at the
+**Equation 12 — limiting pool (pancreas).** A fixed budget set aside at the
 start is drawn down; the final count is fixed before growth begins.
 
 ---
 
 ## 6. Local rules
 
-**Equation 9 — spatial exclusion.** A candidate unit at $\mathbf{x}$ is
+**Equation 13 — spatial exclusion.** A candidate unit at $\mathbf{x}$ is
 accepted only if
 
 $$\phi(\mathbf{x}) < 0 \quad\text{and}\quad \min_j \lVert \mathbf{x} - \mathbf{x}_j \rVert > \lambda$$
@@ -178,7 +215,7 @@ $\lambda$ is the minimum unit spacing. The first condition confines growth to
 the tissue domain, so the shape of the organ influences the architecture that
 emerges.
 
-**Equation 10 — unit growth, limited by local supply.**
+**Equation 14 — unit growth, limited by local supply.**
 
 $$\dot m_j = g(t)\,m_j\left(1 - \frac{m_j}{\kappa\,c_{u,j}}\right), \qquad g(t) = g_0 e^{-t/\tau_g}$$
 
@@ -199,7 +236,7 @@ Two sources are kept separate, because they behave differently.
 | Initial condition | $\sigma_{\text{init}}$ | spread of seeded units | yes |
 | Parameter | $\sigma_{\text{param}}$ | per-individual $c_{\text{set}}$, $P_0$ | no |
 
-**Equation 13 — the contraction bound.** Under capacity saturation with
+**Equation 15 — the contraction bound.** Under capacity saturation with
 $\mathbb{C}$ fixed, the increment of $N^{2}$ is the same for every individual,
 so the dispersion of $N^{2}$ is preserved and
 
@@ -208,7 +245,7 @@ $$\frac{\mathrm{CV}_i}{\mathrm{CV}_f} \le \left(\frac{N_f}{N_i}\right)^{2}$$
 It is an **inequality**, not an identity, and the bound is reached only if the
 setpoint were identical across individuals. With per-individual setpoints,
 
-**Equation 14 — the floor on terminal variance.**
+**Equation 16 — the floor on terminal variance.**
 
 $$\mathrm{CV}_\infty \gtrsim \mathrm{CV}(c_{\text{set}})$$
 
@@ -228,7 +265,7 @@ $\mathrm{sd}(N)$; exhaustion and limiting pool conserve it exactly.
 An observable **self-averages** if its dispersion between realisations decays
 with system size,
 
-**Equation 15.**
+**Equation 17.**
 
 $$\mathrm{CV}(N) \propto N^{-a}, \qquad a > 0$$
 
@@ -262,7 +299,7 @@ dispersions, the within-to-between ratio, and the annotator disagreement.
 Before fitting, ask what is determinable. With $J$ the Jacobian of the
 log-observables with respect to the log-parameters,
 
-**Equation 16.**
+**Equation 18.**
 
 $$J_{ij} = \frac{\partial \log y_i}{\partial \log \theta_j}, \qquad
 \text{rank}(J) \text{ and } \mathrm{cond}(J) = \frac{s_1}{s_{\text{rank}}}$$
@@ -307,7 +344,12 @@ and still not match native proportions, and that is not a process failure.
 | $\tau_b$ | body growth time constant | Eq. 3 |
 | $g_0,\ \tau_g$ | unit growth rate and its decay | Eq. 10 |
 | $\kappa$ | mass supported per unit of supply | Eq. 10 |
-| $\ell_a$ | supply attenuation length | Eq. 5 |
+| $\ell_a$ | supply attenuation length | Eq. 8 |
+| $\tau_{set}$ | wall-shear setpoint | Eq. 6 |
+| $\eta$ | fraction of the calibre gap closed per day | Eq. 6 |
+| $r_k,\ \ell_k$ | radius and length of segment $k$ | Eq. 2 |
+| $f_k,\ \tau_k$ | flow and wall shear on segment $k$ | Eq. 5 |
+| $\gamma$ | exponent in $\mathbb{C}\sim N^{\gamma}$ | §4 |
 | $\sigma_{\text{init}},\ \sigma_{\text{param}}$ | the two disorder widths | §7 |
 | $a$ | self-averaging exponent | Eq. 15 |
 
@@ -322,10 +364,9 @@ the particular branching pattern, or macroscopic form; those are separate
 problems that couple to this one rather than follow from it. The mesenchyme
 appears as the instructor of the organ-specific pattern but is not formalised.
 
-It is also not a hemodynamic model. Segment radii, Poiseuille conductance and
-shear-driven calibre relaxation are described above as what a fuller treatment
-would carry; none of them is implemented. Supply enters as a lumped
-conductance with an exponential proximity term.
+Flow is solved on a tree, not on a network: anastomoses, pulsatility and
+non-Newtonian rheology are absent, and pressure is implicit rather than
+carried as a variable.
 
 Further limits, including which parts rest on which evidence, are in
 `KNOWN_LIMITATIONS.md`.

@@ -1,16 +1,16 @@
 observable_set,parameter,standard_error_log,replicates_for_20pct
-Final N only,nu,0.021998116991554014,1.0
-Final N only,c_set,0.05583270588847094,1.0
-Final N only,lam,0.0046474388498726135,1.0
-Final N only,beta,0.04622266988161681,1.0
-Final N only,C0,0.05104916110870241,1.0
-N trajectory,nu,5.765139369245249,831.0
-N trajectory,c_set,3.2736501207888753,268.0
-N trajectory,lam,21.610298548235278,11676.0
-N trajectory,beta,7.044062515443965,1241.0
-N trajectory,C0,9.591658830022402,2300.0
-N + per-unit supply,nu,1.3548117053735516,46.0
-N + per-unit supply,c_set,0.5237649131160941,7.0
-N + per-unit supply,lam,3.38384440388014,287.0
-N + per-unit supply,beta,1.267870829311826,41.0
-N + per-unit supply,C0,1.4039001255862407,50.0
+Final N only,nu,0.006100228026280873,1.0
+Final N only,c_set,0.041074690339198305,1.0
+Final N only,lam,0.014952201501637676,1.0
+Final N only,beta,0.006809125028025155,1.0
+Final N only,C0,0.03384954943082413,1.0
+N trajectory,nu,0.18908280746626,1.0
+N trajectory,c_set,1.0960586360198796,31.0
+N trajectory,lam,0.6709610517337181,12.0
+N trajectory,beta,2.3547883612354177,139.0
+N trajectory,C0,0.6022633485312223,10.0
+N + per-unit supply,nu,0.07970963788701191,1.0
+N + per-unit supply,c_set,0.09033285254846884,1.0
+N + per-unit supply,lam,0.07717428980947046,1.0
+N + per-unit supply,beta,0.2973930204754007,3.0
+N + per-unit supply,C0,0.08526512453609669,1.0
