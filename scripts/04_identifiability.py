@@ -27,9 +27,10 @@ def run(p, seed):
     finally:
         IDENTITY[KIND].update(keep)
     i = [d - 1 for d in DAYS]
+    # the second tree is extended at a fixed rate, so its size carries no
+    # information about the parameters; it is not used as an observable.
     return dict(N=np.asarray(tr.N, float)[i],
-                cu=np.asarray(tr.cu, float)[i],
-                nv=np.full(len(i), float(len(V))))
+                cu=np.asarray(tr.cu, float)[i])
 
 
 def average(p):
@@ -51,8 +52,7 @@ for name in PARAMS:
 
 SETS = [("Final N only", ["N"], True),
         ("N trajectory", ["N"], False),
-        ("N + per-unit supply", ["N", "cu"], False),
-        ("N + supply + vessels", ["N", "cu", "nv"], False)]
+        ("N + per-unit supply", ["N", "cu"], False)]
 out = {}
 for label, keys, final_only in SETS:
     J = np.array([(vector(plus[n], keys) - vector(minus[n], keys)) / (2 * STEP)
@@ -68,10 +68,24 @@ for label, keys, final_only in SETS:
                       nrep=np.ceil((se / TARGET) ** 2).tolist())
     print(f"{label:>24} rank={rank}/{len(PARAMS)} cond={out[label]['cond']}")
 
-Jfull = np.array([(vector(plus[n], ["N", "cu", "nv"]) -
-                   vector(minus[n], ["N", "cu", "nv"])) / (2 * STEP)
+Jfull = np.array([(vector(plus[n], ["N", "cu"]) -
+                   vector(minus[n], ["N", "cu"])) / (2 * STEP)
                   for n in PARAMS])
 np.savez(OUT / "sens.npz", J=Jfull, params=np.array(PARAMS),
-         keys=np.array(["N", "cu", "nv"]), days=np.array(DAYS))
+         keys=np.array(["N", "cu"]), days=np.array(DAYS))
+# the engine truncates N to an integer, so finite differences carry
+# truncation noise; report how much the condition number moves with the seed
+conds = []
+for s_ in seeds("fig5_identifiability"):
+    J1 = np.array([(vector(run(dict(BASE, **{n: BASE[n]*(1+STEP)}), s_), ["N","cu"]) -
+                    vector(run(dict(BASE, **{n: BASE[n]*(1-STEP)}), s_), ["N","cu"]))
+                   / (2*STEP) for n in PARAMS]).T
+    sv_ = np.linalg.svd(J1, compute_uv=False)
+    rk_ = int((sv_ > max(sv_[0]*1e-8, 1e-10)).sum())
+    if rk_:
+        conds.append(float(sv_[0]/sv_[rk_-1]))
+out["N + per-unit supply"]["cond_per_seed"] = conds
+print(f"  condition number across seeds: "
+      f"{np.median(conds):.0f} (range {min(conds):.0f} to {max(conds):.0f})")
 json.dump(dict(params=PARAMS, sets=out), open(OUT / "ident.json", "w"), indent=1)
 print("wrote results/ident.json and results/sens.npz")

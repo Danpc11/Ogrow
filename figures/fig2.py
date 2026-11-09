@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from organgrow import grow, sdf
 
 from organgrow import figstyle as F
+from organgrow.config import CFG, seeds
 from organgrow.config import ROOT
 
 F.apply()
@@ -12,6 +13,7 @@ RES = ROOT / "results"
 OUTDIR = ROOT / "figures" / "out"
 OUTDIR.mkdir(parents=True, exist_ok=True)
 K = F.C
+d = CFG['disorder']
 MM = F.MM
 
 
@@ -26,7 +28,7 @@ runs, reps = {}, {}
 for kind, _, _, _ in ORG:
     runs[kind] = grow(kind, seed=0, days=70, snap_at=SNAP)
     reps[kind] = [grow(kind, seed=s, days=70, snap_at=(),
-                              sigma_init=0.45, sigma_param=0.04)[4]
+                              sigma_init=d['sigma_init'], sigma_param=d['sigma_param'])[4]
                   for s in range(1, NREP + 1)]
 
 fig = plt.figure(figsize=(F.WIDTH_FULL, 180 * F.MM))

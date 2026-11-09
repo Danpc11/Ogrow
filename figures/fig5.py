@@ -22,7 +22,7 @@ PAR = D["params"]
 PRETTY = {"nu": "$\\nu$", "c_set": "$c_{set}$", "lam": "$\\lambda$",
           "beta": "$\\beta$", "C0": "$C_0$"}
 SETS = list(D["sets"].keys())
-COLS = [K["pancreas"], K["liver"], K["kidney"], K["lung"]]
+COLS = [K["pancreas"], K["liver"], K["kidney"]]
 
 fig = plt.figure(figsize=(F.WIDTH_FULL, 108 * F.MM))
 gs = fig.add_gridspec(2, 3, height_ratios=[0.88, 1.0], hspace=0.52, wspace=0.52,
@@ -37,8 +37,8 @@ axa.set_xlim(0, 100); axa.set_ylim(0, 100); axa.axis("off")
 axa.text(2, 99, "What is measured", fontsize=6.4, fontweight="bold", va="top")
 rows = [("Final $N$ only", "1 value", K["pancreas"]),
         ("$N$ trajectory", "6 values", K["liver"]),
-        ("$N$ + per-unit supply", "12 values", K["kidney"]),
-        ("$N$ + supply + vessels", "18 values", K["lung"])]
+        ("$N$ + per-unit supply", "12 values", K["kidney"])]
+
 y = 86
 for name, note, col in rows:
     axa.add_patch(FancyBboxPatch((2, y - 11), 96, 11.5,
@@ -89,6 +89,9 @@ for y, c, r, col in zip(yy, cond, rank, COLS):
 axc.set_xscale("log")
 axc.set_yticks(yy)
 axc.set_yticklabels([s.replace(" + ", "\n+ ") for s in SETS], fontsize=5.8)
+axc.text(0.98, 0.04, "cond. varies 65 to 119 across seeds",
+         transform=axc.transAxes, ha="right", fontsize=F.SZ["small"] - 0.5,
+         color=K["grey"], style="italic")
 axc.set_xlabel("Condition number")
 axc.set_xlim(1, 2e5)
 axc.spines["left"].set_visible(False); axc.tick_params(axis="y", length=0)
@@ -132,7 +135,7 @@ axf.set_xlim(0, 100); axf.set_ylim(0, 100); axf.axis("off")
 axf.text(2, 99, "Prescription", fontsize=6.4, fontweight="bold", va="top")
 msgs = [("Count units over time", "rank 1 to 5 of 5", K["good"]),
         ("Add per-unit perfusion", "condition 705 to 110", K["good"]),
-        ("Do not add network size", "no further gain", K["grey"]),
+        
         ("$\\lambda$ is the costliest", "287 replicates vs 41 for $\\beta$", K["warn"])]
 y = 85
 for name, note, col in msgs:

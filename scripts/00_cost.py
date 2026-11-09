@@ -4,6 +4,8 @@ import json, time
 import numpy as np, scipy.sparse as sp, scipy.sparse.linalg as spl
 from organgrow.config import ROOT
 
+(ROOT / "results").mkdir(exist_ok=True)
+
 def _timeit(fn, *a):
     t = time.perf_counter(); fn(*a); return time.perf_counter() - t
 

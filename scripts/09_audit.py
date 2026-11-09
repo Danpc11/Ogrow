@@ -78,19 +78,28 @@ check("fig5 replicates for lambda", float(shown.group(1)) if shown else None, la
 check("fig5 replicates for beta", float(shown.group(2)) if shown else None, beta, 0.01)
 
 print("\nFig 6  variance partition")
-P = json.load(open(RES / "partition.json"))
-print(f"  {P['kidneys']} kidneys, {P['donors']} donors")
-print(f"  within {P['intra']:.3f}  between {P['inter']:.3f}  "
-      f"ratio {P['ratio']:.3f}  P = {P['p_permutation']:.4f}")
-for nm, v in P["per_invariant"].items():
-    p = min(v["p_sign"], v["p_wilcoxon"])
-    print(f"  {nm:<14} between {100*v['between_frac']:5.1f}%   "
-          f"L-R {v['lr_rel_diff']:+6.1f}%   P = {p:.4f}")
-allsig = all(min(v["p_sign"], v["p_wilcoxon"]) < 0.05
-             for v in P["per_invariant"].values())
-print(f"  claim 'all six systematic (P<0.05)': {allsig}")
-if not allsig:
-    bad.append("fig6 'all six systematic' claim")
+if not (RES / "partition.json").exists():
+    print("  skipped: needs the human cohort (see data/README.md)")
+else:
+    P = json.load(open(RES / "partition.json"))
+    print(f"  {P['kidneys']} kidneys, {P['donors']} donors")
+    print(f"  within {P['intra']:.3f}  between {P['inter']:.3f}  "
+          f"ratio {P['ratio']:.3f}  P = {P['p_permutation']:.4f}")
+    k = len(P["per_invariant"])
+    alpha = 0.05 / k                      # Bonferroni over the invariants
+    print(f"  paired Wilcoxon, Bonferroni alpha = {alpha:.4f}")
+    nsig = 0
+    for nm, v in P["per_invariant"].items():
+        p = v["p_wilcoxon"]
+        mark = "*" if p < alpha else " "
+        nsig += p < alpha
+        print(f"  {nm:<14} between {100*v['between_frac']:5.1f}%   "
+              f"L-R {v['lr_rel_diff']:+6.1f}%   P = {p:.4f} {mark}")
+    print(f"  {nsig} of {k} survive correction")
+    shown = re.search(r"(\d+) of (\d+) survive", (FIGS / "fig6.py").read_text())
+    if shown:
+        check("fig6 invariants surviving correction",
+              float(shown.group(1)), nsig, 0.001)
 
 print("\n" + "=" * 60)
 if bad:

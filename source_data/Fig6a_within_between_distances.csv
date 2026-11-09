@@ -4,6 +4,6 @@ donors,48
 within_donor_mean,0.836640304857596
 between_donor_mean,1.2893332619860443
 ratio,1.5410843279962478
-permutation_null_mean,1.002858941134169
-permutation_null_sd,0.1054804173717607
+permutation_null_mean,1.0029530728319007
+permutation_null_sd,0.1049555426543298
 p_value,0.0005

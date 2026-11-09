@@ -13,7 +13,9 @@ from organgrow.config import CFG, ROOT
 OUT = ROOT / "results"
 src = OUT / "trusted_split.json"
 if not src.exists():
-    raise SystemExit("run scripts/07_trusted.py first")
+    print("  skipped: results/trusted_split.json absent "
+          "(needs the human cohort; see data/README.md)")
+    raise SystemExit(0)
 
 D = json.load(open(src))
 keys = CFG["human"]["invariants_ct"]
@@ -37,8 +39,10 @@ null = []
 for _ in range(2000):
     p = rng.permutation(len(ks))
     a = np.mean([dist(p[i], p[j]) for i, j in pairs])
+    inpair = {frozenset(q) for q in pairs}
     b = np.mean([dist(p[i], p[j]) for i, j in
-                 list(combinations(range(len(ks)), 2))[:600]])
+                 combinations(range(len(ks)), 2)
+                 if frozenset((i, j)) not in inpair][:600])
     null.append(b / a)
 null = np.array(null)
 obs = inter.mean() / intra.mean()
@@ -55,6 +59,8 @@ for a, nm in enumerate(keys):
     within = np.mean([(x[i] - x[j]) ** 2 / 2 for i, j in pairs])
     L = np.array([D[ks[i]][nm] for i, _ in pairs])
     R = np.array([D[ks[j]][nm] for _, j in pairs])
+    # one paired test, fixed in advance: Wilcoxon signed-rank, two-sided.
+    # The sign test is reported alongside but is not the decision rule.
     res["per_invariant"][nm] = dict(
         between_frac=float(max(1 - within / x.var(ddof=1), 0)),
         lr_rel_diff=float(100 * (L.mean() - R.mean()) / ((L.mean() + R.mean()) / 2)),
@@ -62,6 +68,10 @@ for a, nm in enumerate(keys):
         p_sign=float(stats.binomtest(int((L > R).sum()), len(L), 0.5).pvalue),
         p_wilcoxon=float(stats.wilcoxon(L, R).pvalue))
 
+res["test"] = "paired Wilcoxon signed-rank, two-sided"
+res["alpha_bonferroni"] = 0.05 / len(keys)
+res["n_significant"] = int(sum(v["p_wilcoxon"] < res["alpha_bonferroni"]
+                               for v in res["per_invariant"].values()))
 json.dump(res, open(OUT / "partition.json", "w"), indent=1)
 print(f"{res['kidneys']} kidneys, {res['donors']} donors")
 print(f"  within {res['intra']:.3f}  between {res['inter']:.3f}  "

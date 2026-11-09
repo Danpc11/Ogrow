@@ -7,7 +7,7 @@ name = "organgrow"
 version = "1.0.0"
 description = "Generative growth of exchange organs and the invariant-space metric"
 requires-python = ">=3.10"
-dependencies = ["numpy", "scipy", "matplotlib", "Pillow", "PyYAML"]
+dependencies = ["numpy", "scipy", "matplotlib", "Pillow", "PyYAML", "nibabel"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

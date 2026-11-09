@@ -26,12 +26,8 @@ wrongly, so it is excluded by construction rather than by lack of data.
 | $m_j(t)$ | mass of unit $j$ | arbitrary mass |
 | $M(t)$ | organ mass | arbitrary mass |
 | $P_i(t)$ | progenitor pool at tip $i$ | count |
-| $r_k$ | radius of vessel segment $k$ | length |
-| $\ell_k$ | length of vessel segment $k$ | length |
-| $w_k$ | conductance of segment $k$ | length³/(pressure·time) |
 | $\mathbb{C}(t)$ | effective supply conductance of the organ | as $w_k$ |
 | $c_u(t)$ | supply per unit, $\mathbb{C}/N$ | as $w_k$ |
-| $\tau_k$ | wall shear stress on segment $k$ | pressure |
 | $\phi(\mathbf{x})$ | signed distance to the tissue boundary | length |
 
 **Equation 1 — two fields.**
@@ -79,24 +75,21 @@ the code this is the parameter `vessels`: `"demand"` for the other three,
 
 ## 4. Supply
 
-Flow is solved on the supply tree. Because a tree has analytic resistance, no
-CFD or finite-element solve is needed: conductances combine in series and
-parallel in two traversals, at cost $\mathcal{O}(E)$ in the number of edges.
+The engine does **not** solve a flow problem. It carries a single lumped
+conductance for the organ and attenuates it locally by distance to the nearest
+vessel. This is a deliberate simplification, and the model's results are
+properties of that simplification, not of a hemodynamic solve.
 
-**Equation 2 — Poiseuille conductance.**
-
-$$w_k = \frac{r_k^{4}}{\ell_k}$$
-
-**Equation 3 — supply in series.** The root and the distal tree are in series,
-so the organ's effective conductance is
+**Equation 2 — supply in series.** Root and distal tree are in series, so
 
 $$\mathbb{C}(t) = \left(\frac{1}{C_{\text{root}}(t)} + \frac{1}{C_{\text{distal}}(t)}\right)^{-1},
 \qquad C_{\text{distal}} = \beta \sum_j m_j + C_{0}^{\text{distal}}$$
 
 with $\beta$ the **demand coefficient**: how much conductance a unit of tissue
 mass calls into being. Accumulated demand therefore feeds back into supply.
+There are no segment radii and no per-segment flows in the state.
 
-**Equation 4 — the root grows with the body.**
+**Equation 3 — the root grows with the body.**
 
 $$C_{\text{root}}(t) = C_0\left(1 + \frac{t}{\tau_b}\right)^{\alpha}, \qquad \alpha = 1.155$$
 
@@ -104,14 +97,31 @@ The exponent is the measured developmental allometry of organ mass against
 body mass, not the 3/4 of metabolic scaling: during development the organ
 grows nearly isometrically with the body.
 
-**Equation 5 — supply per unit.**
+**Equation 4 — supply per unit.**
 
 $$c_u(t) = \frac{\mathbb{C}(t)}{N(t)}$$
 
 This is the quantity the organ regulates, and the one the identifiability
 analysis shows must be measured.
 
----
+**Equation 5 — local attenuation.** The supply reaching unit $j$ falls with
+its distance $d_j$ to the nearest vessel,
+
+$$c_{u,j} = c_u\,e^{-d_j/\ell_a}$$
+
+with $\ell_a$ the attenuation length. This stands in for the pressure drop
+along a real vascular path. It is a proximity term, not a hemodynamic
+calculation: it has no radii, no shear and no Poiseuille law.
+
+### What a flow solve would add, and why it is not here
+
+A full treatment would carry a radius $r_k$ per segment, conductance
+$w_k = r_k^4/\ell_k$, and relaxation of each calibre toward a wall-shear
+setpoint. That machinery changes which architectures are reachable and is the
+natural next version of the engine. It is **absent** from this one. The
+benchmark in Figure 1E times a tree traversal against a sparse assembly to
+show that such a solve would be affordable at this scale; it is not part of
+the growth loop.
 
 ## 5. The fabrication window and how it closes
 
@@ -168,23 +178,7 @@ $\lambda$ is the minimum unit spacing. The first condition confines growth to
 the tissue domain, so the shape of the organ influences the architecture that
 emerges.
 
-**Equation 10 — calibre relaxation toward a shear setpoint.**
-
-$$\dot r_k \propto \tau_k - \tau_{\text{set}}(P_k), \qquad \tau_{\text{set}} \propto P_k^{\,b/2}$$
-
-The setpoint rises with transmural pressure, which follows from the cost of
-mural mass through Laplace's law at constant homeostatic stress.
-
-**Equation 11 — homogenised shear.** For a population of calibres,
-
-$$\tau_w = \frac{|u|}{2\,\mathbb{C}}\,r_{\text{eff}}, \qquad r_{\text{eff}} = \frac{\langle r^{5}\rangle}{\langle r^{4}\rangle}$$
-
-This is exact, with no closure assumption, but it depends on the **whole**
-calibre distribution, not its mean. For a log-normal with width $\sigma$,
-$r_{\text{eff}} = r_m e^{9\sigma^{2}/2}$, so at $\sigma = 1$ the factor is 90:
-the width dominates any exponent.
-
-**Equation 12 — unit growth, limited by local supply.**
+**Equation 10 — unit growth, limited by local supply.**
 
 $$\dot m_j = g(t)\,m_j\left(1 - \frac{m_j}{\kappa\,c_{u,j}}\right), \qquad g(t) = g_0 e^{-t/\tau_g}$$
 
@@ -307,13 +301,13 @@ and still not match native proportions, and that is not a process failure.
 | $c_{\text{set}}$ | per-unit perfusion setpoint | Eq. 6 |
 | $\iota,\ \rho,\ \delta$ | induction, self-renewal, loss | Eq. 7 |
 | $\lambda$ | minimum unit spacing | Eq. 9 |
-| $\beta$ | demand coefficient | Eq. 3 |
-| $C_0$ | root conductance at $t=0$ | Eq. 4 |
-| $\alpha$ | developmental allometric exponent | Eq. 4 |
-| $\tau_b$ | body growth time constant | Eq. 4 |
-| $g_0,\ \tau_g$ | unit growth rate and its decay | Eq. 12 |
-| $\kappa$ | mass supported per unit of supply | Eq. 12 |
-| $b$ | mural cost exponent | Eq. 10 |
+| $\beta$ | demand coefficient | Eq. 2 |
+| $C_0$ | root conductance at $t=0$ | Eq. 3 |
+| $\alpha$ | developmental allometric exponent | Eq. 3 |
+| $\tau_b$ | body growth time constant | Eq. 3 |
+| $g_0,\ \tau_g$ | unit growth rate and its decay | Eq. 10 |
+| $\kappa$ | mass supported per unit of supply | Eq. 10 |
+| $\ell_a$ | supply attenuation length | Eq. 5 |
 | $\sigma_{\text{init}},\ \sigma_{\text{param}}$ | the two disorder widths | §7 |
 | $a$ | self-averaging exponent | Eq. 15 |
 
@@ -327,6 +321,11 @@ It is not a theory of development. It does not explain organ specification,
 the particular branching pattern, or macroscopic form; those are separate
 problems that couple to this one rather than follow from it. The mesenchyme
 appears as the instructor of the organ-specific pattern but is not formalised.
+
+It is also not a hemodynamic model. Segment radii, Poiseuille conductance and
+shear-driven calibre relaxation are described above as what a fuller treatment
+would carry; none of them is implemented. Supply enters as a lumped
+conductance with an exponential proximity term.
 
 Further limits, including which parts rest on which evidence, are in
 `KNOWN_LIMITATIONS.md`.

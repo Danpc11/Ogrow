@@ -93,18 +93,20 @@ o2 = np.argsort(rel)
 for i, o in enumerate(o2):
     col = K["liver"] if rel[o] > 0 else K["kidney"]
     axc.barh(i, rel[o], height=0.62, color=col, lw=0)
-    p = min(P["per_invariant"][keys[o]]["p_sign"],
-            P["per_invariant"][keys[o]]["p_wilcoxon"])
+    p = P["per_invariant"][keys[o]]["p_wilcoxon"]
     ptxt = "$P$ < 0.0001" if p < 1e-4 else "$P$ = %.4f" % p
-    axc.text(rel[o] + (0.6 if rel[o] > 0 else 0.6), i,
-             "%d/%d, %s" % (nL[o], npair, ptxt), va="center", ha="left",
-             fontsize=F.SZ["small"] - 0.5, color=K["grey"])
+    sig = p < P["alpha_bonferroni"]
+    axc.text(rel[o] + 0.6, i, "%d/%d, %s%s" % (nL[o], npair, ptxt,
+             "  *" if sig else ""), va="center", ha="left",
+             fontsize=F.SZ["small"] - 0.5,
+             color=K["ink"] if sig else K["grey"])
 axc.set_yticks(range(len(keys)))
 axc.set_yticklabels([PRETTY[keys[o]] for o in o2], fontsize=6.0)
 axc.axvline(0, color=K["ink"], lw=0.7)
 axc.set_xlabel("Left $-$ right (% of mean)"); axc.set_xlim(-30, 24)
 axc.spines["left"].set_visible(False); axc.tick_params(axis="y", length=0)
-axc.text(0.5, -0.30, "sign test and Wilcoxon, whichever is larger",
+axc.text(0.5, -0.30, "paired Wilcoxon; * survives Bonferroni "
+         "($\\alpha$ = %.4f); 3 of 6" % P["alpha_bonferroni"],
          transform=axc.transAxes, ha="center", fontsize=F.SZ["small"],
          color=K["grey"], style="italic")
 

@@ -13,6 +13,7 @@ import numpy as np
 from organgrow.config import ROOT
 
 OUT = ROOT / "results"
+OUT.mkdir(exist_ok=True)
 
 
 def pairwise(V):

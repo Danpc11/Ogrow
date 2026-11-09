@@ -47,11 +47,11 @@ gs = fig.add_gridspec(3, 4, height_ratios=[0.60, 0.86, 1.0],
 # ------------------------------------------------------------ a  the loop
 axa = fig.add_subplot(gs[0, :])
 axa.set_xlim(-1, 101); axa.set_ylim(-9.5, 15); axa.axis("off")
-steps = [("Solve flow\non supply tree", "$f_k,\\ \\tau_k,\\ c_u$"),
-         ("Update\nprogenitor pool", "$P_i$"),
+steps = [("Update\nsupply", "$\\mathbb{C},\\ c_u$"),
+         ("Update\nprogenitor pool", "$P$"),
          ("Branch\nprimary tree", "topology"),
          ("Nucleate units", "$N$"),
-         ("Relax calibres", "$r_k\\!\\to\\!\\tau_{set}$"),
+         ("Extend\nsecond tree", "vessels"),
          ("Grow units", "$m_j$")]
 w, h, y0 = 13.6, 9.4, 3.2
 for i, (lab, out) in enumerate(steps):
@@ -143,20 +143,18 @@ axc.annotate("", xy=tuple(_b - _u * 2.7), xytext=tuple(_a + _u * 2.7),
 axc.text(cx, cy - 22, "$\\lambda$, minimum unit spacing", fontsize=SZ["small"],
          ha="center")
 
-axc.text(0, 30, "Calibre relaxation", fontsize=SZ["annot"], fontweight="bold",
+axc.text(0, 30, "Supply attenuation", fontsize=SZ["annot"], fontweight="bold",
          va="top")
-axc.text(0, 20, "$\\dot r_k\\propto\\tau_k-\\tau_{set}(P_k)$",
+axc.text(0, 20, "$c_{u,j}=c_u\\,e^{-d_j/\\ell_a}$",
          fontsize=SZ["label"], va="top")
 ax2 = axc.inset_axes([0.50, 0.01, 0.46, 0.24])
-t = np.linspace(0, 10, 200)
-for r0, c in [(1.75, K["liver"]), (0.40, K["kidney"])]:
-    ax2.plot(t, 1 + (r0 - 1) * np.exp(-t / 2.4), color=c, lw=1.0)
-ax2.axhline(1, color=K["grey"], lw=0.6, ls=(0, (2, 2)))
-ax2.text(10.2, 1.0, "$\\tau_{set}$", fontsize=SZ["small"], color=K["grey"],
-         va="center")
+dd = np.linspace(0, 200, 200)
+ax2.plot(dd, np.exp(-dd / 58.0), color=K["kidney"], lw=1.0)
+ax2.axvline(58.0, color=K["grey"], lw=0.6, ls=(0, (2, 2)))
+ax2.text(62, 0.80, "$\\ell_a$", fontsize=SZ["small"], color=K["grey"])
 ax2.set_xticks([]); ax2.set_yticks([])
-ax2.set_xlabel("time", fontsize=SZ["small"], labelpad=1)
-ax2.set_ylabel("$\\tau_k$", fontsize=SZ["small"], labelpad=1)
+ax2.set_xlabel("distance to nearest vessel", fontsize=SZ["small"], labelpad=1)
+ax2.set_ylabel("$c_{u,j}/c_u$", fontsize=SZ["small"], labelpad=1)
 for sp in ax2.spines.values():
     sp.set_linewidth(0.5)
 
@@ -202,13 +200,16 @@ ref = E / E[0] * tt[0]
 axe.loglog(E, ref, ":", color=K["ink"], lw=0.7)
 axe.text(E[-2] * 1.2, ref[-2] * 0.40, "$\\mathcal{O}(E)$", fontsize=SZ["small"])
 axe.set_xlabel("Supply-tree edges, $E$")
-axe.set_ylabel("Flow solve (ms)")
+axe.set_ylabel("Cost of one solve (ms)")
 axe.legend(loc="upper left")
 axe.grid(True, which="major", lw=0.3, color=K["pale"], alpha=0.8)
 F.tidy(axe)
 
 F.panel_grid(fig, [[axa], axb, [axc, axd, axe]],
              ["a", "b", "", "", "", "c", "d", "e"])
+axe.text(0.02, 0.97, "benchmark; not part of the loop",
+         transform=axe.transAxes, fontsize=SZ["small"] - 0.5, va="top",
+         color=K["grey"], style="italic")
 fig.savefig(str(OUTDIR / "Fig1.pdf"))
 fig.savefig(str(OUTDIR / "Fig1.png"), dpi=400)
 print("wrote Fig1")

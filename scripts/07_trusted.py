@@ -21,7 +21,8 @@ BIN = 2                      # shape invariants are robust to 2x binning
 MIN_VOX = 150
 
 if not SRC.exists():
-    raise SystemExit(f"no masks at {SRC}; see data/README.md")
+    print(f"  skipped: no masks at {SRC} (see data/README.md)")
+    raise SystemExit(0)
 
 outp = OUT / "trusted_split.json"
 out = json.load(open(outp)) if outp.exists() else {}
