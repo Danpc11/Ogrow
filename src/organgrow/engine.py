@@ -228,9 +228,13 @@ def grow(kind, seed=0, days=None, P0=620.0, C0=None, snap_at=(10, 25, 45, 70),
                 cand = tips[ti] + v / nv * (tree_lam * 2.1)
                 if not inside(cand):
                     continue
-                if ("exclusion" in rules and utree is not None
-                        and utree.query(cand[None, :], k=1)[0][0] < lam):
-                    continue
+                if "exclusion" in rules:
+                    if utree is not None and utree.query(cand[None, :], k=1)[0][0] < lam:
+                        continue
+                    # also against the units placed earlier in this same
+                    # pass, so the spacing rule holds within an iteration
+                    if moved and np.min(((np.asarray(moved) - cand) ** 2).sum(-1)) < lam2:
+                        continue
                 T.append((tips[ti].copy(), cand.copy()))
                 U.append(cand); m.append(0.09)
                 moved.append(cand)

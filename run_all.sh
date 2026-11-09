@@ -27,5 +27,5 @@ echo "== audit: every stated number must match the pipeline =="
 "$PY" scripts/10_source_data.py
 
 echo "== figures =="
-for f in figures/fig*.py; do python "$f"; done
+for f in figures/fig*.py; do "$PY" "$f" || echo "  $f skipped"; done
 echo "done; figures in figures/out/"

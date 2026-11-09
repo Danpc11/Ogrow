@@ -23,8 +23,9 @@ for f in sorted(glob.glob(str(ROOT / "data" / "hoa" / f"*{organ}*complete*.zip")
     seen.add(key)
     try:
         v, xy, zz, n = stack(f, target_um=tgt, max_slices=mx)
-        inv = invariants(v, xy, zz)
-        msk, _ = segment(v)
+        seg = segment(v)
+        inv = invariants(v, xy, zz, seg=seg)
+        msk = seg[0]
         ok, why = qc(msk, inv["volume_mm3"], xy, zz)
         inv.update(donor=m.group(2), part=key[1], organ=organ,
                    src_um=float(m.group(1).replace("_", ".")), file=b)
@@ -36,7 +37,7 @@ for f in sorted(glob.glob(str(ROOT / "data" / "hoa" / f"*{organ}*complete*.zip")
         print(f"  drop {key[0]:>14} {key[1]:>8}  {exc}", flush=True)
 
 json.dump(keep, open(OUT / f"hoa_{organ}.json", "w"), indent=1)
-with open(OUT / "hoa_rejected.csv", "a", newline="") as fh:
+with open(OUT / f"hoa_rejected_{organ}.csv", "w", newline="") as fh:
     w = csv.writer(fh)
     for r in rejected:
         w.writerow([organ, r.get("donor"), r.get("part"), r.get("reason")])

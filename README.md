@@ -10,12 +10,14 @@ what is contingent.
 
 `THEORY.md` states the model formally, with every symbol defined.
 `CLOSED_MODEL.md` describes a rewrite of the engine that is under way in
-`src/organgrow/closed.py`; the figures and the audit still run on `engine.py`.
+`src/organgrow/closed.py`; it runs and passes its smoke tests, but is not yet
+calibrated, and the figures and the audit still run on `engine.py`.
 
 ## Install and reproduce
 
     python3 -m venv .venv && source .venv/bin/activate
     python3 -m pip install -r requirements.txt
+    make test      # ten seconds: engine, tree and closed model, no data
     make all
 
 No install step is needed: `make` puts `src` on `PYTHONPATH` and picks up
@@ -37,7 +39,8 @@ a message when the cohort is absent, and the build continues.
     config/params.yaml   every parameter and seed
     src/organgrow/       engine, invariants, image handling, metric, style
     scripts/             analyses, numbered in dependency order
-    figures/             one script per figure
+    figures/             one script per figure, drawn from results/ only
+    tests/               smoke tests (make test)
     source_data/         the numbers behind every panel, one CSV per table
     results/             generated intermediates
     MANIFEST.md          figure -> command -> seed -> input
@@ -69,4 +72,4 @@ exchangeable sample and is a test, not a measurement.
 
 `hoa_io.py`, `hoa_invariants.py`, `mask_invariants.py` and `qc.py` load the
 human cohorts, segment them, and gate the result; every rejected dataset is
-recorded with its reason in `results/hoa_rejected.csv`.
+recorded with its reason in `results/hoa_rejected_<organ>.csv`.

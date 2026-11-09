@@ -1,4 +1,4 @@
-.PHONY: all clean figures analyses audit source_data
+.PHONY: all clean distclean figures analyses audit source_data test
 PY ?= $(shell command -v python3 2>/dev/null || command -v python)
 # the package is importable from src without installing anything
 export PYTHONPATH := $(CURDIR)/src:$(PYTHONPATH)
@@ -29,5 +29,13 @@ figures: source_data
 	  $(PY) $$f || echo "  $$f skipped"; \
 	done
 
+test:
+	$(PY) tests/test_smoke.py
+
+# clean keeps source_data: the Figure 6 tables come from the human cohort and
+# cannot be regenerated without it
 clean:
-	rm -rf results/* figures/out/* source_data/*
+	rm -rf results/* figures/out/*
+
+distclean: clean
+	rm -rf source_data/*
