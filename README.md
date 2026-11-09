@@ -12,9 +12,12 @@ what is contingent.
 
 ## Install and reproduce
 
-    python -m venv .venv && source .venv/bin/activate
-    pip install -r requirements.txt && pip install -e .
+    python3 -m venv .venv && source .venv/bin/activate
+    python3 -m pip install -r requirements.txt && python3 -m pip install -e .
     make all
+
+On a system where `python` is not on the path, `make` picks up `python3`
+automatically; to force an interpreter use `make all PY=/path/to/python`.
 
 Python 3.10+, Linux or macOS. A full run takes about 40 min on one core.
 `make all` runs the analyses, checks every number the figures state against

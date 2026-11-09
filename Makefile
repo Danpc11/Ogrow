@@ -1,5 +1,5 @@
 .PHONY: all clean figures analyses audit source_data
-PY := python
+PY ?= $(shell command -v python3 2>/dev/null || command -v python)
 
 all: figures
 
