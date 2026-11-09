@@ -88,6 +88,7 @@ xr = np.array([70, 900])
 axb.loglog(xr, 0.33 * xr ** -0.5, ":", color=K["ink"], lw=0.8)
 axb.text(700, 0.010, "$N^{-1/2}$", fontsize=6.2, color=K["ink"])
 axb.set_xlabel("Units, $N$"); axb.set_ylabel("CV across replicates")
+axb.set_title("exhaustion (kidney)", fontsize=F.SZ["small"], color=K["grey"])
 axb.legend(loc="upper left", fontsize=F.SZ["small"] - 0.5, ncol=1,
            labelspacing=0.18, handlelength=1.0, borderpad=0.2)
 axb.set_ylim(5e-4, 300)
@@ -114,7 +115,7 @@ axc.set_yticks(yy)
 axc.set_yticklabels([n.replace(" ", "\n", 1) if len(n) > 11 else n
                      for n in names], fontsize=F.SZ["small"], linespacing=0.95)
 axc.set_xlabel("Fitted exponent, $a$ in $\\mathrm{CV}\\propto N^{-a}$")
-axc.set_xlim(-0.45, 1.75)
+
 axc.spines["left"].set_visible(False); axc.tick_params(axis="y", length=0)
 
 # --------------------------------------------- d  the parameter floor masks it
@@ -129,7 +130,10 @@ axd.text(0.97, 0.95, "$\\sigma_{param}=0.04$", transform=axd.transAxes,
          fontsize=F.SZ["small"], color=K["ink"], ha="right", va="top")
 axd.plot([], [], "o-", color=K["grey"], ms=3.0, mew=0, lw=0.9, label="no parameter disorder")
 axd.plot([], [], "s--", color=K["grey"], ms=3.0, mew=0, lw=0.9, label="with parameter disorder")
-axd.set_xlabel("Units, $N$"); axd.set_ylabel("CV across replicates")
+axd.set_xlabel("Units, $N$")
+from matplotlib.ticker import LogFormatterSciNotation
+axd.xaxis.set_major_formatter(LogFormatterSciNotation())
+axd.tick_params(axis="x", labelsize=F.SZ["small"] - 1); axd.set_ylabel("CV across replicates")
 axd.legend(frameon=False, handlelength=1.5, borderpad=0.1, labelspacing=0.22,
            handletextpad=0.45, loc="lower left", fontsize=5.8)
 
@@ -177,6 +181,24 @@ for name in nspec:
     axf.text(94, y - 3.8, "report only", fontsize=5.8, va="center",
              ha="right", color=K["sim"])
     y -= 10.2
+
+# the contrast: the closure mode that reads supply does not self-average
+CT = json.load(open(RES / "scaling_contrast.json"))
+Nc = np.array([r["N"] for r in CT])
+for i, (key, col) in enumerate([("cv_N", K["pancreas"]),
+                                ("cv_mean_unit", K["kidney"]),
+                                ("cv_mass", K["liver"]),
+                                ("vessel_identity", K["sim"]),
+                                ("density_discord", K["sim"])]):
+    y = np.array([r[key] for r in CT])
+    g, cov = np.polyfit(np.log(Nc), np.log(y), 1, cov=True)
+    axc.errorbar(-g[0], i, xerr=float(np.sqrt(cov[0, 0])), fmt="D",
+                 color=col, ms=3.4, mew=0.9, mfc="none", mec=col,
+                 ecolor=col, elinewidth=0.6, capsize=1.4)
+axc.set_xlim(-3.4, 2.4)
+axc.text(0.02, 0.03, "filled: exhaustion\nopen: saturation, which reads $\\mathbb{C}$",
+         transform=axc.transAxes, fontsize=F.SZ["small"], va="bottom",
+         color=K["grey"], style="italic")
 
 F.panel_grid(fig, [[axa, axb, axc], [axd, axe, axf]],
              ["a", "b", "c", "d", "e", "f"])

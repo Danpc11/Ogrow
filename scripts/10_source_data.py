@@ -78,6 +78,21 @@ write("Fig4bd_scaling_with_organ_size.csv",
        "cv_mean_unit_mass", "cv_total_mass", "cv_dissipation",
        "vessel_identity_disagreement", "density_pattern_discord"], rows)
 
+ct = RES / "scaling_contrast.json"
+if ct.exists():
+    CT = json.load(open(ct))
+    Nc = np.array([r["N"] for r in CT])
+    rows = []
+    for key, nm in [("cv_N", "unit number"), ("cv_mean_unit", "mean unit mass"),
+                    ("cv_mass", "total mass"),
+                    ("vessel_identity", "vessel identity"),
+                    ("density_discord", "local density pattern")]:
+        y = np.array([r[key] for r in CT])
+        g, cov = np.polyfit(np.log(Nc), np.log(y), 1, cov=True)
+        rows.append([nm, -g[0], float(np.sqrt(cov[0, 0]))])
+    write("Fig4c_exponents_saturation.csv",
+          ["observable", "exponent_a", "std_error"], rows)
+
 A0 = json.load(open(RES / "scaling_nodisorder.json"))
 N0 = np.array([r["N"] for r in A0])
 rows = []
@@ -88,7 +103,7 @@ for key, nm in [("cv_N", "unit number"), ("cv_mean_unit", "mean unit mass"),
     y = np.array([r[key] for r in A0])
     g, cov = np.polyfit(np.log(N0), np.log(y), 1, cov=True)
     rows.append([nm, -g[0], float(np.sqrt(cov[0, 0]))])
-write("Fig4c_fitted_exponents.csv", ["observable", "exponent_a", "std_error"], rows)
+write("Fig4c_exponents_exhaustion.csv", ["observable", "exponent_a", "std_error"], rows)
 
 REF = np.load(RES / "ref_cohort.npy")
 inv = ["unit number", "mean unit mass", "unit-mass spread", "mass per volume",
@@ -116,6 +131,11 @@ write("Fig5b_sensitivity_matrix.csv", ["parameter"] + cols,
       [[pars[i]] + list(np.round(S["J"][i], 5)) for i in range(len(pars))])
 
 # ---------------------------------------------------------------- Figure 6
+if not (RES / "trusted_split.json").exists():
+    print("\n  Figure 6 tables skipped: needs the human cohort "
+          "(see data/README.md)")
+    print(f"\nsource data in {OUT.relative_to(ROOT)}/")
+    raise SystemExit(0)
 D = json.load(open(RES / "trusted_split.json"))
 ks = sorted(D)
 write("Fig6_kidney_invariants.csv",

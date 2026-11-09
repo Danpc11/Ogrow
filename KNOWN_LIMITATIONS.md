@@ -25,9 +25,14 @@ cohorts, at 100 um to 1 mm per voxel, yield shape and intensity descriptors
 only. A simulated organ therefore cannot yet be scored against the human
 cohort. Closing this needs the 1 to 6 um zoom volumes.
 
-**Self-averaging exponents rest on five size points.** The fitted exponent for
-unit number is 0.96 +/- 0.19; the ordering is robust, the values are not
-precise.
+**Self-averaging depends on the closure mode, not only on the observable.**
+Under exhaustion, unit number concentrates with a = 1.00; under capacity
+saturation the same quantity disperses, a = -2.45 +/- 0.77. The difference is
+not an artefact of the fit: with ten size points over a factor of three in N,
+the saturating case gives a = -3.64 +/- 0.37 at R^2 = 0.92. Figure 4 therefore
+reports two closure modes rather than one, and the claim that additive
+quantities self-average holds only where the organ does not read a supply that
+the vasculature disperses.
 
 **Finite differences run on a stochastic process with integer truncation.**
 Nucleation truncates to whole units, so the Jacobian, and with it the rank and

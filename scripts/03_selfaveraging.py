@@ -11,18 +11,21 @@ from organgrow.config import CFG, ROOT, seeds
 from organgrow import grow, sdf
 
 OUT = ROOT / "results"; OUT.mkdir(exist_ok=True)
-KIND = "liver"
+KIND = CFG["organs"]["scaling"]
+CONTRAST = CFG["organs"].get("scaling_contrast")
 DAYS = CFG["sweeps"]["scaling_days"]
 d, e = CFG["disorder"], CFG["engine"]
 R = CFG["identity"][KIND]["R"]
 
 
-def probe_points(rng, n=1500):
+def probe_points(rng, kind=None, n=1500):
+    kind = kind or KIND
     """Fixed probe grid inside the domain, shared by every replicate."""
     out = []
     while len(out) < n:
-        P = rng.uniform(-1, 1, (4000, 3)) * np.array([R * 1.1, R, R * 0.6])
-        keep = sdf(KIND, P[:, 0], P[:, 1], P[:, 2]) < 0
+        Rk = CFG["identity"][kind]["R"]
+        P = rng.uniform(-1, 1, (4000, 3)) * np.array([Rk * 1.1, Rk, Rk * 0.6])
+        keep = sdf(kind, P[:, 0], P[:, 1], P[:, 2]) < 0
         out.extend(P[keep])
     return np.asarray(out[:n])
 
@@ -35,14 +38,15 @@ def observables(U, m, V):
                 dissipation=float(np.sum(np.asarray(m) / np.maximum(sup, 1e-6))))
 
 
-def main(sigma_param):
+def main(sigma_param, kind=None):
+    kind = kind or KIND
     rng = np.random.default_rng(0)
-    grid = probe_points(rng)
+    grid = probe_points(rng, kind)
     rows = []
     for nd in DAYS:
         obs, labels, dens = [], [], []
         for s in seeds("fig4_scaling"):
-            U, m, T, V, tr = grow(KIND, seed=s, days=nd, snap_at=(),
+            U, m, T, V, tr = grow(kind, seed=s, days=nd, snap_at=(),
                                   sigma_init=d["sigma_init"], sigma_param=sigma_param)
             if len(U) < 8:
                 continue
@@ -70,6 +74,11 @@ def main(sigma_param):
 
 if __name__ == "__main__":
     for sp, tag in ((0.0, "nodisorder"), (d["sigma_param"], "disorder")):
-        print(f"sigma_param = {sp}")
+        print(f"{KIND}, sigma_param = {sp}")
         json.dump(main(sp), open(OUT / f"scaling_{tag}.json", "w"), indent=1)
+    if CONTRAST:
+        # the closure mode that reads supply, and so inherits vessel disorder
+        print(f"{CONTRAST} (contrast), sigma_param = 0.0")
+        json.dump(main(0.0, CONTRAST),
+                  open(OUT / "scaling_contrast.json", "w"), indent=1)
     print("wrote results/scaling_*.json")
