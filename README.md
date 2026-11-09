@@ -9,6 +9,8 @@ a real organ into what the individual fixes, what its surroundings fix, and
 what is contingent.
 
 `THEORY.md` states the model formally, with every symbol defined.
+`CLOSED_MODEL.md` describes a rewrite of the engine that is under way in
+`src/organgrow/closed.py`; the figures and the audit still run on `engine.py`.
 
 ## Install and reproduce
 

@@ -141,6 +141,21 @@ not its mean. For a log-normal of width $\sigma$, $r_{\text{eff}} =
 r_m e^{9\sigma^{2}/2}$: at $\sigma = 1$ the factor is 90, so the width
 dominates any exponent.
 
+### A critical radius, below which a vessel cannot hold
+
+Shear on a segment in series with the tissue it feeds is not monotone in the
+radius. With $Q = \Delta P / (\ell/r^4 + R_t)$ and $\tau = Q/r^3$, shear rises
+while the segment's own resistance dominates and falls once the tissue's does,
+with a maximum at
+
+$$r_c = \left(\frac{3\ell}{R_t}\right)^{1/4}$$
+
+Below $r_c$ the shear feedback is positive and the vessel closes; above it the
+feedback is negative and the vessel holds. This is a pruning criterion derived
+from the adaptation rule rather than imposed on it, and it predicts that a
+measured calibre distribution has a lower cut-off rather than a tail running
+to zero. (Established in the rewrite; see `CLOSED_MODEL.md`.)
+
 ### How supply scales with unit count
 
 Write $\mathbb{C} \sim N^{\gamma}$. Since $c_u = \mathbb{C}/N \sim

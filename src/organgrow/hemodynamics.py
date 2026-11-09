@@ -125,6 +125,58 @@ class VascularTree:
                 below[par[k]] += eff[k]
         return float(eff[0])
 
+    # ------------------------------------------------- pressure-driven flow
+    def perfuse(self, terminal_conductance, dP=1.0):
+        """Flow and pressure from a fixed perfusion pressure.
+
+        Demand does not set the flow. The tree's geometry does: conductance is
+        reduced leaves-to-root, the root draws Q = dP * C, and that flow is
+        split among daughters in proportion to their conductances. A branch
+        therefore carries what its calibre allows, which is what makes the
+        shear law non-trivial and Murray's relation a result rather than a
+        restatement of the rule.
+
+        `terminal_conductance` maps a tip index to the conductance of the
+        tissue hanging from it, so growing tissue calls flow toward itself
+        without dictating it.
+        """
+        n = len(self.parent)
+        r = np.asarray(self.radius)
+        l = np.asarray(self.length)
+        own = r ** 4 / np.maximum(l, 1e-6)
+        par = np.asarray(self.parent)
+
+        below = np.zeros(n)
+        for k, c in terminal_conductance.items():
+            below[int(k)] += float(c)
+        eff = np.zeros(n)
+        for k in range(n - 1, -1, -1):              # leaves to root
+            eff[k] = own[k] if below[k] <= 0 else 1.0 / (1.0 / own[k] +
+                                                         1.0 / below[k])
+            if par[k] >= 0:
+                below[par[k]] += eff[k]
+
+        kids = [[] for _ in range(n)]
+        for k in range(1, n):
+            kids[par[k]].append(k)
+
+        f = np.zeros(n)
+        p = np.zeros(n)
+        f[0] = dP * eff[0]
+        p[0] = dP
+        for k in range(n):                          # root to leaves
+            drop = f[k] / max(own[k], 1e-12)
+            p_out = p[k] - drop
+            cs = kids[k]
+            if cs:
+                tot = sum(eff[c] for c in cs)
+                for c in cs:
+                    f[c] = f[k] * (eff[c] / max(tot, 1e-12))
+                    p[c] = p_out
+        self.flow = f
+        self.shear = f / np.maximum(r, 1e-6) ** 3
+        return f, p, float(eff[0])
+
     # -------------------------------------------------------------- calibres
     def volume(self):
         """Volume the vessels occupy, which the parenchyma cannot use."""
@@ -133,28 +185,41 @@ class VascularTree:
         return float(np.pi * np.sum(r ** 2 * l))
 
     def relax(self, tau_set, rate=0.12, r_min=0.25, r_max=60.0,
-              volume_budget=None, crowding=1.0, pressure_exp=0.0, p_in=1.0):
-        """Move each radius toward the one that would put shear at setpoint.
+              volume_budget=None, crowding=1.0, pressure_exp=0.0, p_in=1.0,
+              pressures=None, shrink=0.0):
+        """Adapt each radius toward its shear setpoint, stably.
 
-        With tau proportional to f / r^3, the radius satisfying the setpoint is
-        (f / tau_set)^(1/3); the step is a fraction of the gap, so a segment
-        whose flow has just risen widens over several days rather than at once.
+        `shrink` is the constant regression tendency that makes the fixed
+        point a balance rather than a runaway; `volume_budget` raises the
+        setpoint as the vessels fill the space the parenchyma needs.
         """
         f = np.asarray(self.flow)
         r = np.asarray(self.radius)
-        if pressure_exp:
-            # the setpoint rises with transmural pressure, which follows from
-            # the cost of mural mass at constant homeostatic wall stress
-            p = self.pressures(p_in)
-            tau_set = tau_set * np.maximum(p / max(p_in, 1e-9), 1e-3) ** pressure_exp
+        if pressure_exp and pressures is not None:
+            # the setpoint rises with transmural pressure, from the cost of
+            # mural mass at constant homeostatic wall stress. These are the
+            # pressures the flow solve returned, not a rescaled profile.
+            tau_set = tau_set * np.maximum(pressures / max(p_in, 1e-9),
+                                           1e-3) ** pressure_exp
         if volume_budget:
             # mural mass costs space the parenchyma needs, so a crowded organ
             # runs its vessels at higher shear rather than widening them
             phi = min(self.volume() / volume_budget, 0.999)
             tau_set = tau_set / max(1.0 - phi, 1e-3) ** crowding
         ts = np.maximum(np.asarray(tau_set, float), 1e-9)
-        r_target = np.where(f > 0, (f / ts) ** (1.0 / 3.0), r_min)
-        r_new = r + rate * (r_target - r)
+        # Shear-only adaptation with a power-law target is unstable: the
+        # radius that satisfies the setpoint scales as f^(1/3) and f rises
+        # with r^4, so the two reinforce each other. The published stable
+        # form (Pries, Reglin & Secomb) responds to the logarithm of the
+        # shear ratio, which bounds the step, and carries a shrinking
+        # tendency so that a vessel carrying no flow regresses.
+        tau = np.where(f > 0, f / np.maximum(r, 1e-6) ** 3, 0.0)
+        # A segment whose flow stops falling would otherwise widen without
+        # bound: less demand lowers its shear, which widens it, which lowers
+        # the shear again. The shrinking tendency has to be able to win, so
+        # the signal is capped on the widening side.
+        signal = np.clip(np.log(np.maximum(tau, 1e-12) / ts), -4.0, 4.0) - shrink
+        r_new = r * (1.0 + rate * np.tanh(signal))
         self.radius = list(np.clip(r_new, r_min, r_max))
         return np.asarray(self.radius)
 
