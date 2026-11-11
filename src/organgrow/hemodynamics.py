@@ -201,11 +201,24 @@ class VascularTree:
         return f, p, float(eff[0])
 
     # -------------------------------------------------------------- calibres
-    def volume(self):
-        """Volume the vessels occupy, which the parenchyma cannot use."""
+    def volume(self, junction_cost=0.0):
+        """Tissue the vasculature takes, lumens plus junctions.
+
+        Lumen volume alone is degenerate in the branching number: splitting a
+        vessel in two costs nothing, so nothing stops a tip dividing. A
+        junction occupies tissue of its own, of order r^3, and that steric
+        term is what makes the network finite (Murray's cost function is flat
+        in the branching number; a wall cost with a junction penalty is not).
+        """
         r = np.asarray(self.radius)
         l = np.asarray(self.length)
-        return float(np.pi * np.sum(r ** 2 * l))
+        lumen = float(np.pi * np.sum(r ** 2 * l))
+        if junction_cost:
+            par = np.asarray(self.parent)
+            n_kids = np.bincount(par[par >= 0], minlength=len(r))
+            branching = n_kids >= 2
+            lumen += junction_cost * float(np.sum(r[branching] ** 3))
+        return lumen
 
     def relax(self, tau_set, rate=0.12, r_min=0.25, r_max=60.0,
               volume_budget=None, crowding=1.0, pressure_exp=0.0, p_in=1.0,

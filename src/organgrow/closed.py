@@ -31,7 +31,6 @@ is the tissue's demand, but the pressure it delivers is the tree's doing.
     lambda_i = nu * P_i * (q_i - q_set)_+        units nucleated per unit time
     mu_i     = sprout * (q_set - q_i)_+          vessels sprouted per unit time
              + sprout_room * (placements refused for lack of space)
-             + sprout_load * (units carried / units a branch serves - 1)
     k_i      ~ Poisson(lambda_i dt)              demographic noise
     dP_i/dt  = (rho - delta) * P_i - lambda_i    the progenitor pool
     dm_j/dt  = g(t) m_j (1 - m_j / (kappa q_i))  the unit grows to its supply
@@ -91,11 +90,11 @@ def _p(name, value):
 def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
          lam=7.4, s_rate=0.0, tau_set=None,
          N_scale=None, m0=None, m_leak=None, xi=None, kappa=None, g0=None,
-         tau_g=None, eta=None, pressure_exp=None, shrink=None,
+         tau_g=None, eta=None, b_cost=None, shrink=None,
          tau_set_fraction=None, daughter_ratio=None, sprout_reach=None,
-         sprout=None, sprout_room=None, sprout_load=None, vascular_fraction=None, crowding=None, l_root=None,
+         sprout=None, sprout_room=None, sprout_load=None, junction_cost=None, vascular_fraction=None, crowding=None, l_root=None,
          l_sprout=None, nucleation_spread=None,
-         n_seed=None, max_units=None, max_vessels=None):
+         max_units=None, max_vessels=None):
     """Grow one organ. `sdf(x, y, z)` is negative inside the domain.
 
     The identity parameters (nu, q_set, rho, delta, P0) are required; every
@@ -104,17 +103,51 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
     N_scale = float(_p("N_scale", N_scale)); m0 = _p("m0", m0)
     m_leak = _p("m_leak", m_leak); xi = _p("xi", xi); kappa = _p("kappa", kappa)
     g0 = _p("g0", g0); tau_g = _p("tau_g", tau_g); eta = _p("eta", eta)
-    pressure_exp = _p("pressure_exp", pressure_exp); shrink = _p("shrink", shrink)
+    # One number sets three exponents. b is the metabolic cost exponent of
+    # the vessel wall; Murray's b = 1 is the special case where cost is blood
+    # volume, and measured branching exponents of 2.7 to 3.0 correspond to
+    # b between 0.7 and 1.0, with b ~ 0.9 where flow is pulsatile.
+    #     branching   r_p^x = sum r_c^x    with  x = b + 2
+    #     pressure    tau_set ~ p^(b/2)
+    #     daughter    r_c / r_p = N^(-1/x) for an N-way split
+    b_cost = _p("cost_exponent_b", b_cost)
+    branch_exp = b_cost + 2.0
+    pressure_exp = b_cost / 2.0
+    shrink = _p("shrink", shrink)
     tau_set_fraction = _p("tau_set_fraction", tau_set_fraction)
-    daughter_ratio = _p("daughter_ratio", daughter_ratio)
+    # a symmetric bifurcation under the same cost law
+    daughter_ratio = 2.0 ** (-1.0 / branch_exp)
     sprout_reach = _p("sprout_reach", sprout_reach); sprout = _p("sprout", sprout)
     sprout_room = _p("sprout_room", sprout_room)
     sprout_load = _p("sprout_load", sprout_load)
+    junction_cost = _p("junction_cost", junction_cost)
+
+    def _worth_splitting(vt, i, n_here):
+        """Does reaching further buy more than the junction costs?
+
+        A branch does not buy conductance. Two daughters at the cost-law
+        ratio conduct 2 * 2^(-4/(b+2)) of the parent, which is less than one:
+        splitting always costs conductance. What it buys is reach, the tissue
+        a terminal branch can serve, and a tip already carrying n units is
+        serving n / units_per_tip times what one branch is meant to.
+
+        So the comparison is between the tissue that would be relieved and
+        the tissue the junction takes. Both are volumes, which is what makes
+        them comparable without a new constant: the junction occupies
+        junction_cost * r^3, and relieving the overload frees the units above
+        what one branch serves, each of which occupies about lam^3.
+        """
+        r = float(vt.radius[i])
+        excess = n_here - units_per_tip
+        if excess <= 0:
+            return False
+        relieved = excess * lam ** 3 / scale ** 3   # in tree units
+        cost = junction_cost * r ** 3
+        return bool(relieved > cost)
     vascular_fraction = _p("vascular_fraction", vascular_fraction)
     crowding = _p("crowding", crowding); l_root = _p("l_root", l_root)
     l_sprout = _p("l_sprout", l_sprout)
     nucleation_spread = _p("nucleation_spread", nucleation_spread)
-    n_seed = int(_p("n_seed", n_seed))
     max_units = int(_p("max_units", max_units))
     max_vessels = int(_p("max_vessels", max_vessels))
 
@@ -147,34 +180,10 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
     scale = lam                       # tree coordinates -> domain coordinates
     vt = VascularTree(s0 / scale, s0 / scale + np.array([0.0, l_root, 0.0]), r_eq)
 
-    # The organ is seeded with a fixed number of units rather than starting
-    # empty. Starting empty leaves the whole trajectory to the first Poisson
-    # draw: a replicate that happens to draw two units instead of thirty
-    # never grows a tree, never raises its supply, and stays frozen. That is
-    # an artefact of the first step, not biology, and it dominated the
-    # between-replicate spread (r = 0.92 between day-one and final count).
     U = np.zeros((0, 3))              # unit positions
     m = np.zeros(0)                   # unit masses
     tip_of = np.zeros(0, int)         # which tip feeds each unit
     P = {0: float(P0)}                # progenitor pool per tip
-    # The seed units are spread over the domain rather than piled at the
-    # tree's origin. Piled, they fill exactly the shell where new candidates
-    # land, so every placement is refused, nothing nucleates, no sprouting is
-    # triggered, and the organ sits at one vessel forever.
-    _seeded = []
-    _tries = 0
-    while len(_seeded) < n_seed and _tries < 20000:
-        _tries += 1
-        c = s0 + rng.normal(0, 4.0 * lam, 3)
-        if sdf(c[0], c[1], c[2]) >= 0:
-            continue
-        if _seeded and np.min(((np.asarray(_seeded) - c) ** 2).sum(-1)) < lam * lam:
-            continue
-        _seeded.append(c)
-    if _seeded:
-        U = np.asarray(_seeded)
-        m = np.full(len(_seeded), m0)
-        tip_of = np.zeros(len(_seeded), int)
     tr = Trace()
     leak = m_leak ** xi / R0          # what a tip carries before its first unit
 
@@ -258,18 +267,16 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                 # the tree must reach into space that is still empty. The
                 # sprout points away from the units around the segment's end
                 # and reaches past the cloud they occupy.
-                # A third reason to branch, and the one that was missing: a
-                # tip carrying far more tissue than a terminal branch is
-                # meant to serve must divide, whether or not that tissue is
-                # short of supply. Without it a tip with ample supply and
-                # room to place units never branches, so the whole organ can
-                # sit on one vessel: supply stays high, so there is no
-                # deficit, and placements succeed, so there is no crowding.
+                # A third reason to branch: a tip carrying far more tissue
+                # than a terminal branch is meant to serve must divide,
+                # whether or not that tissue is short of supply. Without it a
+                # tip with ample supply and room to place units never
+                # branches, so the organ can sit on one vessel forever.
                 load = n_at[i] / units_per_tip if i < len(n_at) else 0.0
-                if load > 1.0:
-                    k_l = int(rng.poisson(sprout_load * (load - 1.0)))
-                    for _ in range(k_l):
-                        if len(vt) >= max_vessels:
+                if load > 1.0 and _worth_splitting(vt, i, n_at[i]):
+                    for _ in range(int(rng.poisson(sprout_load * (load - 1.0)))):
+                        if (len(vt) >= max_vessels or
+                                vt.volume(junction_cost) >= vol_budget):
                             break
                         sel = np.flatnonzero(tip_of == i)
                         if not len(sel):
@@ -284,10 +291,11 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                         P[i] = P.get(i, 0.0) * 0.5
                         n_at = np.bincount(tip_of, minlength=len(vt))
 
-                if no_room[i] > 0:
+                if no_room[i] > 0 and _worth_splitting(vt, i, n_at[i]):
                     k_r = int(rng.poisson(sprout_room * no_room[i]))
                     for _ in range(k_r):
-                        if len(vt) >= max_vessels:
+                        if (len(vt) >= max_vessels or
+                                vt.volume(junction_cost) >= vol_budget):
                             break
                         b = vt.end[i]
                         near = utree.query_ball_point(b * scale, r=3.0 * lam)
@@ -306,7 +314,9 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                 if n_at[i] == 0:
                     continue
                 deficit = max(q_set - q[i], 0.0)
-                k_v = int(rng.poisson(sprout * deficit)) if deficit > 0 else 0
+                k_v = (int(rng.poisson(sprout * deficit))
+                       if deficit > 0 and _worth_splitting(vt, i, n_at[i])
+                       else 0)
                 for _ in range(k_v):
                     if len(vt) >= max_vessels:
                         break
