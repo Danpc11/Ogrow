@@ -6,7 +6,7 @@
 | Figure 2 | `Fig6.pdf` | `figures/fig6.py` |
 | Figure 3 | `Fig2_closed.pdf` | `figures/fig_closed_paper.py` |
 | Figure 4 | `Fig3_closed.pdf` | `figures/fig3_closed.py` |
-| Figure 5 | `FigMechanism_closed.pdf` | `figures/fig_framework.py` |
+| Figure 5 | `Fig5_pool.pdf` | `figures/fig_framework.py` |
 | Figure 6 | `Fig5_closed.pdf` | `figures/fig_closed_paper.py` |
 | Figure 7 | `Fig4_closed.pdf` | `figures/fig_closed_paper.py` |
 
@@ -38,14 +38,13 @@ spread, for each regime with no added spread, an individual progenitor pool
 or an individual supply threshold (24 replicates each); bars mark means.
 (B) Transmission of each spread to the final count.
 
-**Figure 5 (to be rebuilt: panel B shows a withdrawn claim; the figure will
-show where each organ's pool is held at closure).** Current panels: (A) Distribution of remaining progenitors over tip supply
-relative to the threshold, at closure, in the liver and the pancreas; the
-shaded band is the slice just below the threshold. (B) Measured against
-predicted elasticity of the final count to the threshold, five settings per
-regime, with trend lines, Pearson r and P; dashed line, identity. Bars,
-s.e. of six paired replicates. (C) Elasticity of the final count to the
-progenitor pool at five settings per regime; bars, s.e.
+**Figure 5. What holds each organ's progenitors, and how much of their
+number reaches its size.** (A) Share of the initial progenitor pool spent,
+held at tips short of supply, held at tips with no room, and still active at
+closure; mean of six seeds per regime. (B) Elasticity of the final unit count
+to the progenitor pool at five settings per regime; bars, s.e. of six paired
+replicates. (C) Difference in that elasticity between pancreas and liver under
+eight variants of the auxiliary rules, with z; bars, s.e.
 
 **Figure 6. Vascular rules.** (A) Ratio $r_p^{2.9}/\sum r_c^{2.9}$ at each
 bifurcation of a grown liver and kidney; bars mark medians. (B) Wall shear

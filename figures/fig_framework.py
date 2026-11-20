@@ -75,67 +75,63 @@ import csv
 with open(SD / "Fig1closed_regime_map.csv", "w", newline="") as f:
     wr = csv.writer(f); wr.writerow(["regime", "replicate", "pool_left_fraction", "supply_over_threshold"]); wr.writerows(rows)
 
-# ------------------------------------------------------- mechanism figure
+# ------------------------------------------------- Figure 5: the pool at closure
+import glob as _glob
 E = json.load(open(RES / "elasticity.json"))
-QS = {"ref": 0.6, "q_lo": 0.5, "q_hi": 0.7, "nu_lo": 0.6, "nu_hi": 0.6}
-def predicted(reg, st):
-    pr = []
-    for f in glob.glob(str(RES / "elasticity" / f"{reg}_{st}_P0*_k*.npz")):
-        z = np.load(f); q, P, N = z["q_tip"], z["P_tip"], z["N"][-1]; qs = QS[st]
-        pr.append(-qs * P[(q <= qs) & (q > qs - 0.05)].sum() / 0.05 / N)
-    return float(np.mean(pr))
-
-fig, ax = plt.subplots(1, 3, figsize=(F.WIDTH_FULL, 60 * F.MM))
-fig.subplots_adjust(left=0.07, right=0.985, bottom=0.2, top=0.88, wspace=0.42)
-bins = np.linspace(0, 2.5, 41)
-for reg, name, col in REG[::2]:
-    q, P = [], []
-    for f in glob.glob(str(RES / "elasticity" / f"{reg}_ref_P0*_k*.npz")):
-        z = np.load(f); q += list(z["q_tip"] / 0.6); P += list(z["P_tip"])
-    q, P = np.array(q), np.array(P)
-    ax[0].hist(q, bins=bins, weights=P / max(P.sum(), 1e-9), histtype="step", color=col, lw=1.1)
-    ax[0].text(0.97, 0.92 - 0.1 * (reg == "pancreas"), name, color=col, ha="right",
-               transform=ax[0].transAxes, fontsize=F.SZ["small"])
-ax[0].axvline(1, color=K["ink"], lw=0.7)
-ax[0].axvspan(1 - 0.05 / 0.6, 1, color=K["grey"], alpha=0.25, lw=0)
-ax[0].set_xlabel("Tip supply / threshold"); ax[0].set_ylabel("Share of remaining progenitors")
-
-mrows = []
-for reg, name, col in REG:
-    pr, me, se = [], [], []
-    for st in QS:
-        k = f"{reg}_{st}"
-        if k not in E:
-            continue
-        pr.append(predicted(reg, st)); me.append(E[k]["q_set"]["mean"]); se.append(E[k]["q_set"]["se"])
-        mrows.append([reg, st, pr[-1], me[-1], se[-1]])
-    pr, me, se = map(np.array, (pr, me, se))
-    ax[1].errorbar(pr, me, yerr=se, fmt="o", ms=3.5, color=col, lw=0.8, capsize=0)
-    if reg != "kidney":
-        g = np.polyfit(pr, me, 1); xx = np.linspace(pr.min(), pr.max(), 10)
-        ax[1].plot(xx, np.polyval(g, xx), color=col, lw=0.8)
-        rr, pp = stats.pearsonr(pr, me)
-        ax[1].text(0.03, 0.97 - 0.09 * (reg == "pancreas"), f"{name}: r = {rr:.2f}, P = {pp:.3f}",
-                   color=col, transform=ax[1].transAxes, va="top", fontsize=F.SZ["small"])
-ax[1].text(0.03, 0.79, "Kidney: no stranded pool", color=K["kidney"], transform=ax[1].transAxes,
-           va="top", fontsize=F.SZ["small"])
-lim = [-3.6, 0.3]
-ax[1].plot(lim, lim, color=K["grey"], lw=0.6, ls=(0, (2, 2)))
-ax[1].set_xlim(lim); ax[1].set_ylim(lim)
-ax[1].set_xlabel(r"Predicted $\varepsilon_{q_{\mathrm{set}}}$"); ax[1].set_ylabel(r"Measured $\varepsilon_{q_{\mathrm{set}}}$")
+Rb = json.load(open(RES / "robustness.json"))
+QS = ["ref", "nu_lo", "nu_hi", "q_lo", "q_hi"]
+fig, ax = plt.subplots(1, 3, figsize=(F.WIDTH_FULL, 62 * F.MM),
+                       gridspec_kw=dict(width_ratios=[0.8, 0.9, 0.9]))
+fig.subplots_adjust(left=0.07, right=0.93, bottom=0.27, top=0.88, wspace=0.95)
+parts = [("spent", "spent", "#3a3a3a"), ("supply_held", "held by supply", "#8fb3c9"),
+         ("space_held", "held by room", "#d8c79a"), ("active", "active", "#c8c8c8")]
+crow = []
+for i, (reg, name, col) in enumerate(REG):
+    runs = [json.load(open(f)) for f in sorted(_glob.glob(str(RES / "robustness" / f"reference_{reg}_s*_0.json")))]
+    bottom = 0.0
+    for key, lab, c in parts:
+        v = float(np.mean([r[key] for r in runs]))
+        ax[0].bar(i, v, bottom=bottom, color=c, width=0.62, lw=0)
+        bottom += v
+    crow += [[reg, k, r["spent"], r["supply_held"], r["space_held"], r["active"]] for k, r in enumerate(runs)]
+ax[0].set_xticks(range(3)); ax[0].set_xticklabels([r[1] for r in REG])
+ax[0].set_ylabel("Share of the initial progenitor pool"); ax[0].set_ylim(0, 1.05)
+for j, (key, lab, c) in enumerate(parts):
+    ax[0].text(0.5 + 0.0 * j, -0.22 - 0.075 * j, lab, color=c, transform=ax[0].transAxes,
+               ha="center", fontsize=F.SZ["small"])
 
 for i, (reg, name, col) in enumerate(REG):
     v = [E[f"{reg}_{st}"]["P0"] for st in QS if f"{reg}_{st}" in E]
     xs = i + np.linspace(-0.22, 0.22, len(v))
-    ax[2].errorbar(xs, [a["mean"] for a in v], yerr=[a["se"] for a in v], fmt="o", ms=3.5,
+    ax[1].errorbar(xs, [a["mean"] for a in v], yerr=[a["se"] for a in v], fmt="o", ms=3.5,
                    color=col, lw=0.8, capsize=0)
 for y in (0, 1):
-    ax[2].axhline(y, color=K["grey"], lw=0.6, ls=(0, (2, 2)))
-ax[2].set_xticks(range(3)); ax[2].set_xticklabels([r[1] for r in REG])
-ax[2].set_ylabel(r"$\varepsilon_{P_0}$, five settings"); ax[2].set_ylim(-0.1, 1.15)
+    ax[1].axhline(y, color=K["grey"], lw=0.6, ls=(0, (2, 2)))
+ax[1].set_xticks(range(3)); ax[1].set_xticklabels([r[1] for r in REG])
+ax[1].set_ylabel(r"$\varepsilon_{P_0}$, five settings"); ax[1].set_ylim(-0.15, 1.2)
+
+order = ["reference", "root_surface", "root_random", "no_deficit", "no_load",
+         "no_crowding", "no_mesenchyme", "territory"]
+labels = ["reference", "root at surface", "root at random", "no deficit sprouting",
+          "no load sprouting", "no crowding sprouting", "no mesenchymal signal", "territory assignment"]
+rrow = []
+for j, v in enumerate(order):
+    L, Pn = Rb[v]["liver"], Rb[v]["pancreas"]
+    d = Pn["eps_pool"] - L["eps_pool"]; se = float(np.hypot(Pn["eps_se"], L["eps_se"]))
+    ax[2].errorbar(d, j, xerr=se, fmt="o", ms=3.5, color=K["ink"], lw=0.8, capsize=0)
+    ax[2].text(1.03, j, f"z = {d / se:.1f}", va="center", fontsize=F.SZ["small"] - 0.5,
+               transform=ax[2].get_yaxis_transform())
+    rrow.append([v, Pn["eps_pool"], Pn["eps_se"], L["eps_pool"], L["eps_se"], d, se, d / se])
+ax[2].axvline(0, color=K["grey"], lw=0.6, ls=(0, (2, 2)))
+ax[2].set_yticks(range(len(order))); ax[2].set_yticklabels(labels, fontsize=F.SZ["small"])
+ax[2].invert_yaxis(); ax[2].set_xlim(-0.5, 2.1)
+ax[2].set_xlabel(r"$\varepsilon_{P_0}$, pancreas minus liver")
 F.panel_grid(fig, [list(ax)], ["a", "b", "c"])
-fig.savefig(str(OUT / "FigMechanism_closed.pdf")); fig.savefig(str(OUT / "FigMechanism_closed.png"), dpi=300)
+fig.savefig(str(OUT / "Fig5_pool.pdf")); fig.savefig(str(OUT / "Fig5_pool.png"), dpi=300)
 plt.close(fig)
-with open(SD / "FigMechanism_elasticity.csv", "w", newline="") as f:
-    wr = csv.writer(f); wr.writerow(["regime", "setting", "predicted_eps_setpoint", "measured_eps_setpoint", "se"]); wr.writerows(mrows)
-print("wrote Fig1_closed and FigMechanism_closed")
+with open(SD / "Fig5_closure_shares.csv", "w", newline="") as f:
+    wr = csv.writer(f); wr.writerow(["regime", "seed", "spent", "held_by_supply", "held_by_room", "active"]); wr.writerows(crow)
+with open(SD / "Fig5_robustness_contrast.csv", "w", newline="") as f:
+    wr = csv.writer(f); wr.writerow(["variant", "eps_pancreas", "se_pancreas", "eps_liver", "se_liver",
+                                     "difference", "se", "z"]); wr.writerows(rrow)
+print("wrote Fig1_closed and Fig5_pool")

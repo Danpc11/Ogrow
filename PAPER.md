@@ -36,7 +36,7 @@ distribution of the pool over tips at closure, not from a mean. The three
 closure modes persist in each of eight variants: the vascular root at the
 deepest point, at the surface or at random; each of the four sprouting rules
 removed in turn; and units assigned by vascular territory instead of by
-nearest tip. `PAPER_NUMBERS.md`, Regimes and Robustness; Figures 1 and 3.
+nearest tip. `PAPER_NUMBERS.md`, Regimes and Robustness; Figures 1, 3 and 5A.
 
 **3. Progenitor number reaches size more in a budget organ than in a liver.**
 The elasticity of the final unit count to the progenitor pool is higher in the
@@ -46,7 +46,7 @@ is the pattern found experimentally by Stanger, Tanaka and Melton (*Nature*
 compensated, while the liver did. The model was not fitted to that
 experiment. The kidney, which spends its pool against loss, transmits about
 as little as the liver, so the model does not order all three organs.
-`PAPER_NUMBERS.md`, Elasticities and Robustness; Figure 4.
+`PAPER_NUMBERS.md`, Transmission, Elasticities and Robustness; Figures 4, 5B and 5C.
 
 **4. One wall-cost exponent sets the vascular rules, and a branch buys reach,
 not conductance.** Minimising $\mathcal{C} = Q^2/r^4 + k\,(p\,r^2)^b$ per unit
@@ -62,8 +62,8 @@ which a vessel closes. The Murray ratio in grown trees:
 relaxes as $\sigma^2(t) = \sigma_0^2 e^{-2\lambda t} + \sigma_\infty^2(1 - e^{-2\lambda t})$,
 with weak-feedback limit $\mathrm{CV}_i/\mathrm{CV}_f = (N_f/N_i)^2$, which
 gives 3.31 for the mouse liver against 3.09 measured (Azizoglu et al. 2025).
-The model's contraction from the mouse's initial spread:
-`PAPER_NUMBERS.md`, Contraction; Figure 7.
+The model closes at a spread close to the mouse liver's final one, from a
+larger initial spread of its own: `PAPER_NUMBERS.md`, Contraction; Figure 7.
 
 ## Predictions for experiment
 
@@ -107,7 +107,6 @@ only through the partition formula, which awaits independent input spreads.
 
 ## Before submission
 
-1. `make test`, then `make paper` on the reference version; check that
-   `PAPER_NUMBERS.md` names version 4.3 and a clean commit.
-2. Rebuild Figure 5 without the withdrawn panel.
-3. Check that `PAPER_NUMBERS.md`, Robustness, reproduces the eight variants.
+1. Commit, then `make test` and `make paper` on that commit, so that
+   `PAPER_NUMBERS.md` names version 4.4 and a clean commit.
+2. Write the manuscript from this file, `PAPER_NUMBERS.md` and `FIGURES.md`.

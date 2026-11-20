@@ -100,11 +100,10 @@ if __name__ == "__main__":
                     ca, cb = a.std(ddof=1) / a.mean(), b.std(ddof=1) / b.mean()
                     bs.append(np.sqrt(max(ca ** 2 - cb ** 2, 0.0)) / sig)
                 lo, hi = np.percentile(bs, [2.5, 97.5])
-            # supply binds when supply per unit has come down to the setpoint;
-            # otherwise the organ stopped with supply to spare, so the pool
-            # is what bound
-            qs = np.mean([r["q_final"] / r["q_set"] for r in rows])
-            bound = "supply" if qs <= 1.1 else "progenitor"
+            # what holds an organ's pool is read from its distribution over
+            # tips (closed.closure_state, scripts/21_robustness.py), not from
+            # a mean supply, so no label is given here
+            bound = ""
             res[f"{reg}_{cond}"] = dict(cv=c, transmission=tr, ci95=[float(lo), float(hi)], bound=bound,
                                         N=[r["N"] for r in rows])
             print(f"{reg:>8} {cond:>9} {c:>8.3f} {tr:>13.2f}  [{lo:.2f}, {hi:.2f}]  {bound}")
