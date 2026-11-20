@@ -38,8 +38,8 @@ spread, for each regime with no added spread, an individual progenitor pool
 or an individual supply threshold (24 replicates each); bars mark means.
 (B) Transmission of each spread to the final count.
 
-**Figure 5. The pool waiting just below the threshold sets the response to
-the threshold.** (A) Distribution of remaining progenitors over tip supply
+**Figure 5 (to be rebuilt: panel B shows a withdrawn claim; the figure will
+show where each organ's pool is held at closure).** Current panels: (A) Distribution of remaining progenitors over tip supply
 relative to the threshold, at closure, in the liver and the pancreas; the
 shaded band is the slice just below the threshold. (B) Measured against
 predicted elasticity of the final count to the threshold, five settings per

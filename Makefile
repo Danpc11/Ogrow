@@ -26,8 +26,8 @@ source_data: audit
 
 figures: source_data
 	mkdir -p figures/out
-	@for f in figures/fig*.py; do \
-	  $(PY) $$f || echo "  $$f skipped"; \
+	@for f in figures/fig[1-6].py; do \
+	  $(PY) $$f || exit 1; \
 	done
 
 test:

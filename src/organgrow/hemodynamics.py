@@ -167,10 +167,13 @@ class VascularTree:
             if par[k] >= 0:
                 below[par[k]] += eff[k]
         # the critical radius of each segment in series with everything
-        # below it: shear peaks at (3 l / R_below)^(1/4); under it the
-        # calibre feedback is positive, so it is the floor the segment may
-        # not cross (Eq. in CLOSED_MODEL.md). Dead ends get the root's value.
-        r_crit = np.where(below > 0, (3.0 * l * np.maximum(below, 1e-12)) ** 0.25, 0.0)
+        # below it. With Q = dP / (l / r^4 + R_below), shear Q / r^3 goes as
+        # r / (l + R_below r^4) and peaks where l = 3 R_below r^4, that is at
+        # r_c = (l / (3 R_below))^(1/4) = (l G_below / 3)^(1/4). Under it the
+        # calibre feedback is positive, so it is the floor the segment may not
+        # cross. (An earlier version had (3 l / R_below)^(1/4), 1.73 times too
+        # large, which kept every calibre above 1.73 r_c.)
+        r_crit = np.where(below > 0, (l * np.maximum(below, 1e-12) / 3.0) ** 0.25, 0.0)
         r_crit[below <= 0] = 0.0
         self.r_crit = r_crit
         self.below = below
@@ -189,9 +192,12 @@ class VascularTree:
             pout[k] = p[k] - drop
             cs = kids[k]
             if cs:
-                tot = sum(eff[c] for c in cs)
+                # what enters node k leaves through its daughters and through
+                # any tissue hanging from k itself, each in proportion to its
+                # conductance; below[k] is their sum, so flow is conserved at
+                # the node even when tissue sits on an internal segment
                 for c in cs:
-                    f[c] = f[k] * (eff[c] / max(tot, 1e-12))
+                    f[c] = f[k] * (eff[c] / max(below[k], 1e-12))
                     p[c] = pout[k]
         self.flow = f
         self.shear = f / np.maximum(r, 1e-6) ** 3

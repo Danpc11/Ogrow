@@ -124,3 +124,12 @@ exchangeable sample, so that value is a property of the metric, not a
 measurement.
 
 **Absolute timings in Figure 1E are machine-dependent.**
+
+**Errors found by the external review of 20 November 2026.** The critical
+radius was written and implemented as $(3\ell/R_t)^{1/4}$ instead of
+$(\ell/3R_t)^{1/4}$, and the flow split at a node ignored tissue hanging from
+that node. Both are fixed and covered by tests in `tests/test_smoke.py`; the
+second never applied in practice. The time step is one day and results have
+not been checked against a smaller step. The model has not been checked for
+sensitivity to where the vascular root enters (deepest point, surface,
+random), nor with each sprouting rule removed in turn.

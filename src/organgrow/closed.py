@@ -88,6 +88,30 @@ def _p(name, value):
     return _CL[name] if value is None else value
 
 
+def closure_state(P, q, vt, q_set, tried, no_room, P_initial):
+    """Where the progenitor pool stands, read from its distribution over tips.
+
+    Returns the share of the initial pool that is spent, held at tips whose
+    supply is at or below the threshold (supply holds it), held at tips above
+    the threshold whose placements were all refused (space holds it), and
+    held at tips above the threshold that can still nucleate. A mean supply
+    per unit hides which of these applies; the shares do not.
+    """
+    n = min(len(q), len(tried))
+    held = np.array([P.get(k, 0.0) for k in range(n)], float)
+    qq = np.asarray(q, float)[:n]
+    t = np.asarray(tried, float)[:n]; r = np.asarray(no_room, float)[:n]
+    below = held[qq <= q_set].sum()
+    above = qq > q_set
+    blocked = above & (t > 0) & (r >= t)
+    tot0 = max(P_initial, 1e-9)
+    held_tot = held.sum()
+    return dict(spent=float(max(1.0 - held_tot / tot0, 0.0)),
+                supply_held=float(below / tot0),
+                space_held=float(held[blocked].sum() / tot0),
+                active=float(held[above & ~blocked].sum() / tot0))
+
+
 def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
          lam=7.4, s_rate=0.0, tau_set=None,
          N_scale=None, R_unit=None, units_per_branch=None, m0=None, m_leak=None, xi=None, kappa=None, g0=None,
@@ -177,7 +201,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
     units_per_tip = (float(units_per_branch) if units_per_branch is not None
                      else max(N_scale / max(max_vessels * 0.5, 1.0), 1.0))
     R_seg = R0 / units_per_tip
-    r_crit0 = (3.0 * l_root / R_seg) ** 0.25
+    r_crit0 = (l_root / (3.0 * R_seg)) ** 0.25    # shear peak, see hemodynamics.perfuse
     _tau = lambda x: (dP / (l_root / x ** 4 + R_seg)) / x ** 3
     tau_peak = _tau(r_crit0)
     if tau_set is None:
@@ -212,6 +236,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
     m = np.zeros(0)                   # unit masses
     tip_of = np.zeros(0, int)         # which tip feeds each unit
     P = {0: float(P0)}                # progenitor pool per tip
+    Ptot0 = float(P0)
     tr = Trace()
     leak = m_leak ** xi / R0          # what a tip carries before its first unit
 
@@ -465,8 +490,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
         tr.q.append(qbar); tr.C.append(C); tr.mass.append(float(m.sum()))
         tr.vessels.append(len(vt))
         tr.Q.append(float(vt.flow[0]) if len(vt.flow) else 0.0)
-        tr.bound.append("progenitor" if Ptot < 1e-3 else
-                        ("supply" if qbar <= q_set * 1.05 else "growing"))
+        tr.bound.append(closure_state(P, q, vt, q_set, tried, no_room, Ptot0))
 
     # final state per node, for analyses that need where supply and pool sit
     tr.final = dict(q=np.asarray(q, float).copy(),

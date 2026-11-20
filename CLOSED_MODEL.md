@@ -72,7 +72,7 @@ with the conductance below it is not monotone in the radius: tau = Q/r^3
 rises while the segment's own resistance dominates and falls once the
 tissue's does, peaking at
 
-    r_c = (3 l / R_below)^(1/4)
+    r_c = (l / (3 R_below))^(1/4)
 
 Below r_c the feedback is positive and the vessel closes; above it the vessel
 holds. It is computed for every segment at every step from the real

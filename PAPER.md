@@ -1,16 +1,29 @@
 # The paper: framework, claims and evidence
 
 Target: *Frontiers in Cell and Developmental Biology*, article type
-Hypothesis and Theory. Each claim gives the number behind it, the figure that
+Hypothesis and Theory.
+
+**Status after the external review of 20 November 2026.** Two errors were
+confirmed and fixed: the critical radius was $\sqrt{3}$ times too large and
+served as the floor of every calibre, and flow was not conserved where tissue
+hangs from an internal segment (no run had such tissue, so only the first
+error changed results). Every closed-model number below predates the fix and
+must be regenerated with `make paper` before writing. Spot checks with the
+corrected model, six paired replicates each: the pool elasticity keeps its
+order at the reference setting (liver +0.34, kidney +0.42, pancreas +0.77)
+and stays low in the liver at all five settings (+0.18 to +0.36); claim 4 is
+withdrawn; the liver closes partly by supply and partly by lack of room. Each claim gives the number behind it, the figure that
 shows it and the command that reproduces it. `THEORY.md` holds the
 derivations; nothing in the paper rests on anything not listed here.
 
 ## The hypothesis
 
-An organ stops making functional units when one of two local resources runs
-out at the tips of its growing tree: perfusion per unit, or progenitors. Both
-are local to each tip, and which one binds first is what distinguishes a liver
-from a pancreas. Two consequences follow. Organs differ in which individual
+An organ stops making functional units when local resources run out at the
+tips of its growing tree: perfusion per unit, progenitors, or room to place a
+unit. Given a geometry and the rules that organise the tree in space, which of
+these binds first is what distinguishes a liver from a pancreas; in the runs
+reported, the geometry is held fixed and only the pool and its turnover
+change between regimes. Two consequences follow. Organs differ in which individual
 variation reaches their size, and an organ's sensitivity to its perfusion
 threshold is set by how many progenitors wait at tips whose supply sits just
 below that threshold.
@@ -49,35 +62,19 @@ experiment. It filters the liver's pool less than the full compensation they
 observed. Figure 3; `scripts/15_transmission.py` with `OG_NREP=24`,
 `scripts/19_elasticity.py`.
 
-**4. The sensitivity to the perfusion threshold is set by the pool waiting
-just below it.** Lowering the threshold activates the progenitors held at tips
-whose supply sits just below it, so $\varepsilon_{q_{\text{set}}} = -q_{\text{set}}\, w(q_{\text{set}})/N$, with
-$w$ the pool held per unit of supply just below the threshold, read from the
-final state with no fitted parameter. Across five liver settings it predicts
-the measured elasticity with correlation 0.98 (mean absolute error 0.33),
-from −0.41 to −3.03; in the budget it holds at three of five settings. In
-the pancreas all of the leftover pool lies below the threshold, 42 % of it in
-the slice just under it. In the liver 85 % of the leftover pool sits at tips
-whose supply is above the threshold, where supply does not hold it; only 5 %
-lies in that slice, and that 5 % sets the liver's elasticity. In the
-kidney, whose pool loss spends, nothing is stranded and the threshold acts
-instead through the race between converting a progenitor and losing it. A
-global alternative, closure on total root flow, fails a test with its window
-fixed in advance. Figure 5; `THEORY.md` §13; `scripts/19_elasticity.py`.
-
-**5. One wall-cost exponent sets the vascular rules, and a branch buys reach,
+**4. One wall-cost exponent sets the vascular rules, and a branch buys reach,
 not conductance.** With wall cost exponent $b$, branching follows
 $r_p^{b+2} = \sum r_c^{b+2}$, the shear setpoint rises as $p^{b/2}$ and
 daughters are $2^{-1/(b+2)}$ of their parent. Two daughters conduct
 $2\cdot 2^{-4/(b+2)}$ of their parent, 0.77 at $b = 0.9$, so a split is
 justified by the tissue it reaches. Shear on a segment in series with its
-tissue peaks at $r_c = (3\ell/R_t)^{1/4}$, below which a vessel closes. In
+tissue peaks at $r_c = (\ell/3R_t)^{1/4}$, below which a vessel closes. In
 grown trees $r_p^{2.9}/\sum r_c^{2.9}$ has median 0.952 (313 bifurcations,
 liver) and 0.964 (68, kidney): 3 to 4 % below one, the sign a
 pressure-dependent setpoint predicts. Figure 5;
 `scripts/17_paper_runs.py regimes`.
 
-**6. Capacity closure contracts the spread of unit number.** The spread
+**5. Capacity closure contracts the spread of unit number.** The spread
 relaxes as $\sigma^2(t) = \sigma_0^2 e^{-2\lambda t} + \sigma_\infty^2(1 - e^{-2\lambda t})$,
 with weak-feedback limit $\mathrm{CV}_i/\mathrm{CV}_f = (N_f/N_i)^2$, which
 gives 3.31 for the mouse liver against 3.09 measured (Azizoglu et al. 2025).
@@ -87,11 +84,10 @@ final 0.074. Figure 4; `THEORY.md` §7 and §13.
 
 ## Predictions for experiment
 
-- **Stranded progenitors in the liver.** Residual hepatic progenitors should
-  sit at the vascular front, at tips whose perfusion is just below the
-  threshold that stops nucleation, and the liver's response to a shift in
-  that threshold (hypoxia or VEGF sensing) should scale with how many sit
-  there.
+- **Two holds on the liver's progenitors.** At the end of hepatic growth,
+  residual progenitors should split between sites short of perfusion and
+  sites crowded by existing units, and relieving either one alone should
+  release only part of them.
 - **A budget organ's perfusion sensitivity is not fixed.** Pancreas size
   should track progenitor number, as observed, while its sensitivity to the
   perfusion threshold rises steeply as the threshold approaches the supply at
@@ -105,6 +101,11 @@ final 0.074. Figure 4; `THEORY.md` §7 and §13.
   requirement into a test.
 
 ## Not claimed
+
+- That the pool waiting just below the threshold sets the response to the
+  threshold. The formula is the direct, frozen-state term; after the critical
+  radius was corrected, feedback through the tree dominates and the formula
+  fails (correlation −0.15 over five liver settings).
 
 - The earlier figures from the open engine (`make all`), in which exhaustion
   and limiting pool conserved spread by construction.
@@ -122,8 +123,7 @@ final 0.074. Figure 4; `THEORY.md` §7 and §13.
 The model's parameters are chosen, not fitted; the one calibration is the
 mouse contraction, which the model undershoots. Results come from one domain
 scale, in organs of about 50 to 550 units, so the model's contingent spread
-cannot stand in for a human organ's. The kidney's threshold mechanism is
-derived, not tested, and what holds most of the liver's leftover pool at tips
-above the threshold is not known. The human data give organ shape and size but no unit
+cannot stand in for a human organ's. The model's sensitivity to the perfusion
+threshold has no derivation that survives the full feedback. The human data give organ shape and size but no unit
 counts, so the model and the cohort meet only through the partition formula,
 which awaits independent input spreads.

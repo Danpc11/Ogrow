@@ -74,6 +74,40 @@ check("supply stays in [0, 1]", 0.0 <= min(tr.q) and max(tr.q) <= 1.0 + 1e-9)
 d = cKDTree(U).query(U, k=2)[0][:, 1]
 check("unit spacing >= lam", d.min() >= 7.4 * 0.999, f"min nn={d.min():.2f}")
 
+print("derivations")
+# the critical radius is where shear actually peaks: one segment of length l
+# in series with tissue of conductance G, shear read from perfuse() itself
+from organgrow.hemodynamics import VascularTree
+l, G = 2.0, 0.05
+rs = np.logspace(-1.0, 0.6, 400); sh = []
+for r in rs:
+    t1 = VascularTree(np.zeros(3), np.array([0.0, l, 0.0]), r)
+    t1.perfuse({0: G}); sh.append(float(t1.shear[0]))
+r_peak = rs[int(np.argmax(sh))]
+check("critical radius is the shear peak", abs(r_peak / float(t1.r_crit[0]) - 1) < 0.02,
+      f"peak {r_peak:.3f}, r_crit {float(t1.r_crit[0]):.3f}")
+# flow is conserved at a node that both branches and carries tissue
+t2 = VascularTree(np.zeros(3), np.array([0.0, 1.0, 0.0]), 1.0)
+t2.add(0, np.array([0.0, 1.0, 0.0]), np.array([0.0, 2.0, 0.0]), 0.8)
+t2.add(0, np.array([0.0, 1.0, 0.0]), np.array([1.0, 1.0, 0.0]), 0.8)
+Gi = 0.3
+t2.perfuse({0: Gi, 1: 0.5, 2: 0.2})
+local = t2.pressure_out[0] * Gi
+check("flow conserved where an internal segment carries tissue",
+      abs(t2.flow[0] - (t2.flow[1] + t2.flow[2] + local)) < 1e-9 * t2.flow[0],
+      f"in {t2.flow[0]:.6f}, out {t2.flow[1] + t2.flow[2] + local:.6f}")
+# a budget without loss cannot make more units than it had progenitors
+from organgrow import sdf as _sdf
+from organgrow.closed import grow as _grow
+over = []
+for k in range(3):
+    U_, m_, vt_, tr_ = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z / 0.6), 114,
+                             days=60, rng=np.random.default_rng(10 + k), nu=8.0, q_set=0.6,
+                             rho=0.0, delta=0.0, P0=40.0, R_unit=650.0,
+                             units_per_branch=650 / 600.0, max_vessels=3000)
+    over.append(len(U_) - 40)
+check("a progenitor budget is not exceeded", max(over) <= 0, f"excess {over}")
+
 print()
 if FAIL:
     print("FAILED:", ", ".join(FAIL))

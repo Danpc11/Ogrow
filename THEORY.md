@@ -158,9 +158,14 @@ dominates any exponent.
 Shear on a segment in series with the tissue it feeds is not monotone in the
 radius. With $Q = \Delta P / (\ell/r^4 + R_t)$ and $\tau = Q/r^3$, shear rises
 while the segment's own resistance dominates and falls once the tissue's does,
-with a maximum at
+so that $\tau \propto r/(\ell + R_t r^4)$, whose derivative vanishes where
+$\ell = 3R_t r^4$, that is at
 
-$$r_c = \left(\frac{3\ell}{R_t}\right)^{1/4}$$
+$$r_c = \left(\frac{\ell}{3R_t}\right)^{1/4}$$
+
+(An earlier version wrote $(3\ell/R_t)^{1/4}$, $\sqrt{3}$ times too large, and
+the closed model used it as the floor of every calibre; all closed-model
+results were recomputed after the correction.)
 
 Below $r_c$ the shear feedback is positive and the vessel closes; above it the
 feedback is negative and the vessel holds. This is a pruning criterion derived
@@ -347,8 +352,9 @@ A distance in invariant space normalised by the cohort's own spread,
 
 $$\varepsilon_{ij} = \sqrt{\left\langle\left(\frac{v_i - v_j}{\sigma}\right)^{2}\right\rangle}$$
 
-has expectation $\sqrt{2}$ for **any** exchangeable sample, whatever the
-cohort. Its value is therefore a property of the normalisation, not a
+has mean square $\langle\varepsilon_{ij}^2\rangle = 2$ for **any**
+exchangeable sample with the cohort's own normalisation, whatever the cohort,
+and so, by Jensen's inequality, a mean of at most $\sqrt{2}$. Its value is therefore a property of the normalisation, not a
 measurement; random vectors give the same number. It is useful only as a test
 of exchangeability, which is how `scripts/06_exchangeability.py` reports it.
 
@@ -466,7 +472,16 @@ With a wall cost exponent $b$,
 
 $$r_p^{\,b+2} = \sum_c r_c^{\,b+2}, \qquad \tau_{\text{set}} \propto p^{\,b/2}, \qquad \frac{r_c}{r_p} = 2^{-1/(b+2)}$$
 
-Murray's $b = 1$ is the case where cost is blood volume. $b = 2/3$ and $3/4$
+The three follow from one objective per unit length,
+$\mathcal{C} = Q^2/r^4 + k\,(p\,r^2)^b$: the first term is viscous dissipation,
+the second the metabolic cost of the wall, whose cross-section scales as
+$p\,r^2$ by Laplace's law (thickness $\propto p\,r$), raised to $b$.
+Minimising in $r$ gives $Q^2 \propto k\,p^b r^{2b+4}$, so $Q \propto r^{b+2}$
+at fixed pressure (the branching exponent $b + 2$) and wall shear
+$\tau \propto Q/r^3 \propto p^{b/2} r^{b-1}$. The model keeps the pressure
+factor and drops $r^{b-1}$, which at $b = 0.9$ is $r^{-0.1}$. In this
+notation, cost $\propto r^{\alpha}$ with $\alpha = 2b$. Murray's $b = 1$ is
+the case where cost is blood volume. $b = 2/3$ and $3/4$
 give branching exponents 2.67 and 2.75; $b \approx 0.9$, appropriate where
 flow is pulsatile, gives 2.9. Measured exponents of 2.7 to 3.0 sit in that
 range. The engine uses $b = 0.9$.
@@ -683,6 +698,19 @@ setpoint acts through the race between converting a progenitor and losing it,
 a fraction $\nu D/(\nu D + \delta)$ per tip with $D = q - q_{\text{set}}$; that
 derivation is written, not tested.
 
+**This held before the critical radius was corrected, and does not after.**
+The formula is the direct, frozen-state part of the response: it counts the
+pool released when the threshold drops, with the tree, the pressures and the
+assignment of units held fixed. The full derivative adds
+$\partial N_f/\partial \mathbf{z}\;\mathrm{d}\mathbf{z}/\mathrm{d}q_{\text{set}}$
+for the vascular and tissue state $\mathbf{z}$: units made from released pool
+lower the supply per unit and strand part of it again. With the corrected
+critical radius the liver holds 37 % of its pool below the threshold, the
+feedback dominates, and the direct term predicts −4 to −9 against measured
+−1.1 to −3.4 (correlation −0.15 over the five settings). The claim is
+withdrawn; what survives is that the setpoint elasticity is not a property of
+the regime.
+
 A global derivation for the supply-bound side was tried and failed. With
 total root flow $Q \propto N^\gamma$ at closure, $\varepsilon_{q_{\text{set}}}$
 would be $-1/(1-\gamma)$. With $\gamma$ read from the last 15 % of growth, a
@@ -707,6 +735,17 @@ one from paired measures such as split renal function, the systemic ones from
 paired nephron counts. The model's contingent floor (0.061 in the kidney
 regime) cannot stand in for the human one, because it is measured in organs
 of about 130 units and whether it falls with organ size is not known.
+
+### How each organ closes, read from where its pool is
+
+A mean supply per unit hides mixed states. The model now reports, at each day,
+the share of the initial pool that is spent, held at tips whose supply is at
+or below the threshold, held at tips above it whose placements were all
+refused, and still active. With the corrected critical radius, one replicate
+each: the kidney spends its pool (1.01); the pancreas spends 82 % and holds
+18 % by supply; the liver spends 13 %, holds 37 % by supply and 48 % by lack of
+room. The liver's closure is not supply alone: almost half its pool is held
+where supply is sufficient and there is no space to place a unit.
 
 ### Murray's relation in grown trees
 

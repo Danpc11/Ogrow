@@ -93,7 +93,7 @@ ax[0].axhline(1, color=K["grey"], lw=0.6, ls=(0, (2, 2)))
 ax[0].set_xticks([0, 1]); ax[0].set_xticklabels(["Liver", "Kidney"])
 ax[0].set_ylabel(rf"$r_p^{{{x:.1f}}}/\sum r_c^{{{x:.1f}}}$")
 lr = 2.1; Rt = 600.0; r = np.logspace(-1.3, 0.8, 300)
-tau = (1.0 / (lr / r ** 4 + Rt)) / r ** 3; rc = (3 * lr / Rt) ** 0.25
+tau = (1.0 / (lr / r ** 4 + Rt)) / r ** 3; rc = (lr / (3 * Rt)) ** 0.25
 ax[1].loglog(r / rc, tau / tau.max(), color=K["ink"])
 ax[1].axvline(1, color=K["grey"], lw=0.6, ls=(0, (2, 2)))
 ax[1].set_xlabel("Radius / critical radius"); ax[1].set_ylabel("Wall shear / peak")
