@@ -49,7 +49,9 @@ def run(tag, seed, nu, **p):
         kids.setdefault(int(par[k]), []).append(k)
     murray = [float(r[a] ** x / sum(r[c] ** x for c in cs))
               for a, cs in kids.items() if len(cs) >= 2]
-    np.savez(f, N=np.asarray(tr.N, float), q=np.asarray(tr.q, float),
+    b = tr.bound[-1]
+    np.savez(f, closure=np.array([b["spent"], b["supply_held"], b["space_held"], b["active"]]),
+             N=np.asarray(tr.N, float), q=np.asarray(tr.q, float),
              P=np.asarray(tr.P, float), vessels=np.asarray(tr.vessels, float),
              murray=np.asarray(murray), nu=nu)
     print(f"  {tag}: N={len(U)}", flush=True)

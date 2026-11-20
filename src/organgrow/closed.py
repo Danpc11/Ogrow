@@ -79,6 +79,7 @@ class Trace:
     C: list = field(default_factory=list)       # tree conductance
     mass: list = field(default_factory=list)
     vessels: list = field(default_factory=list)
+    lost: list = field(default_factory=list)   # progenitors lost, cumulative
     Q: list = field(default_factory=list)      # total flow through the root
     bound: list = field(default_factory=list)   # "growing", "supply" or "progenitor"
 
@@ -193,7 +194,14 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
     R0 = float(R_unit) if R_unit is not None else N_scale
     # room the vessels may take before they compete with the parenchyma,
     # in tree units (lengths in lam, radii in r_root)
-    vol_budget = vascular_fraction * (2.0 * np.prod(box / lam))
+    # The organ's volume, from the fraction of a fixed grid over the sampling
+    # box (-box, +box), whose volume is 8 bx by bz, that falls inside the
+    # domain. The vascular budget is a fraction of it, in units of lam^3.
+    # (An earlier version used 2 * prod(box / lam), a quarter of the box and
+    # not the organ.) The same volume sets the attractor count.
+    _g = np.stack(np.meshgrid(*[np.linspace(-1, 1, 25)] * 3, indexing="ij"), -1).reshape(-1, 3) * box
+    _vol_dom = float(np.prod(2.0 * box)) * float(np.mean([sdf(*p) < 0 for p in _g]))
+    vol_budget = vascular_fraction * _vol_dom / lam ** 3
 
     # Design point: a terminal branch carries the handful of units below it.
     # Its shear in series with that tissue peaks at r_c; the setpoint sits
@@ -209,7 +217,11 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
     try:
         r_eq = brentq(lambda x: _tau(x) - tau_set, r_crit0 * 1.001, 100.0)
     except ValueError:
-        r_eq = 2.0 * r_crit0
+        raise ValueError(
+            f"no stable equilibrium radius: the shear setpoint {tau_set:.4g} is "
+            f"not below the peak shear {tau_peak:.4g} at the critical radius "
+            f"{r_crit0:.4g}; the setpoint, the root length or the unit "
+            f"resistance is inconsistent") from None
 
     def inside(X, s=1.0):
         return sdf(X[:, 0] / s, X[:, 1] / s, X[:, 2] / s) < 0
@@ -235,8 +247,16 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
     U = np.zeros((0, 3))              # unit positions
     m = np.zeros(0)                   # unit masses
     tip_of = np.zeros(0, int)         # which tip feeds each unit
-    P = {0: float(P0)}                # progenitor pool per tip
-    Ptot0 = float(P0)
+    # Progenitors are counted as whole cells. Each day a tip's progenitors
+    # differentiate into units (one progenitor per unit placed), divide with
+    # probability rho and are lost with probability delta, all as discrete
+    # events; a branching tip hands each of its progenitors to the new branch
+    # with probability one half. With rho = 0 the balance
+    # P0 = units made + progenitors left + progenitors lost holds exactly in
+    # every realisation, not only on average (tests/test_smoke.py).
+    P = {0: int(round(P0))}           # progenitor count per tip
+    Ptot0 = float(P[0])
+    lost = 0                          # progenitors lost, cumulative
     tr = Trace()
     leak = m_leak ** xi / R0          # what a tip carries before its first unit
 
@@ -250,8 +270,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
     # yet served, each pulls the nearest tip within reach, and each is removed
     # once a vessel or a unit comes close. Density, reach and kill distance
     # are intensive, so the signal scales with the organ.
-    _vol_dom = float(np.prod(2.0 * box)) * float(np.mean(
-        [sdf(*p) < 0 for p in rng.uniform(-1, 1, (4000, 3)) * box]))
+    # _vol_dom: the organ volume computed with the vascular budget above
     n_attr = int(round(attractor_density * _vol_dom / lam ** 3))
     A = rng.uniform(-1, 1, (max(n_attr * 3, 10), 3)) * box
     A = A[np.array([sdf(*p) < 0 for p in A])][:n_attr]
@@ -307,11 +326,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
             # which made a pool-bound organ exceed its own budget by up to
             # 40 %, and by an amount that depended on the drive, that is on
             # the setpoint.
-            # The fractional part of the pool is resolved once, into one
-            # progenitor or none, so that it cannot retry day after day and
-            # end up converted with certainty; the expectation is preserved.
-            avail = int(Pi) + int(rng.random() < Pi - int(Pi))
-            k = min(k, avail)
+            k = min(k, int(Pi))
             tried[i] = k
             placed = 0
             for _ in range(k):
@@ -329,8 +344,13 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                     continue
                 new_pos.append(c); new_tip.append(i)
                 placed += 1
-            # progenitors are spent by the units made, not by the ones refused
-            P[i] = max(avail - placed, 0) + (rho - delta) * Pi
+            # progenitors are spent by the units made, not by the ones refused;
+            # the survivors then divide and die as independent events
+            left = int(Pi) - placed
+            born = int(rng.binomial(left, min(rho, 1.0))) if rho > 0 and left else 0
+            died = int(rng.binomial(left, min(delta, 1.0))) if delta > 0 and left else 0
+            lost += died
+            P[i] = left + born - died
         if new_pos:
             U = np.vstack([U, np.asarray(new_pos)])
             m = np.concatenate([m, np.full(len(new_pos), m0)])
@@ -379,8 +399,8 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                                     b + (u / scale - b) * sprout_reach,
                                     max(vt.radius[i] * daughter_ratio,
                                         vt.r_crit[i] * sprout_floor))
-                        P[nk] = P.get(i, 0.0) * 0.5
-                        P[i] = P.get(i, 0.0) * 0.5
+                        P[nk] = int(rng.binomial(int(P.get(i, 0)), 0.5))
+                        P[i] = int(P.get(i, 0)) - P[nk]
                         n_at = np.bincount(tip_of, minlength=len(vt))
 
                 if no_room[i] > 0 and _worth_splitting(vt, i, n_at[i]):
@@ -407,8 +427,8 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                                     max(vt.radius[i] * daughter_ratio, vt.r_crit[i] * sprout_floor))
                         # the new tip inherits half the pool: it is where the
                         # next units will go
-                        P[nk] = P.get(i, 0.0) * 0.5
-                        P[i] = P.get(i, 0.0) * 0.5
+                        P[nk] = int(rng.binomial(int(P.get(i, 0)), 0.5))
+                        P[i] = int(P.get(i, 0)) - P[nk]
                 if n_at[i] == 0:
                     continue
                 deficit = max(q_set - q[i], 0.0)
@@ -437,8 +457,8 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                     moved = sel[d_new < d_old]
                     tip_of[moved] = nk
                     frac = len(moved) / len(sel)
-                    P[nk] = P.get(i, 0.0) * frac
-                    P[i] = P.get(i, 0.0) * (1.0 - frac)
+                    P[nk] = int(rng.binomial(int(P.get(i, 0)), frac))
+                    P[i] = int(P.get(i, 0)) - P[nk]
                     sel = np.flatnonzero(tip_of == i)
                     if not len(sel):
                         break
@@ -473,8 +493,8 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                                 max(vt.radius[i] * daughter_ratio, rc_i * sprout_floor))
                     # extending, not branching: the progenitor niche travels
                     # with the tip, so the front does not starve
-                    P[nk] = P.get(i, 0.0)
-                    P[i] = 0.0
+                    P[nk] = int(P.get(i, 0))
+                    P[i] = 0
             # tissue reached by a vessel or a unit is served
             served = cKDTree(np.asarray(vt.endpoints()) * scale).query(A)[0] < attractor_kill * lam
             if len(U):
@@ -486,7 +506,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
         # q was read at the start of the day, before any sprout was added
         live = [i for i in active if n_at[i] > 0] or tips
         qbar = float(np.mean(q[live]))
-        tr.t.append(day); tr.N.append(len(U)); tr.P.append(Ptot)
+        tr.t.append(day); tr.N.append(len(U)); tr.P.append(Ptot); tr.lost.append(lost)
         tr.q.append(qbar); tr.C.append(C); tr.mass.append(float(m.sum()))
         tr.vessels.append(len(vt))
         tr.Q.append(float(vt.flow[0]) if len(vt.flow) else 0.0)

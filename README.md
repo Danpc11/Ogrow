@@ -27,8 +27,10 @@ the closed model and the human cohort tables:
 | 5 | vascular rules: Murray, critical radius, reach | `scripts/17_paper_runs.py` |
 | 6 | size and shape partition in 48 human donors | `source_data/` or the cohort |
 
-`make all` still builds the earlier figures from the open engine; they are
-kept for the record and are not the paper's.
+**Two pipelines, not one.** `make paper` is the manuscript: closed model,
+human tables, the paper's figures and `PAPER_NUMBERS.md`. `make all` builds
+the earlier figures from the open engine (`src/organgrow/engine.py`); they are
+kept for the record, are not the paper's, and should not be used to check it.
 
 ## Install and reproduce
 

@@ -96,17 +96,32 @@ local = t2.pressure_out[0] * Gi
 check("flow conserved where an internal segment carries tissue",
       abs(t2.flow[0] - (t2.flow[1] + t2.flow[2] + local)) < 1e-9 * t2.flow[0],
       f"in {t2.flow[0]:.6f}, out {t2.flow[1] + t2.flow[2] + local:.6f}")
-# a budget without loss cannot make more units than it had progenitors
+# progenitors are conserved exactly in every realisation: with no division,
+# what was there at the start is now units, progenitors left, or lost
 from organgrow import sdf as _sdf
-from organgrow.closed import grow as _grow
-over = []
+from organgrow.closed import grow as _grow, closure_state
+bal = []
 for k in range(3):
     U_, m_, vt_, tr_ = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z / 0.6), 114,
                              days=60, rng=np.random.default_rng(10 + k), nu=8.0, q_set=0.6,
-                             rho=0.0, delta=0.0, P0=40.0, R_unit=650.0,
+                             rho=0.0, delta=0.03, P0=40.0, R_unit=650.0,
                              units_per_branch=650 / 600.0, max_vessels=3000)
-    over.append(len(U_) - 40)
-check("a progenitor budget is not exceeded", max(over) <= 0, f"excess {over}")
+    bal.append(40 - (len(U_) + int(round(tr_.P[-1])) + tr_.lost[-1]))
+check("progenitors conserved exactly in each realisation", all(b == 0 for b in bal),
+      f"P0 - (N + P + lost) = {bal}")
+# the closure state tells a tip held by lack of room from one held by supply
+st = closure_state({0: 5, 1: 5, 2: 5, 3: 5}, np.array([0.5, 0.9, 0.9, 0.9]), None,
+                   0.6, np.array([3, 4, 0, 2]), np.array([0, 4, 0, 1]), 40.0)
+check("closure separates supply, room and active",
+      abs(st["supply_held"] - 5 / 40) < 1e-12 and abs(st["space_held"] - 5 / 40) < 1e-12
+      and abs(st["active"] - 10 / 40) < 1e-12, str(st))
+# an unreachable shear setpoint is an error, not a silently substituted radius
+try:
+    _grow(lambda x, y, z: _sdf("liver", x, y, z), 114, days=2, rng=np.random.default_rng(0),
+          nu=8.0, q_set=0.6, rho=0.0, delta=0.0, P0=10.0, tau_set=1e9)
+    check("unreachable setpoint raises", False, "no error")
+except ValueError:
+    check("unreachable setpoint raises", True)
 
 print()
 if FAIL:

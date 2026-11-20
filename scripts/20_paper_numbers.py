@@ -1,0 +1,95 @@
+#!/usr/bin/env python
+"""Write PAPER_NUMBERS.md: every model number the paper uses, with the model
+version and commit that produced it.
+
+The paper's text does not copy model numbers by hand; it points here, so that
+numbers from different versions of the model cannot sit side by side.
+Run by `make paper` after the runs it reads.
+"""
+import csv
+import datetime
+import json
+import subprocess
+
+import numpy as np
+
+import organgrow
+from organgrow.config import ROOT
+
+RES = ROOT / "results"
+out = []
+w = out.append
+try:
+    commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT,
+                            capture_output=True, text=True).stdout.strip()
+    dirty = subprocess.run(["git", "status", "--porcelain", "src", "scripts", "config"],
+                           cwd=ROOT, capture_output=True, text=True).stdout.strip()
+    commit = (commit or "unknown") + (" (with uncommitted changes)" if dirty else "")
+except Exception:
+    commit = "unknown"
+w("# Numbers the paper uses\n")
+w(f"Model version {organgrow.__version__}, commit {commit}, generated "
+  f"{datetime.date.today().isoformat()} by `scripts/20_paper_numbers.py`. Do not edit by hand.\n")
+
+def table(header, rows):
+    w("| " + " | ".join(header) + " |")
+    w("|" + "---|" * len(header))
+    for r in rows:
+        w("| " + " | ".join(str(x) for x in r) + " |")
+    w("")
+
+src = ROOT / "source_data"
+if (src / "Fig6bc_variance_partition.csv").exists():
+    w("## Human kidneys (TRUSTED, independent of the model)\n")
+    rows = [[r["invariant"], f"{float(r['between_donor_fraction']):.3f}", f"{float(r['p_wilcoxon']):.2g}"]
+            for r in csv.DictReader(open(src / "Fig6bc_variance_partition.csv"))]
+    table(["invariant", "between-donor share", "paired Wilcoxon P"], rows)
+
+reg = ("liver", "kidney", "pancreas")
+if all((RES / "paper" / f"regime_{r}.npz").exists() for r in reg):
+    w("## Regimes at closure (one organ each)\n")
+    rows = []
+    for r in reg:
+        d = np.load(RES / "paper" / f"regime_{r}.npz")
+        c = d["closure"] if "closure" in d.files else [np.nan] * 4
+        rows.append([r, int(d["N"][-1]), f"{c[0]:.2f}", f"{c[1]:.2f}", f"{c[2]:.2f}", f"{c[3]:.2f}"])
+    table(["regime", "units", "pool spent", "held by supply", "held by room", "active"], rows)
+
+if (RES / "transmission.json").exists():
+    T = json.load(open(RES / "transmission.json"))
+    w("## Transmission of an individual spread (95 % bootstrap interval)\n")
+    rows = []
+    for r in reg:
+        def cell(k):
+            v = T.get(f"{r}_{k}")
+            return f"{v['transmission']:.2f} [{v['ci95'][0]:.2f}, {v['ci95'][1]:.2f}]" if v else "-"
+        rows.append([r, cell("pool"), cell("setpoint")])
+    table(["regime", "pool", "setpoint"], rows)
+
+if (RES / "elasticity.json").exists():
+    E = json.load(open(RES / "elasticity.json"))
+    w("## Elasticities of the final count (mean ± s.e., paired replicates)\n")
+    rows = [[k.split("_", 1)[0], k.split("_", 1)[1],
+             f"{v['P0']['mean']:+.2f} ± {v['P0']['se']:.2f}" if "P0" in v else "-",
+             f"{v['q_set']['mean']:+.2f} ± {v['q_set']['se']:.2f}" if "q_set" in v else "-"]
+            for k, v in E.items()]
+    table(["regime", "setting", "pool", "setpoint"], rows)
+
+if (RES / "paper_numbers.json").exists():
+    Pn = json.load(open(RES / "paper_numbers.json"))
+    w("## Murray ratio in grown trees\n")
+    table(["regime", "bifurcations", "median", "interquartile"],
+          [[r, Pn[f"murray_{r}"]["n"], f"{Pn[f'murray_{r}']['median']:.3f}",
+            f"{Pn[f'murray_{r}']['q25']:.3f} to {Pn[f'murray_{r}']['q75']:.3f}"]
+           for r in ("liver", "kidney") if f"murray_{r}" in Pn])
+    c = Pn.get("calibration")
+    if c:
+        w("## Contraction of the spread of unit number\n")
+        table(["spread", "CV at start", "CV at closure"],
+              [[f"maturity, offset s.d. {m['offset_sd']} d", f"{m['cv_start']:.3f}", f"{m['cv_final']:.3f}"]
+               for m in c["maturity"]] +
+              [["growth rate", f"{c['rate']['cv_start']:.3f}", f"{c['rate']['cv_final']:.3f}"],
+               ["mouse liver (Azizoglu et al. 2025)", "0.229", "0.074"]])
+
+open(ROOT / "PAPER_NUMBERS.md", "w").write("\n".join(out) + "\n")
+print("wrote PAPER_NUMBERS.md")
