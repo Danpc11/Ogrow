@@ -123,6 +123,22 @@ try:
 except ValueError:
     check("unreachable setpoint raises", True)
 
+# units assigned by vascular territory still hang from tips, and an unknown
+# root site is an error rather than a silent default
+U_, m_, vt_, tr_ = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z / 0.6), 114,
+                         days=40, rng=np.random.default_rng(5), nu=8.0, q_set=0.6, rho=0.0,
+                         delta=0.0, P0=40.0, R_unit=650.0, units_per_branch=650 / 600.0,
+                         max_vessels=3000, assign_mode="segment", root_site="surface")
+from organgrow.closed import _assign
+own = _assign(vt_, U_, vt_.tips(), 7.4, "segment")
+check("territory assignment returns tips", set(own.tolist()) <= set(vt_.tips()))
+try:
+    _grow(lambda x, y, z: _sdf("liver", x, y, z), 114, days=2, rng=np.random.default_rng(0),
+          nu=8.0, q_set=0.6, rho=0.0, delta=0.0, P0=10.0, root_site="nowhere")
+    check("unknown root site raises", False, "no error")
+except ValueError:
+    check("unknown root site raises", True)
+
 print()
 if FAIL:
     print("FAILED:", ", ".join(FAIL))

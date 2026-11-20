@@ -1,7 +1,7 @@
 # The paper: framework, claims and evidence
 
 Target: *Frontiers in Cell and Developmental Biology*, Hypothesis and Theory.
-Reference model: version 4.3 (`src/organgrow/closed.py`). Every number from
+Reference model: version 4.4 (`src/organgrow/closed.py`). Every number from
 the model that the paper uses is in `PAPER_NUMBERS.md`, written by
 `make paper` with the version and commit that produced it; this file does not
 copy model numbers by hand. Numbers given here are either data (the human
@@ -26,20 +26,27 @@ $P$ = 0.0005). Left and right differ systematically: by paired Wilcoxon with
 Bonferroni over six invariants, volume ($P$ = 0.0007), flatness and
 surface-per-volume ($P$ < 0.0001) survive. Figure 2.
 
-**2. Organs differ in what holds their progenitors when growth stops.** One
-nucleation law, with supply, progenitors and room local to each tip, gives
-organs that close in different ways: one spends its pool, one keeps part of it
-at tips short of supply, one keeps it at tips short of supply and at tips
-with no room. Read from the distribution of the pool over tips at closure,
-not from a mean. `PAPER_NUMBERS.md`, Regimes; Figures 1 and 3.
+**2. Organs differ in what holds their progenitors when growth stops, and
+the difference does not depend on the auxiliary rules.** One nucleation law,
+with supply, progenitors and room local to each tip, gives organs that close
+in different ways: the kidney spends its pool; the pancreas spends most of it
+and keeps the rest at tips short of supply; the liver keeps nearly all of it,
+held both at tips short of supply and at tips with no room. Read from the
+distribution of the pool over tips at closure, not from a mean. The three
+closure modes persist in each of eight variants: the vascular root at the
+deepest point, at the surface or at random; each of the four sprouting rules
+removed in turn; and units assigned by vascular territory instead of by
+nearest tip. `PAPER_NUMBERS.md`, Regimes and Robustness; Figures 1 and 3.
 
-**3. Progenitor number reaches size in a budget organ and much less in a
-liver.** The elasticity and the transmission of an individual spread in the
-progenitor pool are ordered liver < kidney < budget. This is the pattern found
-experimentally by Stanger, Tanaka and Melton (*Nature* 2007): halving
-pancreatic progenitors halved the pancreas, which never compensated, while
-the liver did. The model was not fitted to that experiment.
-`PAPER_NUMBERS.md`, Transmission and Elasticities; Figure 4.
+**3. Progenitor number reaches size more in a budget organ than in a liver.**
+The elasticity of the final unit count to the progenitor pool is higher in the
+pancreas than in the liver in all eight variants, significantly in six. This
+is the pattern found experimentally by Stanger, Tanaka and Melton (*Nature*
+2007): halving pancreatic progenitors halved the pancreas, which never
+compensated, while the liver did. The model was not fitted to that
+experiment. The kidney, which spends its pool against loss, transmits about
+as little as the liver, so the model does not order all three organs.
+`PAPER_NUMBERS.md`, Elasticities and Robustness; Figure 4.
 
 **4. One wall-cost exponent sets the vascular rules, and a branch buys reach,
 not conductance.** Minimising $\mathcal{C} = Q^2/r^4 + k\,(p\,r^2)^b$ per unit
@@ -65,7 +72,8 @@ The model's contraction from the mouse's initial spread:
   sites crowded by existing units, and relieving either one alone should
   release only part of them.
 - **A budget organ tracks its progenitors.** Pancreas size should scale with
-  progenitor number, as observed, while the liver's should not.
+  progenitor number, as observed, while the liver's should not; a kidney whose
+  progenitors are also lost during induction should track them weakly.
 - **Paired kidneys.** With the model's elasticities, the share of size
   variance between individuals is
   $(\varepsilon_q^2\sigma_{q,s}^2 + \varepsilon_P^2\sigma_{P,s}^2)$ over that
@@ -91,9 +99,9 @@ The model's contraction from the mouse's initial spread:
 The model's parameters are chosen, not fitted; the one calibration is the
 mouse contraction. Results come from one domain scale, so the model's
 contingent spread cannot stand in for a human organ's. The time step is one
-day and has not been varied. Units are assigned to the nearest tip in space,
-not along the tree. The model has not yet been run with the vascular root at
-the surface or at random, nor with each sprouting rule removed in turn. The
+day and has not been varied. The pool elasticity of the liver is not
+measurable when the root is placed at random or load-driven sprouting is
+removed (s.e. 0.5 to 0.7). The
 human data give shape and size but no unit counts, so model and cohort meet
 only through the partition formula, which awaits independent input spreads.
 
@@ -102,4 +110,4 @@ only through the partition formula, which awaits independent input spreads.
 1. `make test`, then `make paper` on the reference version; check that
    `PAPER_NUMBERS.md` names version 4.3 and a clean commit.
 2. Rebuild Figure 5 without the withdrawn panel.
-3. Root-position sensitivity and rule ablations (see Limitations).
+3. Check that `PAPER_NUMBERS.md`, Robustness, reproduces the eight variants.

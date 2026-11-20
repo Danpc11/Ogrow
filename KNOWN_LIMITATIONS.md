@@ -130,13 +130,12 @@ radius was written and implemented as $(3\ell/R_t)^{1/4}$ instead of
 $(\ell/3R_t)^{1/4}$, and the flow split at a node ignored tissue hanging from
 that node. Both are fixed and covered by tests in `tests/test_smoke.py`; the
 second never applied in practice. The time step is one day and results have
-not been checked against a smaller step. The model has not been checked for
-sensitivity to where the vascular root enters (deepest point, surface,
-random), nor with each sprouting rule removed in turn.
+not been checked against a smaller step. Sensitivity to where the vascular root
+enters and to each sprouting rule is reported in `THEORY.md` §13, Robustness.
 
 **Units are assigned to the nearest tip in space.** Each day a unit is fed by
 the terminal branch whose end is closest to it, not by the branch it is
 closest to along the tree or by hydraulic resistance. Where branches pass
-close to each other a unit can change territory. A comparison with assignment
-by distance to segments and by tree connectivity, counting units that change
-territory and the effect on perfusion, has not been made.
+close to each other a unit can change territory. Assignment by vascular
+territory (`assign_mode="segment"`) moves 9 to 31 % of the liver's units and
+leaves the closure modes and the pancreas-liver contrast unchanged.

@@ -91,5 +91,19 @@ if (RES / "paper_numbers.json").exists():
               [["growth rate", f"{c['rate']['cv_start']:.3f}", f"{c['rate']['cv_final']:.3f}"],
                ["mouse liver (Azizoglu et al. 2025)", "0.229", "0.074"]])
 
+if (RES / "robustness.json").exists():
+    Rb = json.load(open(RES / "robustness.json"))
+    w("## Robustness to the auxiliary rules (six seeds per cell)\n")
+    rows = []
+    for v, x in Rb.items():
+        L, K_, Pn_ = x["liver"], x["kidney"], x["pancreas"]
+        d = Pn_["eps_pool"] - L["eps_pool"]; s = float(np.hypot(Pn_["eps_se"], L["eps_se"]))
+        rows.append([v, f"{K_['spent']:.2f}", f"{Pn_['spent']:.2f}",
+                     f"{L['supply_held']:.2f} / {L['space_held']:.2f}",
+                     f"{L['eps_pool']:+.2f} ± {L['eps_se']:.2f}", f"{K_['eps_pool']:+.2f} ± {K_['eps_se']:.2f}",
+                     f"{Pn_['eps_pool']:+.2f} ± {Pn_['eps_se']:.2f}", f"{d / s:.1f}"])
+    table(["variant", "kidney pool spent", "pancreas pool spent", "liver held by supply / room",
+           "liver pool elasticity", "kidney", "pancreas", "z, pancreas minus liver"], rows)
+
 open(ROOT / "PAPER_NUMBERS.md", "w").write("\n".join(out) + "\n")
 print("wrote PAPER_NUMBERS.md")

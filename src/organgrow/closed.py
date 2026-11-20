@@ -89,6 +89,51 @@ def _p(name, value):
     return _CL[name] if value is None else value
 
 
+def _assign(vt, U, tips, scale, mode):
+    """The tip that feeds each unit.
+
+    "tip": the terminal branch whose end is nearest in space.
+    "segment": the vessel segment nearest to the unit, then the nearest tip
+    within that segment's subtree, so that a unit stays in the territory of
+    the vessel it lies against rather than jumping to a tip of another
+    branch that happens to end close by.
+    """
+    tips = np.asarray(tips, int)
+    ends = np.asarray([vt.end[k] for k in range(len(vt.parent))], float) * scale
+    if mode == "tip":
+        return tips[cKDTree(ends[tips]).query(U)[1]]
+    if mode != "segment":
+        raise ValueError(f"unknown assign_mode {mode!r}")
+    par = np.asarray(vt.parent)
+    starts = np.where(par[:, None] >= 0, ends[np.maximum(par, 0)], ends)
+    ts = np.linspace(0.0, 1.0, 6)
+    pts = (starts[:, None, :] + ts[None, :, None] * (ends - starts)[:, None, :]).reshape(-1, 3)
+    seg = np.repeat(np.arange(len(par)), len(ts))[cKDTree(pts).query(U)[1]]
+    kids = [[] for _ in range(len(par))]
+    for k in range(1, len(par)):
+        kids[par[k]].append(k)
+    is_tip = np.zeros(len(par), bool); is_tip[tips] = True
+    sub = {}
+    def subtree_tips(k):
+        if k not in sub:
+            out, stack = [], [k]
+            while stack:
+                j = stack.pop()
+                if is_tip[j]:
+                    out.append(j)
+                stack.extend(kids[j])
+            sub[k] = np.asarray(out, int)
+        return sub[k]
+    out = np.empty(len(U), int)
+    for s_ in np.unique(seg):
+        idx = np.flatnonzero(seg == s_)
+        cand = subtree_tips(int(s_))
+        if len(cand) == 0:
+            cand = tips
+        out[idx] = cand[cKDTree(ends[cand]).query(U[idx])[1]]
+    return out
+
+
 def closure_state(P, q, vt, q_set, tried, no_room, P_initial):
     """Where the progenitor pool stands, read from its distribution over tips.
 
@@ -121,7 +166,8 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
          sprout=None, sprout_room=None, sprout_load=None, junction_cost=None, vascular_fraction=None, crowding=None, l_root=None,
          l_sprout=None, nucleation_spread=None,
          max_units=None, max_vessels=None,
-         attractor_density=None, attractor_reach=None, attractor_kill=None):
+         attractor_density=None, attractor_reach=None, attractor_kill=None,
+         root_site="deepest", assign_mode="tip"):
     """Grow one organ. `sdf(x, y, z)` is negative inside the domain.
 
     The identity parameters (nu, q_set, rho, delta, P0) are required; every
@@ -241,6 +287,19 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                               indexing="ij"), -1).reshape(-1, 3) * box
     _d = np.array([sdf(*p) for p in _g])
     s0 = _g[int(np.argmin(_d))]
+    # Alternatives, for testing how much the results depend on this choice:
+    # "surface" enters from the organ's surface, walking from the deepest
+    # point along -y to the boundary and stepping one spacing back inside, as
+    # a hilum does; "random" draws an interior point per replicate.
+    if root_site == "surface":
+        d = np.array([0.0, -1.0, 0.0]); p = s0.copy()
+        while sdf(*(p + d * lam * 0.5)) < 0:
+            p = p + d * lam * 0.5
+        s0 = p - d * lam
+    elif root_site == "random":
+        s0 = seed[inside(seed)][0]
+    elif root_site != "deepest":
+        raise ValueError(f"unknown root_site {root_site!r}")
     scale = lam                       # tree coordinates -> domain coordinates
     vt = VascularTree(s0 / scale, s0 / scale + np.array([0.0, l_root, 0.0]), r_eq)
 
@@ -286,8 +345,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
         # domain beyond reach. Reassigning by proximity is what makes a branch
         # actually relieve the tissue that justified it.
         if len(U) and len(tips):
-            _te = np.asarray([vt.end[k] for k in tips]) * scale
-            tip_of = np.asarray(tips, int)[cKDTree(_te).query(U)[1]]
+            tip_of = _assign(vt, U, tips, scale, assign_mode)
         n_at = np.bincount(tip_of, minlength=len(vt)) if len(tip_of) else np.zeros(len(vt), int)
         # tissue hangs along a vessel, not only at its end: a segment that has
         # branched keeps the units and the progenitors it already carried, so
@@ -513,7 +571,10 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
         tr.bound.append(closure_state(P, q, vt, q_set, tried, no_room, Ptot0))
 
     # final state per node, for analyses that need where supply and pool sit
-    tr.final = dict(q=np.asarray(q, float).copy(),
+    _tips = vt.tips()
+    _diff = (float(np.mean(_assign(vt, U, _tips, scale, "tip") != _assign(vt, U, _tips, scale, "segment")))
+             if len(U) and len(_tips) else 0.0)
+    tr.final = dict(territory_diff=_diff, q=np.asarray(q, float).copy(),
                     P=np.array([P.get(k, 0.0) for k in range(len(q))], float),
                     tips=np.asarray(vt.tips(), int))
     return U, m, vt, tr

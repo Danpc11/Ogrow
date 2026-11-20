@@ -753,6 +753,26 @@ each: the kidney spends its pool (1.01); the pancreas spends 82 % and holds
 room. The liver's closure is not supply alone: almost half its pool is held
 where supply is sufficient and there is no space to place a unit.
 
+### Robustness to the auxiliary rules
+
+The vascular root at the deepest point, at the surface (entering from the
+boundary along $-y$, as a hilum) or at random; each sprouting rule removed in
+turn (deficit, load, crowding, mesenchymal signal); and units assigned by
+vascular territory, the nearest segment and then the nearest tip in its
+subtree, instead of the nearest tip in space. Six seeds per regime and
+variant (`scripts/21_robustness.py`).
+
+The closure modes hold in all eight: the kidney spends its pool; the pancreas
+spends 61 to 91 % and holds the rest by supply; the liver spends 3 to 15 % and
+holds the rest by supply (42 to 62 %) and by lack of room (24 to 47 %). The
+pool elasticity is higher in the pancreas than in the liver in all eight
+(z ≥ 2.3 in six, 1.4 with the root at the surface, 0.9 without load-driven
+sprouting), but the liver and the kidney cannot be told apart (z between −0.1
+and 0.7 in five variants); with a random root or without load-driven sprouting
+the liver's elasticity carries a standard error of 0.5 to 0.7. Between 9 and
+31 % of the liver's units change territory between the two assignment rules
+without changing these conclusions.
+
 ### Murray's relation in grown trees
 
 With flow driven by pressure, the branching relation is a result rather than
