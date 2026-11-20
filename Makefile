@@ -1,4 +1,4 @@
-.PHONY: all clean distclean figures analyses audit source_data test
+.PHONY: all clean distclean figures analyses audit source_data test closed paper
 PY ?= $(shell command -v python3 2>/dev/null || command -v python)
 # the package is importable from src without installing anything
 export PYTHONPATH := $(CURDIR)/src:$(PYTHONPATH)
@@ -11,6 +11,7 @@ analyses:
 	$(PY) scripts/02_closure.py
 	$(PY) scripts/03_selfaveraging.py
 	$(PY) scripts/04_identifiability.py
+	$(PY) scripts/06_exchangeability.py
 	$(PY) scripts/11_vascular_disorder.py
 	$(PY) scripts/05_hoa.py kidney
 	$(PY) scripts/05_hoa.py lung
@@ -32,6 +33,16 @@ figures: source_data
 test:
 	$(PY) tests/test_smoke.py
 
+# The closed model. Not part of `all`: it does not yet produce the figures,
+# and the size sweep takes several minutes per size.
+closed:
+	$(PY) scripts/12_calibrate_closed.py
+	$(PY) scripts/13_phase_diagram.py
+	$(PY) scripts/14_size_sweep.py
+	for r in liver kidney pancreas; do for c in baseline pool setpoint; do \
+	  $(PY) scripts/15_transmission.py $$r $$c 0 8; done; done
+	$(PY) scripts/15_transmission.py
+
 # clean keeps source_data: the Figure 6 tables come from the human cohort and
 # cannot be regenerated without it
 clean:
@@ -39,3 +50,19 @@ clean:
 
 distclean: clean
 	rm -rf source_data/*
+
+# The paper: closed model and human cohort. A few minutes on one core for the
+# regime runs, about ten for the transmission; seconds on a multicore machine.
+paper:
+	for r in liver kidney pancreas; do for c in baseline pool setpoint; do \
+	  $(PY) scripts/15_transmission.py $$r $$c 0 8; done; done
+	$(PY) scripts/15_transmission.py
+	$(PY) scripts/17_paper_runs.py
+	for r in liver kidney pancreas; do for s in ref nu_lo nu_hi q_lo q_hi; do \
+	  $(PY) scripts/19_elasticity.py $$r $$s 0 6; done; done
+	$(PY) scripts/19_elasticity.py
+	$(PY) figures/fig_framework.py
+	$(PY) figures/fig_closed_paper.py
+	$(PY) figures/fig3_closed.py
+	$(PY) figures/fig6.py
+	$(PY) scripts/18_paper_tables.py

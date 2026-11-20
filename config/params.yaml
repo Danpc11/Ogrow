@@ -1,4 +1,11 @@
 # All parameters and seeds used in the manuscript. Nothing is set elsewhere.
+# b is the metabolic cost exponent of the vessel wall, shared by both engines.
+# It sets three exponents at once: branching r_p^(b+2) = sum r_c^(b+2), the
+# shear setpoint p^(b/2), and the daughter ratio 2^(-1/(b+2)). Murray's b = 1
+# is the case where cost is blood volume; measured branching exponents of 2.7
+# to 3.0 put b between 0.7 and 1.0, near 0.9 where flow is pulsatile.
+cost_exponent_b: 0.9
+
 engine:
   days: 70
   n_attractors: 9000
@@ -20,8 +27,6 @@ engine:
   # (Taber 1998; Pries, Reglin & Secomb). b = 1 is Murray's case, where cost
   # is blood volume, and is the critical exponent of irrigability in d = 3,
   # so b/2 = 0.5 is derived, not fitted.
-  cost_exponent_b: 1.0
-  pressure_exp: 0.5
   consumption_per_mass: 1.0  # demand drawn per unit of tissue mass
   attenuation_length: 58.0 # supply falls as exp(-d / this)
   kappa: 5.0               # unit mass supported per unit of local supply
@@ -66,8 +71,8 @@ sweeps:
   scaling_days: [4, 6, 9, 14, 22, 35, 70]   # wide span of N, not of time
 
 hoa:
-  target_um: {kidney: 200, heart: 450, lung: 300}
-  max_slices: {kidney: 260, heart: 150, lung: 200}
+  target_um: {kidney: 200, lung: 300}
+  max_slices: {kidney: 260, lung: 200}
   invariants: [volume_mm3, surface_mm2, sphericity, elong, flat,
                dark_largest_frac, intensity_cv, intensity_skew]
   log_scaled: [volume_mm3, surface_mm2]
@@ -103,12 +108,6 @@ closed:                  # src/organgrow/closed.py, the closed model (not yet in
   g0: 0.30               # unit growth rate at day 0
   tau_g: 12.0            # decay time of that rate
   eta: 0.12              # calibre adaptation rate
-  # b is the metabolic cost exponent of the vessel wall and sets three
-  # exponents at once: branching r_p^(b+2) = sum r_c^(b+2), the setpoint
-  # p^(b/2), and the daughter ratio 2^(-1/(b+2)). Murray's b = 1 is the case
-  # where cost is blood volume; measured branching exponents of 2.7 to 3.0
-  # put b between 0.7 and 1.0, nearer 0.9 where flow is pulsatile.
-  cost_exponent_b: 0.9
   # A junction occupies tissue. Vessel volume alone is degenerate in the
   # branching number, so without this term nothing stops a tip dividing; the
   # steric cost of the junction is what makes the network finite.
@@ -125,6 +124,14 @@ closed:                  # src/organgrow/closed.py, the closed model (not yet in
   daughter_ratio: 0.79   # radius of a sprout relative to its parent
   sprout_reach: 0.55     # a sprout covers this fraction of the way to the unit that called it
   sprout: 4.0            # sprouts per day per unit of supply deficit
+  # mesenchymal signal (space colonisation): attractors per lam^3 of domain,
+  # how far one reaches for a tip and how close a vessel or unit must come to
+  # serve it, both in units of lam. Reach and kill follow the open engine.
+  attractor_density: 0.05
+  attractor_reach: 16.0
+  attractor_kill: 1.25
+  r_max_factor: 20.0     # widest a calibre may become, in units of r_eq
+  sprout_floor: 1.05     # a sprout starts at this multiple of the critical radius
   sprout_load: 0.5       # a tip carrying more tissue than one terminal
                          # branch serves divides, deficit or not
   sprout_room: 0.3       # sprouts per day per placement refused for lack of space

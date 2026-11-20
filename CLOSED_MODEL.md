@@ -1,8 +1,9 @@
-# The closed model (runs; not yet calibrated)
+# The closed model
 
-`src/organgrow/closed.py` is a rewrite of the engine, kept beside the one the
-figures use rather than replacing it. The figures and the audit still run on
-`engine.py`; nothing here affects them. `make test` exercises it.
+`src/organgrow/closed.py` is the model the paper rests on; `make paper`
+builds its figures. `engine.py`, the earlier open engine, is kept for the
+legacy figures of `make all`, several of which carry their answer by
+construction (see below). `make test` exercises both.
 
 ## Why a rewrite
 

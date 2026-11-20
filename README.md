@@ -13,6 +13,23 @@ what is contingent.
 `src/organgrow/closed.py`; it runs and passes its smoke tests, but is not yet
 calibrated, and the figures and the audit still run on `engine.py`.
 
+## The paper
+
+`PAPER.md` lists each claim with the number behind it, the figure that shows
+it and the command that produces it. `make paper` builds those figures from
+the closed model and the human cohort tables:
+
+| Figure | Content | Built from |
+| --- | --- | --- |
+| 2 | which bound stops each regime | `scripts/17_paper_runs.py` |
+| 3 | which individual spread reaches organ size | `scripts/15_transmission.py` |
+| 4 | calibration against the mouse liver | `scripts/17_paper_runs.py` |
+| 5 | vascular rules: Murray, critical radius, reach | `scripts/17_paper_runs.py` |
+| 6 | size and shape partition in 48 human donors | `source_data/` or the cohort |
+
+`make all` still builds the earlier figures from the open engine; they are
+kept for the record and are not the paper's.
+
 ## Install and reproduce
 
     python3 -m venv .venv && source .venv/bin/activate

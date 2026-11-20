@@ -41,21 +41,16 @@ def sdf(kind, x, y, z):
     return np.maximum(np.hypot(y - cy, z * 1.35) - rad, np.abs(x) - 165)
 
 
-try:                                  # parameters live in config/params.yaml
-    from .config import CFG
-    IDENTITY = {k: dict(v) for k, v in CFG["identity"].items()}
-    _ENG = CFG["engine"]
-except Exception:                     # standalone use without the config file
-    IDENTITY = {
-        "liver":    dict(mode="saturation", R=190, lam=7.4, nu=400.0, c_set=0.055),
-        "kidney":   dict(mode="exhaustion", R=150, lam=6.0, iota=0.165, decay=0.952),
-        "pancreas": dict(mode="pool",       R=165, lam=6.6, draw=0.075),
-        "lung":     dict(mode="exhaustion", R=175, lam=6.2, iota=0.110, decay=0.930,
-                         vessels="bundle"),
-    }
-    _ENG = dict(days=70, n_attractors=9000, max_units=4200, beta=2.2,
-                g0=0.30, tau_g=12.0, C0=14.0, alpha_allometric=1.155,
-                tau_body=16.0)
+# Parameters live in config/params.yaml and nowhere else. There used to be a
+# fallback here that silently ran with values from three versions back
+# (nu = 400, beta = 2.2) when the file failed to load, so a YAML error produced
+# different figures with no error at all. A missing or broken config is now an
+# error.
+from .config import CFG
+IDENTITY = {k: dict(v) for k, v in CFG["identity"].items()}
+_ENG = dict(CFG["engine"])
+# One cost exponent for both engines; the shear setpoint rises as p^(b/2).
+_ENG["pressure_exp"] = CFG["cost_exponent_b"] / 2.0
 
 
 @dataclass

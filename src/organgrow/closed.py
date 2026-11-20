@@ -79,6 +79,7 @@ class Trace:
     C: list = field(default_factory=list)       # tree conductance
     mass: list = field(default_factory=list)
     vessels: list = field(default_factory=list)
+    Q: list = field(default_factory=list)      # total flow through the root
     bound: list = field(default_factory=list)   # "growing", "supply" or "progenitor"
 
 
@@ -89,12 +90,13 @@ def _p(name, value):
 
 def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
          lam=7.4, s_rate=0.0, tau_set=None,
-         N_scale=None, m0=None, m_leak=None, xi=None, kappa=None, g0=None,
+         N_scale=None, R_unit=None, units_per_branch=None, m0=None, m_leak=None, xi=None, kappa=None, g0=None,
          tau_g=None, eta=None, b_cost=None, shrink=None,
          tau_set_fraction=None, daughter_ratio=None, sprout_reach=None,
          sprout=None, sprout_room=None, sprout_load=None, junction_cost=None, vascular_fraction=None, crowding=None, l_root=None,
          l_sprout=None, nucleation_spread=None,
-         max_units=None, max_vessels=None):
+         max_units=None, max_vessels=None,
+         attractor_density=None, attractor_reach=None, attractor_kill=None):
     """Grow one organ. `sdf(x, y, z)` is negative inside the domain.
 
     The identity parameters (nu, q_set, rho, delta, P0) are required; every
@@ -110,7 +112,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
     #     branching   r_p^x = sum r_c^x    with  x = b + 2
     #     pressure    tau_set ~ p^(b/2)
     #     daughter    r_c / r_p = N^(-1/x) for an N-way split
-    b_cost = _p("cost_exponent_b", b_cost)
+    b_cost = CFG["cost_exponent_b"] if b_cost is None else b_cost
     branch_exp = b_cost + 2.0
     pressure_exp = b_cost / 2.0
     shrink = _p("shrink", shrink)
@@ -121,6 +123,11 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
     sprout_room = _p("sprout_room", sprout_room)
     sprout_load = _p("sprout_load", sprout_load)
     junction_cost = _p("junction_cost", junction_cost)
+    attractor_density = _p("attractor_density", attractor_density)
+    attractor_reach = _p("attractor_reach", attractor_reach)
+    attractor_kill = _p("attractor_kill", attractor_kill)
+    r_max_factor = _p("r_max_factor", None)     # widest calibre, in units of r_eq
+    sprout_floor = _p("sprout_floor", None)     # a sprout starts this far above r_crit
 
     def _worth_splitting(vt, i, n_here):
         """Does reaching further buy more than the junction costs?
@@ -152,7 +159,14 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
     max_vessels = int(_p("max_vessels", max_vessels))
 
     box = np.array([R * 1.35, R * 1.25, R * 0.85])
-    R0 = N_scale                       # resistance of one mature unit
+    # N_scale used to do two jobs: it set the resistance of one unit, which is
+    # intensive, and, divided by the vessel cap, how many units a terminal
+    # branch serves, also intensive but built from two extensive numbers.
+    # Scaling the organ therefore changed the physics of a single unit. They
+    # are now two latent parameters of their own. Their defaults reproduce
+    # the calibrated reference organ exactly; what they mean physically is a
+    # question for the fit, not something assumed here.
+    R0 = float(R_unit) if R_unit is not None else N_scale
     # room the vessels may take before they compete with the parenchyma,
     # in tree units (lengths in lam, radii in r_root)
     vol_budget = vascular_fraction * (2.0 * np.prod(box / lam))
@@ -160,7 +174,8 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
     # Design point: a terminal branch carries the handful of units below it.
     # Its shear in series with that tissue peaks at r_c; the setpoint sits
     # below the peak and segments are born on the stable side of it.
-    units_per_tip = max(N_scale / max(max_vessels * 0.5, 1.0), 1.0)
+    units_per_tip = (float(units_per_branch) if units_per_branch is not None
+                     else max(N_scale / max(max_vessels * 0.5, 1.0), 1.0))
     R_seg = R0 / units_per_tip
     r_crit0 = (3.0 * l_root / R_seg) ** 0.25
     _tau = lambda x: (dP / (l_root / x ** 4 + R_seg)) / x ** 3
@@ -176,7 +191,20 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
         return sdf(X[:, 0] / s, X[:, 1] / s, X[:, 2] / s) < 0
 
     seed = rng.uniform(-1, 1, (20000, 3)) * box
-    s0 = seed[inside(seed)][0]
+    # The vascular root enters at a fixed anatomical site, the hilum, not at a
+    # random point. Drawing it at random was the largest source of
+    # between-replicate spread in the closed model: a root that lands on the
+    # boundary leaves most nucleation candidates outside the organ, so too few
+    # units fit for the first branch to pay for its junction, and the tree
+    # stays at one vessel; a root deep inside branches explosively. Spearman
+    # 0.72 between root depth and final vessel count over eight seeds.
+    # The root is placed at the deepest point of the domain, found on a fixed
+    # grid so that it is identical across replicates and scales with s. The
+    # random draw above is kept so the generator stream is unchanged.
+    _g = np.stack(np.meshgrid(*[np.linspace(-1, 1, 41)] * 3,
+                              indexing="ij"), -1).reshape(-1, 3) * box
+    _d = np.array([sdf(*p) for p in _g])
+    s0 = _g[int(np.argmin(_d))]
     scale = lam                       # tree coordinates -> domain coordinates
     vt = VascularTree(s0 / scale, s0 / scale + np.array([0.0, l_root, 0.0]), r_eq)
 
@@ -187,9 +215,35 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
     tr = Trace()
     leak = m_leak ** xi / R0          # what a tip carries before its first unit
 
+    # ---- the mesenchymal signal: unserved tissue that calls the tree --------
+    # Nothing else in the model drives growth into unoccupied space: units
+    # appear only next to tips and tips sprout toward tissue that already
+    # exists, so without this the organ grew as a colony around its root and
+    # left 61 to 87 % of its domain empty. The signal is formalised as space
+    # colonisation (Runions and colleagues, leaf venation): attractor points
+    # spread through the domain at a fixed density stand for mesenchyme not
+    # yet served, each pulls the nearest tip within reach, and each is removed
+    # once a vessel or a unit comes close. Density, reach and kill distance
+    # are intensive, so the signal scales with the organ.
+    _vol_dom = float(np.prod(2.0 * box)) * float(np.mean(
+        [sdf(*p) < 0 for p in rng.uniform(-1, 1, (4000, 3)) * box]))
+    n_attr = int(round(attractor_density * _vol_dom / lam ** 3))
+    A = rng.uniform(-1, 1, (max(n_attr * 3, 10), 3)) * box
+    A = A[np.array([sdf(*p) < 0 for p in A])][:n_attr]
+
     for day in range(1, days + 1):
         s = 1.0 + s_rate * day        # the body grows the space, not the supply
         tips = vt.tips()
+        # Each unit is fed by the terminal branch nearest to it. Units used to
+        # stay with the tip they were born at, so when that tip branched to
+        # relieve its load the load never moved: the parent kept every unit,
+        # kept passing the junction test, and kept sprouting. The root ended
+        # with 270 daughters and the tree was a star around it, with its whole
+        # domain beyond reach. Reassigning by proximity is what makes a branch
+        # actually relieve the tissue that justified it.
+        if len(U) and len(tips):
+            _te = np.asarray([vt.end[k] for k in tips]) * scale
+            tip_of = np.asarray(tips, int)[cKDTree(_te).query(U)[1]]
         n_at = np.bincount(tip_of, minlength=len(vt)) if len(tip_of) else np.zeros(len(vt), int)
         # tissue hangs along a vessel, not only at its end: a segment that has
         # branched keeps the units and the progenitors it already carried, so
@@ -208,12 +262,13 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
         # the transmural pressure of a segment is the mean of inlet and outlet
         vt.relax(tau_set, rate=eta, pressure_exp=pressure_exp, p_in=dP,
                  pressures=0.5 * (p_in + p_out),
-                 r_min=vt.r_crit, r_max=20.0 * r_eq, shrink=shrink,
+                 r_min=vt.r_crit, r_max=r_max_factor * r_eq, shrink=shrink,
                  volume_budget=vol_budget, crowding=crowding)
 
         # ---- nucleation: one law, demographic noise ------------------------
         new_pos, new_tip = [], []
         no_room = np.zeros(len(vt), int)   # placements refused for lack of space
+        tried = np.zeros(len(vt), int)     # placements attempted
         for i in active:
             Pi = P.get(i, 0.0)
             if Pi <= 0:
@@ -221,6 +276,18 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
             drive = max(q[i] - q_set, 0.0)
             lam_i = nu * Pi * drive
             k = int(rng.poisson(lam_i)) if lam_i > 0 else 0
+            # A unit consumes one progenitor, so a tip cannot make more units
+            # than it holds. The draw used to be uncapped: a tip with two
+            # progenitors could place five units and clamp its pool at zero,
+            # which made a pool-bound organ exceed its own budget by up to
+            # 40 %, and by an amount that depended on the drive, that is on
+            # the setpoint.
+            # The fractional part of the pool is resolved once, into one
+            # progenitor or none, so that it cannot retry day after day and
+            # end up converted with certainty; the expectation is preserved.
+            avail = int(Pi) + int(rng.random() < Pi - int(Pi))
+            k = min(k, avail)
+            tried[i] = k
             placed = 0
             for _ in range(k):
                 if len(U) + len(new_pos) >= max_units:
@@ -238,7 +305,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                 new_pos.append(c); new_tip.append(i)
                 placed += 1
             # progenitors are spent by the units made, not by the ones refused
-            P[i] = max(Pi + (rho - delta) * Pi - placed, 0.0)
+            P[i] = max(avail - placed, 0) + (rho - delta) * Pi
         if new_pos:
             U = np.vstack([U, np.asarray(new_pos)])
             m = np.concatenate([m, np.full(len(new_pos), m0)])
@@ -286,13 +353,19 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                         nk = vt.add(i, b.copy(),
                                     b + (u / scale - b) * sprout_reach,
                                     max(vt.radius[i] * daughter_ratio,
-                                        vt.r_crit[i] * 1.05))
+                                        vt.r_crit[i] * sprout_floor))
                         P[nk] = P.get(i, 0.0) * 0.5
                         P[i] = P.get(i, 0.0) * 0.5
                         n_at = np.bincount(tip_of, minlength=len(vt))
 
                 if no_room[i] > 0 and _worth_splitting(vt, i, n_at[i]):
-                    k_r = int(rng.poisson(sprout_room * no_room[i]))
+                    # Respond to how crowded the tip is, which is the share of
+                    # placements refused, not their number. The number grows
+                    # with the progenitor pool, so a pool of a few hundred
+                    # made hundreds of vessels in one day and every tree ran
+                    # to the vessel cap.
+                    k_r = int(rng.poisson(sprout_room * no_room[i]
+                                          / max(tried[i], 1)))
                     for _ in range(k_r):
                         if (len(vt) >= max_vessels or
                                 vt.volume(junction_cost) >= vol_budget):
@@ -306,7 +379,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                         if sdf(end[0] * scale / s, end[1] * scale / s, end[2] * scale / s) >= 0:
                             continue
                         nk = vt.add(i, b.copy(), end,
-                                    max(vt.radius[i] * daughter_ratio, vt.r_crit[i] * 1.05))
+                                    max(vt.radius[i] * daughter_ratio, vt.r_crit[i] * sprout_floor))
                         # the new tip inherits half the pool: it is where the
                         # next units will go
                         P[nk] = P.get(i, 0.0) * 0.5
@@ -314,6 +387,12 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                 if n_at[i] == 0:
                     continue
                 deficit = max(q_set - q[i], 0.0)
+                # The junction test stays on this path too. Removing it was
+                # tried on the reasoning that tissue short of supply should call
+                # a vessel whatever the tip's load; once the mesenchymal signal
+                # let the organ reach its supply bound, deficit was positive at
+                # every tip and the ungated path ran the tree to its cap (6000
+                # vessels against 773 with it off, at the same filling).
                 k_v = (int(rng.poisson(sprout * deficit))
                        if deficit > 0 and _worth_splitting(vt, i, n_at[i])
                        else 0)
@@ -327,7 +406,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                     b = vt.end[i]
                     end = b + (u / scale - b) * sprout_reach
                     nk = vt.add(i, b.copy(), end,
-                                max(vt.radius[i] * daughter_ratio, vt.r_crit[i] * 1.05))
+                                max(vt.radius[i] * daughter_ratio, vt.r_crit[i] * sprout_floor))
                     d_old = ((U[sel] - b * scale) ** 2).sum(-1)
                     d_new = ((U[sel] - end * scale) ** 2).sum(-1)
                     moved = sel[d_new < d_old]
@@ -340,6 +419,44 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                         break
             n_at = np.bincount(tip_of, minlength=len(vt))
 
+        # ---- tips extend into unserved tissue (mesenchymal signal) --------
+        if len(A):
+            tips_now = vt.tips()
+            ends = np.asarray([vt.end[k] for k in tips_now]) * scale
+            d, near = cKDTree(ends).query(A)
+            pulled = d < attractor_reach * lam
+            if pulled.any():
+                for t_idx in np.unique(near[pulled]):
+                    if (len(vt) >= max_vessels or
+                            vt.volume(junction_cost) >= vol_budget):
+                        break
+                    i = tips_now[int(t_idx)]
+                    pts = A[pulled & (near == t_idx)]
+                    v = pts - ends[t_idx]
+                    v /= np.maximum(np.linalg.norm(v, axis=1, keepdims=True), 1e-9)
+                    step = v.mean(0)
+                    nrm = np.linalg.norm(step)
+                    if nrm < 1e-6:
+                        continue
+                    b = vt.end[i]
+                    end = b + step / nrm * l_sprout
+                    if sdf(*(end * scale / s)) >= 0:
+                        continue
+                    _rc = np.atleast_1d(vt.r_crit)
+                    rc_i = _rc[i] if i < len(_rc) else _rc[min(vt.parent[i], len(_rc) - 1)]
+                    nk = vt.add(i, b.copy(), end,
+                                max(vt.radius[i] * daughter_ratio, rc_i * sprout_floor))
+                    # extending, not branching: the progenitor niche travels
+                    # with the tip, so the front does not starve
+                    P[nk] = P.get(i, 0.0)
+                    P[i] = 0.0
+            # tissue reached by a vessel or a unit is served
+            served = cKDTree(np.asarray(vt.endpoints()) * scale).query(A)[0] < attractor_kill * lam
+            if len(U):
+                served |= cKDTree(U).query(A)[0] < attractor_kill * lam
+            A = A[~served]
+            n_at = np.bincount(tip_of, minlength=len(vt))
+
         Ptot = float(sum(P.values()))
         # q was read at the start of the day, before any sprout was added
         live = [i for i in active if n_at[i] > 0] or tips
@@ -347,7 +464,12 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
         tr.t.append(day); tr.N.append(len(U)); tr.P.append(Ptot)
         tr.q.append(qbar); tr.C.append(C); tr.mass.append(float(m.sum()))
         tr.vessels.append(len(vt))
+        tr.Q.append(float(vt.flow[0]) if len(vt.flow) else 0.0)
         tr.bound.append("progenitor" if Ptot < 1e-3 else
                         ("supply" if qbar <= q_set * 1.05 else "growing"))
 
+    # final state per node, for analyses that need where supply and pool sit
+    tr.final = dict(q=np.asarray(q, float).copy(),
+                    P=np.array([P.get(k, 0.0) for k in range(len(q))], float),
+                    tips=np.asarray(vt.tips(), int))
     return U, m, vt, tr

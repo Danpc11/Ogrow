@@ -1,128 +1,107 @@
 #!/usr/bin/env python
-"""Calibrate the closed engine against the measured mouse liver contraction.
+"""Calibrate the closed model's liver against the measured mouse contraction.
 
-Three conditions, asked for together rather than one after another, because
-in the open engine they fought each other:
+Target (Azizoglu et al. 2025, mouse liver, postnatal): lobule number grows
+1.82-fold while its coefficient of variation across animals contracts
+3.09-fold, and the window closes.
 
-  1. unit number grows 1.82-fold          (80 -> 146 lobules, Azizoglu 2025)
-  2. the CV of unit number contracts 3.09-fold over that growth
-  3. the window closes inside the run: supply per unit reaches q_set and the
-     unit count stops rising
+The organ is grown in the liver regime: the progenitor pool is large enough
+not to bind, so the supply bound is what stops it. For each (nu, q_set) a
+cohort of replicates is grown. The last day is the closed organ; the earlier
+day at which the mean count was 1/1.82 of the final one is the start of the
+measured interval; the contraction is the ratio of the two CVs.
 
-Only three numbers are free: nu, q_set and the length of the run. Everything
-else is derived (the setpoint from the vessel-tissue coupling point, the
-critical radius from the shear condition, the scales from the
-nondimensionalisation) or fixed by the regime (rho = delta for a liver, where
-capacity binds before the progenitor pool).
-
-With Poisson nucleation the terminal floor is demographic, which is what the
-animal has: counting 146 lobules carries a floor of 1/sqrt(146) = 0.083,
-just above the 0.074 reported. If the closed engine reproduces the
-contraction without a large parameter spread, the tension the open engine had
-between closing and contracting was an artefact of putting all the terminal
-variance into sigma_param.
+Usage:
+    python scripts/12_calibrate_closed.py NU QSET K0 K1   replicates K0..K1-1
+    python scripts/12_calibrate_closed.py NU QSET         one point, saved
+    python scripts/12_calibrate_closed.py                 collect saved points
 """
 import json
-import itertools
+import sys
+
 import numpy as np
 
 from organgrow import sdf
 from organgrow.config import ROOT
 from organgrow.closed import grow
 
-OUT = ROOT / "results"
-OUT.mkdir(exist_ok=True)
+OUT = ROOT / "results" / "closed_calibration"
+OUT.mkdir(parents=True, exist_ok=True)
 
-TARGET_GROWTH = 1.82          # N_f / N_i
-TARGET_CONTRACTION = 3.09     # CV_i / CV_f at that growth
-NREP = 14
-KIND = "liver"
-R = 190
-
-
-def run(nu, q_set, days, P0=600.0, nrep=NREP, seed0=300):
-    """One cohort: unit-count trajectories for `nrep` replicate organs."""
-    traces = []
-    for s in range(nrep):
-        rng = np.random.default_rng(seed0 + s)
-        U, m, vt, tr = grow(lambda x, y, z: sdf(KIND, x, y, z), R,
-                            days=days, rng=rng, nu=nu, q_set=q_set,
-                            rho=0.1, delta=0.1, P0=P0)
-        traces.append((np.asarray(tr.N, float), np.asarray(tr.q, float)))
-    N = np.vstack([t[0] for t in traces])
-    q = np.vstack([t[1] for t in traces])
-    return N, q
+GROWTH, CONTRACTION = 1.82, 3.09
+S = 0.6                 # domain scale of the calibration organ
+P0 = 2600.0             # large enough that the progenitor bound does not bind
+DAYS, NREP, SEED0 = 140, 8, 300
 
 
-def score(N, q, q_set):
-    """How far a cohort sits from the three conditions."""
-    mean = N.mean(0)
-    if mean[0] <= 0 or mean[-1] / mean[0] < TARGET_GROWTH:
+REPS = OUT / "reps"
+REPS.mkdir(exist_ok=True)
+
+
+def run_rep(nu, q_set, k):
+    """One replicate, saved, so a long point can be built over several calls."""
+    f = REPS / f"nu{nu}_q{q_set}_k{k}.npz"
+    if f.exists():
+        return
+    rng = np.random.default_rng(SEED0 + k)
+    U, m, vt, tr = grow(lambda x, y, z: sdf("liver", x / S, y / S, z / S),
+                        190 * S, days=DAYS, rng=rng, nu=nu, q_set=q_set,
+                        rho=0.1, delta=0.1, P0=P0, R_unit=650.0,
+                        units_per_branch=650 / 600.0, max_vessels=6000)
+    np.savez(f, N=np.asarray(tr.N, float), q=np.asarray(tr.q, float))
+
+
+def cohort(nu, q_set):
+    fs = [REPS / f"nu{nu}_q{q_set}_k{k}.npz" for k in range(NREP)]
+    have = [f for f in fs if f.exists()]
+    if len(have) < NREP:
         return None
-    k = int(np.argmin(np.abs(mean / mean[0] - TARGET_GROWTH)))
-    cv_i = N[:, 0].std(ddof=1) / mean[0]
-    cv_k = N[:, k].std(ddof=1) / mean[k]
-    if cv_k <= 0:
-        return None
-    contraction = cv_i / cv_k
-    # the window has closed if the count has stopped rising and supply per
-    # unit has come down to the setpoint
-    tail = (mean[-1] - mean[int(0.8 * len(mean))]) / max(mean[-1], 1.0)
-    closed = bool(tail < 0.05 and q.mean(0)[-1] <= q_set * 1.1)
-    return dict(day_at_growth=k + 1, contraction=float(contraction),
-                closed=closed, N_final=float(mean[-1]),
-                cv_initial=float(cv_i), cv_at_growth=float(cv_k),
-                cv_final=float(N[:, -1].std(ddof=1) / mean[-1]),
-                q_final=float(q.mean(0)[-1]),
-                error=float(abs(np.log(contraction / TARGET_CONTRACTION))))
+    d = [np.load(f) for f in have]
+    return np.vstack([x["N"] for x in d]), np.vstack([x["q"] for x in d])
 
 
-def main():
-    # P0 is large enough that the progenitor pool does not run out: the
-    # liver is the organ where capacity binds first, and a small pool puts it
-    # in the kidney's regime instead, which is what an earlier sweep hit.
-    grid = dict(nu=[0.5, 1.0, 2.0, 4.0, 8.0],
-                q_set=[0.2, 0.4, 0.6, 0.8],
-                days=[70])
-    rows, best = [], None
-    print(f"{'nu':>6} {'q_set':>7} {'days':>6} {'N_f':>7} {'contr':>8} "
-          f"{'CV_f':>8} {'closed':>7} {'err':>6}")
-    for nu, q_set, days in itertools.product(grid["nu"], grid["q_set"],
-                                             grid["days"]):
-        N, q = run(nu, q_set, days)
-        s = score(N, q, q_set)
-        if s is None:
-            continue
-        s.update(nu=nu, q_set=q_set, days=days)
-        rows.append(s)
-        print(f"{nu:>6} {q_set:>7} {days:>6} {s['N_final']:>7.0f} "
-              f"{s['contraction']:>8.2f} {s['cv_final']:>8.4f} "
-              f"{str(s['closed']):>7} {s['error']:>6.2f}")
-        # a run that does not close is not a candidate, however well its
-        # contraction matches: the window closing is the condition the open
-        # engine could never satisfy at the same time
-        if s["closed"] and (best is None or s["error"] < best["error"]):
-            best = s
-
-    res = dict(target_growth=TARGET_GROWTH,
-               target_contraction=TARGET_CONTRACTION,
-               poisson_floor_146=float(1 / np.sqrt(146)),
-               observed_cv_final=0.074, grid=rows, best=best)
-    json.dump(res, open(OUT / "closed_calibration.json", "w"), indent=1)
-
-    print()
-    if best is None:
-        print("no setting closes the window and matches the contraction")
-        print("that is a statement about the model, not about the search")
-    else:
-        print(f"best: nu = {best['nu']}, q_set = {best['q_set']}, "
-              f"days = {best['days']}")
-        print(f"  contraction {best['contraction']:.2f} "
-              f"against {TARGET_CONTRACTION} measured")
-        print(f"  terminal CV {best['cv_final']:.4f} against 0.074 measured, "
-              f"Poisson floor {1/np.sqrt(146):.3f}")
-    print("wrote results/closed_calibration.json")
+def score(N, Q, q_set):
+    n = N.mean(0)
+    k = int(np.argmin(np.abs(n - n[-1] / GROWTH)))
+    cv = lambda d: N[:, d].std(ddof=1) / max(N[:, d].mean(), 1e-9)
+    tail = (n[-1] - n[int(0.8 * len(n))]) / max(n[-1], 1.0)
+    return dict(day_start=k + 1, contraction=float(cv(k) / max(cv(-1), 1e-9)),
+                cv_start=float(cv(k)), cv_final=float(cv(-1)),
+                N_final=float(n[-1]), q_final=float(Q.mean(0)[-1]),
+                closed=bool(tail < 0.05 and Q.mean(0)[-1] <= 1.1 * q_set),
+                growth_last_fifth=float(tail),
+                N_final_each=[float(x) for x in N[:, -1]])
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) == 5:                       # run replicates k0..k1-1
+        nu, q_set, k0, k1 = float(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4])
+        for k in range(k0, min(k1, NREP)):
+            run_rep(nu, q_set, k)
+        print(f"nu={nu} q_set={q_set}: replicates {k0} to {min(k1, NREP) - 1} done")
+    elif len(sys.argv) == 3:
+        nu, q_set = float(sys.argv[1]), float(sys.argv[2])
+        c = cohort(nu, q_set)
+        if c is None:
+            for k in range(NREP):
+                run_rep(nu, q_set, k)
+            c = cohort(nu, q_set)
+        r = score(*c, q_set)
+        r.update(nu=nu, q_set=q_set)
+        json.dump(r, open(OUT / f"nu{nu}_q{q_set}.json", "w"), indent=1)
+        print(f"nu={nu:<5} q_set={q_set:<5} N_f={r['N_final']:6.0f} "
+              f"contraction={r['contraction']:5.2f} CV_f={r['cv_final']:.4f} "
+              f"q_f={r['q_final']:.3f} closed={r['closed']} "
+              f"(last fifth +{100*r['growth_last_fifth']:.1f} %)")
+    else:
+        rows = [json.load(open(f)) for f in sorted(OUT.glob("*.json"))]
+        ok = [r for r in rows if r["closed"]]
+        for r in sorted(rows, key=lambda r: (r["nu"], r["q_set"])):
+            print(f"nu={r['nu']:<5} q_set={r['q_set']:<5} contraction="
+                  f"{r['contraction']:5.2f} closed={r['closed']}")
+        if ok:
+            best = min(ok, key=lambda r: abs(np.log(r["contraction"] / CONTRACTION)))
+            print(f"\nbest closed: nu={best['nu']}, q_set={best['q_set']}, "
+                  f"contraction {best['contraction']:.2f} against {CONTRACTION}")
+        else:
+            print("\nno point closes the window")

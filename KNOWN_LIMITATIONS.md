@@ -48,20 +48,23 @@ contraction but the floor of it.
 
 **Flow is solved on a tree, not a network.** Anastomoses, pulsatility and
 non-Newtonian rheology are absent, and pressure is implicit. The shear setpoint
-rises as p^(b/2) with b = 1, which is derived from the cost of mural mass
+rises as p^(b/2) with b = 0.9, shared by both engines and derived from the cost of mural mass
 (Taber 1998; Pries, Reglin & Secomb), not fitted. An earlier version used an
 exponent of 2.0, chosen so that supply per unit would fall; that produced a
 sign reversal in the central result which was an artefact of the choice.
 
-**The closed model runs but is not calibrated.** `src/organgrow/closed.py`
-grows an organ under pressure-driven flow with one nucleation law and passes
-its smoke tests (no calibre runaway, conductance bounded by the tissue,
-spacing rule intact). Its identity parameters (nu, q_set, rho, delta, P_0)
-have not been fitted to any measurement, so nothing it produces is in the
-figures yet. Two further things it fixed in its own earlier draft: tips with
-no tissue were treated as open drains, which was the calibre runaway, and
-the supply a unit read was the flow its own branch drew, which is circular;
-supply is now the outlet pressure the tree delivers.
+**What in the closed model is set rather than measured.** The paper's
+results come from the closed model (`src/organgrow/closed.py`). Its nucleation
+rate (nu = 8), supply setpoint (0.6), the three regimes' pools and turnover,
+and the density, reach and kill distance of the mesenchymal signal are chosen,
+not fitted to data. The liver regime needs a pool of about four progenitors
+per unit made; with fewer, the progenitor bound binds first. The single
+calibration against data is the mouse liver contraction, and it fixes the
+source of the initial spread (maturity, not rate) rather than a parameter.
+Results are reported for one domain scale (0.6). The transmission uses 24
+replicates per condition with bootstrap intervals; the regime runs and the
+mouse calibration use eight. The transmission has not yet been checked across
+the parameter space, only at one setting per regime.
 
 **Three errors in earlier versions, now fixed, that invalidated results.**
 Nucleation truncated its rate to an integer each day, which turned the law

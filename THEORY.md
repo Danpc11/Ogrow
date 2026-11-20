@@ -75,6 +75,10 @@ the code this is the parameter `vessels`: `"demand"` for the other three,
 
 ## 4. Supply: flow, shear and calibre on the tree
 
+Sections 4 to 8 describe the open engine, `src/organgrow/engine.py`, which
+produces the figures. Where the closed model behaves differently it is said in
+place and developed in §13.
+
 A tree has analytic resistance, so no linear system is needed. Demand is
 accumulated from the leaves to the root in one pass and conductance combined
 in another, both at cost $\mathcal{O}(E)$ in the number of edges
@@ -123,6 +127,10 @@ check that the implementation reaches its own fixed point, not a validation
 against measured calibres: at a uniform setpoint the relation is an algebraic
 consequence of the rule.
 
+Murray's exponent 3 is the special case b = 1 of a more general law (§13).
+With a wall cost exponent b, the branching exponent is b + 2, so b between 0.7
+and 1.0 gives 2.7 to 3.0, the range measured in real trees.
+
 **Equation 7 — supply per unit.**
 
 $$c_u(t) = \frac{\mathbb{C}(t)}{N(t)}$$
@@ -131,6 +139,10 @@ $$c_u(t) = \frac{\mathbb{C}(t)}{N(t)}$$
 the nearest vessel and rises with that vessel's calibre,
 
 $$c_{u,j} = c_u \, e^{-d_j/\ell_a} \sqrt{r_{v(j)}/r_{\text{root}}}$$
+
+This holds for the open engine. In the closed model supply per unit is read
+from the outlet pressure of the terminal branch that feeds the unit,
+$q = p_{\text{out}}/\Delta P$, with no proximity term.
 
 **Equation 9 — homogenised shear.** For a population of calibres,
 
@@ -168,7 +180,9 @@ $\gamma$ = 0.60 (pancreas).
 $\gamma$ = 0.50 (lung).
 All are below 1, so the feedback is stabilising and no runaway occurs. They are
 also well below the 4/3 that uniform-shear adaptation alone would give, because
-the root is in series and caps the total.
+the root is in series and caps the total. That cap is a property of the open
+engine: in the closed model the root takes under 3 % of the pressure drop and
+its radius follows the shear law, growing as $Q^{1/3}$.
 
 ### The tree adds little disorder of its own
 
@@ -187,12 +201,16 @@ does not survive their correction.
 
 The vasculature is therefore a conduit here, not a source of quenched
 disorder, at least at the scale this engine resolves and with flow driven by
-demand. Whether the pressure-driven tree of the closed model behaves
-differently is open (`CLOSED_MODEL.md`).
+demand. In the closed model the opposite held: the topology of the tree was
+the main source of spread between replicates, through where its root entered
+and how it branched (§13).
 
 ## 5. The fabrication window and how it closes
 
-**Organ identity is one parameter: the closure mode.** Everything else in the
+**Organ identity is one parameter: the closure mode.** (This is the open
+engine's formulation. In the closed model, §13, identity is which of two local
+bounds, supply per unit or the progenitor pool, binds first, and the three
+modes below are its limits.) Everything else in the
 engine is shared.
 
 > **Open point.** The closure-mode table below assigns the liver to signal
@@ -271,14 +289,21 @@ Two sources are kept separate, because they behave differently.
 | Initial condition | $\sigma_{\text{init}}$ | spread of seeded units | yes |
 | Parameter | $\sigma_{\text{param}}$ | per-individual $c_{\text{set}}$, $P_0$ | no |
 
-**Equation 15 — the contraction bound.** Under capacity saturation with
-$\mathbb{C}$ fixed, the increment of $N^{2}$ is the same for every individual,
-so the dispersion of $N^{2}$ is preserved and
+**Equation 15: the dilution law.** If the increment of $N^{2}$ is the same
+for every individual, the dispersion of $N^{2}$ is preserved and
 
-$$\frac{\mathrm{CV}_i}{\mathrm{CV}_f} \le \left(\frac{N_f}{N_i}\right)^{2}$$
+$$\frac{\mathrm{CV}_i}{\mathrm{CV}_f} = \left(\frac{N_f}{N_i}\right)^{2}$$
 
-It is an **inequality**, not an identity, and the bound is reached only if the
-setpoint were identical across individuals. With per-individual setpoints,
+Multiplying the nucleation law by $2N$ gives
+$\mathrm{d}(N^2)/\mathrm{d}t = 2\nu(\mathbb{C} - c_{\text{set}}N)$, so the
+increment is equal across individuals only while $c_{\text{set}}N$ is
+negligible. Once it is not, it acts as a restoring term: an individual ahead
+of the others gains less. Contraction then **exceeds** the dilution value; the
+open engine contracts three to four times more than it. Equation 15 is the
+weak-feedback limit, not an upper bound. It fits the one measurement
+available, mouse liver, where $N$ grows 1.82-fold and the CV contracts
+3.09-fold against 3.31 predicted. The general form is in §13. With
+per-individual setpoints,
 
 **Equation 16 — the floor on terminal variance.**
 
@@ -291,7 +316,10 @@ earlier equality form did not.
 The discriminating measurement is the **absolute** dispersion $\mathrm{sd}(N)$,
 not the CV. A falling CV is ambiguous: it falls both when variance is destroyed
 and when it is merely diluted by a growing $N$. Capacity saturation destroys
-$\mathrm{sd}(N)$; exhaustion and limiting pool conserve it exactly.
+$\mathrm{sd}(N)$; exhaustion and limiting pool conserve it exactly. In the
+open engine that last statement holds by construction, because those two modes
+read nothing that growth changes. The closed model runs all three as one law
+(§13), so there the answer is a measurement rather than an input.
 
 ---
 
@@ -400,8 +428,359 @@ problems that couple to this one rather than follow from it. The mesenchyme
 appears as the instructor of the organ-specific pattern but is not formalised.
 
 Flow is solved on a tree, not on a network: anastomoses, pulsatility and
-non-Newtonian rheology are absent, and pressure is implicit rather than
-carried as a variable.
+non-Newtonian rheology are absent. Pressure is implicit in the open engine and
+explicit in the closed model.
+
+The closed model carries two latent parameters, the resistance of one unit and
+the number of units a terminal branch serves. Their defaults reproduce the
+reference organ; what they correspond to physically is to be decided by the
+fit, and a latent earns an interpretation only if the data constrain it and it
+predicts something it was not fitted to.
 
 Further limits, including which parts rest on which evidence, are in
 `KNOWN_LIMITATIONS.md`.
+
+---
+
+## 13. What the closed model establishes, and what it withdrew
+
+Sections 4 to 8 describe the open engine that produces the figures. The closed
+model (`src/organgrow/closed.py`) replaces its three open loops with one law,
+and where the two disagree this section is the current statement.
+
+### One law, two bounds
+
+At every tip, with supply per unit $q_i$ and progenitor pool $P_i$,
+
+$$\lambda_i = \nu\,P_i\,(q_i - q_{\text{set}})_+, \qquad k_i \sim \mathrm{Poisson}(\lambda_i), \qquad \dot P_i = (\rho - \delta)\,P_i - k_i$$
+
+A growing organ meets one of two ceilings: supply per unit falls to
+$q_{\text{set}}$, or the pool runs out. Which comes first is set by $\nu$ and
+$\rho - \delta$, so organ identity is a position on that plane rather than a
+branch in the code. Nucleation is a Poisson draw, so the demographic floor on
+the spread is part of the law rather than added afterwards.
+
+### The cost exponent sets three exponents
+
+With a wall cost exponent $b$,
+
+$$r_p^{\,b+2} = \sum_c r_c^{\,b+2}, \qquad \tau_{\text{set}} \propto p^{\,b/2}, \qquad \frac{r_c}{r_p} = 2^{-1/(b+2)}$$
+
+Murray's $b = 1$ is the case where cost is blood volume. $b = 2/3$ and $3/4$
+give branching exponents 2.67 and 2.75; $b \approx 0.9$, appropriate where
+flow is pulsatile, gives 2.9. Measured exponents of 2.7 to 3.0 sit in that
+range. The engine uses $b = 0.9$.
+
+### A branch buys reach, not conductance
+
+Two daughters at the cost-law ratio conduct $2 \cdot 2^{-4/(b+2)}$ of their
+parent, which is 0.77 at $b = 0.9$ and below one for every $b$. Dividing a
+tip always loses conductance. What it gains is the tissue it can serve, so a
+split is worth making when the tissue it relieves exceeds the tissue its
+junction occupies. Vessel volume alone is flat in the branching number, and
+without the junction term the tree grows until an implementation cap stops
+it; with it, the tree stops on its own.
+
+### Contraction of variance, general form
+
+The spread of unit number relaxes from its initial value toward a floor,
+
+$$\sigma^{2}(t) = \sigma_0^{2}\,e^{-2\lambda t} + \sigma_\infty^{2}\left(1 - e^{-2\lambda t}\right)$$
+
+which fits the open engine with $R^2$ between 0.92 and 0.99. $\lambda$ is set
+by how strongly the closure reads supply and $\sigma_\infty$ by what keeps
+injecting disorder. Equation 15 is its limit when $\lambda$ is small, which is
+the regime the mouse liver occupies.
+
+### Where the between-individual spread came from
+
+Two features of the implementation, not of the biology, dominated the spread
+in the first versions of the closed model, and both are now fixed.
+
+The vascular root was placed at a random point of the domain. A root on the
+boundary leaves most nucleation candidates outside the organ, so the first
+branch never pays for its junction and the tree stays at one vessel; a root
+deep inside branches explosively. Root depth predicted final vessel count with
+Spearman 0.72 ($P = 0.045$, eight seeds). In an organ the root enters at a
+fixed site, the hilum, and the model now places it at the deepest point of the
+domain.
+
+Sprouting for lack of room counted refused placements, and that count grows
+with the progenitor pool, so a pool of a few hundred made hundreds of vessels
+in a day and every tree reached the vessel cap. It now responds to the share
+of placements refused.
+
+With both fixed, the spread of unit number across replicates fell from 0.255
+to 0.124 and that of vessel number from 0.62 to 0.079.
+
+A third error made the tree a star. A unit stayed attached to the tip where it
+was born, so when that tip branched to relieve its load, the load never moved:
+the parent kept every unit, kept passing the junction test and kept sprouting.
+The root ended with 270 daughters and 409 of 492 vessels were tips one
+generation from it. Each unit is now fed by the nearest terminal branch, which
+is what makes a branch relieve the tissue that justified it. The largest node
+now has 20 to 42 daughters, and the trees again reach the vessel cap, so the
+cap is again an implementation limit and not physics. An early-history lock-in, of the kind a Polya urn produces above its
+threshold, looked like the explanation before the root was fixed; it was the
+root.
+
+A fourth defect let a tip make more units than it held progenitors: the
+number of units was drawn as Poisson in $\nu P_i (q_i - q_{\text{set}})$
+without a cap, and the pool was clamped at zero afterwards. A pool-bound
+organ exceeded its own budget by up to 40 %, by an amount that grew with the
+drive. A tip now makes at most the progenitors it holds, and the fractional
+part of a pool is resolved once, so that it cannot retry until it succeeds.
+
+### The organ does not fill its domain
+
+Scaling the domain with every extensive quantity scaled as $s^3$ gave
+$N \propto V^{0.642 \pm 0.028}$ over a 33-fold range in volume, and the
+fraction of the progenitor pool left rose from 0.04 to 0.69 with size. Neither
+is a scaling law. Measured directly, 61 % of the domain is more than two unit
+spacings from any unit in the smallest organ and 87 % in the largest: the
+organ grows as a colony around its root and never reaches its walls. Supply is
+not what stops it (supply per unit stays near 0.85, above $q_{\text{set}}$),
+nor the pool, nor time (doubling the run adds 5 %).
+
+Nothing in the closed model drives growth into unoccupied space. Units appear
+only next to tips, and tips sprout toward existing tissue, a short step away
+from crowding, or toward tissue short of supply, which nowhere is. This is the
+gap §12 names: the mesenchyme instructs the pattern and is not formalised. A
+formulation exists outside biology, space colonisation (Runions and
+colleagues, for leaf venation): attractor points in unserved tissue guide the
+nearest tips and are removed when reached, which fills a domain and gives a
+finite tree. The open engine already used it; the closed model dropped it.
+
+It is now in the closed model. Attractors spread at a fixed density through
+the domain pull the nearest tip within reach and are removed once a vessel or
+a unit comes close; a tip that extends toward them carries its progenitor
+niche with it, so the front does not starve. With a pool large enough not to
+bind, the unfilled fraction of the smaller domain fell from 54 % to 24 %, the
+tree stopped on its own at 1342 vessels against a cap of 5999, and supply per
+unit fell to 0.57, below $q_{\text{set}}$: the liver reached its supply bound
+for the first time in the closed model. In a domain 4.6 times larger the same
+bound binds with 58 % of the domain still empty, which is the expected
+behaviour of a supply-limited organ: it grows to what its perfusion sustains,
+not to what its container holds.
+
+Two conditions came out of getting there. The liver regime needs a pool that
+does not bind, about four progenitors per unit made; with fewer, the
+progenitor bound binds first and the organ behaves as a kidney. And the
+junction test has to stay on the deficit path: removing it let every
+supply-short tip sprout every day, and the tree ran to its cap.
+
+### Self-averaging, and why it is not yet measured
+
+Whether unit number self-averages is decided by how $R = \mathrm{sd}/\mathrm{mean}$
+behaves as size grows with nothing else changing: $N^{-1/2}$ for
+self-averaging, a constant under quenched disorder. `scripts/14_size_sweep.py`
+checks four controls first and reports no exponent if any drifts. In the
+current model the supply per unit and the median radius hold across sizes,
+but the fraction of the pool left rises from 0.04 to 0.69. That drift comes
+from the unfilled domain, not from the pool itself, and no exponent is
+reported until organs fill their domains.
+
+### Calibration against the mouse liver
+
+The mouse target is a contraction of 3.09 in the CV of lobule number while
+the count grows 1.82-fold. With only demographic noise there is little to
+contract: the model starts the interval near its floor. Livers grown at one
+rate and counted with an offset in maturity that reproduces the mouse's
+initial spread (CV 0.228 against 0.229) close at 0.108, a contraction of 2.1.
+The mouse closes at 0.074, below the model's floor, so capacity closure in
+this model contracts the spread in the right direction but not enough.
+
+An earlier version reported that capacity erased a spread in maturity but
+not one in growth rate, with each individual's final count tracking its rate,
+and proposed that as the test between capacity and signal. That difference
+came from a defect: a tip could make more units than it had progenitors, by an
+amount that grew with its nucleation rate, so fast individuals overshot. With
+the defect fixed, a spread in rate ($\sigma(\log\nu) = 1$) contracts from
+0.141 to 0.085 and the final count no longer tracks the rate (Spearman 0.33,
+$P$ = 0.42). The question of §5, capacity or signal for the liver, is open
+again; what the model now says is that capacity alone leaves a floor above
+the mouse's.
+
+### Which individual spread reaches the final count
+
+The open engine answered which closure destroys variance by construction. In
+the closed model it is measured: each replicate gets its own progenitor pool
+or its own supply setpoint, both with a spread of 0.30 in log, and the
+transmission is the part of the final CV of $N$ above the demographic
+baseline, divided by the input spread. 24 replicates per condition, 95 %
+bootstrap intervals.
+
+| Regime | Bound | Pool spread passes | Setpoint spread passes |
+|---|---|---|---|
+| Liver | supply | 0.23 [0.00, 0.42] | 1.42 [0.79, 2.10] |
+| Kidney | progenitors, with loss | 0.59 [0.41, 0.72] | 1.28 [0.69, 1.88] |
+| Pancreas | progenitors, no loss | 1.12 [0.85, 1.33] | 1.08 [0.32, 1.69] |
+
+The liver filters the spread in its pool, because once supply binds, more
+progenitors cannot make more units; the budget passes it whole. No regime
+filters the setpoint. Supply and progenitors are both local to a tip, and a
+tip converts its pool only where its supply exceeds the setpoint, so the
+setpoint decides how much of the pool becomes tissue in every regime.
+
+The closure mode therefore decides which spread is removed, not which is
+kept: a supply-bound organ removes spread in its progenitors, and nothing
+removes spread in the supply setpoint.
+
+Two measurement lessons came with this. These numbers are after the fix of
+the progenitor overdraft described above, which had raised the setpoint
+transmission of the pool-bound regimes. And an input spread of 0.15 in the
+setpoint was too small against the liver's demographic baseline (CV 0.091):
+its interval reached zero, which looked like filtering and was noise.
+
+### Elasticities, and what sets the setpoint's
+
+A comparison of spreads between cohorts is dominated, for large input spreads,
+by the individuals at the tail. The local measure is the elasticity of the
+final count, $\varepsilon_x = \partial \ln N / \partial \ln x$, estimated with
+the same seed at $x e^{\pm 0.3}$ (`scripts/19_elasticity.py`, six paired
+replicates, mean ± s.e.).
+
+| Regime | Setting | $\varepsilon_{P_0}$ | $\varepsilon_{q_{\text{set}}}$ |
+|---|---|---|---|
+| Liver | reference | +0.38 ± 0.13 | −1.19 ± 0.08 |
+| Kidney | $q_{\text{set}}$ 0.5 / 0.6 / 0.7 | +0.59 / +0.55 / +0.51 | −0.40 / −0.91 / −2.95 |
+| Kidney | $\nu$ 4 / 16 | +0.62 / +0.53 | −1.20 / −0.75 |
+| Pancreas | $q_{\text{set}}$ 0.5 / 0.6 / 0.7 | +0.92 / +0.86 / +0.87 | −0.13 / −0.36 / −2.55 |
+| Pancreas | $\nu$ 4 / 16 | +0.68 / +0.83 | −0.53 / −0.29 |
+
+The pool elasticity is stable within a regime and rises from the liver to the
+budget. The setpoint elasticity is not a property of the regime: it depends on
+where the setpoint sits relative to the supply at the tips.
+
+The liver was then measured at the same five settings (six paired replicates
+each): $\varepsilon_{P_0}$ = +0.38, +0.39, +0.35, +0.32, +0.36 at reference,
+$\nu$ 4, $\nu$ 16, $q_{\text{set}}$ 0.5 and 0.7, and $\varepsilon_{q_{\text{set}}}$ =
+−1.19, −1.42, −0.94, −0.41, −3.03. At every setting the pool elasticity is
+ordered liver < kidney < budget.
+
+**One mechanism sets the setpoint elasticity wherever pool is left over.**
+Lowering the setpoint by $\mathrm{d}q$ activates the tips whose supply sits
+just below it, which convert what they hold, so
+
+$$\varepsilon_{q_{\text{set}}} = -\,q_{\text{set}}\, w(q_{\text{set}}) / N,$$
+
+with $w$ the pool held per unit of supply just below the threshold, read from
+the final state ($\Delta q = 0.05$) with no fitted parameter. Across the five
+liver settings the prediction follows the measurement with correlation 0.98
+(mean absolute error 0.33): −1.04 against −1.19 at reference, −3.13 against
+−3.03 at the highest setpoint. In the budget it holds at three of five
+settings (−0.44 against −0.36 at reference) and misses where the stranded
+pool sits far below the threshold, where a ±30 % step is no longer local. So
+the liver does not respond to its setpoint through a global capacity: its
+size moves with the setpoint because of the pool waiting tip by tip just below
+it. Where the leftover pool sits differs between organs: in the budget
+all of it lies below the threshold, 42 % in the slice just under it; in the
+liver 85 % sits at tips whose supply is above the threshold, and only 5 % in
+that slice. Supply does not hold the liver's remaining pool, and the 5 % at the
+threshold is what its elasticity reads. In the kidney the formula gives zero and the measurement does not, as it
+should: loss spends the kidney's pool, nothing is left stranded, and the
+setpoint acts through the race between converting a progenitor and losing it,
+a fraction $\nu D/(\nu D + \delta)$ per tip with $D = q - q_{\text{set}}$; that
+derivation is written, not tested.
+
+A global derivation for the supply-bound side was tried and failed. With
+total root flow $Q \propto N^\gamma$ at closure, $\varepsilon_{q_{\text{set}}}$
+would be $-1/(1-\gamma)$. With $\gamma$ read from the last 15 % of growth, a
+window fixed before testing, it predicts about −1.3 at every liver setting
+against measurements from −0.41 to −3.03 (correlation −0.60). Its agreement at
+the reference setting alone was a coincidence.
+
+### The human partition, and what the model can and cannot predict
+
+If each kidney's log size is a systemic deviation shared by the pair plus a
+local one and a contingent one, the fraction of size variance between
+individuals is
+$(\varepsilon_q^2\sigma_{q,s}^2 + \varepsilon_P^2\sigma_{P,s}^2) /
+(\varepsilon_q^2\sigma_{q,s}^2 + \varepsilon_P^2\sigma_{P,s}^2 +
+\varepsilon_q^2\sigma_{q,\ell}^2 + \varepsilon_P^2\sigma_{P,\ell}^2 + \sigma_c^2)$,
+with $s$ systemic, $\ell$ local and $\sigma_c$ the contingent floor. The model
+supplies the weights; the input spreads must come from elsewhere. TRUSTED
+gives 0.887 for volume, so the systemic part must be 2.8 times the
+within-individual part in standard deviation. That is a requirement, not a
+prediction, until the input spreads are measured independently: the local
+one from paired measures such as split renal function, the systemic ones from
+paired nephron counts. The model's contingent floor (0.061 in the kidney
+regime) cannot stand in for the human one, because it is measured in organs
+of about 130 units and whether it falls with organ size is not known.
+
+### Murray's relation in grown trees
+
+With flow driven by pressure, the branching relation is a result rather than
+a restatement of the rule. With the exponent $b + 2 = 2.9$, the ratio
+$r_p^{2.9}/\sum_c r_c^{2.9}$ over the bifurcations of grown trees has median
+0.95 in the liver regime (313 bifurcations, interquartile 0.94 to 0.96) and
+0.96 in the kidney regime (68). The deficit of 3 to 4 % has a sign the theory
+gives: the setpoint rises with pressure, so vessels near the root, at higher
+pressure, run at higher shear and are slightly narrower than the pure law asks.
+
+### Branching exponent of a human liver: not yet measurable
+
+The liver of donor LADAF-2020-27 was analysed at full resolution (157 µm) in
+40 overlapping blocks, with the radius of each branch read just outside its
+junction (1.2 to 3 junction radii from the centre), which is what densely
+branching vessels allow. Over 112 bifurcations the median exponent is 2.32
+(95 % interval 1.99 to 2.42), but that number is not a measurement of the
+tree. It moves from 1.6 to 4.4 as the minimum radius required of the smaller
+daughter rises from 1.5 to 3 voxels, and it splits by geometry: 3.37 where a
+trunk continues and gives off a side branch, 1.92 where a vessel divides. An
+exponent below 2 at a division means the daughters carry more cross-section
+than their parent, which points to the parent being measured short.
+
+The likely cause is that the vessels of an organ imaged ex vivo are empty and
+flatten, the large veins most, and a distance transform reads the minor
+half-axis of a flattened lumen rather than its radius. The bias grows with
+size and differs between branch geometries, which is the pattern observed.
+The earlier figure of 2.87 to 3.02 at 314 µm rests on the same radius and is
+withdrawn with it. The exponent becomes measurable with a radius that does not
+depend on flattening: the perimeter of a collapsed thin-walled tube is
+preserved where its area and minor axis are not, so a perimeter-equivalent
+radius on cross-sections normal to the centreline is the next step, with the
+portal and hepatic venous trees analysed separately.
+
+### Withdrawn
+
+- Equation 15 as an upper bound on contraction. It is the weak-feedback limit.
+- A resonance of vascular disorder in the calibre relaxation rate, an
+  artefact of three errors in the open engine.
+- An early-history lock-in as the source of spread in the closed model; it
+  was the random root.
+- Exact conservation of variance under exhaustion and limiting pool as a
+  result of the open engine, where it is built in. In the closed model a
+  budget without loss does pass its pool's spread whole (1.12, interval
+  0.85 to 1.33), while a pool with loss passes 0.59.
+- A diagonal transmission in which each closure mode filters the other's
+  variable. The setpoint passes in every regime.
+- A branching exponent of 2.87 to 3.02 in a human liver; the radius behind
+  it reads the minor axis of flattened vessels.
+- $N \propto V^{0.64}$ as a law of the closed model; the organs did not fill
+  their domains.
+- A difference between spread in maturity and in growth rate under capacity
+  closure; it came from the progenitor overdraft.
+
+### Open
+
+- Whether the liver window closes by capacity, as §5 has it when it
+  eliminates $\sigma(t)$, or by signal decay, as the closure table has it.
+  The open engine could not satisfy both the measured contraction and closure
+  within the run.
+- The size sweep on the closed model (`make closed`), which needs several
+  minutes per size and replicate and is for a multicore machine.
+- The human partition of Figure 6 as a prediction: two kidneys of one
+  individual share its parameters, differ in domain and seeds, and the
+  fractions of variance between and within individuals follow from the
+  transmission above once the input spreads are fixed independently.
+- The density, reach and kill distance of the mesenchymal signal are set,
+  not measured.
+- The kidney's setpoint elasticity from the race between conversion and
+  loss.
+- What holds 85 % of the liver's leftover pool at tips whose supply exceeds
+  the threshold.
+- Independent measures of systemic and local input spreads, which turn the
+  partition formula into a prediction.
+- Why the model's floor of spread (0.108) lies above the mouse liver's
+  final spread (0.074), and whether a signal-timed stop closes the gap.

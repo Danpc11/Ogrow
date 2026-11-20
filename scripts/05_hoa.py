@@ -11,8 +11,13 @@ OUT = ROOT / "results"; OUT.mkdir(exist_ok=True)
 tgt = CFG["hoa"]["target_um"][organ]
 mx = CFG["hoa"]["max_slices"][organ]
 
+files = sorted(glob.glob(str(ROOT / "data" / "hoa" / f"*{organ}*complete*.zip")))
+if not files:
+    print(f"  skipped: no {organ} volumes in data/hoa (see data/README.md)")
+    raise SystemExit(0)
+
 keep, rejected, seen = [], [], set()
-for f in sorted(glob.glob(str(ROOT / "data" / "hoa" / f"*{organ}*complete*.zip"))):
+for f in files:
     b = os.path.basename(f)
     m = re.match(r'_(\d+_?\d*)um_([A-Za-z0-9-]+(?:_\d+)?)_%s-?(\w*)_' % organ, b)
     if not m:
@@ -35,6 +40,25 @@ for f in sorted(glob.glob(str(ROOT / "data" / "hoa" / f"*{organ}*complete*.zip")
     except Exception as exc:
         rejected.append(dict(donor=key[0], part=key[1], reason=str(exc)))
         print(f"  drop {key[0]:>14} {key[1]:>8}  {exc}", flush=True)
+
+# Outlier rule, applied after the per-volume gate: a volume whose organ
+# volume or sphericity sits more than outlier_z cohort standard deviations
+# from the cohort mean is dropped and recorded with its z.
+zmax = float(CFG["hoa"]["outlier_z"])
+if len(keep) >= 4:
+    import numpy as np
+    for key in ("volume_mm3", "sphericity"):
+        v = np.array([k[key] for k in keep], float)
+        sd = v.std(ddof=1)
+        if sd <= 0:
+            continue
+        z = (v - v.mean()) / sd
+        out = [i for i in range(len(keep)) if abs(z[i]) > zmax]
+        for i in sorted(out, reverse=True):
+            k = keep.pop(i)
+            rejected.append(dict(donor=k["donor"], part=k["part"],
+                                 reason=f"outlier: |z| = {abs(z[i]):.1f} on {key}"))
+            print(f"  drop {k['donor']:>14} {k['part']:>8}  outlier |z| = {abs(z[i]):.1f} on {key}")
 
 json.dump(keep, open(OUT / f"hoa_{organ}.json", "w"), indent=1)
 with open(OUT / f"hoa_rejected_{organ}.csv", "w", newline="") as fh:

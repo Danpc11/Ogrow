@@ -18,12 +18,15 @@ the file names, so do not rename them.
 | S-20-28 | - | 10.15151/ESRF-DC-2008212555 |
 | S-20-29 | - | 10.15151/ESRF-DC-1773965411 |
 
-## Heart and lung
+## Lung
 
-The heart and lung cohorts are listed in `data/datasets_heart.csv` and
-`data/datasets_lung.csv` with the same fields. Donor metadata, including the
-clinical context that qualifies each cohort, come from the JSON file that
-accompanies every dataset on the portal.
+The lung volumes are the FO-20 donors on the portal; `scripts/05_hoa.py lung`
+lists each one as it processes it, and no separate index file is shipped.
+Donor metadata, including the clinical context that qualifies the cohort, come
+from the JSON file that accompanies every dataset on the portal.
+
+The heart is outside the scope of the theory (`THEORY.md` §1) and is not
+processed.
 
 ## TRUSTED (kidney, clinical CT, 48 donors)
 

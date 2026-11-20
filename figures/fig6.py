@@ -17,10 +17,47 @@ MM = F.MM
 
 
 
-if not (RES / "partition.json").exists():
-    raise SystemExit("Fig6 skipped: needs the human cohort (see data/README.md)")
-P = json.load(open(RES / "partition.json"))
-D = json.load(open(RES / "trusted_split.json"))
+def _from_source_data():
+    """Rebuild the two inputs from the versioned tables in source_data/.
+
+    The cohort is not redistributed, but the per-kidney invariants and the
+    partition are, so the figure can be drawn without it.
+    """
+    import csv
+    SD = ROOT / "source_data"
+    rows = list(csv.DictReader(open(SD / "Fig6bc_variance_partition.csv")))
+    dist = {r["quantity"]: float(r["value"])
+            for r in csv.DictReader(open(SD / "Fig6a_within_between_distances.csv"))}
+    per = {r["invariant"]: dict(between_frac=float(r["between_donor_fraction"]),
+                                lr_rel_diff=float(r["left_minus_right_pct"]),
+                                n_left_greater=int(r["n_left_greater"]),
+                                n_pairs=int(r["n_pairs"]),
+                                p_sign=float(r["p_sign"]),
+                                p_wilcoxon=float(r["p_wilcoxon"]))
+           for r in rows}
+    P = dict(per_invariant=per, ratio=dist["ratio"],
+             p_permutation=dist["p_value"], null_sd=dist["permutation_null_sd"],
+             alpha_bonferroni=0.05 / len(per))
+    D = {}
+    for r in csv.DictReader(open(SD / "Fig6_kidney_invariants.csv")):
+        D[r["kidney"]] = dict(pid=r["donor"], side=r["side"],
+                              volume_cm3=float(r["volume_cm3"]),
+                              surface_cm2=float(r["surface_cm2"]),
+                              sphericity=float(r["sphericity"]),
+                              elong=float(r["elongation"]),
+                              flat=float(r["flatness"]),
+                              surf_vol=float(r["surface_per_volume"]))
+    return P, D
+
+
+if (RES / "partition.json").exists() and (RES / "trusted_split.json").exists():
+    P = json.load(open(RES / "partition.json"))
+    D = json.load(open(RES / "trusted_split.json"))
+elif (ROOT / "source_data" / "Fig6bc_variance_partition.csv").exists():
+    print("Fig6: cohort absent, drawing from source_data/")
+    P, D = _from_source_data()
+else:
+    raise SystemExit("Fig6 skipped: needs the human cohort or source_data/")
 PRETTY = {"volume_cm3": "Volume", "surface_cm2": "Surface",
           "sphericity": "Sphericity", "elong": "Elongation",
           "flat": "Flatness", "surf_vol": "Surface / volume"}
@@ -51,15 +88,12 @@ for i, x in enumerate((16, 58)):
                  color="white", fontweight="bold")
 axa.add_patch(FancyArrowPatch((24, 57), (35, 57), arrowstyle="<|-|>",
                               mutation_scale=5, lw=0.8, color=K["liver"]))
-axa.text(29, 51, "within", ha="center", fontsize=6.0, color=K["liver"])
+axa.text(29, 54, "within", ha="center", va="top", fontsize=6.0, color=K["liver"])
 axa.add_patch(FancyArrowPatch((29, 82), (71, 82),
                               connectionstyle="arc3,rad=-0.28",
                               arrowstyle="<|-|>", mutation_scale=5, lw=0.8,
                               color=K["kidney"]))
 axa.text(50, 88, "between", ha="center", fontsize=6.0, color=K["kidney"])
-axa.text(50, 38, "what the individual fixes appears\nbetween donors; what the "
-                 "organ's\nsurroundings fix appears within one",
-         ha="center", va="center", fontsize=6.1)
 axa.text(50, 16, "ratio %.2f    $P$ = %.4f" % (P["ratio"], P["p_permutation"]),
          ha="center", fontsize=6.4, color=K["ink"], fontweight="bold")
 axa.text(50, 7, "permutation null 1.00 $\\pm$ %.2f" % P["null_sd"],
@@ -98,7 +132,7 @@ for i, o in enumerate(o2):
     p = P["per_invariant"][keys[o]]["p_wilcoxon"]
     ptxt = "$P$ < 0.0001" if p < 1e-4 else "$P$ = %.4f" % p
     sig = p < P["alpha_bonferroni"]
-    axc.text(rel[o] + 0.6, i, "%d/%d, %s%s" % (nL[o], npair, ptxt,
+    axc.text(max(rel[o], 0) + 0.6, i, "%d/%d, %s%s" % (nL[o], npair, ptxt,
              "  *" if sig else ""), va="center", ha="left",
              fontsize=F.SZ["small"] - 0.5,
              color=K["ink"] if sig else K["grey"])
@@ -156,10 +190,7 @@ for name, what, act, col in rows:
     axe.text(7, y - 21, act, fontsize=F.SZ["small"], va="center",
              color=col, style="italic")
     y -= 28
-axe.text(50, -6, "a construct can reach its mass target and\n"
-                 "still not match native proportions",
-         ha="center", fontsize=5.9, color=K["grey"], style="italic",
-         clip_on=False)
+
 
 F.panel_grid(fig, [[axa, axb], [axc, axd, axe]],
              ["a", "b", "c", "d", "e"])
