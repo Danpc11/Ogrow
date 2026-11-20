@@ -119,9 +119,9 @@ hypertensive; the lung cohort is COVID-19. Reported variability is an upper
 bound on developmental variability.
 
 **The pairwise distance in invariant space is self-normalising.** Dividing by
-the cohort's own spread makes the expected distance sqrt(2) for any
-exchangeable sample, so that value is a property of the metric, not a
-measurement.
+the cohort's own spread makes the mean squared distance 2 for any
+exchangeable sample (and the mean distance at most sqrt(2)), so that value is
+a property of the metric, not a measurement.
 
 **Absolute timings in Figure 1E are machine-dependent.**
 
@@ -137,5 +137,6 @@ enters and to each sprouting rule is reported in `THEORY.md` §13, Robustness.
 the terminal branch whose end is closest to it, not by the branch it is
 closest to along the tree or by hydraulic resistance. Where branches pass
 close to each other a unit can change territory. Assignment by vascular
-territory (`assign_mode="segment"`) moves 9 to 31 % of the liver's units and
+territory (`assign_mode="segment"`, exact projection on segments) moves 19 to
+25 % of the liver's units and
 leaves the closure modes and the pancreas-liver contrast unchanged.

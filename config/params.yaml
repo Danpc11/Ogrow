@@ -111,14 +111,14 @@ closed:                  # src/organgrow/closed.py, the closed model (not yet in
   # A junction occupies tissue. Vessel volume alone is degenerate in the
   # branching number, so without this term nothing stops a tip dividing; the
   # steric cost of the junction is what makes the network finite.
-  junction_cost: 100.0   # junction volume as a multiple of r^3. A branch
-                         # buys reach, not conductance: two daughters at the
-                         # cost-law ratio conduct 2*2^(-4/(b+2)) of the
-                         # parent, which is less than one. What a split buys
-                         # is the tissue it relieves, and the junction's own
-                         # volume is what that has to beat. Without this term
-                         # the tree runs to whatever max_vessels happens to
-                         # be, which is an implementation number, not physics.
+  junction_cost: 4.18879 # volume of a junction in units of r^3: a sphere of
+                         # the junction's radius, 4 pi / 3. It is geometry, not
+                         # a tuned number. The same volume enters the sprouting
+                         # stop and the calibre feedback, so both read one
+                         # measure of vascular space. (Earlier versions used
+                         # 100, chosen to stop branching; counted as space it
+                         # filled 42 % of the budget and pinned two thirds of
+                         # the vessels at the critical radius.)
   shrink: 0.25           # regression tendency in the calibre law
   tau_set_fraction: 0.3  # setpoint as a fraction of the shear peak at the design point
   daughter_ratio: 0.79   # radius of a sprout relative to its parent

@@ -139,6 +139,35 @@ try:
 except ValueError:
     check("unknown root site raises", True)
 
+# the critical radius satisfies tau'(r_c) = 0 and tau''(r_c) < 0 analytically
+_l, _G = 2.0, 0.5
+_rc = (_l * _G / 3.0) ** 0.25
+_tau = lambda r: (1.0 / (_l / r ** 4 + 1.0 / _G)) / r ** 3
+_h = 1e-4 * _rc
+_d1 = (_tau(_rc + _h) - _tau(_rc - _h)) / (2 * _h)
+_d2 = (_tau(_rc + _h) - 2 * _tau(_rc) + _tau(_rc - _h)) / _h ** 2
+check("shear has zero slope and negative curvature at r_c",
+      abs(_d1) < 1e-6 * _tau(_rc) / _rc and _d2 < 0, f"tau' {_d1:.2e}, tau'' {_d2:.2e}")
+# hydraulic consistency: the flow the root draws is the flow the tissue takes
+t3 = VascularTree(np.zeros(3), np.array([0.0, 1.0, 0.0]), 1.0)
+t3.add(0, np.array([0.0, 1.0, 0.0]), np.array([0.0, 2.0, 0.0]), 0.7)
+t3.add(0, np.array([0.0, 1.0, 0.0]), np.array([1.0, 1.0, 0.0]), 0.6)
+t3.add(1, np.array([0.0, 2.0, 0.0]), np.array([0.0, 3.0, 0.0]), 0.5)
+loads = {0: 0.1, 2: 0.4, 3: 0.3}
+t3.perfuse(loads)
+taken = sum(t3.pressure_out[k] * g for k, g in loads.items())
+check("root flow equals the flow the tissue takes", abs(t3.flow[0] - taken) < 1e-9 * t3.flow[0],
+      f"root {t3.flow[0]:.6f}, tissue {taken:.6f}")
+# progenitor accounting with division: P0 + born = units + left + lost
+acc = []
+for k in range(2):
+    U_, m_, vt_, tr_ = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z / 0.6), 114,
+                             days=50, rng=np.random.default_rng(20 + k), nu=8.0, q_set=0.6,
+                             rho=0.05, delta=0.03, P0=40.0, R_unit=650.0,
+                             units_per_branch=650 / 600.0, max_vessels=3000)
+    acc.append(40 + tr_.born[-1] - (len(U_) + int(round(tr_.P[-1])) + tr_.lost[-1]))
+check("progenitors balance with division and loss", all(a == 0 for a in acc), f"{acc}")
+
 print()
 if FAIL:
     print("FAILED:", ", ".join(FAIL))

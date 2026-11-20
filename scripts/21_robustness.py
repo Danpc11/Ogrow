@@ -55,7 +55,7 @@ def run(variant, reg, seed, sign):
                         days=DAYS, rng=np.random.default_rng(seed), nu=NU,
                         **FIX, **p, **VARIANTS[variant])
     r = dict(N=len(U), vessels=len(vt), territory_diff=tr.final["territory_diff"],
-             **tr.bound[-1])
+             **tr.closure)
     json.dump(r, open(f, "w"))
     return r
 

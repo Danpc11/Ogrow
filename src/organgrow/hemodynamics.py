@@ -113,10 +113,15 @@ class VascularTree:
 
     # ----------------------------------------------------------- conductance
     def conductance(self):
-        """Effective conductance from the root, by series-parallel reduction.
+        """Effective conductance from the root with open-drain tips.
 
         Walking leaves to root, each segment's downstream conductance is its
-        own in series with the parallel sum of its daughters'.
+        own in series with the parallel sum of its daughters', and a tip with
+        nothing below it drains at its own conductance. This is the boundary
+        condition of the open engine (engine.py), which spreads tissue along
+        tips. The closed model uses perfuse() instead, where a tip without
+        tissue is a dead end and tissue loads are explicit; the two give
+        different conductances for the same tree by design.
         """
         n = len(self.parent)
         r = np.asarray(self.radius)
@@ -228,6 +233,7 @@ class VascularTree:
 
     def relax(self, tau_set, rate=0.12, r_min=0.25, r_max=60.0,
               volume_budget=None, crowding=1.0, pressure_exp=0.0, p_in=1.0,
+              junction_cost=0.0,
               pressures=None, shrink=0.0):
         """Adapt each radius toward its shear setpoint, stably.
 
@@ -246,7 +252,9 @@ class VascularTree:
         if volume_budget:
             # mural mass costs space the parenchyma needs, so a crowded organ
             # runs its vessels at higher shear rather than widening them
-            phi = min(self.volume() / volume_budget, 0.999)
+            # the same measure of vascular space as the sprouting stop:
+            # lumens plus junctions
+            phi = min(self.volume(junction_cost) / volume_budget, 0.999)
             tau_set = tau_set / max(1.0 - phi, 1e-3) ** crowding
         ts = np.maximum(np.asarray(tau_set, float), 1e-9)
         # Shear-only adaptation with a power-law target is unstable: the

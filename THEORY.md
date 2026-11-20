@@ -495,7 +495,8 @@ range. The engine uses $b = 0.9$.
 ### A branch buys reach, not conductance
 
 Two daughters at the cost-law ratio conduct $2 \cdot 2^{-4/(b+2)}$ of their
-parent, which is 0.77 at $b = 0.9$ and below one for every $b$. Dividing a
+parent, which is 0.77 at $b = 0.9$ and below one for every $b < 2$, which includes the
+measured range. Dividing a
 tip always loses conductance. What it gains is the tissue it can serve, so a
 split is worth making when the tissue it relieves exceeds the tissue its
 junction occupies. Vessel volume alone is flat in the branching number, and
@@ -762,15 +763,25 @@ vascular territory, the nearest segment and then the nearest tip in its
 subtree, instead of the nearest tip in space. Six seeds per regime and
 variant (`scripts/21_robustness.py`).
 
-The closure modes hold in all eight: the kidney spends its pool; the pancreas
-spends 61 to 91 % and holds the rest by supply; the liver spends 3 to 15 % and
-holds the rest by supply (42 to 62 %) and by lack of room (24 to 47 %). The
-pool elasticity is higher in the pancreas than in the liver in all eight
-(z ≥ 2.3 in six, 1.4 with the root at the surface, 0.9 without load-driven
-sprouting), but the liver and the kidney cannot be told apart (z between −0.1
-and 0.7 in five variants); with a random root or without load-driven sprouting
-the liver's elasticity carries a standard error of 0.5 to 0.7. Between 9 and
-31 % of the liver's units change territory between the two assignment rules
+Version 4.5 measures the vascular space with one quantity wherever it acts
+(lumens plus junctions, for the sprouting stop and for the calibre feedback;
+version 4.4 used lumens alone in the second), takes the volume of a junction
+from its geometry, a sphere of its radius ($4\pi r^3/3$, where earlier versions
+used $100\,r^3$, chosen to stop branching), and estimates the room left at a
+tip from trial placements independent of the dynamics. With the old junction
+volume counted as space, 42 % of the budget was filled and two thirds of the
+vessels sat at the critical radius, with Murray ratios of 0.5 to 0.7; with the
+geometric volume the tree still stops on its own and the ratio returns to 0.9.
+
+The closure modes hold in all eight variants: the kidney spends its pool; the
+pancreas spends 55 to 88 % and holds the rest by supply; the liver spends 7 to
+15 % and holds the rest mostly by supply (61 to 75 %) and partly by lack of
+room (15 to 32 %). The pool elasticity is higher in the pancreas than in the
+liver in all eight (z from 2.3 to 8.3 in six; 1.4 with a random root and 1.2
+without load-driven sprouting). The kidney lies between them at every setting
+of the reference rules (liver +0.13 to +0.26, kidney +0.35 to +0.40, pancreas
++0.61 to +0.70) but is not separated from the liver robustly. Between 19 and
+25 % of the liver's units change territory between the two assignment rules
 without changing these conclusions.
 
 ### Murray's relation in grown trees

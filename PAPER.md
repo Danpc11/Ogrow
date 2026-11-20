@@ -1,7 +1,7 @@
 # The paper: framework, claims and evidence
 
 Target: *Frontiers in Cell and Developmental Biology*, Hypothesis and Theory.
-Reference model: version 4.4 (`src/organgrow/closed.py`). Every number from
+Reference model: version 4.5 (`src/organgrow/closed.py`). Every number from
 the model that the paper uses is in `PAPER_NUMBERS.md`, written by
 `make paper` with the version and commit that produced it; this file does not
 copy model numbers by hand. Numbers given here are either data (the human
@@ -31,8 +31,9 @@ the difference does not depend on the auxiliary rules.** One nucleation law,
 with supply, progenitors and room local to each tip, gives organs that close
 in different ways: the kidney spends its pool; the pancreas spends most of it
 and keeps the rest at tips short of supply; the liver keeps nearly all of it,
-held both at tips short of supply and at tips with no room. Read from the
-distribution of the pool over tips at closure, not from a mean. The three
+mostly at tips short of supply and partly at tips with no room. Read from the distribution of the pool over tips at
+closure, with the room left at each tip tested by trial placements that do
+not depend on the dynamics, not from a mean. The three
 closure modes persist in each of eight variants: the vascular root at the
 deepest point, at the surface or at random; each of the four sprouting rules
 removed in turn; and units assigned by vascular territory instead of by
@@ -44,8 +45,8 @@ pancreas than in the liver in all eight variants, significantly in six. This
 is the pattern found experimentally by Stanger, Tanaka and Melton (*Nature*
 2007): halving pancreatic progenitors halved the pancreas, which never
 compensated, while the liver did. The model was not fitted to that
-experiment. The kidney, which spends its pool against loss, transmits about
-as little as the liver, so the model does not order all three organs.
+experiment. The model does not separate the kidney, which spends its pool
+against loss, from the liver robustly, so it does not order all three organs.
 `PAPER_NUMBERS.md`, Transmission, Elasticities and Robustness; Figures 4, 5B and 5C.
 
 **4. One wall-cost exponent sets the vascular rules, and a branch buys reach,
@@ -53,7 +54,8 @@ not conductance.** Minimising $\mathcal{C} = Q^2/r^4 + k\,(p\,r^2)^b$ per unit
 length, with wall cross-section $\propto p\,r^2$ by Laplace's law, gives
 branching $r_p^{b+2} = \sum r_c^{b+2}$ and wall shear
 $\propto p^{b/2} r^{b-1}$. Two daughters conduct $2\cdot 2^{-4/(b+2)}$ of
-their parent, 0.77 at $b = 0.9$ and below one for every $b$. Shear on a
+their parent, 0.77 at $b = 0.9$ and below one for every $b < 2$, which includes the
+measured range. Shear on a
 segment in series with its tissue peaks at $r_c = (\ell/3R_t)^{1/4}$, below
 which a vessel closes. The Murray ratio in grown trees:
 `PAPER_NUMBERS.md`, Murray; Figure 6.
@@ -62,15 +64,16 @@ which a vessel closes. The Murray ratio in grown trees:
 relaxes as $\sigma^2(t) = \sigma_0^2 e^{-2\lambda t} + \sigma_\infty^2(1 - e^{-2\lambda t})$,
 with weak-feedback limit $\mathrm{CV}_i/\mathrm{CV}_f = (N_f/N_i)^2$, which
 gives 3.31 for the mouse liver against 3.09 measured (Azizoglu et al. 2025).
-The model closes at a spread close to the mouse liver's final one, from a
-larger initial spread of its own: `PAPER_NUMBERS.md`, Contraction; Figure 7.
+The model contracts more than the mouse liver, from a larger initial spread
+of its own to a smaller final one: `PAPER_NUMBERS.md`, Contraction; Figure 7.
 
 ## Predictions for experiment
 
-- **Two holds on the liver's progenitors.** At the end of hepatic growth,
-  residual progenitors should split between sites short of perfusion and
-  sites crowded by existing units, and relieving either one alone should
-  release only part of them.
+- **The liver's progenitors are held mostly by perfusion.** At the end of
+  hepatic growth, residual progenitors should sit mostly where perfusion is
+  short and partly where existing units leave no room; raising local
+  perfusion should release most of them, and adding progenitors should not
+  enlarge the liver.
 - **A budget organ tracks its progenitors.** Pancreas size should scale with
   progenitor number, as observed, while the liver's should not; a kidney whose
   progenitors are also lost during induction should track them weakly.
@@ -100,13 +103,13 @@ The model's parameters are chosen, not fitted; the one calibration is the
 mouse contraction. Results come from one domain scale, so the model's
 contingent spread cannot stand in for a human organ's. The time step is one
 day and has not been varied. The pool elasticity of the liver is not
-measurable when the root is placed at random or load-driven sprouting is
-removed (s.e. 0.5 to 0.7). The
+measurable without load-driven sprouting (s.e. 0.55), and the pancreas-liver
+contrast is not significant with a random root. The
 human data give shape and size but no unit counts, so model and cohort meet
 only through the partition formula, which awaits independent input spreads.
 
 ## Before submission
 
 1. Commit, then `make test` and `make paper` on that commit, so that
-   `PAPER_NUMBERS.md` names version 4.4 and a clean commit.
+   `PAPER_NUMBERS.md` names version 4.5 and a clean commit.
 2. Write the manuscript from this file, `PAPER_NUMBERS.md` and `FIGURES.md`.

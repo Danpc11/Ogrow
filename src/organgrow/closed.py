@@ -52,7 +52,7 @@ with the conductance below it is not monotone in the radius: tau = Q / r^3
 rises while the segment's own resistance dominates and falls once the
 tissue's does, with a maximum at
 
-    r_c = (3 l / R_below)^(1/4)
+    r_c = (l / (3 R_below))^(1/4)
 
 Below r_c the calibre feedback is positive and the vessel closes; above it
 the vessel holds. It is computed per segment at every step from the real
@@ -80,6 +80,8 @@ class Trace:
     mass: list = field(default_factory=list)
     vessels: list = field(default_factory=list)
     lost: list = field(default_factory=list)   # progenitors lost, cumulative
+    born: list = field(default_factory=list)   # progenitors born, cumulative
+    closure: dict = field(default_factory=dict)  # closure_by_trials at the end
     Q: list = field(default_factory=list)      # total flow through the root
     bound: list = field(default_factory=list)   # "growing", "supply" or "progenitor"
 
@@ -106,9 +108,16 @@ def _assign(vt, U, tips, scale, mode):
         raise ValueError(f"unknown assign_mode {mode!r}")
     par = np.asarray(vt.parent)
     starts = np.where(par[:, None] >= 0, ends[np.maximum(par, 0)], ends)
-    ts = np.linspace(0.0, 1.0, 6)
-    pts = (starts[:, None, :] + ts[None, :, None] * (ends - starts)[:, None, :]).reshape(-1, 3)
-    seg = np.repeat(np.arange(len(par)), len(ts))[cKDTree(pts).query(U)[1]]
+    # exact distance from each unit to each straight segment: project, clip
+    # the projection to the segment, measure
+    ab = ends - starts
+    L2 = np.maximum((ab ** 2).sum(1), 1e-12)
+    seg = np.empty(len(U), int)
+    for a0 in range(0, len(U), 256):
+        u = U[a0:a0 + 256][:, None, :]
+        t = np.clip(((u - starts[None]) * ab[None]).sum(-1) / L2[None], 0.0, 1.0)
+        d2 = ((u - (starts[None] + t[..., None] * ab[None])) ** 2).sum(-1)
+        seg[a0:a0 + 256] = np.argmin(d2, axis=1)
     kids = [[] for _ in range(len(par))]
     for k in range(1, len(par)):
         kids[par[k]].append(k)
@@ -156,6 +165,45 @@ def closure_state(P, q, vt, q_set, tried, no_room, P_initial):
                 supply_held=float(below / tot0),
                 space_held=float(held[blocked].sum() / tot0),
                 active=float(held[above & ~blocked].sum() / tot0))
+
+
+def closure_by_trials(P, q, vt, q_set, U, sdf_scaled, scale, spread, lam, nu,
+                      P_initial, n_trials=40, seed=12345):
+    """Where the pool stands at closure, with room tested rather than inferred.
+
+    For every tip that holds progenitors and has supply above the threshold,
+    n_trials placements are drawn with an independent generator, around the
+    tip as nucleation draws them, and the share that would land inside the
+    organ and at least lam from every unit estimates its placement
+    probability p. Its pool counts as held by room in proportion 1 - p and as
+    active in proportion p. Pool at tips at or below the threshold is held by
+    supply. The residual nucleation capacity is
+    sum nu P (q - q_set)+ p. This does not depend on what one stochastic day
+    happened to try.
+    """
+    rng = np.random.default_rng(seed)
+    par = np.asarray(vt.parent)
+    n = len(par)
+    held = np.array([P.get(k, 0.0) for k in range(n)], float)
+    # tips born on the last day have no supply yet: they take their parent's
+    qq = np.empty(n)
+    qq[:len(q)] = np.asarray(q, float)[:n]
+    for k in range(len(q), n):
+        qq[k] = qq[par[k]]
+    tree = cKDTree(U) if len(U) else None
+    supply = held[qq <= q_set].sum(); room = active = lam_eff = 0.0
+    for i in np.flatnonzero((qq > q_set) & (held > 0)):
+        c = vt.end[i] * scale + rng.normal(0, spread, (n_trials, 3))
+        ok = np.array([sdf_scaled(*x) < 0 for x in c])
+        if tree is not None and ok.any():
+            ok[ok] = tree.query(c[ok])[0] >= lam
+        p = float(ok.mean())
+        room += held[i] * (1 - p); active += held[i] * p
+        lam_eff += nu * held[i] * (qq[i] - q_set) * p
+    tot0 = max(P_initial, 1e-9)
+    return dict(spent=float(max(1.0 - held.sum() / tot0, 0.0)),
+                supply_held=float(supply / tot0), space_held=float(room / tot0),
+                active=float(active / tot0), residual_rate=float(lam_eff))
 
 
 def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
@@ -316,6 +364,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
     P = {0: int(round(P0))}           # progenitor count per tip
     Ptot0 = float(P[0])
     lost = 0                          # progenitors lost, cumulative
+    born = 0                          # progenitors born, cumulative
     tr = Trace()
     leak = m_leak ** xi / R0          # what a tip carries before its first unit
 
@@ -365,7 +414,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
         vt.relax(tau_set, rate=eta, pressure_exp=pressure_exp, p_in=dP,
                  pressures=0.5 * (p_in + p_out),
                  r_min=vt.r_crit, r_max=r_max_factor * r_eq, shrink=shrink,
-                 volume_budget=vol_budget, crowding=crowding)
+                 volume_budget=vol_budget, crowding=crowding, junction_cost=junction_cost)
 
         # ---- nucleation: one law, demographic noise ------------------------
         new_pos, new_tip = [], []
@@ -405,10 +454,11 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
             # progenitors are spent by the units made, not by the ones refused;
             # the survivors then divide and die as independent events
             left = int(Pi) - placed
-            born = int(rng.binomial(left, min(rho, 1.0))) if rho > 0 and left else 0
+            born_i = int(rng.binomial(left, min(rho, 1.0))) if rho > 0 and left else 0
             died = int(rng.binomial(left, min(delta, 1.0))) if delta > 0 and left else 0
             lost += died
-            P[i] = left + born - died
+            born += born_i
+            P[i] = left + born_i - died
         if new_pos:
             U = np.vstack([U, np.asarray(new_pos)])
             m = np.concatenate([m, np.full(len(new_pos), m0)])
@@ -564,13 +614,15 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
         # q was read at the start of the day, before any sprout was added
         live = [i for i in active if n_at[i] > 0] or tips
         qbar = float(np.mean(q[live]))
-        tr.t.append(day); tr.N.append(len(U)); tr.P.append(Ptot); tr.lost.append(lost)
+        tr.t.append(day); tr.N.append(len(U)); tr.P.append(Ptot); tr.lost.append(lost); tr.born.append(born)
         tr.q.append(qbar); tr.C.append(C); tr.mass.append(float(m.sum()))
         tr.vessels.append(len(vt))
         tr.Q.append(float(vt.flow[0]) if len(vt.flow) else 0.0)
         tr.bound.append(closure_state(P, q, vt, q_set, tried, no_room, Ptot0))
 
     # final state per node, for analyses that need where supply and pool sit
+    tr.closure = closure_by_trials(P, q, vt, q_set, U, lambda x, y, z: sdf(x / s, y / s, z / s),
+                                   scale, nucleation_spread * lam, lam, nu, Ptot0)
     _tips = vt.tips()
     _diff = (float(np.mean(_assign(vt, U, _tips, scale, "tip") != _assign(vt, U, _tips, scale, "segment")))
              if len(U) and len(_tips) else 0.0)

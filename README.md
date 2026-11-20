@@ -86,8 +86,9 @@ tree that either pursues demand or runs bundled with the primary tree, and unit
 growth limited by local supply.
 
 `metrics.py` computes distances in invariant space. Note the caution in
-`THEORY.md` §8: a self-normalised distance has expectation sqrt(2) for any
-exchangeable sample and is a test, not a measurement.
+`THEORY.md` §8: a self-normalised distance has mean square 2 (and so a mean of
+at most sqrt(2)) for any exchangeable sample, and is a test, not a
+measurement.
 
 `hoa_io.py`, `hoa_invariants.py`, `mask_invariants.py` and `qc.py` load the
 human cohorts, segment them, and gate the result; every rejected dataset is
