@@ -61,12 +61,13 @@ paper:
 	for r in liver kidney pancreas; do for s in ref nu_lo nu_hi q_lo q_hi; do \
 	  $(PY) scripts/19_elasticity.py $$r $$s 0 6; done; done
 	$(PY) scripts/19_elasticity.py
+	$(PY) scripts/21_robustness.py reference root_surface root_random no_deficit no_load no_crowding no_mesenchyme territory binomial binomial_half_day binomial_quarter_day competing_fates
+	$(PY) scripts/21_robustness.py
+	$(PY) scripts/22_interventions.py
+	# figures and tables last: they read every result above
 	$(PY) figures/fig_framework.py
 	$(PY) figures/fig_closed_paper.py
 	$(PY) figures/fig3_closed.py
 	$(PY) figures/fig6.py
 	$(PY) scripts/18_paper_tables.py
-	$(PY) scripts/21_robustness.py reference root_surface root_random no_deficit no_load no_crowding no_mesenchyme territory binomial binomial_half_day binomial_quarter_day competing_fates
-	$(PY) scripts/21_robustness.py
-	$(PY) scripts/22_interventions.py
 	$(PY) scripts/20_paper_numbers.py

@@ -5,7 +5,9 @@ Reference model: version 4.7 (`src/organgrow/closed.py`). Every number from
 the model that the paper uses is in `PAPER_NUMBERS.md`, written by
 `make paper` with the version and commit that produced it; this file does not
 copy model numbers by hand. Numbers given here are either data (the human
-cohort) or analytic.
+cohort) or analytic. Model numbers depend on the random stream, which numpy
+does not keep fixed across versions, so they are produced with the versions
+pinned in `requirements.txt` and recorded in the stamp.
 
 ## The hypothesis
 
@@ -41,17 +43,18 @@ deepest point, at the surface or at random; each of the four sprouting rules
 removed in turn; units assigned by vascular territory instead of by nearest
 tip; binomial nucleation with one, two and four steps a day; and division and
 loss as competing fates. Closure is stable in all three regimes: forty more
-days add 2 % to the liver and nothing to the others. It differs in whether it
-can be undone. Relieving perfusion (a 20 % lower threshold) or room (a 20 %
-shorter least spacing) on the day of closure restarts the liver's growth, by
-14 % and 29 % more units; nothing restarts the kidney's, whose pool is spent;
-the pancreas gains at most a few units. The shares of the pool held by each
+days add little to the liver and nothing to the others. It differs in whether
+it can be undone. Relieving perfusion (a 20 % lower threshold) or room (a 20 %
+shorter least spacing) on the day of closure restarts the liver's growth;
+nothing restarts the kidney's, whose pool is spent; the pancreas gains at most
+a few units (`PAPER_NUMBERS.md`, Interventions). The shares of the pool held by each
 constraint describe where the pool sits, not how much each constraint weighs:
 the liver is held by both. `PAPER_NUMBERS.md`, Regimes and Robustness; Figures 1, 3 and 5A.
 
 **3. Progenitor number reaches size more in a budget organ than in a liver.**
 The elasticity of the final unit count to the progenitor pool is higher in the
-pancreas than in the liver in all twelve variants, significantly in ten. This
+pancreas than in the liver in every variant, with the z of each in
+`PAPER_NUMBERS.md`, Robustness. This
 is the pattern found experimentally by Stanger, Tanaka and Melton (*Nature*
 2007): halving pancreatic progenitors halved the pancreas, which never
 compensated, while the liver did. The model was not fitted to that
