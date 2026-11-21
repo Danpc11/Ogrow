@@ -1,5 +1,7 @@
 # Growth of exchange organs, and the limit of what can be specified
 
+[![tests](https://github.com/Danpc11/Ogrow/actions/workflows/tests.yml/badge.svg)](https://github.com/Danpc11/Ogrow/actions/workflows/tests.yml)
+
 Code, data tables and figures for the manuscript.
 
 A generative model in which liver, kidney and pancreas grow from the same
@@ -23,8 +25,9 @@ kept for the record, are not the paper's, and should not be used to check it.
 ## Install and reproduce
 
     python3 -m venv .venv && source .venv/bin/activate
-    python3 -m pip install -r requirements.txt
+    python3 -m pip install -r requirements.txt -r requirements-dev.txt
     make test      # under a minute: derivations, conservation, closed model
+    make check     # static analysis; version and stamped numbers agree
     make paper     # the manuscript: about half an hour on one core
 
 No install step is needed: `make` puts `src` on `PYTHONPATH` and picks up

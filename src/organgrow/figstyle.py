@@ -11,7 +11,6 @@ is placed at 180 mm, so 7 pt here is 7 pt on the page; a figure declared at
 90 mm would be, so the same rcParams apply and nothing is rescaled.
 """
 import matplotlib as mpl
-import matplotlib.pyplot as plt
 
 MM = 1 / 25.4
 WIDTH_FULL = 180 * MM          # Nature double column

@@ -1,7 +1,6 @@
 """Figure 3 — window closure determines whether unit-number variance contracts."""
 import json
 import numpy as np
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
 

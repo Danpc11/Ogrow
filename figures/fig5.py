@@ -1,7 +1,6 @@
 """Figure 5 — structural identifiability determines what must be measured."""
 import json
 import numpy as np
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch
 

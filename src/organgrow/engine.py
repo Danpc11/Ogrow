@@ -305,7 +305,6 @@ def grow(kind, seed=0, days=None, P0=620.0, C0=None, snap_at=(10, 25, 45, 70),
         # mass hanging from it: using it as a per-unit supply term would make
         # a unit's ceiling proportional to its own mass. Only the distance to
         # the nearest vessel enters locally; the tree acts through C.
-        _rv = 1.0
         sup = cu * (np.exp(-_dv / _ENG["attenuation_length"])
                     if "shear" in rules else 1.0)
         marr = np.asarray(m)

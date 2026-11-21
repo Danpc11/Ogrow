@@ -6,7 +6,6 @@ redraw any panel from them without running the engine.
 """
 import csv
 import json
-from itertools import combinations
 import numpy as np
 from organgrow.config import CFG, ROOT
 

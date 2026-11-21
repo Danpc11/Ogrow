@@ -6,8 +6,6 @@ produces, so a stale caption cannot survive a rerun unnoticed.
 """
 import json
 import re
-from itertools import combinations
-from pathlib import Path
 import numpy as np
 from organgrow.config import CFG, ROOT
 

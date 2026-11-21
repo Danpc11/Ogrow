@@ -3,3 +3,6 @@ __version__ = "4.7.1"
 from .engine import grow, sdf, IDENTITY
 from .sim_invariants import invariants as sim_invariants
 from .metrics import epsilon, floor, effective_axes
+
+__all__ = ["grow", "sdf", "IDENTITY", "sim_invariants", "epsilon", "floor",
+           "effective_axes", "__version__"]

@@ -1,11 +1,10 @@
 """Figure 2 — the same engine generates liver, kidney and pancreas."""
 import numpy as np
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 from organgrow import sdf
 
 from organgrow import figstyle as F
-from organgrow.config import CFG, seeds
+from organgrow.config import CFG
 from organgrow.config import ROOT
 
 F.apply()

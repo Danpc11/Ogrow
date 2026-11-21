@@ -1,7 +1,6 @@
 """Figure 4 — a self-averaging criterion separates specifiable from irreducible."""
 import json
 import numpy as np
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch, Circle
 

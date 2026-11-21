@@ -1,4 +1,4 @@
-.PHONY: all clean distclean figures analyses audit source_data test closed paper
+.PHONY: all clean distclean figures analyses audit source_data test closed paper check
 PY ?= $(shell command -v python3 2>/dev/null || command -v python)
 # the package is importable from src without installing anything
 export PYTHONPATH := $(CURDIR)/src:$(PYTHONPATH)
@@ -32,6 +32,12 @@ figures: source_data
 
 test:
 	$(PY) tests/test_smoke.py
+
+# what CI runs besides the tests: static analysis, and that the version and
+# the stamped numbers of the paper agree
+check:
+	$(PY) -m pyflakes src scripts figures tests
+	$(PY) scripts/check_consistency.py
 
 # Exploratory runs from the development of the closed model, with parameters
 # from earlier versions. The paper does not use them; see `make paper`.
