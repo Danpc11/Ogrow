@@ -1,5 +1,5 @@
 """Generative growth of exchange organs, and the invariant-space metric."""
-__version__ = "4.6.0"
+__version__ = "4.7.0"
 from .engine import grow, sdf, IDENTITY
 from .sim_invariants import invariants as sim_invariants
 from .metrics import epsilon, floor, effective_axes

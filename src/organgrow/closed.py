@@ -224,7 +224,8 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
          max_units=None, max_vessels=None,
          attractor_density=None, attractor_reach=None, attractor_kill=None,
          root_site="deepest", assign_mode="tip",
-         nucleation="poisson_capped", substeps=1):
+         nucleation="poisson_capped", substeps=1, turnover="independent",
+         intervene_day=None, intervene=None, intervene_factor=0.8):
     """Grow one organ. `sdf(x, y, z)` is negative inside the domain.
 
     The identity parameters (nu, q_set, rho, delta, P0) are required; every
@@ -392,7 +393,21 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
     A = rng.uniform(-1, 1, (max(n_attr * 3, 10), 3)) * box
     A = A[np.array([sdf(*p) < 0 for p in A])][:n_attr]
 
+    spacing = lam                     # least distance between units
     for day in range(1, days + 1):
+        # A causal test of closure: on intervene_day the state is changed and
+        # growth continues. "supply" lowers the threshold by intervene_factor,
+        # which raises the hydraulic availability of every tip relative to it
+        # without touching the pool; "room" shrinks the least spacing between
+        # units by intervene_factor, which frees space without touching
+        # perfusion or the pool.
+        if intervene_day is not None and day == intervene_day:
+            if intervene == "supply":
+                q_set = q_set * intervene_factor
+            elif intervene == "room":
+                spacing = spacing * intervene_factor
+            else:
+                raise ValueError(f"unknown intervention {intervene!r}")
         s = 1.0 + s_rate * day        # the body grows the space, not the supply
         tips = vt.tips()
         # Each unit is fed by the terminal branch nearest to it. Units used to
@@ -464,10 +479,10 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                     if sdf(c[0] / s, c[1] / s, c[2] / s) >= 0:
                         no_room[i] += 1
                         continue
-                    if len(U) and np.min(((U - c) ** 2).sum(-1)) < lam * lam:
+                    if len(U) and np.min(((U - c) ** 2).sum(-1)) < spacing * spacing:
                         no_room[i] += 1
                         continue
-                    if new_pos and np.min(((np.asarray(new_pos) - c) ** 2).sum(-1)) < lam * lam:
+                    if new_pos and np.min(((np.asarray(new_pos) - c) ** 2).sum(-1)) < spacing * spacing:
                         no_room[i] += 1
                         continue
                     new_pos.append(c); new_tip.append(i)
@@ -475,8 +490,22 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                 # progenitors are spent by the units made, not by the ones refused;
                 # the survivors then divide and die as independent events
                 left = int(Pi) - placed
-                born_i = int(rng.binomial(left, min(rho * dt, 1.0))) if rho > 0 and left else 0
-                died = int(rng.binomial(left, min(delta * dt, 1.0))) if delta > 0 and left else 0
+                if turnover == "independent":
+                    born_i = int(rng.binomial(left, min(rho * dt, 1.0))) if rho > 0 and left else 0
+                    died = int(rng.binomial(left, min(delta * dt, 1.0))) if delta > 0 and left else 0
+                elif turnover == "competing":
+                    # one fate per progenitor per step: divide, be lost, or
+                    # neither, with hazards rho and delta competing
+                    if left and rho + delta > 0:
+                        pe = 1.0 - np.exp(-(rho + delta) * dt)
+                        born_i, died, _ = rng.multinomial(
+                            left, [pe * rho / (rho + delta), pe * delta / (rho + delta),
+                                   1.0 - pe])
+                        born_i, died = int(born_i), int(died)
+                    else:
+                        born_i = died = 0
+                else:
+                    raise ValueError(f"unknown turnover {turnover!r}")
                 lost += died
                 born += born_i
                 P[i] = left + born_i - died
@@ -643,7 +672,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
 
     # final state per node, for analyses that need where supply and pool sit
     tr.closure = closure_by_trials(P, q, vt, q_set, U, lambda x, y, z: sdf(x / s, y / s, z / s),
-                                   scale, nucleation_spread * lam, lam, nu, Ptot0)
+                                   scale, nucleation_spread * lam, spacing, nu, Ptot0)
     _tips = vt.tips()
     _diff = (float(np.mean(_assign(vt, U, _tips, scale, "tip") != _assign(vt, U, _tips, scale, "segment")))
              if len(U) and len(_tips) else 0.0)

@@ -2,30 +2,18 @@
 
 Code, data tables and figures for the manuscript.
 
-A generative model in which liver, kidney, pancreas and lung emerge from the
-same local rules, with organ identity entering as a single parameter — how the
-fabrication window closes. Paired human kidneys then separate the variation in
-a real organ into what the individual fixes, what its surroundings fix, and
-what is contingent.
+A generative model in which liver, kidney and pancreas grow from the same
+local rules: a tree whose tips hold supply, progenitors and room, and one
+nucleation law. Organs differ in which local resource stops their growth, and
+that decides which individual variation reaches their size. Paired human
+kidneys show how variation in a real organ divides between individuals and
+the sides within one.
 
-`THEORY.md` states the model formally, with every symbol defined.
-`CLOSED_MODEL.md` describes a rewrite of the engine that is under way in
-`src/organgrow/closed.py`; it runs and passes its smoke tests, but is not yet
-calibrated, and the figures and the audit still run on `engine.py`.
-
-## The paper
-
-`PAPER.md` lists each claim with the number behind it, the figure that shows
-it and the command that produces it. `make paper` builds those figures from
-the closed model and the human cohort tables:
-
-| Figure | Content | Built from |
-| --- | --- | --- |
-| 2 | which bound stops each regime | `scripts/17_paper_runs.py` |
-| 3 | which individual spread reaches organ size | `scripts/15_transmission.py` |
-| 4 | calibration against the mouse liver | `scripts/17_paper_runs.py` |
-| 5 | vascular rules: Murray, critical radius, reach | `scripts/17_paper_runs.py` |
-| 6 | size and shape partition in 48 human donors | `source_data/` or the cohort |
+`PAPER.md` lists each claim with its evidence, `PAPER_NUMBERS.md` holds every
+model number, stamped with the version and commit that produced it, and
+`FIGURES.md` gives the figures in manuscript order with their legends.
+`THEORY.md` states the model formally; its section 13 records how the closed
+model (`src/organgrow/closed.py`) was built and corrected.
 
 **Two pipelines, not one.** `make paper` is the manuscript: closed model,
 human tables, the paper's figures and `PAPER_NUMBERS.md`. `make all` builds
@@ -36,8 +24,8 @@ kept for the record, are not the paper's, and should not be used to check it.
 
     python3 -m venv .venv && source .venv/bin/activate
     python3 -m pip install -r requirements.txt
-    make test      # ten seconds: engine, tree and closed model, no data
-    make all
+    make test      # under a minute: derivations, conservation, closed model
+    make paper     # the manuscript: about half an hour on one core
 
 No install step is needed: `make` puts `src` on `PYTHONPATH` and picks up
 `python3` when `python` is not on the path. To force an interpreter, use

@@ -112,5 +112,13 @@ if (RES / "robustness.json").exists():
     table(["variant", "kidney pool spent", "pancreas pool spent", "liver held by supply / room",
            "liver pool elasticity", "kidney", "pancreas", "z, pancreas minus liver"], rows)
 
+if (RES / "interventions.json").exists():
+    I = json.load(open(RES / "interventions.json"))
+    w("## Interventions on the closed state (day 140, then 40 days; six seeds)\n")
+    table(["regime", "intervention", "pool on day 140", "share of that pool released",
+           "units added, relative to day 140"],
+          [[k.split("_")[0], k.split("_")[1], f"{v['pool']:.0f}", f"{v['released']:.3f} ± {v['se']:.3f}",
+            f"{v['units_added']:.3f} ± {v['units_added_se']:.3f}"] for k, v in I.items()])
+
 open(ROOT / "PAPER_NUMBERS.md", "w").write("\n".join(out) + "\n")
 print("wrote PAPER_NUMBERS.md")

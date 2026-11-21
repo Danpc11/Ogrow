@@ -45,6 +45,8 @@ VARIANTS = {
     "territory": dict(assign_mode="segment"),
     "binomial": dict(nucleation="binomial"),
     "binomial_half_day": dict(nucleation="binomial", substeps=2),
+    "binomial_quarter_day": dict(nucleation="binomial", substeps=4),
+    "competing_fates": dict(turnover="competing"),
 }
 
 

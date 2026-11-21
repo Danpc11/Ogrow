@@ -1,6 +1,6 @@
 # Numbers the paper uses
 
-Model version 4.6.0, commit unknown, generated 2026-11-21 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.7.0, commit unknown, generated 2026-11-21 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.12.3, numpy 2.5.4, scipy 1.18.1; `config/params.yaml` sha256 04415cee25e4.
 
@@ -84,4 +84,20 @@ Python 3.12.3, numpy 2.5.4, scipy 1.18.1; `config/params.yaml` sha256 04415cee25
 | territory | 1.00 | 0.79 | 0.66 / 0.23 | +0.06 ± 0.08 | +0.35 ± 0.08 | +0.67 ± 0.05 | 6.6 |
 | binomial | 1.00 | 0.66 | 0.73 / 0.19 | +0.09 ± 0.07 | +0.37 ± 0.07 | +0.80 ± 0.08 | 6.6 |
 | binomial_half_day | 1.00 | 0.80 | 0.73 / 0.26 | +0.22 ± 0.06 | +0.27 ± 0.08 | +0.71 ± 0.11 | 3.9 |
+| binomial_quarter_day | 1.00 | 0.80 | 0.71 / 0.17 | +0.17 ± 0.07 | +0.37 ± 0.05 | +0.85 ± 0.08 | 6.3 |
+| competing_fates | 1.00 | 0.79 | 0.78 / 0.15 | +0.26 ± 0.08 | +0.36 ± 0.07 | +0.61 ± 0.04 | 3.8 |
+
+## Interventions on the closed state (day 140, then 40 days; six seeds)
+
+| regime | intervention | pool on day 140 | share of that pool released | units added, relative to day 140 |
+|---|---|---|---|---|
+| liver | none | 2336 | 0.002 ± 0.001 | 0.024 ± 0.008 |
+| liver | supply | 2336 | 0.013 ± 0.001 | 0.142 ± 0.016 |
+| liver | room | 2336 | 0.026 ± 0.004 | 0.292 ± 0.048 |
+| kidney | none | 0 | 0.000 ± 0.000 | 0.000 ± 0.000 |
+| kidney | supply | 0 | 0.000 ± 0.000 | 0.000 ± 0.000 |
+| kidney | room | 0 | 0.000 ± 0.000 | 0.000 ± 0.000 |
+| pancreas | none | 12 | 0.000 ± 0.000 | 0.000 ± 0.000 |
+| pancreas | supply | 12 | 0.101 ± 0.060 | 0.029 ± 0.022 |
+| pancreas | room | 12 | 0.000 ± 0.000 | 0.000 ± 0.000 |
 

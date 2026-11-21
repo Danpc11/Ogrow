@@ -1,7 +1,7 @@
 # The paper: framework, claims and evidence
 
 Target: *Frontiers in Cell and Developmental Biology*, Hypothesis and Theory.
-Reference model: version 4.6 (`src/organgrow/closed.py`). Every number from
+Reference model: version 4.7 (`src/organgrow/closed.py`). Every number from
 the model that the paper uses is in `PAPER_NUMBERS.md`, written by
 `make paper` with the version and commit that produced it; this file does not
 copy model numbers by hand. Numbers given here are either data (the human
@@ -20,10 +20,10 @@ delivery.
 
 ## Claims
 
-**1. In human kidneys, size is set by the individual and shape by position.**
-In 96 kidneys from 48 donors (TRUSTED, clinical CT), 89 % of the variance in
-volume lies between donors and 80 % of the variance in sphericity within a
-donor; the within-to-between distance ratio is 1.54 (permutation
+**1. In human kidneys, volume varies mostly between donors and shape within
+a donor.** In 96 kidneys from 48 donors (TRUSTED, clinical CT), 89 % of the
+variance in volume lies between donors and 80 % of the variance in sphericity
+within a donor; the within-to-between distance ratio is 1.54 (permutation
 $P$ = 0.0005). Left and right differ systematically: by paired Wilcoxon with
 Bonferroni over six invariants, volume ($P$ = 0.0007), flatness and
 surface-per-volume ($P$ < 0.0001) survive. Figure 2.
@@ -36,14 +36,22 @@ and keeps the rest at tips short of supply; the liver keeps nearly all of it,
 mostly at tips short of supply and partly at tips with no room. Read from the distribution of the pool over tips at
 closure, with the room left at each tip tested by trial placements that do
 not depend on the dynamics, not from a mean. The three
-closure modes persist in each of ten variants: the vascular root at the
+closure modes persist in each of twelve variants: the vascular root at the
 deepest point, at the surface or at random; each of the four sprouting rules
 removed in turn; units assigned by vascular territory instead of by nearest
-tip; binomial nucleation; and binomial nucleation with a half-day step. `PAPER_NUMBERS.md`, Regimes and Robustness; Figures 1, 3 and 5A.
+tip; binomial nucleation with one, two and four steps a day; and division and
+loss as competing fates. Closure is stable in all three regimes: forty more
+days add 2 % to the liver and nothing to the others. It differs in whether it
+can be undone. Relieving perfusion (a 20 % lower threshold) or room (a 20 %
+shorter least spacing) on the day of closure restarts the liver's growth, by
+14 % and 29 % more units; nothing restarts the kidney's, whose pool is spent;
+the pancreas gains at most a few units. The shares of the pool held by each
+constraint describe where the pool sits, not how much each constraint weighs:
+the liver is held by both. `PAPER_NUMBERS.md`, Regimes and Robustness; Figures 1, 3 and 5A.
 
 **3. Progenitor number reaches size more in a budget organ than in a liver.**
 The elasticity of the final unit count to the progenitor pool is higher in the
-pancreas than in the liver in all ten variants, significantly in eight. This
+pancreas than in the liver in all twelve variants, significantly in ten. This
 is the pattern found experimentally by Stanger, Tanaka and Melton (*Nature*
 2007): halving pancreatic progenitors halved the pancreas, which never
 compensated, while the liver did. The model was not fitted to that
@@ -75,11 +83,11 @@ larger initial spread of its own to a smaller final one:
 
 ## Predictions for experiment
 
-- **The liver's progenitors are held mostly by perfusion.** At the end of
-  hepatic growth, residual progenitors should sit mostly where perfusion is
-  short and partly where existing units leave no room; raising local
-  perfusion should release most of them, and adding progenitors should not
-  enlarge the liver.
+- **Closure is reversible in the liver and not in the kidney.** At the end
+  of growth the liver keeps progenitors that more perfusion or more room puts
+  back to work, while the kidney keeps none. This matches, qualitatively, the
+  regenerative growth of the adult liver and the absence of new nephrons after
+  birth; it is a correspondence, not a test.
 - **A budget organ tracks its progenitors.** Pancreas size should scale with
   progenitor number, as observed, while the liver's should not; a kidney whose
   progenitors are also lost during induction should track them weakly.
@@ -107,9 +115,12 @@ larger initial spread of its own to a smaller final one:
 
 The model's parameters are chosen, not fitted; the one calibration is the
 mouse contraction. Results come from one domain scale, so the model's
-contingent spread cannot stand in for a human organ's. The progenitor processes were checked with
-binomial nucleation and a half-day step; vascular adaptation and sprouting run
-once a day and were not. The critical radius is the floor of calibre
+contingent spread cannot stand in for a human organ's. The progenitor processes converge with one, two
+and four steps a day with the tree held fixed within the day; the coupled
+vascular and tissue dynamics run once a day, and their convergence with a
+smaller step was not tested. The two interventions are not matched in
+strength, so their effects show that both constraints hold the liver, not
+which holds it more. The critical radius is the floor of calibre
 adaptation, so simulated trees cannot show calibres below it. The pool elasticity of the liver is not
 measurable without load-driven sprouting (s.e. 0.55), and the pancreas-liver
 contrast is not significant with a random root. The room left at a tip is
@@ -121,5 +132,5 @@ only through the partition formula, which awaits independent input spreads.
 ## Before submission
 
 1. Commit, then `make test` and `make paper` on that commit, so that
-   `PAPER_NUMBERS.md` names version 4.6 and a clean commit.
+   `PAPER_NUMBERS.md` names version 4.7 and a clean commit.
 2. Write the manuscript from this file, `PAPER_NUMBERS.md` and `FIGURES.md`.

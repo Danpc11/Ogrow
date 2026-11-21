@@ -793,6 +793,30 @@ the same with the day split into two steps for nucleation, division and loss.
 The closure modes and the pancreas-liver contrast hold in both (z = 6.6 and
 3.9). Vascular adaptation and sprouting still run once a day.
 
+### Closure is stable, and its reversibility differs between regimes
+
+Two more variants complete the test of the progenitor process: four steps a
+day with binomial nucleation (with one, two and four steps the pool
+elasticities stay within noise: liver +0.09, +0.22, +0.17; pancreas +0.80,
++0.71, +0.85), and division and loss as competing fates, one fate per
+progenitor per step drawn from a multinomial with total probability
+$1 - e^{-(\rho+\delta)\Delta t}$ split in proportion to the rates (liver
++0.26, pancreas +0.61, against +0.22 and +0.61 with independent draws). The
+pancreas-liver contrast holds in all twelve variants, with z above 2 in ten.
+
+The shares of the pool held by supply and by room are a description of the
+final state. Whether each constraint holds growth is a causal question, asked
+here by changing the state on day 140 and running on for 40 days
+(`scripts/22_interventions.py`, six seeds). Unchanged, the liver adds 2.4 % more
+units and the kidney and pancreas nothing, so closure is stable. A 20 % lower
+threshold, which raises every tip's hydraulic availability relative to it
+without touching the pool, adds 14 % to the liver; a 20 % shorter least
+spacing, which frees room without touching perfusion or the pool, adds 29 %.
+The kidney, with its pool spent, gains nothing from either; the pancreas, with
+a few progenitors left, gains at most a few units from the first. The liver
+closes held by both constraints at once, and its closure can be undone; the
+kidney's cannot.
+
 ### Murray's relation in grown trees
 
 With flow driven by pressure, the branching relation is a result rather than

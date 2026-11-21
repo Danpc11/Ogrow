@@ -179,6 +179,16 @@ for k in range(2):
     accb.append(40 + tr_.born[-1] - (len(U_) + int(round(tr_.P[-1])) + tr_.lost[-1]))
 check("binomial nucleation with substeps balances progenitors", all(a == 0 for a in accb), f"{accb}")
 
+# competing fates conserve progenitors exactly as well
+accc = []
+for k in range(2):
+    U_, m_, vt_, tr_ = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z / 0.6), 114,
+                             days=40, rng=np.random.default_rng(60 + k), nu=8.0, q_set=0.6,
+                             rho=0.05, delta=0.03, P0=40.0, R_unit=650.0,
+                             units_per_branch=650 / 600.0, max_vessels=3000, turnover="competing")
+    accc.append(40 + tr_.born[-1] - (len(U_) + int(round(tr_.P[-1])) + tr_.lost[-1]))
+check("competing fates balance progenitors", all(a == 0 for a in accc), f"{accc}")
+
 print()
 if FAIL:
     print("FAILED:", ", ".join(FAIL))
