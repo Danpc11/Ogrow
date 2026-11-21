@@ -1,5 +1,8 @@
 #!/usr/bin/env python
-"""Which bound binds first, and what that does to the variance.
+"""Exploratory, from the development of the closed model; its parameters are
+from earlier versions and the paper does not use it (see PAPER.md).
+
+Which bound binds first, and what that does to the variance.
 
 In the closed model organ identity is not a branch in the code. One law
 governs nucleation at every tip,

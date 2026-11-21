@@ -31,8 +31,12 @@ is the tissue's demand, but the pressure it delivers is the tree's doing.
     lambda_i = nu * P_i * (q_i - q_set)_+        units nucleated per unit time
     mu_i     = sprout * (q_set - q_i)_+          vessels sprouted per unit time
              + sprout_room * (placements refused for lack of space)
-    k_i      ~ Poisson(lambda_i dt)              demographic noise
-    dP_i/dt  = (rho - delta) * P_i - lambda_i    the progenitor pool
+    k_i      = min(Poisson(lambda_i dt), P_i)    units made; or Binomial(P_i,
+                                                 1 - exp(-nu (q_i - q_set)_+ dt))
+    P_i is a whole number of progenitors: each unit made spends one, and the
+    survivors divide with probability rho dt and are lost with probability
+    delta dt (independently, or as competing fates). P0 + born = units + left
+    + lost holds exactly in every realisation.
     dm_j/dt  = g(t) m_j (1 - m_j / (kappa q_i))  the unit grows to its supply
 
 One signal, q_i - q_set, drives both responses with opposite signs: excess
@@ -218,7 +222,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
          lam=7.4, s_rate=0.0, tau_set=None,
          N_scale=None, R_unit=None, units_per_branch=None, m0=None, m_leak=None, xi=None, kappa=None, g0=None,
          tau_g=None, eta=None, b_cost=None, shrink=None,
-         tau_set_fraction=None, daughter_ratio=None, sprout_reach=None,
+         tau_set_fraction=None, sprout_reach=None,
          sprout=None, sprout_room=None, sprout_load=None, junction_cost=None, vascular_fraction=None, crowding=None, l_root=None,
          l_sprout=None, nucleation_spread=None,
          max_units=None, max_vessels=None,
@@ -600,7 +604,8 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                        if deficit > 0 and _worth_splitting(vt, i, n_at[i])
                        else 0)
                 for _ in range(k_v):
-                    if len(vt) >= max_vessels:
+                    # the same stop as every other sprouting rule
+                    if len(vt) >= max_vessels or vt.volume(junction_cost) >= vol_budget:
                         break
                     sel = np.flatnonzero(tip_of == i)
                     if not len(sel):

@@ -33,8 +33,8 @@ figures: source_data
 test:
 	$(PY) tests/test_smoke.py
 
-# The closed model. Not part of `all`: it does not yet produce the figures,
-# and the size sweep takes several minutes per size.
+# Exploratory runs from the development of the closed model, with parameters
+# from earlier versions. The paper does not use them; see `make paper`.
 closed:
 	$(PY) scripts/12_calibrate_closed.py
 	$(PY) scripts/13_phase_diagram.py

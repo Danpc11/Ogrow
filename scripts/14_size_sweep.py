@@ -1,5 +1,8 @@
 #!/usr/bin/env python
-"""Does unit number self-average? A size sweep that checks its own controls.
+"""Exploratory, from the development of the closed model; its parameters are
+from earlier versions and the paper does not use it (see PAPER.md).
+
+Does unit number self-average? A size sweep that checks its own controls.
 
 Self-averaging is a statement about how the relative spread R = sd/mean of an
 observable behaves as the system grows with everything else held fixed:

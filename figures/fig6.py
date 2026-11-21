@@ -1,7 +1,6 @@
 """Figure 6 — size belongs to the individual, shape to the surroundings."""
 import json
 import numpy as np
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch, Circle, FancyArrowPatch
 

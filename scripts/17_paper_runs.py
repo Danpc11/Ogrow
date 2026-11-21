@@ -14,7 +14,6 @@ scripts/15_transmission.py; nu = 8 throughout.
 
 Usage:  python scripts/17_paper_runs.py [JOB ...]     default: all
 """
-import json
 import sys
 
 import numpy as np

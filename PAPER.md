@@ -1,7 +1,7 @@
 # The paper: framework, claims and evidence
 
 Target: *Frontiers in Cell and Developmental Biology*, Hypothesis and Theory.
-Reference model: version 4.7 (`src/organgrow/closed.py`). Every number from
+Reference model: version 4.7.1 (`src/organgrow/closed.py`). Every number from
 the model that the paper uses is in `PAPER_NUMBERS.md`, written by
 `make paper` with the version and commit that produced it; this file does not
 copy model numbers by hand. Numbers given here are either data (the human
@@ -43,7 +43,8 @@ deepest point, at the surface or at random; each of the four sprouting rules
 removed in turn; units assigned by vascular territory instead of by nearest
 tip; binomial nucleation with one, two and four steps a day; and division and
 loss as competing fates. Closure is stable in all three regimes: forty more
-days add little to the liver and nothing to the others. It differs in whether
+days add little to the liver and the pancreas and nothing to the kidney. It
+differs in whether
 it can be undone. Relieving perfusion (a 20 % lower threshold) or room (a 20 %
 shorter least spacing) on the day of closure restarts the liver's growth;
 nothing restarts the kidney's, whose pool is spent; the pancreas gains at most
@@ -79,9 +80,11 @@ CV is $(N_f/N_i)^2$; this is the weak-feedback limit of the nucleation law,
 derived, and gives 3.31 for the mouse liver against 3.09 measured (Azizoglu et
 al. 2025). The relaxation form
 $\sigma^2(t) = \sigma_0^2 e^{-2\lambda t} + \sigma_\infty^2(1 - e^{-2\lambda t})$
-describes the simulations but is fitted, not derived, and no mechanism is
+was fitted to simulations of the earlier open engine ($R^2$ 0.92 to 0.99); it
+is not derived, has not been fitted to the closed model, and no mechanism is
 claimed for $\lambda$. The model contracts more than the mouse liver, from a
-larger initial spread of its own to a smaller final one:
+larger initial spread of its own; its final spread is in
+`PAPER_NUMBERS.md`, beside the mouse's:
 `PAPER_NUMBERS.md`, Contraction; Figure 7.
 
 ## Predictions for experiment
@@ -107,8 +110,12 @@ larger initial spread of its own to a smaller final one:
 - That the pool waiting just below the threshold sets the response to the
   threshold: that formula is the direct, frozen-state term, and feedback
   through the tree dominates once the critical radius is correct.
-- A difference between spread in maturity and spread in growth rate, which
-  came from a defect that let a tip make more units than it had progenitors.
+- That capacity closure treats a spread in maturity and a spread in growth
+  rate differently. The difference first came from a defect that let a tip
+  make more units than it had progenitors; it disappeared when that was fixed
+  and reappears in the current version, where the final count tracks the
+  nucleation rate. A result that changes with versions of the model is not
+  claimed in either direction.
 - A branching exponent for human liver vessels, whose radius reads the minor
   axis of flattened ex vivo vessels.
 - Glomerular density and spacing in human kidneys, which need a validated
@@ -135,5 +142,5 @@ only through the partition formula, which awaits independent input spreads.
 ## Before submission
 
 1. Commit, then `make test` and `make paper` on that commit, so that
-   `PAPER_NUMBERS.md` names version 4.7 and a clean commit.
+   `PAPER_NUMBERS.md` names version 4.7.1 and a clean commit.
 2. Write the manuscript from this file, `PAPER_NUMBERS.md` and `FIGURES.md`.

@@ -1,119 +1,80 @@
-# The closed model
+# The closed model (version 4.7.1)
 
 `src/organgrow/closed.py` is the model the paper rests on; `make paper`
-builds its figures. `engine.py`, the earlier open engine, is kept for the
-legacy figures of `make all`, several of which carry their answer by
-construction (see below). `make test` exercises both.
+builds its results. Its parameters are in `config/params.yaml`, section
+`closed`; the three regimes are set in the scripts that run them (below).
+How the model was built, what was corrected and what was withdrawn is in
+`THEORY.md` §13; this file states what the model is now.
 
-## Why a rewrite
+## State
 
-The old engine carried three loops that were open in ways that decided the
-answers before any measurement:
+- A tree of straight segments with one radius each. The root enters at the
+  deepest point of the domain (`root_site`: also `"surface"`, `"random"`).
+- Units, with a position and a mass. Each unit is fed by the tip nearest to
+  it (`assign_mode`: also `"segment"`, the nearest segment by exact
+  projection and then the nearest tip in its subtree).
+- Progenitors, a whole number per tip.
 
-- **Flow was demand-driven.** A branch carried the mass hanging from it, so
-  the tree's conductance limited nothing, Murray's relation followed from the
-  rule rather than from the physics, and the tree could not be a source of
-  disorder because nothing fed back into it.
-- **Supply was imposed.** `C_root(t)` was the body's allometry entered as an
-  input, so much of the growth curve was the datum rather than the result.
-- **The three closure modes did not compete.** Saturation had feedback;
-  exhaustion and pool were decay curves with none. Asking which mode destroys
-  variance had the answer built in: an open loop conserves the spread exactly
-  because it reads nothing.
-- **Nucleation had no noise**, so all terminal variance entered through
-  sigma_param, which is why the calibration against mouse never fitted: in the
-  animal the floor is demographic.
+## One day
 
-## What is in place and verified
+1. **Perfusion** (`hemodynamics.perfuse`). Flow is solved by series-parallel
+   reduction with dead-end tips and the tissue of each tip as a load
+   (conductance $m^{\xi}/R_{\text{unit}}$ per unit). Flow is conserved at
+   every node, including nodes that carry tissue. The supply of a tip is
+   hydraulic, $q_i = p_{\text{out},i}/\Delta P$.
+2. **Calibres** (`relax`). Each radius moves toward the shear setpoint, which
+   rises with pressure as $p^{b/2}$ ($b = 0.9$). The critical radius
+   $r_c = (\ell/3R_{\text{below}})^{1/4}$, where shear peaks, is the floor of
+   the adaptation. As vascular space fills its budget the setpoint rises.
+   Vascular space is lumens plus junctions, a junction counting as a sphere
+   of its radius, $4\pi r^3/3$; the budget is a fraction of the organ's
+   volume. The same space and budget stop sprouting.
+3. **Nucleation and progenitors.** At tip $i$ the number of units attempted
+   is $\min(\text{Poisson}(\nu P_i (q_i - q_{\text{set}})_+), P_i)$, or
+   Binomial$(P_i, 1 - e^{-\nu (q_i - q_{\text{set}})_+})$ with
+   `nucleation="binomial"`. A unit lands within `nucleation_spread` λ of the
+   tip and is refused outside the organ or closer than λ to another unit; each
+   unit placed spends one progenitor. The survivors divide with probability
+   ρ and are lost with probability δ, independently or as competing fates
+   (`turnover="competing"`). `substeps` splits this step within the day.
+4. **Units** grow logistically toward $\kappa q_i$ at a rate that decays with
+   time.
+5. **Sprouting**, by four rules, each gated by the junction test (a split must
+   relieve more tissue than its junction occupies) and each stopped by the
+   vascular budget or the vessel cap: a tip whose supply is below the
+   threshold calls a vessel (deficit); a tip that feeds more units than one
+   branch serves divides (load); a tip whose placements are refused sprouts in
+   proportion to the share refused (crowding); and a tip extends toward
+   unserved tissue, the mesenchymal signal, formalised as space colonisation
+   with attractors that are removed once reached. A daughter's radius is
+   $2^{-1/(b+2)}$ of its parent's, and not below $1.05\,r_c$. A tip that
+   extends carries its progenitors with it.
 
-**Pressure-driven flow.** Conductance is reduced leaves-to-root, the root
-draws Q = dP * C, and that flow splits among daughters in proportion to their
-conductances. Mass is conserved at every branch. A tip with no tissue below it
-is a dead end with zero conductance, not an open drain (see below). A branch
-carries what its calibre allows.
+## What the model reports
 
-**Supply is read from pressure, not from the tissue's own draw.** The supply
-a unit can take at segment i is what a mature unit would draw at the outlet
-pressure the tree delivers there:
+The trace of units, pool, supply, vessels and progenitors born and lost per
+day. At the end, `tr.closure`: the shares of the initial pool spent, held at
+tips short of supply, held for lack of room (from trial placements, 40 per
+tip and 400 if none succeeds) and still active, and the residual nucleation
+rate. `intervene_day` and `intervene` change the state during a run, lowering
+the threshold (`"supply"`) or the least spacing (`"room"`).
 
-    q_i = p_out,i / dP
+## The regimes
 
-The flow a branch carries is the tissue's demand, but the pressure it
-delivers is the tree's doing, so a unit's ceiling does not depend on the mass
-already hanging beside it. The earlier draft used flow per unit, which is
-mass per unit, and froze every organ at a few dozen units.
+| Regime | Initial pool | ρ | δ |
+| --- | --- | --- | --- |
+| Liver | 2600 | 0.10 | 0.10 |
+| Kidney | 300 | 0 | 0.05 |
+| Pancreas | 60 | 0 | 0 |
 
-**One nucleation law.** At each segment i that carries tissue or progenitors,
+All with ν = 8, $q_{\text{set}}$ = 0.6, domain scale 0.6, 140 days, a vessel
+cap of 6000 that no run reaches, $R_{\text{unit}}$ = 650 and 650/600 units per
+terminal branch (`scripts/15`, `17`, `19`, `21`, `22`).
 
-    lambda_i = nu * P_i * (q_i - q_set)_+      units made
-    k_i      ~ Poisson(lambda_i)               demographic noise
-    dP_i/dt  = (rho - delta) * P_i - k_i       progenitors spent on units made
-    mu_i     = sprout * (q_set - q_i)_+        vessels sprouted toward tissue short of supply
-             + sprout_room * (placements refused for lack of space)
+## Tests
 
-One signal with two responses of opposite sign: excess supply makes tissue, a
-shortfall makes vessels. The second sprouting term is geometric: when a
-segment has supply and progenitors but no room within the spacing rule, the
-tree reaches into empty space. The three closure modes are two numbers,
-(rho - delta, P_0), not a branch in the code.
-
-**Tissue hangs along a vessel, not only at its end.** A segment that has
-branched keeps the units and the pool it carried, and a sprout toward a
-unit takes with it the units now closer to its end, with the pool split in
-the same proportion. Without this, progenitors were stranded on segments the
-nucleation loop no longer visited.
-
-**Scales are derived, not fitted.** Pressure dP = 1, length lam = 1, radius
-r_root = 1; a mature unit has conductance 1 / N_scale, so an organ of N_scale
-mature units matches the tree. Every run starts at q = 1.00 exactly.
-
-**A critical radius falls out of the physics.** Shear on a segment in series
-with the conductance below it is not monotone in the radius: tau = Q/r^3
-rises while the segment's own resistance dominates and falls once the
-tissue's does, peaking at
-
-    r_c = (l / (3 R_below))^(1/4)
-
-Below r_c the feedback is positive and the vessel closes; above it the vessel
-holds. It is computed for every segment at every step from the real
-conductance below it (`VascularTree.r_crit`) and is the floor the segment may
-not cross. It predicts a lower cut-off in measured calibre distributions.
-
-**Every parameter other than identity is in `config/params.yaml`,** section
-`closed`. A keyword passed to `grow` overrides the file.
-
-## What the earlier draft got wrong, and the fix
-
-The draft reported a calibre runaway when nucleation stopped (conductance
-climbing from 0.0015 to 754 with no new tissue) and attributed it to the
-shrinking tendency being too weak. The cause was elsewhere: `perfuse` gave a
-tip with nothing below it its own full conductance, as if it discharged to
-zero pressure. Every sprouted vessel without a unit yet was an open drain;
-its shear rose with its radius, so the loop ran away. With dead ends at zero
-conductance the tree's conductance is bounded by the tissue's, which the
-smoke test now asserts.
-
-## What is still open
-
-- **Calibration.** nu, q_set, rho, delta and P_0 are not fitted to anything.
-  The first anchor is the mouse liver (N grows 1.82-fold, CV of lobule number
-  contracts 3.09-fold, terminal CV 0.074 against a Poisson floor of 0.083 for
-  146 lobules). With Poisson nucleation the floor is demographic, so the
-  contraction should come out near the measured one without tension with
-  closure; if it does not, the model is wrong, not the calibration.
-- **Growth rate.** With the default scales the organ is supply-limited early:
-  the pressure drop per segment at the shear setpoint is tau_set * l / r, and
-  with q_set near 1 a path of a few segments already falls short. q_set and
-  tau_set_fraction have to be set together; the smoke test uses q_set = 0.5.
-- **The old engine's analyses are not ported.** Closure comparison,
-  self-averaging and identifiability still run on `engine.py`.
-
-## What this changes in the manuscript if it works
-
-The central sentence stops being "identity is a closure parameter" and becomes
-"identity is which bound binds first, and that choice fixes what fraction of
-the final variance is specifiable". The phase diagram in (nu, rho - delta)
-replaces Figure 3, and the three noise sources of the model (parametric,
-domain, demographic) map one to one onto the systemic, positional and
-contingent partition measured in human kidneys, so Figure 6 becomes a
-prediction of the engine rather than a separate result.
+`tests/test_smoke.py` checks, among others, that $r_c$ is the shear peak of
+`perfuse` and satisfies $\tau'(r_c) = 0$, $\tau''(r_c) < 0$; that flow is
+conserved at a node carrying tissue and the root flow equals the flow the
+tissue takes; and that progenitors balance exactly in every realisation, with
+division and loss, binomial nucleation with substeps and competing fates.

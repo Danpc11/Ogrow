@@ -1,5 +1,8 @@
 #!/usr/bin/env python
-"""Calibrate the closed model's liver against the measured mouse contraction.
+"""Exploratory, from the development of the closed model; its parameters are
+from earlier versions and the paper does not use it (see PAPER.md).
+
+Calibrate the closed model's liver against the measured mouse contraction.
 
 Target (Azizoglu et al. 2025, mouse liver, postnatal): lobule number grows
 1.82-fold while its coefficient of variation across animals contracts

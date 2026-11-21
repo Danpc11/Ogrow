@@ -55,16 +55,15 @@ sign reversal in the central result which was an artefact of the choice.
 
 **What in the closed model is set rather than measured.** The paper's
 results come from the closed model (`src/organgrow/closed.py`). Its nucleation
-rate (nu = 8), supply setpoint (0.6), the three regimes' pools and turnover,
+rate (nu = 8), supply threshold (0.6), the three regimes' pools and turnover,
 and the density, reach and kill distance of the mesenchymal signal are chosen,
-not fitted to data. The liver regime needs a pool of about four progenitors
-per unit made; with fewer, the progenitor bound binds first. The single
-calibration against data is the mouse liver contraction, and it fixes the
-source of the initial spread (maturity, not rate) rather than a parameter.
-Results are reported for one domain scale (0.6). The transmission uses 24
-replicates per condition with bootstrap intervals; the regime runs and the
-mouse calibration use eight. The transmission has not yet been checked across
-the parameter space, only at one setting per regime.
+not fitted to data; the junction volume is geometric ($4\pi r^3/3$). The liver
+regime uses a pool much larger than the units it makes (2,600 progenitors for
+about 200 units), so that its pool does not bind. The one comparison with data
+is the mouse liver contraction, which the model exceeds. Results come from one
+domain scale (0.6); the transmission uses 24 replicates per condition with
+bootstrap intervals, the elasticities six paired replicates at five settings
+per regime, and the robustness checks six seeds in each of twelve variants.
 
 **Three errors in earlier versions, now fixed, that invalidated results.**
 Nucleation truncated its rate to an integer each day, which turned the law

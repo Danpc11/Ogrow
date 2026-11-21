@@ -5,7 +5,6 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch
-from scipy import stats
 
 from organgrow import figstyle as F
 from organgrow.config import ROOT
