@@ -1,6 +1,6 @@
 # Numbers the paper uses
 
-Model version 4.8.0, commit d85ea5e, generated 2026-11-21 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.9.0, commit bfded3f, generated 2026-11-21 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b024.
 
@@ -101,4 +101,19 @@ Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b0
 | pancreas | none | 12 | 0.019 ± 0.019 | 0.003 ± 0.003 |
 | pancreas | supply | 12 | 0.123 ± 0.063 | 0.032 ± 0.022 |
 | pancreas | room | 12 | 0.037 ± 0.037 | 0.007 ± 0.007 |
+
+## Organ size: unit count and closure against domain volume (two seeds each)
+
+| sweep | domain scale | days | units | held by supply | held by room | share of close packing |
+|---|---|---|---|---|---|---|
+| geometry | 0.4 | 140 | 116 | 0.97 | 0.02 | 14.5 % |
+| geometry | 0.6 | 140 | 206 | 0.80 | 0.20 | 7.6 % |
+| geometry | 0.8 | 140 | 246 | 0.78 | 0.31 | 3.8 % |
+| geometry | 1.0 | 140 | 442 | 0.70 | 0.42 | 3.5 % |
+| geometry: unit count scales as V^0.44 |  |  |  |  |  |  |
+| allometric | 0.4 | 103 | 98 | 0.96 | 0.14 | 12.3 % |
+| allometric | 0.6 | 140 | 206 | 0.80 | 0.20 | 7.6 % |
+| allometric | 0.8 | 174 | 458 | 0.82 | 0.14 | 7.1 % |
+| allometric | 1.0 | 205 | 430 | 0.60 | 0.43 | 3.4 % |
+| allometric: unit count scales as V^0.57 |  |  |  |  |  |  |
 
