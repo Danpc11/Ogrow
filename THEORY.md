@@ -188,8 +188,11 @@ $\gamma$ = 0.50 (lung).
 All are below 1, so the feedback is stabilising and no runaway occurs. They are
 also well below the 4/3 that uniform-shear adaptation alone would give, because
 the root is in series and caps the total. That cap is a property of the open
-engine: in the closed model the root takes under 3 % of the pressure drop and
-its radius follows the shear law, growing as $Q^{1/3}$.
+engine: in the closed model the root does not cap the tree, taking 9 % of the
+pressure drop in the reference liver, and its radius follows the shear law,
+growing as $Q^{1/3}$. (An earlier version of this sentence said under 3 %, a
+number from before the critical radius and the junction volume were
+corrected.)
 
 ### The tree adds little disorder of its own
 
@@ -407,7 +410,8 @@ and still not match native proportions, and that is not a process failure.
 | --- | --- | --- |
 | $\nu$ | nucleation efficiency | Eq. 6 |
 | $c_{\text{set}}$ | per-unit perfusion setpoint | Eq. 6 |
-| $\iota,\ \rho,\ \delta$ | induction, self-renewal, loss | Eq. 7 |
+| $\iota,\ \rho,\ \delta$ | induction, division, loss | Eq. 7 |
+| $w$ | self-renewal of the competent pool | §13 |
 | $\lambda$ | minimum unit spacing | Eq. 9 |
 | $\beta$ | demand coefficient | Eq. 2 |
 | $C_0$ | root conductance at $t=0$ | Eq. 3 |
@@ -462,16 +466,22 @@ Sections 4 to 8 describe the open engine that produces the figures. The closed
 model (`src/organgrow/closed.py`) replaces its three open loops with one law,
 and where the two disagree this section is the current statement.
 
-### One law, two bounds
+### One law, three bounds
 
-At every tip, with supply per unit $q_i$ and progenitor pool $P_i$,
+At every tip, with supply per unit $q_i$ and competent pool $P_i$,
 
-$$\lambda_i = \nu\,P_i\,(q_i - q_{\text{set}})_+, \qquad k_i \sim \mathrm{Poisson}(\lambda_i), \qquad \dot P_i = (\rho - \delta)\,P_i - k_i$$
+$$\lambda_i = \nu\,P_i\,(q_i - q_{\text{set}})_+, \qquad k_i \sim \mathrm{Poisson}(\lambda_i), \qquad \dot P_i = (\rho - \delta)\,P_i - (1 - w)\,k_i$$
 
-A growing organ meets one of two ceilings: supply per unit falls to
-$q_{\text{set}}$, or the pool runs out. Which comes first is set by $\nu$ and
-$\rho - \delta$, so organ identity is a position on that plane rather than a
-branch in the code. Nucleation is a Poisson draw, so the demographic floor on
+with $w$ the self-renewal of the compartment: $w = 1$ where the differentiated
+cell is its own progenitor and forming a unit does not draw the pool down, and
+$w = 0$ where the progenitor is a separate, consumable population.
+
+A growing organ meets one of three ceilings: supply per unit falls to
+$q_{\text{set}}$, the pool runs out, or there is no room to place a unit.
+Which comes first is set by $\nu$, by $\rho - \delta$ and by $w$, so organ
+identity is a position in that space rather than a branch in the code. The
+third ceiling is local, not the packing limit of the organ: see the scaling
+section below. Nucleation is a Poisson draw, so the demographic floor on
 the spread is part of the law rather than added afterwards.
 
 ### The cost exponent sets three exponents
@@ -592,6 +602,40 @@ does not bind, about four progenitors per unit made; with fewer, the
 progenitor bound binds first and the organ behaves as a kidney. And the
 junction test has to stay on the deficit path: removing it let every
 supply-short tip sprout every day, and the tree ran to its cap.
+
+### Organ size, developmental time, and what the geometry constrains
+
+Unit size is conserved far better than organ size across mammals: liver
+lobules and nephrons differ between mouse and human by a factor of a few,
+while body mass differs by three orders of magnitude. A larger organ therefore
+holds more units of the same size, and the number that fit is $V/\lambda^3$.
+Three other quantities carry the standard allometries: the developmental
+window as $M^{1/4}$, cellular rates as $M^{-1/4}$, so that their product is
+scale invariant, and the flow reaching the organ as $M^{3/4}$. Since the units
+that fit scale as $M$, supply per unit scales as $M^{-1/4}$: a larger animal
+perfuses each of its units less.
+
+Scaling the domain alone over a 15-fold range of volume, with the pool, the
+window and the rates held at the reference, gives $N \propto V^{0.37}$.
+Carrying the allometries as well gives $N \propto V^{0.74}$. The allometric
+scalings therefore do most of the work, but neither reaches the $V^{1}$ that a
+conserved unit size requires, so the model's organs do not grow in proportion
+to their containers.
+
+The share of the pool held for lack of room rises with size, from 0.09 at the
+smallest domain to 0.50 at the largest, while the share held by supply falls
+from 0.99 to 0.54. That reads as geometry beginning to bind, and it is not:
+the units occupy between 3 and 17 % of what close packing of the domain would
+allow, and that fraction falls as the domain grows. What rises is local
+crowding at the vascular front, where a unit is placed within a fixed distance
+of a tip. The model's spatial constraint is the local exclusion of Eq. 13, and
+the organ never approaches the packing limit of its container. A geometry that
+binds at the scale of the organ is not in the model.
+
+Replicate spread also grows with size: at the second largest domain two seeds
+gave 1021 and 276 units. Results at scales far from the reference are not
+reliable, and the regimes reported in this work are stated at one scale.
+(`scripts/23_scaling.py`.)
 
 ### Self-averaging, and why it is not yet measured
 

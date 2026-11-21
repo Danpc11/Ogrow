@@ -70,6 +70,7 @@ paper:
 	$(PY) scripts/21_robustness.py reference root_surface root_random no_deficit no_load no_crowding no_mesenchyme territory binomial binomial_half_day binomial_quarter_day competing_fates no_self_renewal
 	$(PY) scripts/21_robustness.py
 	$(PY) scripts/22_interventions.py
+	$(PY) scripts/23_scaling.py
 	# figures and tables last: they read every result above
 	$(PY) figures/fig_framework.py
 	$(PY) figures/fig_closed_paper.py

@@ -120,5 +120,19 @@ if (RES / "interventions.json").exists():
           [[k.split("_")[0], k.split("_")[1], f"{v['pool']:.0f}", f"{v['released']:.3f} ± {v['se']:.3f}",
             f"{v['units_added']:.3f} ± {v['units_added_se']:.3f}"] for k, v in I.items()])
 
+if (RES / "scaling.json").exists():
+    Sc = json.load(open(RES / "scaling.json"))
+    w("## Organ size: unit count and closure against domain volume (two seeds each)\n")
+    rows = []
+    for mode, v in Sc.items():
+        for S in sorted({r["S"] for r in v["rows"]}):
+            g = [r for r in v["rows"] if r["S"] == S]
+            mm = lambda k: float(np.mean([x[k] for x in g]))
+            rows.append([mode, S, g[0]["days"], f"{mm('N'):.0f}", f"{mm('supply_held'):.2f}",
+                         f"{mm('space_held'):.2f}", f"{100 * mm('fill'):.1f} %"])
+        rows.append([f"{mode}: unit count scales as V^{v['exponent']:.2f}", "", "", "", "", "", ""])
+    table(["sweep", "domain scale", "days", "units", "held by supply", "held by room",
+           "share of close packing"], rows)
+
 open(ROOT / "PAPER_NUMBERS.md", "w").write("\n".join(out) + "\n")
 print("wrote PAPER_NUMBERS.md")

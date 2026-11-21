@@ -1,7 +1,7 @@
 # The paper: framework, claims and evidence
 
 Target: *Frontiers in Cell and Developmental Biology*, Hypothesis and Theory.
-Reference model: version 4.8.0 (`src/organgrow/closed.py`). Every number from
+Reference model: version 4.9.0 (`src/organgrow/closed.py`). Every number from
 the model that the paper uses is in `PAPER_NUMBERS.md`, written by
 `make paper` with the version and commit that produced it; this file does not
 copy model numbers by hand. Numbers given here are either data (the human
@@ -132,7 +132,12 @@ larger initial spread of its own; its final spread is in
 
 The model's parameters are chosen, not fitted; the one calibration is the
 mouse contraction. Results come from one domain scale, so the model's
-contingent spread cannot stand in for a human organ's. The progenitor processes converge with one, two
+contingent spread cannot stand in for a human organ's. The spatial constraint
+is the local exclusion between neighbouring units, not the packing limit of
+the organ, which never binds: units occupy 3 to 17 % of close packing across a
+15-fold range of domain volume, and unit count scales as domain volume to the
+0.74 under the allometric scalings of pool, window and rates, against the
+exponent 1 that a conserved unit size requires. The progenitor processes converge with one, two
 and four steps a day with the tree held fixed within the day; the coupled
 vascular and tissue dynamics run once a day, and their convergence with a
 smaller step was not tested. The two interventions are not matched in
@@ -149,5 +154,5 @@ only through the partition formula, which awaits independent input spreads.
 ## Before submission
 
 1. Commit, then `make test` and `make paper` on that commit, so that
-   `PAPER_NUMBERS.md` names version 4.8.0 and a clean commit.
+   `PAPER_NUMBERS.md` names version 4.9.0 and a clean commit.
 2. Write the manuscript from this file, `PAPER_NUMBERS.md` and `FIGURES.md`.

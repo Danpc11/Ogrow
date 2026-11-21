@@ -154,3 +154,13 @@ it. The difference between organs therefore rests on the size of the pool
 relative to what supply and room allow, not on self-renewal, and the initial
 pool cannot be made small, because a tip makes at most as many units per step
 as it holds progenitors.
+
+**The spatial constraint is local, not the organ's geometry.** Units are
+excluded within one spacing of each other and are placed near a vascular tip,
+so what the model calls lack of room is crowding at the vascular front. Across
+a 15-fold range of domain volume the units occupy 3 to 17 % of close packing,
+and that fraction falls as the domain grows, so the packing limit of the organ
+never binds. Unit number scales as $V^{0.37}$ with the domain alone and
+$V^{0.74}$ with the allometric scalings of pool, window and rates, against the
+$V^{1}$ that a conserved unit size requires. Replicate spread grows with scale.
+All regimes in this work are reported at one domain scale.
