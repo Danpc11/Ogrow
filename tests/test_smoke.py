@@ -189,6 +189,25 @@ for k in range(2):
     accc.append(40 + tr_.born[-1] - (len(U_) + int(round(tr_.P[-1])) + tr_.lost[-1]))
 check("competing fates balance progenitors", all(a == 0 for a in accc), f"{accc}")
 
+# where the differentiated cell is its own progenitor (renewal = 1, the liver),
+# the pool is not drawn down by unit formation and the books still balance
+accr = []
+for k in range(2):
+    U_, m_, vt_, tr_ = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z / 0.6), 114,
+                             days=40, rng=np.random.default_rng(80 + k), nu=8.0, q_set=0.6,
+                             rho=0.05, delta=0.03, P0=40.0, R_unit=650.0,
+                             units_per_branch=650 / 600.0, max_vessels=3000, renewal=1.0)
+    accr.append(40 + tr_.born[-1] + tr_.renewed[-1]
+                - (len(U_) + int(round(tr_.P[-1])) + tr_.lost[-1]))
+check("self-renewal balances progenitors", all(a == 0 for a in accr), f"{accr}")
+# and a self-renewing pool is never spent by making units
+U_, m_, vt_, tr_ = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z / 0.6), 114,
+                         days=40, rng=np.random.default_rng(90), nu=8.0, q_set=0.6,
+                         rho=0.0, delta=0.0, P0=40.0, R_unit=650.0,
+                         units_per_branch=650 / 600.0, max_vessels=3000, renewal=1.0)
+check("a self-renewing pool is not spent", int(round(tr_.P[-1])) == 40,
+      f"P0 40, final {tr_.P[-1]:.0f}, units {len(U_)}")
+
 print()
 if FAIL:
     print("FAILED:", ", ".join(FAIL))

@@ -793,6 +793,48 @@ the same with the day split into two steps for nucleation, division and loss.
 The closure modes and the pancreas-liver contrast hold in both (z = 6.6 and
 3.9). Vascular adaptation and sprouting still run once a day.
 
+### Whether making a unit spends a progenitor
+
+The three regimes were first set apart by how much progenitor pool each organ
+starts with and how fast it turns over. That left the liver with a pool
+thirteen times the units it makes, a number with no mechanism behind it.
+Version 4.8 replaces it with the property that actually separates these
+organs: whether the cell that forms a unit is spent.
+
+In the liver the differentiated cell is its own progenitor. Mononuclear
+hepatocytes divide and restore the compartment, so forming a lobule does not
+draw it down, and the model sets renewal = 1. In the kidney the cap mesenchyme
+is a separate population that is consumed and not replaced, which is why no
+nephrons form after birth, and in the pancreas the multipotent progenitors are
+likewise spent; both use renewal = 0.
+
+This matters because fetal transcriptomes appear at first to contradict the
+liver regime. In sorted hepatic lineage cells from E10.5 to E17.5 (GSE90047,
+251 cells) the hepatoblast programme is fully converted by E17.5, with no
+residual population, while mouse liver lobule number keeps rising after birth.
+Read as the liver spending a progenitor pool, that is the opposite of what the
+model says. Read with renewal = 1 it is consistent: the hepatocytes that
+hepatoblasts become are the competent compartment, so its conversion is not
+its exhaustion. The pancreatic multipotent pool over E12.5 to E15.5
+(GSE132188, 36,351 cells) falls from 0.64 to 0.006 of the epithelium, which is
+a pool being spent.
+
+The correction leaves the results in place. With renewal = 1 the liver makes
+218 units against 202, closes by supply (0.73) and room (0.20) as before, and
+its elasticity to the initial pool is 0.17 either way, against 0.75 and 0.66
+for the pancreas. So the contrast between organs does not come from renewal;
+it comes from the pool relative to what supply and room allow. What renewal
+supplies is the mechanism for why the liver's pool is not limiting, in place
+of a large number. Treating the liver as a consumable pool is kept as the
+robustness variant `no_self_renewal`.
+
+Two things the correction does not do. The liver's initial pool is not freed
+to be small: because a tip can make at most as many units per step as it holds
+progenitors, holding the product of rate and pool fixed while shrinking the
+pool still lowers the final count (203 units at a pool of 2600, 97 at 130). And
+the elasticity of 0.17 is a rate effect, not a budget effect: a larger pool
+makes units faster and overshoots slightly before supply closes the organ.
+
 ### Closure is stable, and its reversibility differs between regimes
 
 Two more variants complete the test of the progenitor process: four steps a

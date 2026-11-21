@@ -36,9 +36,9 @@ S, DAYS, SEED0 = 0.6, 140, 300
 NREP = int(os.environ.get('OG_NREP', 8))
 SIG_P, SIG_Q = 0.30, 0.30   # equal input spreads, so the two transmissions are comparable
 REGIMES = {
-    "liver":  dict(P0=2600.0, rho=0.10, delta=0.10, q_set=0.6),   # supply binds
-    "kidney": dict(P0=300.0,  rho=0.00, delta=0.05, q_set=0.6),   # pool binds, with loss
-    "pancreas": dict(P0=60.0, rho=0.00, delta=0.00, q_set=0.6),   # a budget, no loss
+    "liver":  dict(P0=2600.0, rho=0.10, delta=0.10, q_set=0.6, renewal=1.0),   # supply binds
+    "kidney": dict(P0=300.0,  rho=0.00, delta=0.05, q_set=0.6, renewal=0.0),   # pool binds, with loss
+    "pancreas": dict(P0=60.0, rho=0.00, delta=0.00, q_set=0.6, renewal=0.0),   # a budget, no loss
 }
 CONDITIONS = ("baseline", "pool", "setpoint")
 Z = np.random.default_rng(2024).normal(size=(max(NREP, 64), 2))

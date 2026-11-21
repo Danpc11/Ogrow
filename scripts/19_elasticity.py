@@ -25,9 +25,9 @@ OUT = ROOT / "results" / "elasticity"
 OUT.mkdir(parents=True, exist_ok=True)
 S, DAYS, SEED0, H = 0.6, 140, 300, 0.3
 BASE = {
-    "liver":    dict(P0=2600.0, rho=0.10, delta=0.10, q_set=0.6, nu=8.0),
-    "kidney":   dict(P0=300.0,  rho=0.00, delta=0.05, q_set=0.6, nu=8.0),
-    "pancreas": dict(P0=60.0,   rho=0.00, delta=0.00, q_set=0.6, nu=8.0),
+    "liver":    dict(P0=2600.0, rho=0.10, delta=0.10, q_set=0.6, renewal=1.0, nu=8.0),
+    "kidney":   dict(P0=300.0,  rho=0.00, delta=0.05, q_set=0.6, renewal=0.0, nu=8.0),
+    "pancreas": dict(P0=60.0,   rho=0.00, delta=0.00, q_set=0.6, renewal=0.0, nu=8.0),
 }
 SETTINGS = {"ref": {}, "nu_lo": dict(nu=4.0), "nu_hi": dict(nu=16.0),
             "q_lo": dict(q_set=0.5), "q_hi": dict(q_set=0.7)}

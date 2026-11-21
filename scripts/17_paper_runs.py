@@ -26,9 +26,9 @@ OUT = ROOT / "results" / "paper"
 OUT.mkdir(parents=True, exist_ok=True)
 S, DAYS, NU, NREP, SEED0 = 0.6, 140, 8.0, 8, 300
 REGIMES = {
-    "liver":    dict(P0=2600.0, rho=0.10, delta=0.10, q_set=0.6),
-    "kidney":   dict(P0=300.0,  rho=0.00, delta=0.05, q_set=0.6),
-    "pancreas": dict(P0=60.0,   rho=0.00, delta=0.00, q_set=0.6),
+    "liver":    dict(P0=2600.0, rho=0.10, delta=0.10, q_set=0.6, renewal=1.0),
+    "kidney":   dict(P0=300.0,  rho=0.00, delta=0.05, q_set=0.6, renewal=0.0),
+    "pancreas": dict(P0=60.0,   rho=0.00, delta=0.00, q_set=0.6, renewal=0.0),
 }
 FIX = dict(R_unit=650.0, units_per_branch=650 / 600.0, max_vessels=6000)
 

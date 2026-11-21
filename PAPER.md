@@ -1,7 +1,7 @@
 # The paper: framework, claims and evidence
 
 Target: *Frontiers in Cell and Developmental Biology*, Hypothesis and Theory.
-Reference model: version 4.7.1 (`src/organgrow/closed.py`). Every number from
+Reference model: version 4.8.0 (`src/organgrow/closed.py`). Every number from
 the model that the paper uses is in `PAPER_NUMBERS.md`, written by
 `make paper` with the version and commit that produced it; this file does not
 copy model numbers by hand. Numbers given here are either data (the human
@@ -32,17 +32,23 @@ surface-per-volume ($P$ < 0.0001) survive. Figure 2.
 
 **2. Organs differ in what holds their progenitors when growth stops, and
 the difference does not depend on the auxiliary rules.** One nucleation law,
-with supply, progenitors and room local to each tip, gives organs that close
-in different ways: the kidney spends its pool; the pancreas spends most of it
+with supply, progenitors and room local to each tip, and one property that
+separates the organs: whether the cell that forms a unit is spent. In the
+liver it is not, because mononuclear hepatocytes are their own progenitors and
+restore the compartment by dividing; in the kidney and the pancreas the
+progenitors are separate populations that are consumed, which is why no
+nephrons form after birth. With that one difference the organs close in
+different ways: the kidney spends its pool; the pancreas spends most of it
 and keeps the rest at tips short of supply; the liver keeps nearly all of it,
 mostly at tips short of supply and partly at tips with no room. Read from the distribution of the pool over tips at
 closure, with the room left at each tip tested by trial placements that do
 not depend on the dynamics, not from a mean. The three
-closure modes persist in each of twelve variants: the vascular root at the
+closure modes persist in each of thirteen variants: the vascular root at the
 deepest point, at the surface or at random; each of the four sprouting rules
 removed in turn; units assigned by vascular territory instead of by nearest
-tip; binomial nucleation with one, two and four steps a day; and division and
-loss as competing fates. Closure is stable in all three regimes: forty more
+tip; binomial nucleation with one, two and four steps a day; division and
+loss as competing fates; and the liver treated as a consumable pool instead of
+a self-renewing one. Closure is stable in all three regimes: forty more
 days add little to the liver and the pancreas and nothing to the kidney. It
 differs in whether
 it can be undone. Relieving perfusion (a 20 % lower threshold) or room (a 20 %
@@ -95,7 +101,8 @@ larger initial spread of its own; its final spread is in
   regenerative growth of the adult liver and the absence of new nephrons after
   birth; it is a correspondence, not a test.
 - **A budget organ tracks its progenitors.** Pancreas size should scale with
-  progenitor number, as observed, while the liver's should not; a kidney whose
+  progenitor number, as observed, while the liver's should not, because the
+  liver's competent compartment is restored by the cells it makes; a kidney whose
   progenitors are also lost during induction should track them weakly.
 - **Paired kidneys.** With the model's elasticities, the share of size
   variance between individuals is
@@ -142,5 +149,5 @@ only through the partition formula, which awaits independent input spreads.
 ## Before submission
 
 1. Commit, then `make test` and `make paper` on that commit, so that
-   `PAPER_NUMBERS.md` names version 4.7.1 and a clean commit.
+   `PAPER_NUMBERS.md` names version 4.8.0 and a clean commit.
 2. Write the manuscript from this file, `PAPER_NUMBERS.md` and `FIGURES.md`.

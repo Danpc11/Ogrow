@@ -141,3 +141,16 @@ close to each other a unit can change territory. Assignment by vascular
 territory (`assign_mode="segment"`, exact projection on segments) moves 19 to
 25 % of the liver's units and
 leaves the closure modes and the pancreas-liver contrast unchanged.
+
+**What self-renewal does and does not settle.** Version 4.8 makes the liver's
+competent compartment self-renewing (renewal = 1), because mononuclear
+hepatocytes are their own progenitors, and keeps the kidney's and the
+pancreas's consumable (renewal = 0). This replaces a pool thirteen times
+larger than the units it makes with a mechanism, and it reconciles the liver
+regime with fetal transcriptomes, in which the hepatoblast programme is fully
+converted before birth while lobules keep forming. It does not change the
+results: the liver's elasticity to the initial pool is 0.17 with and without
+it. The difference between organs therefore rests on the size of the pool
+relative to what supply and room allow, not on self-renewal, and the initial
+pool cannot be made small, because a tip makes at most as many units per step
+as it holds progenitors.

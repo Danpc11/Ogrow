@@ -30,9 +30,9 @@ from organgrow.closed import grow
 OUT = ROOT / "results" / "robustness"
 OUT.mkdir(parents=True, exist_ok=True)
 S, DAYS, NU, SEEDS, H = 0.6, 140, 8.0, range(300, 306), 0.3
-REG = {"liver": dict(P0=2600.0, rho=0.10, delta=0.10, q_set=0.6),
-       "kidney": dict(P0=300.0, rho=0.00, delta=0.05, q_set=0.6),
-       "pancreas": dict(P0=60.0, rho=0.00, delta=0.00, q_set=0.6)}
+REG = {"liver": dict(P0=2600.0, rho=0.10, delta=0.10, q_set=0.6, renewal=1.0),
+       "kidney": dict(P0=300.0, rho=0.00, delta=0.05, q_set=0.6, renewal=0.0),
+       "pancreas": dict(P0=60.0, rho=0.00, delta=0.00, q_set=0.6, renewal=0.0)}
 FIX = dict(R_unit=650.0, units_per_branch=650 / 600.0, max_vessels=6000)
 VARIANTS = {
     "reference": {},
@@ -47,6 +47,7 @@ VARIANTS = {
     "binomial_half_day": dict(nucleation="binomial", substeps=2),
     "binomial_quarter_day": dict(nucleation="binomial", substeps=4),
     "competing_fates": dict(turnover="competing"),
+    "no_self_renewal": dict(renewal=0.0),
 }
 
 
@@ -55,9 +56,9 @@ def run(variant, reg, seed, sign):
     if f.exists():
         return json.load(open(f))
     p = dict(REG[reg]); p["P0"] *= float(np.exp({"0": 0.0, "+": H, "-": -H}[sign]))
+    p.update(VARIANTS[variant])          # a variant overrides the regime's own value
     U, m, vt, tr = grow(lambda x, y, z: sdf("liver", x / S, y / S, z / S), 190 * S,
-                        days=DAYS, rng=np.random.default_rng(seed), nu=NU,
-                        **FIX, **p, **VARIANTS[variant])
+                        days=DAYS, rng=np.random.default_rng(seed), nu=NU, **FIX, **p)
     r = dict(N=len(U), vessels=len(vt), territory_diff=tr.final["territory_diff"],
              **tr.closure)
     json.dump(r, open(f, "w"))

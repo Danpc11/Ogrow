@@ -85,6 +85,7 @@ class Trace:
     vessels: list = field(default_factory=list)
     lost: list = field(default_factory=list)   # progenitors lost, cumulative
     born: list = field(default_factory=list)   # progenitors born, cumulative
+    renewed: list = field(default_factory=list)  # progenitors returned, cumulative
     closure: dict = field(default_factory=dict)  # closure_by_trials at the end
     Q: list = field(default_factory=list)      # total flow through the root
     bound: list = field(default_factory=list)   # "growing", "supply" or "progenitor"
@@ -229,6 +230,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
          attractor_density=None, attractor_reach=None, attractor_kill=None,
          root_site="deepest", assign_mode="tip",
          nucleation="poisson_capped", substeps=1, turnover="independent",
+         renewal=0.0,
          intervene_day=None, intervene=None, intervene_factor=0.8):
     """Grow one organ. `sdf(x, y, z)` is negative inside the domain.
 
@@ -379,6 +381,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
     Ptot0 = float(P[0])
     lost = 0                          # progenitors lost, cumulative
     born = 0                          # progenitors born, cumulative
+    renewed = 0                       # progenitors returned after making a unit
     tr = Trace()
     leak = m_leak ** xi / R0          # what a tip carries before its first unit
 
@@ -467,8 +470,9 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                     k = int(rng.poisson(lam_i)) if lam_i > 0 else 0
                 else:
                     raise ValueError(f"unknown nucleation {nucleation!r}")
-                # A unit consumes one progenitor, so a tip cannot make more units
-                # than it holds. The draw used to be uncapped: a tip with two
+                # A unit takes one cell from the competent pool, so a tip cannot
+                # make more units than it holds. Whether that cell is spent
+                # depends on the organ: see `renewal` below. The draw used to be uncapped: a tip with two
                 # progenitors could place five units and clamp its pool at zero,
                 # which made a pool-bound organ exceed its own budget by up to
                 # 40 %, and by an amount that depended on the drive, that is on
@@ -491,9 +495,17 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                         continue
                     new_pos.append(c); new_tip.append(i)
                     placed += 1
-                # progenitors are spent by the units made, not by the ones refused;
-                # the survivors then divide and die as independent events
-                left = int(Pi) - placed
+                # Whether making a unit spends a progenitor is the organ's
+                # defining property. Where the differentiated cell is its own
+                # progenitor, as mononuclear hepatocytes are in the liver, the
+                # cell that forms a unit stays competent and the pool is not
+                # drawn down: renewal = 1. Where the progenitor is a separate,
+                # consumable population, as the cap mesenchyme is in the kidney
+                # and the multipotent progenitors are in the pancreas, it is
+                # spent: renewal = 0. The survivors then divide and die.
+                returned = int(rng.binomial(placed, min(renewal, 1.0))) if renewal > 0 and placed else 0
+                renewed += returned
+                left = int(Pi) - placed + returned
                 if turnover == "independent":
                     born_i = int(rng.binomial(left, min(rho * dt, 1.0))) if rho > 0 and left else 0
                     died = int(rng.binomial(left, min(delta * dt, 1.0))) if delta > 0 and left else 0
@@ -669,7 +681,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
         # q was read at the start of the day, before any sprout was added
         live = [i for i in active if n_at[i] > 0] or tips
         qbar = float(np.mean(q[live]))
-        tr.t.append(day); tr.N.append(len(U)); tr.P.append(Ptot); tr.lost.append(lost); tr.born.append(born)
+        tr.t.append(day); tr.N.append(len(U)); tr.P.append(Ptot); tr.lost.append(lost); tr.born.append(born); tr.renewed.append(renewed)
         tr.q.append(qbar); tr.C.append(C); tr.mass.append(float(m.sum()))
         tr.vessels.append(len(vt))
         tr.Q.append(float(vt.flow[0]) if len(vt.flow) else 0.0)

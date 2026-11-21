@@ -1,4 +1,4 @@
-# The closed model (version 4.7.1)
+# The closed model (version 4.8.0)
 
 `src/organgrow/closed.py` is the model the paper rests on; `make paper`
 builds its results. Its parameters are in `config/params.yaml`, section
@@ -34,8 +34,15 @@ How the model was built, what was corrected and what was withdrawn is in
    Binomial$(P_i, 1 - e^{-\nu (q_i - q_{\text{set}})_+})$ with
    `nucleation="binomial"`. A unit lands within `nucleation_spread` λ of the
    tip and is refused outside the organ or closer than λ to another unit; each
-   unit placed spends one progenitor. The survivors divide with probability
-   ρ and are lost with probability δ, independently or as competing fates
+   unit placed takes one cell from the competent pool. Whether that cell is
+   spent is the organ's defining property, set by `renewal`: the cell stays
+   competent with probability `renewal` and is spent otherwise. The liver uses
+   renewal = 1, because its differentiated cells are its own progenitors;
+   mononuclear hepatocytes divide and restore the compartment, so forming a
+   lobule does not draw it down. The kidney and the pancreas use renewal = 0,
+   because the cap mesenchyme and the multipotent progenitors are separate,
+   consumable populations. The survivors then divide with probability ρ and
+   are lost with probability δ, independently or as competing fates
    (`turnover="competing"`). `substeps` splits this step within the day.
 4. **Units** grow logistically toward $\kappa q_i$ at a rate that decays with
    time.
@@ -61,11 +68,11 @@ the threshold (`"supply"`) or the least spacing (`"room"`).
 
 ## The regimes
 
-| Regime | Initial pool | ρ | δ |
-| --- | --- | --- | --- |
-| Liver | 2600 | 0.10 | 0.10 |
-| Kidney | 300 | 0 | 0.05 |
-| Pancreas | 60 | 0 | 0 |
+| Regime | Initial pool | ρ | δ | renewal |
+| --- | --- | --- | --- | --- |
+| Liver | 2600 | 0.10 | 0.10 | 1 |
+| Kidney | 300 | 0 | 0.05 | 0 |
+| Pancreas | 60 | 0 | 0 | 0 |
 
 All with ν = 8, $q_{\text{set}}$ = 0.6, domain scale 0.6, 140 days, a vessel
 cap of 6000 that no run reaches, $R_{\text{unit}}$ = 650 and 650/600 units per

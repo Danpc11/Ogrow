@@ -111,11 +111,12 @@ ax[1].set_ylabel(r"$\varepsilon_{P_0}$, five settings"); ax[1].set_ylim(-0.15, 1
 
 order = ["reference", "root_surface", "root_random", "no_deficit", "no_load",
          "no_crowding", "no_mesenchyme", "territory", "binomial", "binomial_half_day",
-         "binomial_quarter_day", "competing_fates"]
+         "binomial_quarter_day", "competing_fates", "no_self_renewal"]
 labels = ["reference", "root at surface", "root at random", "no deficit sprouting",
           "no load sprouting", "no crowding sprouting", "no mesenchymal signal",
           "territory assignment", "binomial nucleation", "binomial, half-day step",
-          "binomial, quarter-day step", "competing fates"]
+          "binomial, quarter-day step", "competing fates",
+          "liver pool consumable"]
 rrow = []
 for j, v in enumerate(order):
     L, Pn = Rb[v]["liver"], Rb[v]["pancreas"]
