@@ -7,11 +7,17 @@ on:
 jobs:
   tests:
     name: tests (Python ${{ matrix.python }})
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        python: ["3.9", "3.12"]
+        include:
+          # Python 3.9 is the system Python of macOS used for the stamped
+          # numbers; GitHub publishes it for Ubuntu 24.04 but not for 26.04
+          - python: "3.9"
+            os: ubuntu-24.04
+          - python: "3.12"
+            os: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
