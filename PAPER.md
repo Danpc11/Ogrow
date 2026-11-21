@@ -1,7 +1,7 @@
 # The paper: framework, claims and evidence
 
 Target: *Frontiers in Cell and Developmental Biology*, Hypothesis and Theory.
-Reference model: version 4.5 (`src/organgrow/closed.py`). Every number from
+Reference model: version 4.6 (`src/organgrow/closed.py`). Every number from
 the model that the paper uses is in `PAPER_NUMBERS.md`, written by
 `make paper` with the version and commit that produced it; this file does not
 copy model numbers by hand. Numbers given here are either data (the human
@@ -14,7 +14,9 @@ tips of its growing tree: perfusion per unit, progenitors, or room to place a
 unit. Given a geometry and the rules that organise the tree in space, which of
 these holds an organ's remaining progenitors at closure distinguishes a liver
 from a pancreas. In the runs reported the geometry is held fixed and only the
-pool and its turnover change between regimes.
+pool and its turnover change between regimes. Supply is hydraulic: the outlet
+pressure at a tip relative to the driving pressure, not oxygen or metabolite
+delivery.
 
 ## Claims
 
@@ -34,14 +36,14 @@ and keeps the rest at tips short of supply; the liver keeps nearly all of it,
 mostly at tips short of supply and partly at tips with no room. Read from the distribution of the pool over tips at
 closure, with the room left at each tip tested by trial placements that do
 not depend on the dynamics, not from a mean. The three
-closure modes persist in each of eight variants: the vascular root at the
+closure modes persist in each of ten variants: the vascular root at the
 deepest point, at the surface or at random; each of the four sprouting rules
-removed in turn; and units assigned by vascular territory instead of by
-nearest tip. `PAPER_NUMBERS.md`, Regimes and Robustness; Figures 1, 3 and 5A.
+removed in turn; units assigned by vascular territory instead of by nearest
+tip; binomial nucleation; and binomial nucleation with a half-day step. `PAPER_NUMBERS.md`, Regimes and Robustness; Figures 1, 3 and 5A.
 
 **3. Progenitor number reaches size more in a budget organ than in a liver.**
 The elasticity of the final unit count to the progenitor pool is higher in the
-pancreas than in the liver in all eight variants, significantly in six. This
+pancreas than in the liver in all ten variants, significantly in eight. This
 is the pattern found experimentally by Stanger, Tanaka and Melton (*Nature*
 2007): halving pancreatic progenitors halved the pancreas, which never
 compensated, while the liver did. The model was not fitted to that
@@ -60,12 +62,16 @@ segment in series with its tissue peaks at $r_c = (\ell/3R_t)^{1/4}$, below
 which a vessel closes. The Murray ratio in grown trees:
 `PAPER_NUMBERS.md`, Murray; Figure 6.
 
-**5. Capacity closure contracts the spread of unit number.** The spread
-relaxes as $\sigma^2(t) = \sigma_0^2 e^{-2\lambda t} + \sigma_\infty^2(1 - e^{-2\lambda t})$,
-with weak-feedback limit $\mathrm{CV}_i/\mathrm{CV}_f = (N_f/N_i)^2$, which
-gives 3.31 for the mouse liver against 3.09 measured (Azizoglu et al. 2025).
-The model contracts more than the mouse liver, from a larger initial spread
-of its own to a smaller final one: `PAPER_NUMBERS.md`, Contraction; Figure 7.
+**5. Capacity closure contracts the spread of unit number.** If every
+individual gains the same increment of $N^2$, the ratio of initial to final
+CV is $(N_f/N_i)^2$; this is the weak-feedback limit of the nucleation law,
+derived, and gives 3.31 for the mouse liver against 3.09 measured (Azizoglu et
+al. 2025). The relaxation form
+$\sigma^2(t) = \sigma_0^2 e^{-2\lambda t} + \sigma_\infty^2(1 - e^{-2\lambda t})$
+describes the simulations but is fitted, not derived, and no mechanism is
+claimed for $\lambda$. The model contracts more than the mouse liver, from a
+larger initial spread of its own to a smaller final one:
+`PAPER_NUMBERS.md`, Contraction; Figure 7.
 
 ## Predictions for experiment
 
@@ -101,15 +107,19 @@ of its own to a smaller final one: `PAPER_NUMBERS.md`, Contraction; Figure 7.
 
 The model's parameters are chosen, not fitted; the one calibration is the
 mouse contraction. Results come from one domain scale, so the model's
-contingent spread cannot stand in for a human organ's. The time step is one
-day and has not been varied. The pool elasticity of the liver is not
+contingent spread cannot stand in for a human organ's. The progenitor processes were checked with
+binomial nucleation and a half-day step; vascular adaptation and sprouting run
+once a day and were not. The critical radius is the floor of calibre
+adaptation, so simulated trees cannot show calibres below it. The pool elasticity of the liver is not
 measurable without load-driven sprouting (s.e. 0.55), and the pancreas-liver
-contrast is not significant with a random root. The
+contrast is not significant with a random root. The room left at a tip is
+estimated from trial placements in the final state, which measures residual
+capacity, not whether growth could resume later. The
 human data give shape and size but no unit counts, so model and cohort meet
 only through the partition formula, which awaits independent input spreads.
 
 ## Before submission
 
 1. Commit, then `make test` and `make paper` on that commit, so that
-   `PAPER_NUMBERS.md` names version 4.5 and a clean commit.
+   `PAPER_NUMBERS.md` names version 4.6 and a clean commit.
 2. Write the manuscript from this file, `PAPER_NUMBERS.md` and `FIGURES.md`.

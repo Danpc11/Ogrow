@@ -43,6 +43,8 @@ VARIANTS = {
     "no_crowding": dict(sprout_room=0.0),
     "no_mesenchyme": dict(attractor_density=0.0),
     "territory": dict(assign_mode="segment"),
+    "binomial": dict(nucleation="binomial"),
+    "binomial_half_day": dict(nucleation="binomial", substeps=2),
 }
 
 

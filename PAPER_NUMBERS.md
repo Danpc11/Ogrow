@@ -1,6 +1,8 @@
 # Numbers the paper uses
 
-Model version 4.5.0, commit unknown, generated 2026-11-20 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.6.0, commit unknown, generated 2026-11-21 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+
+Python 3.12.3, numpy 2.5.4, scipy 1.18.1; `config/params.yaml` sha256 04415cee25e4.
 
 ## Human kidneys (TRUSTED, independent of the model)
 
@@ -15,11 +17,11 @@ Model version 4.5.0, commit unknown, generated 2026-11-20 by `scripts/20_paper_n
 
 ## Regimes at closure (one organ each)
 
-| regime | units | pool spent | held by supply | held by room | active |
-|---|---|---|---|---|---|
-| liver | 202 | 0.02 | 0.79 | 0.19 | 0.00 |
-| kidney | 79 | 1.00 | 0.00 | 0.00 | 0.00 |
-| pancreas | 41 | 0.68 | 0.32 | 0.00 | 0.00 |
+| regime | units | pool spent | held by supply | held by room | active | units added in the last fifth |
+|---|---|---|---|---|---|---|
+| liver | 202 | 0.02 | 0.79 | 0.19 | 0.00 | 2.0 % |
+| kidney | 79 | 1.00 | 0.00 | 0.00 | 0.00 | 0.0 % |
+| pancreas | 41 | 0.68 | 0.32 | 0.00 | 0.00 | 0.0 % |
 
 ## Transmission of an individual spread (95 % bootstrap interval)
 
@@ -80,4 +82,6 @@ Model version 4.5.0, commit unknown, generated 2026-11-20 by `scripts/20_paper_n
 | no_crowding | 1.00 | 0.76 | 0.73 / 0.21 | +0.33 ± 0.05 | +0.37 ± 0.07 | +0.59 ± 0.10 | 2.3 |
 | no_mesenchyme | 1.00 | 0.88 | 0.73 / 0.18 | +0.11 ± 0.06 | +0.40 ± 0.08 | +0.81 ± 0.06 | 8.3 |
 | territory | 1.00 | 0.79 | 0.66 / 0.23 | +0.06 ± 0.08 | +0.35 ± 0.08 | +0.67 ± 0.05 | 6.6 |
+| binomial | 1.00 | 0.66 | 0.73 / 0.19 | +0.09 ± 0.07 | +0.37 ± 0.07 | +0.80 ± 0.08 | 6.6 |
+| binomial_half_day | 1.00 | 0.80 | 0.73 / 0.26 | +0.22 ± 0.06 | +0.27 ± 0.08 | +0.71 ± 0.11 | 3.9 |
 

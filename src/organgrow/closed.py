@@ -193,10 +193,18 @@ def closure_by_trials(P, q, vt, q_set, U, sdf_scaled, scale, spread, lam, nu,
     tree = cKDTree(U) if len(U) else None
     supply = held[qq <= q_set].sum(); room = active = lam_eff = 0.0
     for i in np.flatnonzero((qq > q_set) & (held > 0)):
-        c = vt.end[i] * scale + rng.normal(0, spread, (n_trials, 3))
-        ok = np.array([sdf_scaled(*x) < 0 for x in c])
-        if tree is not None and ok.any():
-            ok[ok] = tree.query(c[ok])[0] >= lam
+        def _trial(n):
+            c = vt.end[i] * scale + rng.normal(0, spread, (n, 3))
+            ok = np.array([sdf_scaled(*x) < 0 for x in c])
+            if tree is not None and ok.any():
+                ok[ok] = tree.query(c[ok])[0] >= lam
+            return ok
+        ok = _trial(n_trials)
+        if not ok.any():
+            # no success in n_trials: draw nine times more before reading zero,
+            # so that a true probability of 0.02 is read as zero with chance
+            # 0.98^400 rather than 0.98^40
+            ok = np.concatenate([ok, _trial(9 * n_trials)])
         p = float(ok.mean())
         room += held[i] * (1 - p); active += held[i] * p
         lam_eff += nu * held[i] * (qq[i] - q_set) * p
@@ -215,7 +223,8 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
          l_sprout=None, nucleation_spread=None,
          max_units=None, max_vessels=None,
          attractor_density=None, attractor_reach=None, attractor_kill=None,
-         root_site="deepest", assign_mode="tip"):
+         root_site="deepest", assign_mode="tip",
+         nucleation="poisson_capped", substeps=1):
     """Grow one organ. `sdf(x, y, z)` is negative inside the domain.
 
     The identity parameters (nu, q_set, rho, delta, P0) are required; every
@@ -420,45 +429,57 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
         new_pos, new_tip = [], []
         no_room = np.zeros(len(vt), int)   # placements refused for lack of space
         tried = np.zeros(len(vt), int)     # placements attempted
-        for i in active:
-            Pi = P.get(i, 0.0)
-            if Pi <= 0:
-                continue
-            drive = max(q[i] - q_set, 0.0)
-            lam_i = nu * Pi * drive
-            k = int(rng.poisson(lam_i)) if lam_i > 0 else 0
-            # A unit consumes one progenitor, so a tip cannot make more units
-            # than it holds. The draw used to be uncapped: a tip with two
-            # progenitors could place five units and clamp its pool at zero,
-            # which made a pool-bound organ exceed its own budget by up to
-            # 40 %, and by an amount that depended on the drive, that is on
-            # the setpoint.
-            k = min(k, int(Pi))
-            tried[i] = k
-            placed = 0
-            for _ in range(k):
-                if len(U) + len(new_pos) >= max_units:
-                    break
-                c = vt.end[i] * scale + rng.normal(0, nucleation_spread * lam, 3)
-                if sdf(c[0] / s, c[1] / s, c[2] / s) >= 0:
-                    no_room[i] += 1
+        # the day can be split into substeps for the progenitor processes
+        # (nucleation, division, loss), with supply held at its value for the
+        # day; substeps = 1 is the reference
+        dt = 1.0 / substeps
+        for _sub in range(substeps):
+            for i in active:
+                Pi = P.get(i, 0.0)
+                if Pi <= 0:
                     continue
-                if len(U) and np.min(((U - c) ** 2).sum(-1)) < lam * lam:
-                    no_room[i] += 1
-                    continue
-                if new_pos and np.min(((np.asarray(new_pos) - c) ** 2).sum(-1)) < lam * lam:
-                    no_room[i] += 1
-                    continue
-                new_pos.append(c); new_tip.append(i)
-                placed += 1
-            # progenitors are spent by the units made, not by the ones refused;
-            # the survivors then divide and die as independent events
-            left = int(Pi) - placed
-            born_i = int(rng.binomial(left, min(rho, 1.0))) if rho > 0 and left else 0
-            died = int(rng.binomial(left, min(delta, 1.0))) if delta > 0 and left else 0
-            lost += died
-            born += born_i
-            P[i] = left + born_i - died
+                drive = max(q[i] - q_set, 0.0)
+                lam_i = nu * Pi * drive * dt
+                if nucleation == "binomial":
+                    # each progenitor differentiates with hazard nu * drive over
+                    # the step, independently; the cap is automatic
+                    k = int(rng.binomial(int(Pi), 1.0 - np.exp(-nu * drive * dt))) if drive > 0 else 0
+                elif nucleation == "poisson_capped":
+                    k = int(rng.poisson(lam_i)) if lam_i > 0 else 0
+                else:
+                    raise ValueError(f"unknown nucleation {nucleation!r}")
+                # A unit consumes one progenitor, so a tip cannot make more units
+                # than it holds. The draw used to be uncapped: a tip with two
+                # progenitors could place five units and clamp its pool at zero,
+                # which made a pool-bound organ exceed its own budget by up to
+                # 40 %, and by an amount that depended on the drive, that is on
+                # the setpoint.
+                k = min(k, int(Pi))
+                tried[i] += k
+                placed = 0
+                for _ in range(k):
+                    if len(U) + len(new_pos) >= max_units:
+                        break
+                    c = vt.end[i] * scale + rng.normal(0, nucleation_spread * lam, 3)
+                    if sdf(c[0] / s, c[1] / s, c[2] / s) >= 0:
+                        no_room[i] += 1
+                        continue
+                    if len(U) and np.min(((U - c) ** 2).sum(-1)) < lam * lam:
+                        no_room[i] += 1
+                        continue
+                    if new_pos and np.min(((np.asarray(new_pos) - c) ** 2).sum(-1)) < lam * lam:
+                        no_room[i] += 1
+                        continue
+                    new_pos.append(c); new_tip.append(i)
+                    placed += 1
+                # progenitors are spent by the units made, not by the ones refused;
+                # the survivors then divide and die as independent events
+                left = int(Pi) - placed
+                born_i = int(rng.binomial(left, min(rho * dt, 1.0))) if rho > 0 and left else 0
+                died = int(rng.binomial(left, min(delta * dt, 1.0))) if delta > 0 and left else 0
+                lost += died
+                born += born_i
+                P[i] = left + born_i - died
         if new_pos:
             U = np.vstack([U, np.asarray(new_pos)])
             m = np.concatenate([m, np.full(len(new_pos), m0)])

@@ -168,6 +168,17 @@ for k in range(2):
     acc.append(40 + tr_.born[-1] - (len(U_) + int(round(tr_.P[-1])) + tr_.lost[-1]))
 check("progenitors balance with division and loss", all(a == 0 for a in acc), f"{acc}")
 
+# binomial nucleation with a split day conserves progenitors just as exactly
+accb = []
+for k in range(2):
+    U_, m_, vt_, tr_ = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z / 0.6), 114,
+                             days=40, rng=np.random.default_rng(40 + k), nu=8.0, q_set=0.6,
+                             rho=0.05, delta=0.03, P0=40.0, R_unit=650.0,
+                             units_per_branch=650 / 600.0, max_vessels=3000,
+                             nucleation="binomial", substeps=2)
+    accb.append(40 + tr_.born[-1] - (len(U_) + int(round(tr_.P[-1])) + tr_.lost[-1]))
+check("binomial nucleation with substeps balances progenitors", all(a == 0 for a in accb), f"{accb}")
+
 print()
 if FAIL:
     print("FAILED:", ", ".join(FAIL))

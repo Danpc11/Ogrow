@@ -28,8 +28,12 @@ try:
 except Exception:
     commit = "unknown"
 w("# Numbers the paper uses\n")
+import hashlib, platform, scipy
+cfg_hash = hashlib.sha256((ROOT / "config" / "params.yaml").read_bytes()).hexdigest()[:12]
 w(f"Model version {organgrow.__version__}, commit {commit}, generated "
   f"{datetime.date.today().isoformat()} by `scripts/20_paper_numbers.py`. Do not edit by hand.\n")
+w(f"Python {platform.python_version()}, numpy {np.__version__}, scipy {scipy.__version__}; "
+  f"`config/params.yaml` sha256 {cfg_hash}.\n")
 
 def table(header, rows):
     w("| " + " | ".join(header) + " |")
@@ -52,8 +56,11 @@ if all((RES / "paper" / f"regime_{r}.npz").exists() for r in reg):
     for r in reg:
         d = np.load(RES / "paper" / f"regime_{r}.npz")
         c = d["closure"] if "closure" in d.files else [np.nan] * 4
-        rows.append([r, int(d["N"][-1]), f"{c[0]:.2f}", f"{c[1]:.2f}", f"{c[2]:.2f}", f"{c[3]:.2f}"])
-    table(["regime", "units", "pool spent", "held by supply", "held by room", "active"], rows)
+        Nt = d["N"]; late = (Nt[-1] - Nt[int(0.8 * len(Nt))]) / max(Nt[-1], 1)
+        rows.append([r, int(Nt[-1]), f"{c[0]:.2f}", f"{c[1]:.2f}", f"{c[2]:.2f}", f"{c[3]:.2f}",
+                     f"{100 * late:.1f} %"])
+    table(["regime", "units", "pool spent", "held by supply", "held by room", "active",
+           "units added in the last fifth"], rows)
 
 if (RES / "transmission.json").exists():
     T = json.load(open(RES / "transmission.json"))

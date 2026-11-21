@@ -66,6 +66,6 @@ paper:
 	$(PY) figures/fig3_closed.py
 	$(PY) figures/fig6.py
 	$(PY) scripts/18_paper_tables.py
-	$(PY) scripts/21_robustness.py reference root_surface root_random no_deficit no_load no_crowding no_mesenchyme territory
+	$(PY) scripts/21_robustness.py reference root_surface root_random no_deficit no_load no_crowding no_mesenchyme territory binomial binomial_half_day
 	$(PY) scripts/21_robustness.py
 	$(PY) scripts/20_paper_numbers.py

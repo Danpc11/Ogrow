@@ -168,10 +168,12 @@ the closed model used it as the floor of every calibre; all closed-model
 results were recomputed after the correction.)
 
 Below $r_c$ the shear feedback is positive and the vessel closes; above it the
-feedback is negative and the vessel holds. This is a pruning criterion derived
-from the adaptation rule rather than imposed on it, and it predicts that a
-measured calibre distribution has a lower cut-off rather than a tail running
-to zero. (Established in the rewrite; see `CLOSED_MODEL.md`.)
+feedback is negative and the vessel holds. The criterion is derived from the
+adaptation rule. The closed model, however, uses $r_c$ as the floor of the
+adaptation, so the absence of calibres below $r_c$ in simulated trees is
+imposed, not predicted. For real trees the derivation predicts a lower
+cut-off in the calibre distribution rather than a tail running to zero, which
+is a test on measured calibres, not a result of the model.
 
 ### How supply scales with unit count
 
@@ -497,7 +499,7 @@ range. The engine uses $b = 0.9$.
 Two daughters at the cost-law ratio conduct $2 \cdot 2^{-4/(b+2)}$ of their
 parent, which is 0.77 at $b = 0.9$ and below one for every $b < 2$, which includes the
 measured range. Dividing a
-tip always loses conductance. What it gains is the tissue it can serve, so a
+tip loses conductance whenever $b < 2$. What it gains is the tissue it can serve, so a
 split is worth making when the tissue it relieves exceeds the tissue its
 junction occupies. Vessel volume alone is flat in the branching number, and
 without the junction term the tree grows until an implementation cap stops
@@ -783,6 +785,13 @@ of the reference rules (liver +0.13 to +0.26, kidney +0.35 to +0.40, pancreas
 +0.61 to +0.70) but is not separated from the liver robustly. Between 19 and
 25 % of the liver's units change territory between the two assignment rules
 without changing these conclusions.
+
+Two further variants test the progenitor process itself: nucleation drawn as
+Binomial$(P_i, 1 - e^{-\nu (q_i - q_{\text{set}})_+ \Delta t})$, each progenitor
+differentiating independently, instead of a Poisson draw capped at $P_i$; and
+the same with the day split into two steps for nucleation, division and loss.
+The closure modes and the pancreas-liver contrast hold in both (z = 6.6 and
+3.9). Vascular adaptation and sprouting still run once a day.
 
 ### Murray's relation in grown trees
 

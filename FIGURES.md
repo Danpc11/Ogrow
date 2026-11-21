@@ -44,7 +44,7 @@ held at tips short of supply, held for lack of room (estimated by trial
 placements), and still active at closure; mean of six seeds per regime. (B) Elasticity of the final unit count
 to the progenitor pool at five settings per regime; bars, s.e. of six paired
 replicates. (C) Difference in that elasticity between pancreas and liver under
-eight variants of the auxiliary rules, with z; bars, s.e.
+ten variants of the auxiliary rules, with z; bars, s.e.
 
 **Figure 6. Vascular rules.** (A) Ratio $r_p^{2.9}/\sum r_c^{2.9}$ at each
 bifurcation of a grown liver and kidney; bars mark medians. (B) Wall shear
