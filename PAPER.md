@@ -60,8 +60,10 @@ the liver is held by both. `PAPER_NUMBERS.md`, Regimes and Robustness; Figures 1
 
 **3. Progenitor number reaches size more in a budget organ than in a liver.**
 The elasticity of the final unit count to the progenitor pool is higher in the
-pancreas than in the liver in every variant, with the z of each in
-`PAPER_NUMBERS.md`, Robustness. This
+pancreas than in the liver in twelve of the thirteen variants, with z between
+2.5 and 7.9; the exception is the variant without load-driven sprouting, where
+the liver's elasticity carries a standard error of 1.12 and the contrast is
+not resolved. The z of each is in `PAPER_NUMBERS.md`, Robustness. This
 is the pattern found experimentally by Stanger, Tanaka and Melton (*Nature*
 2007): halving pancreatic progenitors halved the pancreas, which never
 compensated, while the liver did. The model was not fitted to that
@@ -144,8 +146,8 @@ smaller step was not tested. The two interventions are not matched in
 strength, so their effects show that both constraints hold the liver, not
 which holds it more. The critical radius is the floor of calibre
 adaptation, so simulated trees cannot show calibres below it. The pool elasticity of the liver is not
-measurable without load-driven sprouting (s.e. 0.55), and the pancreas-liver
-contrast is not significant with a random root. The room left at a tip is
+measurable without load-driven sprouting (s.e. 1.12), so one of the thirteen
+robustness variants neither supports nor contradicts the contrast. The room left at a tip is
 estimated from trial placements in the final state, which measures residual
 capacity, not whether growth could resume later. The
 human data give shape and size but no unit counts, so model and cohort meet

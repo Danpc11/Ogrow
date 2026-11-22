@@ -28,6 +28,10 @@ kept for the record, are not the paper's, and should not be used to check it.
     python3 -m pip install -r requirements.txt -r requirements-dev.txt
     make test      # under a minute: derivations, conservation, closed model
     make check     # static analysis; version and stamped numbers agree
+
+When the model's version changes, run `make paper` before committing: the
+regenerated `PAPER_NUMBERS.md` belongs in the same commit as the change, so
+that no commit carries numbers from two versions and the check stays green.
     make paper     # the manuscript: about half an hour on one core
 
 No install step is needed: `make` puts `src` on `PYTHONPATH` and picks up

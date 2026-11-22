@@ -823,8 +823,9 @@ The closure modes hold in all eight variants: the kidney spends its pool; the
 pancreas spends 55 to 88 % and holds the rest by supply; the liver spends 7 to
 15 % and holds the rest mostly by supply (61 to 75 %) and partly by lack of
 room (15 to 32 %). The pool elasticity is higher in the pancreas than in the
-liver in all eight (z from 2.3 to 8.3 in six; 1.4 with a random root and 1.2
-without load-driven sprouting). The kidney lies between them at every setting
+liver in all eight, and significant in all but the variant without
+load-driven sprouting (see the thirteen-variant table in `PAPER_NUMBERS.md`,
+which supersedes the figures quoted here from version 4.4) The kidney lies between them at every setting
 of the reference rules (liver +0.13 to +0.26, kidney +0.35 to +0.40, pancreas
 +0.61 to +0.70) but is not separated from the liver robustly. Between 19 and
 25 % of the liver's units change territory between the two assignment rules
@@ -888,7 +889,11 @@ elasticities stay within noise: liver +0.09, +0.22, +0.17; pancreas +0.80,
 progenitor per step drawn from a multinomial with total probability
 $1 - e^{-(\rho+\delta)\Delta t}$ split in proportion to the rates (liver
 +0.26, pancreas +0.61, against +0.22 and +0.61 with independent draws). The
-pancreas-liver contrast holds in all twelve variants, with z above 2 in ten.
+pancreas-liver contrast holds in twelve of the thirteen variants of the
+reference version, with z between 2.5 and 7.9. The exception is the variant
+without load-driven sprouting, where the liver's elasticity has a standard
+error of 1.12 and the contrast is not resolved in either direction; that
+variant is uninformative rather than contrary.
 
 The shares of the pool held by supply and by room are a description of the
 final state. Whether each constraint holds growth is a causal question, asked

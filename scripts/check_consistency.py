@@ -39,7 +39,13 @@ for name, v in found.items():
     ok = v == version
     print(f"  {'ok  ' if ok else 'FAIL'} {name}: {v}")
     if not ok:
-        fail.append(f"{name} says {v}, pyproject.toml says {version}")
+        if name == "PAPER_NUMBERS.md":
+            fail.append(f"{name} holds numbers from version {v}, while the code is "
+                        f"{version}. Run `make paper` and commit the regenerated "
+                        f"PAPER_NUMBERS.md and source_data together with the version "
+                        f"change, so that no commit carries numbers from two versions.")
+        else:
+            fail.append(f"{name} says {v}, pyproject.toml says {version}")
 
 stamp = re.search(r"Model version [0-9.]+, commit ([^,]+),", read("PAPER_NUMBERS.md"))
 commit = stamp.group(1).strip() if stamp else "missing"
