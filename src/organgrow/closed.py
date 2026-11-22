@@ -87,6 +87,8 @@ class Trace:
     born: list = field(default_factory=list)   # progenitors born, cumulative
     renewed: list = field(default_factory=list)  # progenitors returned, cumulative
     closure: dict = field(default_factory=dict)  # closure_by_trials at the end
+    injury: dict = field(default_factory=dict)   # what was destroyed, and when
+    perfused: list = field(default_factory=list)  # mass whose supply meets the threshold
     Q: list = field(default_factory=list)      # total flow through the root
     bound: list = field(default_factory=list)   # "growing", "supply" or "progenitor"
 
@@ -230,7 +232,8 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
          attractor_density=None, attractor_reach=None, attractor_kill=None,
          root_site="deepest", assign_mode="tip",
          nucleation="poisson_capped", substeps=1, turnover="independent",
-         renewal=0.0,
+         renewal=0.0, injure_day=None, injury=None, injury_fraction=0.3,
+         injury_axis=1,
          intervene_day=None, intervene=None, intervene_factor=0.8):
     """Grow one organ. `sdf(x, y, z)` is negative inside the domain.
 
@@ -401,6 +404,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
     A = A[np.array([sdf(*p) < 0 for p in A])][:n_attr]
 
     spacing = lam                     # least distance between units
+    tip_of_prev = np.zeros(0, int)    # the assignment of the previous day
     for day in range(1, days + 1):
         # A causal test of closure: on intervene_day the state is changed and
         # growth continues. "supply" lowers the threshold by intervene_factor,
@@ -415,6 +419,49 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                 spacing = spacing * intervene_factor
             else:
                 raise ValueError(f"unknown intervention {intervene!r}")
+        # Injury: on injure_day a part of the organ is destroyed and growth
+        # continues, so that recovery can be told from further growth. The
+        # damage is a plane cut, as a lobectomy is, not a random removal:
+        # everything past a threshold along `injury_axis` is lost. "parenchyma"
+        # removes the units there and leaves the tree; "vascular" occludes the
+        # vessels there, which stops perfusion downstream without removing
+        # tissue; "combined" does both. Where the competent compartment is the
+        # tissue itself (renewal > 0, the liver), losing units loses the
+        # progenitors they carried, in proportion; where it is a separate
+        # population (renewal = 0) it survives parenchymal loss and is lost
+        # only with the vessels that hold its niche.
+        if injure_day is not None and day == injure_day:
+            if injury not in ("parenchyma", "vascular", "combined"):
+                raise ValueError(f"unknown injury {injury!r}")
+            pre = dict(N=len(U), mass=float(m.sum()), P=float(sum(P.values())))
+            ax = int(injury_axis)
+            if len(U):
+                cut = float(np.quantile(U[:, ax], 1.0 - injury_fraction))
+            else:
+                cut = np.inf
+            hit_u = U[:, ax] > cut if len(U) else np.zeros(0, bool)
+            if injury in ("vascular", "combined"):
+                ends = np.asarray([vt.end[k] for k in range(len(vt.parent))], float) * scale
+                for k in np.flatnonzero(ends[:, ax] > cut):
+                    if k:                       # never occlude the root
+                        vt.occluded[int(k)] = True
+                gone = {int(k) for k in np.flatnonzero(ends[:, ax] > cut) if k}
+                for k in list(P):
+                    if k in gone:
+                        P[k] = 0
+            if injury in ("parenchyma", "combined") and len(U):
+                if renewal > 0 and hit_u.any() and len(tip_of_prev):
+                    # the pool rides with the tissue it is made of
+                    for k in list(P):
+                        served = np.flatnonzero(tip_of_prev == k)
+                        if len(served):
+                            frac_lost = float(hit_u[served].mean())
+                            P[k] = int(round(P[k] * (1.0 - frac_lost)))
+                U = U[~hit_u]; m = m[~hit_u]
+            tr.injury = dict(day=day, kind=injury, fraction=float(injury_fraction),
+                             axis=ax, cut=float(cut), pre=pre,
+                             post=dict(N=len(U), mass=float(m.sum()),
+                                       P=float(sum(P.values()))))
         s = 1.0 + s_rate * day        # the body grows the space, not the supply
         tips = vt.tips()
         # Each unit is fed by the terminal branch nearest to it. Units used to
@@ -426,6 +473,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
         # actually relieve the tissue that justified it.
         if len(U) and len(tips):
             tip_of = _assign(vt, U, tips, scale, assign_mode)
+            tip_of_prev = tip_of
         n_at = np.bincount(tip_of, minlength=len(vt)) if len(tip_of) else np.zeros(len(vt), int)
         # tissue hangs along a vessel, not only at its end: a segment that has
         # branched keeps the units and the progenitors it already carried, so
@@ -683,6 +731,15 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
         qbar = float(np.mean(q[live]))
         tr.t.append(day); tr.N.append(len(U)); tr.P.append(Ptot); tr.lost.append(lost); tr.born.append(born); tr.renewed.append(renewed)
         tr.q.append(qbar); tr.C.append(C); tr.mass.append(float(m.sum()))
+        # Hydraulic function, with no parameter the model does not already
+        # have: the mass whose supply meets the threshold, counting a unit
+        # short of supply in proportion to what reaches it. Structural
+        # recovery is tr.N and tr.mass; this is functional recovery.
+        if len(U) and len(tip_of):
+            qu = np.asarray(q, float)[np.clip(tip_of, 0, len(q) - 1)]
+            tr.perfused.append(float((np.minimum(qu / max(q_set, 1e-9), 1.0) * m).sum()))
+        else:
+            tr.perfused.append(0.0)
         tr.vessels.append(len(vt))
         tr.Q.append(float(vt.flow[0]) if len(vt.flow) else 0.0)
         tr.bound.append(closure_state(P, q, vt, q_set, tried, no_room, Ptot0))

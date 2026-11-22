@@ -908,6 +908,57 @@ a few progenitors left, gains at most a few units from the first. The liver
 closes held by both constraints at once, and its closure can be undone; the
 kidney's cannot.
 
+### Injury after closure: structure recovers, function does not
+
+The interventions of the previous section relieve a constraint on an intact
+organ, so what follows them is further growth. Recovery is a different
+question and needs tissue to be destroyed. The organ is grown to closure on
+day 140, a part of it is destroyed, and growth runs on to day 220 against the
+same run with no injury (`scripts/24_injury.py`, three seeds, 30 % of the
+organ, cut by a plane as a lobectomy is rather than removed at random).
+
+Three injuries. "Parenchyma" removes the units past the cut and leaves the
+tree. "Vascular" occludes the vessels past the cut, which stops perfusion
+downstream without removing tissue. "Combined" does both. Where the competent
+compartment is the tissue itself ($w = 1$), losing units loses the
+progenitors they carried, in proportion; where it is a separate population
+($w = 0$) it survives parenchymal loss and goes only with the vessels that
+hold its niche.
+
+Four readouts, none of which needs a parameter the model does not already
+have: unit count and total unit mass for structure, and for function the mass
+whose supply meets the threshold, $\sum_j \min(q_j/q_{\text{set}}, 1)\,m_j$,
+and the flow through the root.
+
+**The liver recovers its unit count and not its function.** Eighty days after
+losing 30 % of its units it has made back 0.80 of the count, reaching 0.93 of
+the uninjured organ, while mass recovers 0.11 and reaches 0.78, the perfused
+mass recovers nothing and reaches 0.79, and root flow reaches 0.82. The reason
+is in the model's own rules: a new unit starts small and grows at a rate that
+decays with time, so an organ that rebuilds after closure fills with units
+that never mature. Counting units would report a recovered organ; the function
+is not there. This is a prediction, and it is also a warning about the
+observable: unit number is the wrong readout for regeneration.
+
+**The kidney recovers nothing.** The same injury leaves it at 0.70 of the
+uninjured organ in every readout, which is the 30 % removed, because its pool
+was spent at closure and nothing restores it.
+
+**Occluding the vessels of the lost region helps.** Parenchymal loss alone
+leaves perfused mass at 0.79 of control; removing the vessels of the same
+region as well leaves it at 0.88, and the unit count overshoots to 1.04. The
+vasculature of lost tissue keeps drawing flow, and closing it returns supply
+to the tissue that survives, which lifts the supply per unit back above the
+threshold where new units can form. Vascular occlusion alone raises perfused
+mass to 1.17 of control while root flow falls to 0.77: less blood enters, and
+what enters reaches fewer, better served units.
+
+What this does not do is validate the model against regeneration. After a
+partial hepatectomy a liver restores mass largely by hypertrophy and division
+of the hepatocytes it keeps, not by building lobules, so the measured
+observable is mass and not unit count. The model produces both, and the
+prediction above is precisely that they come apart.
+
 ### Murray's relation in grown trees
 
 With flow driven by pressure, the branching relation is a result rather than

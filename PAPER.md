@@ -1,7 +1,7 @@
 # The paper: framework, claims and evidence
 
 Target: *Frontiers in Cell and Developmental Biology*, Hypothesis and Theory.
-Reference model: version 4.9.0 (`src/organgrow/closed.py`). Every number from
+Reference model: version 4.10.0 (`src/organgrow/closed.py`). Every number from
 the model that the paper uses is in `PAPER_NUMBERS.md`, written by
 `make paper` with the version and commit that produced it; this file does not
 copy model numbers by hand. Numbers given here are either data (the human
@@ -95,6 +95,18 @@ larger initial spread of its own; its final spread is in
 `PAPER_NUMBERS.md`, beside the mouse's:
 `PAPER_NUMBERS.md`, Contraction; Figure 7.
 
+**6. After an organ closes, rebuilding its units does not rebuild its
+function.** Destroying 30 % of a closed organ and letting it grow for 80 more
+days separates two organs and two readouts. The liver makes back 0.80 of the
+units it lost and reaches 0.93 of the uninjured count, while the mass whose
+supply meets the threshold reaches 0.79 and does not recover at all: units
+built after closure start small and grow at a rate that has decayed, so the
+organ refills with units that never mature. The kidney, whose pool was spent,
+stays at 0.70 in every readout. Occluding the vessels of the lost region as
+well as removing its tissue raises functional recovery from 0.79 to 0.88,
+because the vasculature of lost tissue keeps drawing flow that the surviving
+tissue needs. `PAPER_NUMBERS.md`, Injury; Figure 8.
+
 ## Predictions for experiment
 
 - **Closure is reversible in the liver and not in the kidney.** At the end
@@ -102,6 +114,14 @@ larger initial spread of its own; its final spread is in
   back to work, while the kidney keeps none. This matches, qualitatively, the
   regenerative growth of the adult liver and the absence of new nephrons after
   birth; it is a correspondence, not a test.
+- **Count is the wrong readout for regeneration.** A tissue that rebuilds
+  units after its growth window has closed should recover its unit number long
+  before, or without ever, recovering its perfused mass. Measuring recovery by
+  counting units would call such a tissue healed.
+- **The vasculature of lost tissue is worth closing.** After parenchymal
+  loss, removing or occluding the vessels that served the lost region should
+  improve the function the remaining tissue recovers, because they compete for
+  the same inflow.
 - **A budget organ tracks its progenitors.** Pancreas size should scale with
   progenitor number, as observed, while the liver's should not, because the
   liver's competent compartment is restored by the cells it makes; a kidney whose
@@ -156,5 +176,5 @@ only through the partition formula, which awaits independent input spreads.
 ## Before submission
 
 1. Commit, then `make test` and `make paper` on that commit, so that
-   `PAPER_NUMBERS.md` names version 4.9.0 and a clean commit.
+   `PAPER_NUMBERS.md` names version 4.10.0 and a clean commit.
 2. Write the manuscript from this file, `PAPER_NUMBERS.md` and `FIGURES.md`.

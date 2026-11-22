@@ -208,6 +208,39 @@ U_, m_, vt_, tr_ = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z / 0.6
 check("a self-renewing pool is not spent", int(round(tr_.P[-1])) == 40,
       f"P0 40, final {tr_.P[-1]:.0f}, units {len(U_)}")
 
+# an occluded segment carries no flow, and neither does what hangs below it
+t4 = VascularTree(np.zeros(3), np.array([0.0, 1.0, 0.0]), 1.0)
+t4.add(0, np.array([0.0, 1.0, 0.0]), np.array([0.0, 2.0, 0.0]), 0.8)
+t4.add(0, np.array([0.0, 1.0, 0.0]), np.array([1.0, 1.0, 0.0]), 0.8)
+t4.add(1, np.array([0.0, 2.0, 0.0]), np.array([0.0, 3.0, 0.0]), 0.6)
+t4.perfuse({2: 0.4, 3: 0.3})
+open_flow = float(t4.flow[2])
+t4.occluded[1] = True
+t4.perfuse({2: 0.4, 3: 0.3})
+check("an occluded segment and its subtree carry no flow",
+      abs(float(t4.flow[1])) < 1e-12 and abs(float(t4.flow[3])) < 1e-12
+      and float(t4.flow[2]) > 0, f"occluded {t4.flow[1]:.2e}, below {t4.flow[3]:.2e}")
+check("occlusion leaves the other branch conducting", float(t4.flow[2]) > 0.5 * open_flow,
+      f"{t4.flow[2]:.5f} against {open_flow:.5f} before")
+# a plane cut removes the fraction of units it was asked for
+U_, m_, vt_, tr_ = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z / 0.6), 114,
+                         days=45, rng=np.random.default_rng(7), nu=8.0, q_set=0.6,
+                         rho=0.0, delta=0.0, P0=400.0, R_unit=650.0,
+                         units_per_branch=650 / 600.0, max_vessels=3000,
+                         injure_day=40, injury="parenchyma", injury_fraction=0.3)
+i_ = tr_.injury
+got = 1 - i_["post"]["N"] / max(i_["pre"]["N"], 1)
+check("a plane cut removes the fraction asked for", abs(got - 0.3) < 0.03,
+      f"asked 0.30, removed {got:.3f} ({i_['pre']['N']} to {i_['post']['N']})")
+check("the injury is recorded with its day and kind",
+      i_["day"] == 40 and i_["kind"] == "parenchyma", str({k: i_[k] for k in ("day", "kind")}))
+try:
+    _grow(lambda x, y, z: _sdf("liver", x, y, z), 114, days=3, rng=np.random.default_rng(0),
+          nu=8.0, q_set=0.6, rho=0.0, delta=0.0, P0=10.0, injure_day=2, injury="meteorite")
+    check("unknown injury raises", False, "no error")
+except ValueError:
+    check("unknown injury raises", True)
+
 print()
 if FAIL:
     print("FAILED:", ", ".join(FAIL))

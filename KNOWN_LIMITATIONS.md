@@ -164,3 +164,13 @@ never binds. Unit number scales as $V^{0.37}$ with the domain alone and
 $V^{0.74}$ with the allometric scalings of pool, window and rates, against the
 $V^{1}$ that a conserved unit size requires. Replicate spread grows with scale.
 All regimes in this work are reported at one domain scale.
+
+**What the injury experiment is and is not.** Growing an organ to closure,
+destroying a part of it and running on measures recovery rather than further
+growth, which the earlier interventions on an intact organ did not. It is not
+a validation: it has not been compared with a measured regeneration, and the
+comparison that would be natural, a partial hepatectomy, restores mass largely
+by hypertrophy and division of the hepatocytes that remain rather than by
+building lobules, so the measured observable is mass and not unit count. The
+cut is a plane through the organ, the vascular injury is occlusion rather than
+excision, and the fraction destroyed was not varied.

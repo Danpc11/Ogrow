@@ -23,7 +23,7 @@ class VascularTree:
     the segment index, which is created in topological order.
     """
 
-    __slots__ = ("parent", "start", "end", "radius", "length",
+    __slots__ = ("parent", "start", "end", "radius", "length", "occluded",
                  "flow", "shear", "is_tip",
                  "pressure_in", "pressure_out", "conductance_total",
                  "r_crit", "below")
@@ -33,6 +33,7 @@ class VascularTree:
         self.start = [np.asarray(root_start, float)]
         self.end = [np.asarray(root_end, float)]
         self.radius = [float(r0)]
+        self.occluded = [False]            # a segment that no longer conducts
         self.length = [max(float(np.linalg.norm(
             np.asarray(root_end, float) - np.asarray(root_start, float))), 1e-6)]
         self.flow = np.zeros(1)
@@ -55,6 +56,7 @@ class VascularTree:
         self.length.append(max(float(np.linalg.norm(
             np.asarray(end, float) - np.asarray(start, float))), 1e-6))
         self.radius.append(float(radius))
+        self.occluded.append(False)
         self.flow = np.append(np.asarray(self.flow, float), 0.0)
         self.shear = np.append(np.asarray(self.shear, float), 0.0)
         self.is_tip.append(True)
@@ -127,6 +129,8 @@ class VascularTree:
         r = np.asarray(self.radius)
         l = np.asarray(self.length)
         own = r ** 4 / np.maximum(l, 1e-6)
+        if any(self.occluded):
+            own = np.where(np.asarray(self.occluded[:len(own)]), 0.0, own)
         below = np.zeros(n)                     # parallel sum of daughters
         eff = np.zeros(n)
         par = np.asarray(self.parent)
@@ -156,6 +160,8 @@ class VascularTree:
         r = np.asarray(self.radius)
         l = np.asarray(self.length)
         own = r ** 4 / np.maximum(l, 1e-6)
+        if any(self.occluded):
+            own = np.where(np.asarray(self.occluded[:len(own)]), 0.0, own)
         par = np.asarray(self.parent)
 
         below = np.zeros(n)
@@ -167,8 +173,8 @@ class VascularTree:
             # its conductance is zero, otherwise it would discharge to zero
             # pressure, its shear would rise with its radius and the calibre
             # loop would run away
-            eff[k] = 0.0 if below[k] <= 0 else 1.0 / (1.0 / own[k] +
-                                                      1.0 / below[k])
+            eff[k] = 0.0 if (below[k] <= 0 or own[k] <= 0) else 1.0 / (1.0 / own[k] +
+                                                                       1.0 / below[k])
             if par[k] >= 0:
                 below[par[k]] += eff[k]
         # the critical radius of each segment in series with everything

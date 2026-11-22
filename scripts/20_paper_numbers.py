@@ -134,5 +134,22 @@ if (RES / "scaling.json").exists():
     table(["sweep", "domain scale", "days", "units", "held by supply", "held by room",
            "share of close packing"], rows)
 
+if (RES / "injury.json").exists():
+    Ij = json.load(open(RES / "injury.json"))
+    w("## Injury after closure (day 140, 30 % of the organ, read on day 220; three seeds)\n")
+    names = {"N": "units", "mass": "mass", "perfused": "perfused mass", "Q": "root flow"}
+    rows = []
+    for k, v in Ij.items():
+        reg, kind = k.rsplit("_", 1)
+        if kind == "control":
+            continue
+        for q, nm in names.items():
+            c = v[q]
+            rec = "not lowered" if c["recovered"] != c["recovered"] else \
+                  f"{c['recovered']:.2f} ± {c['se']:.2f}"
+            rows.append([reg, kind, nm, rec, f"{c['of_control']:.2f}"])
+    table(["regime", "injury", "readout", "share of the loss recovered",
+           "day 220, relative to uninjured"], rows)
+
 open(ROOT / "PAPER_NUMBERS.md", "w").write("\n".join(out) + "\n")
 print("wrote PAPER_NUMBERS.md")

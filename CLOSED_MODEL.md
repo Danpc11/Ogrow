@@ -1,4 +1,4 @@
-# The closed model (version 4.9.0)
+# The closed model (version 4.10.0)
 
 `src/organgrow/closed.py` is the model the paper rests on; `make paper`
 builds its results. Its parameters are in `config/params.yaml`, section
@@ -64,7 +64,13 @@ day. At the end, `tr.closure`: the shares of the initial pool spent, held at
 tips short of supply, held for lack of room (from trial placements, 40 per
 tip and 400 if none succeeds) and still active, and the residual nucleation
 rate. `intervene_day` and `intervene` change the state during a run, lowering
-the threshold (`"supply"`) or the least spacing (`"room"`).
+the threshold (`"supply"`) or the least spacing (`"room"`). `injure_day` and
+`injury` destroy a part of the organ past a plane cut along `injury_axis`,
+holding `injury_fraction` of the units: `"parenchyma"` removes those units,
+`"vascular"` occludes the vessels there so they carry no flow, and
+`"combined"` does both. Each day the trace also records `perfused`, the mass
+whose supply meets the threshold, counting a unit short of supply in
+proportion to what reaches it.
 
 ## The regimes
 

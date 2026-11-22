@@ -8,6 +8,7 @@
 | Figure 4 | `Fig3_closed.pdf` | `figures/fig3_closed.py` |
 | Figure 5 | `Fig5_pool.pdf` | `figures/fig_framework.py` |
 | Figure 6 | `Fig5_closed.pdf` | `figures/fig_closed_paper.py` |
+| Figure 8 | `Fig8_injury.pdf` | `figures/fig_injury.py` |
 | Figure 7 | `Fig4_closed.pdf` | `figures/fig_closed_paper.py` |
 
 **Figure 1. A growing tree whose tips hold supply and progenitors.**
@@ -59,3 +60,11 @@ against nucleation rate for eight livers with individual rates, with trend
 line, Spearman correlation and P. (B) CV of unit number at closure against
 its CV at the start of the measured interval, for a spread in maturity
 (offsets of 2 to 10 days), a spread in rate, and the mouse liver.
+
+**Figure 8. Injury after closure.** (A) Liver unit count (solid) and perfused
+mass (dashed) against day, each relative to the day before injury, for an
+organ that loses 30 % of its units on day 140 (red) and for the same run with
+no injury (grey); mean of three seeds. (B) Liver unit count, mass, perfused
+mass and root flow on day 220, each relative to the uninjured run, for the
+three injuries. (C) The same four readouts after parenchymal loss, liver
+against kidney; the dotted line is the level reached with no recovery.

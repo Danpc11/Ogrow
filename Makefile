@@ -71,8 +71,10 @@ paper:
 	$(PY) scripts/21_robustness.py
 	$(PY) scripts/22_interventions.py
 	$(PY) scripts/23_scaling.py
+	$(PY) scripts/24_injury.py
 	# figures and tables last: they read every result above
 	$(PY) figures/fig_framework.py
+	$(PY) figures/fig_injury.py
 	$(PY) figures/fig_closed_paper.py
 	$(PY) figures/fig3_closed.py
 	$(PY) figures/fig6.py
