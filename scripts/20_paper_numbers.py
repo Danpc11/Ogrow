@@ -138,7 +138,8 @@ if (RES / "injury.json").exists():
     Ij = json.load(open(RES / "injury.json"))
     names = {"units": "units", "mass": "mass", "mass_per_unit": "mass per unit",
              "perfused": "perfused mass"}
-    w("## Injury after closure (day 140, 30 % of the parenchyma removed, read on day 220; "
+    w("## Injury after closure (day 140, 30 % of the units removed by a plane cut, "
+      "read on day 220; "
       "three seeds; every entry is day 220 over the day before the injury)\n")
     rows = []
     for reg in ("liver", "kidney"):

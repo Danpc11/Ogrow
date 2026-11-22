@@ -44,8 +44,6 @@ def run(reg, setting, k, inp, sign):
     U, m, vt, tr = grow(lambda x, y, z: sdf("liver", x / S, y / S, z / S),
                         190 * S, days=DAYS, rng=rng, **FIX, **p)
     fin = tr.final
-    t = fin["tips"][fin["tips"] < len(fin["q"])]   # tips born on the last day have no supply yet
-    fin = dict(fin, tips=t)
     np.savez(f, N=np.asarray(tr.N, float), C=np.asarray(tr.C, float), Q=np.asarray(tr.Q, float),
              q=np.asarray(tr.q, float), P=np.asarray(tr.P, float),
              q_tip=fin["q"][fin["tips"]], P_tip=fin["P"][fin["tips"]],

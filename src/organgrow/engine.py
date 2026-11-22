@@ -62,7 +62,6 @@ class Trace:
     hypo: list = field(default_factory=list)
     snapshots: dict = field(default_factory=dict)
     r_eff: float = 0.0                       # <r^5>/<r^4> at the end
-    vessel_radii: object = None              # calibres at the end
     shear_cv: list = field(default_factory=list)   # spread of wall shear
 
 
@@ -320,7 +319,6 @@ def grow(kind, seed=0, days=None, P0=620.0, C0=None, snap_at=(10, 25, 45, 70),
             tr.snapshots[day] = (np.asarray(U).copy(), np.asarray(m).copy(),
                                  [tuple(map(np.asarray, e)) for e in T])
 
-    V = [(vt.start[k], vt.end[k]) for k in range(len(vt))]
     tr.r_eff = vt.r_eff()
-    tr.vessel_radii = vt.radii()
+    V = [(vt.start[k], vt.end[k]) for k in range(len(vt))]
     return np.asarray(U), np.asarray(m), T, V, tr

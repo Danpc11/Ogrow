@@ -1,4 +1,4 @@
-# The closed model (version 4.11.0)
+# The closed model (version 4.12.0)
 
 `src/organgrow/closed.py` is the model the paper rests on; `make paper`
 builds its results. Its parameters are in `config/params.yaml`, section
@@ -71,9 +71,14 @@ holding `injury_fraction` of the units: `"parenchyma"` removes those units,
 `"combined"` does both. `injury_reactivates` is the share of the day-zero
 growth rate the injury restores to the units, 0 for none and 1 for full, and
 `inflow_limited` holds the flow entering the organ at what it was receiving
-before the injury, in place of a fixed pressure at the inlet; each unit's
-share is then its conductance over the tree's, and the mass it can support is
-set by the flow that reaches it. Each day the trace also records `perfused`, the mass
+before the injury, in place of a fixed pressure at the inlet. The network is
+linear, so the perfusion solve is rescaled rather than redone: the flow
+distribution is unchanged and the driving pressure falls as the tree grows its
+conductance, so the supply the model reports and the shear the calibres chase
+obey the same boundary condition as the growth ceiling. Each unit's share is
+its own conductance times the pressure its tip delivers, and the mass it can
+support is set by the flow that reaches it. It takes effect from the injury
+onward, since what it holds the inflow to is the pre-injury value. Each day the trace also records `perfused`, the mass
 whose supply meets the threshold, counting a unit short of supply in
 proportion to what reaches it.
 

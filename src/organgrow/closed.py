@@ -90,12 +90,30 @@ class Trace:
     injury: dict = field(default_factory=dict)   # what was destroyed, and when
     perfused: list = field(default_factory=list)  # mass whose supply meets the threshold
     Q: list = field(default_factory=list)      # total flow through the root
-    bound: list = field(default_factory=list)   # "growing", "supply" or "progenitor"
+    bound: list = field(default_factory=list)   # closure_state, per day
+    final: dict = field(default_factory=dict)   # per-segment state at the end
 
 
 def _p(name, value):
     """A keyword given explicitly wins; otherwise the config value."""
     return _CL[name] if value is None else value
+
+
+def _q_full(q, parent, n):
+    """Supply per tip for every segment, including those born since the solve.
+
+    The perfusion solve runs at the start of the day, so segments added during
+    it have no supply of their own. A new segment leaves its parent's end and
+    serves the tissue around it, so it inherits the parent's value. Reading
+    them as the last entry of `q` instead, as a clipped index does, hands a
+    unit the supply of an unrelated branch.
+    """
+    out = np.empty(n)
+    k = min(len(q), n)
+    out[:k] = np.asarray(q, float)[:k]
+    for j in range(k, n):
+        out[j] = out[parent[j]] if 0 <= parent[j] < j else 0.0
+    return out
 
 
 def _assign(vt, U, tips, scale, mode):
@@ -150,7 +168,7 @@ def _assign(vt, U, tips, scale, mode):
     return out
 
 
-def closure_state(P, q, vt, q_set, tried, no_room, P_initial):
+def closure_state(P, q, q_set, tried, no_room, P_initial):
     """Where the progenitor pool stands, read from its distribution over tips.
 
     Returns the share of the initial pool that is spent, held at tips whose
@@ -445,12 +463,10 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
             hit_u = U[:, ax] > cut if len(U) else np.zeros(0, bool)
             if injury in ("vascular", "combined"):
                 ends = np.asarray([vt.end[k] for k in range(len(vt.parent))], float) * scale
-                for k in np.flatnonzero(ends[:, ax] > cut):
-                    if k:                       # never occlude the root
-                        vt.occluded[int(k)] = True
                 gone = {int(k) for k in np.flatnonzero(ends[:, ax] > cut) if k}
-                for k in list(P):
-                    if k in gone:
+                for k in gone:                  # the root is never occluded
+                    vt.occluded[k] = True
+                    if k in P:
                         P[k] = 0
             if injury in ("parenchyma", "combined") and len(U):
                 if renewal > 0 and hit_u.any() and len(tip_of_prev):
@@ -461,17 +477,17 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                             frac_lost = float(hit_u[served].mean())
                             P[k] = int(round(P[k] * (1.0 - frac_lost)))
                 U = U[~hit_u]; m = m[~hit_u]
-            # Injury can restore the ability of a unit to enlarge. The growth
-            # rate decays as exp(-t / tau_g), so by closure a unit can no
-            # longer grow; after damage, real organs enlarge the units they
-            # keep. `injury_reactivates` is the share of the day-zero rate
-            # restored, 0 for no reactivation and 1 for full.
             if inflow_limited:
                 # fix the delivery at what the intact organ was receiving, and
                 # the demand at the delivery per unit mass it was living on
                 inflow_target = float(tr.Q[-1]) if tr.Q else None
                 if inflow_target and m.sum() > 0:
                     phi_set = inflow_target / float(pre["mass"])
+            # Injury can restore the ability of a unit to enlarge. The growth
+            # rate decays as exp(-t / tau_g), so by closure a unit can no
+            # longer grow; after damage, real organs enlarge the units they
+            # keep. `injury_reactivates` is the share of the day-zero rate
+            # restored, 0 for no reactivation and 1 for full.
             if injury_reactivates > 0:
                 g_clock = day + tau_g * float(np.log(min(injury_reactivates, 1.0)))
             tr.injury = dict(day=day, kind=injury, reactivates=float(injury_reactivates), fraction=float(injury_fraction),
@@ -501,6 +517,22 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
         for t_, mj in zip(tip_of, m):
             tc[int(t_)] = tc.get(int(t_), 0.0) + float(mj) ** xi / R0
         f, p_in, C = vt.perfuse(tc, dP=dP)
+        if inflow_limited and inflow_target is not None and f[0] > 0:
+            # The solve above drives the tree with a fixed inlet pressure. Under
+            # a fixed inflow the network is linear, so the same solve holds once
+            # it is rescaled: the distribution of flow is unchanged and the
+            # driving pressure falls as the tree grows its conductance. Without
+            # this the growth ceiling would obey the fixed inflow while the
+            # supply the model reports, and the shear the calibres chase, still
+            # obeyed the pressure, and the organ would report a third more blood
+            # than the circulation is sending it.
+            sc = float(inflow_target) / float(f[0])
+            f = f * sc
+            p_in = p_in * sc
+            vt.flow = f
+            vt.shear = f / np.maximum(np.asarray(vt.radius, float), 1e-6) ** 3
+            vt.pressure_in = p_in
+            vt.pressure_out = vt.pressure_out * sc
         p_out = vt.pressure_out
         q = np.maximum(p_out, 0.0) / dP            # supply per unit, by tip
 
@@ -536,8 +568,9 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                     raise ValueError(f"unknown nucleation {nucleation!r}")
                 # A unit takes one cell from the competent pool, so a tip cannot
                 # make more units than it holds. Whether that cell is spent
-                # depends on the organ: see `renewal` below. The draw used to be uncapped: a tip with two
-                # progenitors could place five units and clamp its pool at zero,
+                # depends on the organ: see `renewal` below. The draw used to
+                # be uncapped: a tip with two progenitors could place five
+                # units and clamp its pool at zero,
                 # which made a pool-bound organ exceed its own budget by up to
                 # 40 %, and by an amount that depended on the drive, that is on
                 # the setpoint.
@@ -596,6 +629,8 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
             n_at = np.bincount(tip_of, minlength=len(vt))
 
         # ---- unit growth: the ceiling is the supply at the unit's tip ------
+        # Sprouting runs after this, so every entry of tip_of still names a
+        # segment that existed when q was read.
         if len(U):
             g = g0 * np.exp(-(day - g_clock) / tau_g)
             if inflow_limited and inflow_target is not None:
@@ -607,14 +642,21 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                 # each unit's share is its conductance over the tree's, and the
                 # mass it can support is set by the flow that reaches it. With
                 # tissue conductance linear in mass this makes the delivery per
-                # unit mass the same everywhere and inversely proportional to
-                # the organ's mass, so the organ grows until its mass matches
-                # its blood supply and stops. The rule is local; the ceiling on
-                # the whole organ follows from it.
-                gshare = np.maximum(m, 1e-9) ** xi
-                share = gshare / max(gshare.sum(), 1e-12)
-                flow_j = inflow_target * share
-                ceiling = np.maximum(flow_j / phi_set, 1e-6)
+                # unit mass fall as the organ grows, so the organ grows until
+                # its mass matches its blood supply and stops. The rule is
+                # local; the ceiling on the whole organ follows from it.
+                #
+                # The network is linear, so fixing the total inflow instead of
+                # the inlet pressure leaves the flow distribution unchanged and
+                # only rescales it. The share a unit takes is therefore its own
+                # conductance times the pressure its tip delivers, which is the
+                # tree's answer, not the tissue's: a unit on a poorly perfused
+                # branch gets a lower ceiling, and one on an occluded branch
+                # gets none. Distributing by tissue conductance alone would be
+                # the zero-resistance limit, in which the tree does not matter.
+                w_j = np.maximum(m, 1e-9) ** xi * np.maximum(q[tip_of], 0.0)
+                share = w_j / max(w_j.sum(), 1e-12)
+                ceiling = np.maximum(inflow_target * share / phi_set, 1e-6)
             else:
                 ceiling = np.maximum(kappa * q[tip_of], 1e-6)
             m = m + g * m * (1.0 - m / ceiling)
@@ -770,13 +812,13 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
         # short of supply in proportion to what reaches it. Structural
         # recovery is tr.N and tr.mass; this is functional recovery.
         if len(U) and len(tip_of):
-            qu = np.asarray(q, float)[np.clip(tip_of, 0, len(q) - 1)]
+            qu = _q_full(q, np.asarray(vt.parent), len(vt))[tip_of]
             tr.perfused.append(float((np.minimum(qu / max(q_set, 1e-9), 1.0) * m).sum()))
         else:
             tr.perfused.append(0.0)
         tr.vessels.append(len(vt))
         tr.Q.append(float(vt.flow[0]) if len(vt.flow) else 0.0)
-        tr.bound.append(closure_state(P, q, vt, q_set, tried, no_room, Ptot0))
+        tr.bound.append(closure_state(P, q, q_set, tried, no_room, Ptot0))
 
     # final state per node, for analyses that need where supply and pool sit
     tr.closure = closure_by_trials(P, q, vt, q_set, U, lambda x, y, z: sdf(x / s, y / s, z / s),
@@ -784,7 +826,11 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
     _tips = vt.tips()
     _diff = (float(np.mean(_assign(vt, U, _tips, scale, "tip") != _assign(vt, U, _tips, scale, "segment")))
              if len(U) and len(_tips) else 0.0)
-    tr.final = dict(territory_diff=_diff, q=np.asarray(q, float).copy(),
-                    P=np.array([P.get(k, 0.0) for k in range(len(q))], float),
-                    tips=np.asarray(vt.tips(), int))
+    # q, P and tips are all indexed by segment over the whole final tree, so a
+    # caller may index q and P with tips. Reading q straight from the last
+    # solve would leave it short of the segments sprouted that day.
+    tr.final = dict(territory_diff=_diff,
+                    q=_q_full(q, np.asarray(vt.parent), len(vt)),
+                    P=np.array([P.get(k, 0.0) for k in range(len(vt))], float),
+                    tips=np.asarray(_tips, int))
     return U, m, vt, tr

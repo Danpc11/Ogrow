@@ -167,13 +167,23 @@ All regimes in this work are reported at one domain scale.
 
 **How far compensation goes is not right.** Given an injury that restores
 the ability of units to enlarge and an inflow held at its pre-injury value,
-the model compensates in full: a kidney that loses 30 % of its units ends with
-1.42 times the mass per unit, against the 1.43 of full compensation, and 1.95
-against 2.00 after losing half. A real kidney that loses half grows the
-remnant by about a half. Nothing in the model limits how large a unit may
-become. The vascular and combined injuries were examined only under the
-original condition, in which no organ recovers, and have not been rerun with
-reactivation and a fixed inflow.
+the model makes up all but a twentieth of the loss: a kidney that loses 30 %
+of its units ends with 1.36 times the mass per unit, against the 1.43 of full
+compensation, and 1.89 against 2.00 after losing half. A real kidney that
+loses half grows the remnant by about a half. Nothing in the model limits how
+large a unit may become. The vascular and combined injuries were examined only
+under the original condition, in which no organ recovers, and have not been
+rerun with reactivation and a fixed inflow.
+
+**The difference between two regimes is tested as if the two were
+independent.** The elasticity of the final unit count to the progenitor pool
+is measured per seed, with the same seed list for every regime, so the
+pancreas-liver difference is a paired design. Its z is nonetheless formed from
+the two standard errors combined in quadrature rather than from the paired
+differences. Where the two are positively correlated this overstates the
+standard error, so the reported z is conservative and the ordering it supports
+is if anything stronger than stated. Reporting the paired difference would be
+both more precise and more powerful.
 
 **What the injury experiment is and is not.** Growing an organ to closure,
 destroying a part of it and running on measures recovery rather than further

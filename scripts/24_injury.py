@@ -36,7 +36,6 @@ SEEDS = (300, 301, 302)
 REG = {"liver": dict(P0=2600.0, rho=0.10, delta=0.10, q_set=0.6, renewal=1.0),
        "kidney": dict(P0=300.0, rho=0.00, delta=0.05, q_set=0.6, renewal=0.0)}
 FIX = dict(R_unit=650.0, units_per_branch=650 / 600.0, max_vessels=6000)
-KINDS = ("control", "parenchyma", "vascular", "combined")
 # Recovery needs two things the growth model does not have on its own. Injury
 # must restore a unit's ability to enlarge, which growth factors do and the
 # decaying growth rate forbids; and the circulation must cap how far it goes,
@@ -53,8 +52,7 @@ def run(reg, kind, seed, cond="as grown", frac=FRAC):
     f = OUT / f"{tag}.json"
     if f.exists():
         return json.load(open(f))
-    kw = {} if kind == "control" else dict(injure_day=CLOSE, injury=kind,
-                                           injury_fraction=frac, **CONDS[cond])
+    kw = dict(injure_day=CLOSE, injury=kind, injury_fraction=frac, **CONDS[cond])
     U, m, vt, tr = grow(lambda x, y, z: sdf("liver", x / S, y / S, z / S), 190 * S,
                         days=END, rng=np.random.default_rng(seed), nu=NU,
                         **FIX, **REG[reg], **kw)
@@ -63,30 +61,6 @@ def run(reg, kind, seed, cond="as grown", frac=FRAC):
              series=series, injury=tr.injury, closure=tr.closure)
     json.dump(r, open(f, "w"))
     return r
-
-
-def recovery(rows, key):
-    """Recovery of `key` at the end, averaged over seeds, with its spread.
-
-    Defined only where the injury actually lowered the quantity, by more than
-    2 % of its value before: an injury that does not touch a quantity has
-    nothing to recover, and the ratio would divide by noise.
-    """
-    out = []
-    for r in rows:
-        s = r["series"][key]
-        pre, post, end = s[CLOSE - 2], s[CLOSE - 1], s[-1]
-        out.append((end - post) / (pre - post) if pre - post > 0.02 * abs(pre) else np.nan)
-    if all(np.isnan(out)):
-        return np.nan, np.nan
-    return float(np.nanmean(out)), float(np.nanstd(out, ddof=1) / np.sqrt(len(out)))
-
-
-def versus_control(rows, ctrl, key):
-    """Where the quantity ends, against the same run with no injury."""
-    v = [r["series"][key][-1] for r in rows]
-    c = [r["series"][key][-1] for r in ctrl]
-    return float(np.mean(v) / max(np.mean(c), 1e-9))
 
 
 def levels(rows, key):

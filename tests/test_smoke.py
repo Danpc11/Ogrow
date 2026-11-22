@@ -110,7 +110,7 @@ for k in range(3):
 check("progenitors conserved exactly in each realisation", all(b == 0 for b in bal),
       f"P0 - (N + P + lost) = {bal}")
 # the closure state tells a tip held by lack of room from one held by supply
-st = closure_state({0: 5, 1: 5, 2: 5, 3: 5}, np.array([0.5, 0.9, 0.9, 0.9]), None,
+st = closure_state({0: 5, 1: 5, 2: 5, 3: 5}, np.array([0.5, 0.9, 0.9, 0.9]),
                    0.6, np.array([3, 4, 0, 2]), np.array([0, 4, 0, 1]), 40.0)
 check("closure separates supply, room and active",
       abs(st["supply_held"] - 5 / 40) < 1e-12 and abs(st["space_held"] - 5 / 40) < 1e-12
@@ -250,6 +250,18 @@ def _after_injury(**kw):
                              injure_day=40, injury="parenchyma", injury_fraction=0.3, **kw)
     return float(m2.sum()) / tr2.injury["pre"]["mass"]
 
+# the declared boundary condition has to hold exactly, not only in the ceiling
+_U3, _m3, _vt3, _tr3 = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z / 0.6), 114,
+                             days=70, rng=np.random.default_rng(7), nu=8.0, q_set=0.6,
+                             rho=0.0, delta=0.0, P0=400.0, R_unit=650.0,
+                             units_per_branch=650 / 600.0, max_vessels=3000,
+                             injure_day=40, injury="parenchyma", injury_fraction=0.3,
+                             injury_reactivates=1.0, inflow_limited=True)
+_pre_Q = _tr3.Q[38]
+_drift = max(abs(x - _pre_Q) for x in _tr3.Q[40:]) / max(_pre_Q, 1e-12)
+check("a fixed inflow holds the root flow at its pre-injury value",
+      _drift < 1e-9, f"largest departure {_drift:.2e} of {_pre_Q:.6f}")
+
 _quiet = _after_injury()
 _react = _after_injury(injury_reactivates=1.0)
 _held = _after_injury(injury_reactivates=1.0, inflow_limited=True)
@@ -261,6 +273,21 @@ check("at a fixed inlet pressure the rebuild overshoots", _react > 1.3,
       f"mass {_react:.2f} of pre-injury")
 check("a fixed inflow stops the rebuild at the old size", 0.9 < _held < 1.15,
       f"mass {_held:.2f} of pre-injury")
+
+# the final per-segment state covers every segment, so tips index into it
+from organgrow.closed import _q_full as _qf
+_fin = tr_.final
+check("final q and P cover every segment",
+      len(_fin["q"]) == len(vt_.parent) and len(_fin["P"]) == len(vt_.parent),
+      f"segments {len(vt_.parent)}, q {len(_fin['q'])}, P {len(_fin['P'])}")
+try:
+    _ = _fin["q"][_fin["tips"]], _fin["P"][_fin["tips"]]
+    check("tips index into the final q and P", True)
+except IndexError as e:
+    check("tips index into the final q and P", False, str(e))
+check("a segment born after the solve takes its parent's supply",
+      list(_qf(np.array([0.4, 0.7]), np.array([-1, 0, 1, 0]), 4)) == [0.4, 0.7, 0.7, 0.4],
+      str(list(_qf(np.array([0.4, 0.7]), np.array([-1, 0, 1, 0]), 4))))
 
 print()
 if FAIL:

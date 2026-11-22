@@ -14,7 +14,6 @@ import matplotlib as mpl
 
 MM = 1 / 25.4
 WIDTH_FULL = 180 * MM          # Nature double column
-WIDTH_HALF = 88 * MM
 
 # One palette, used by every figure so a colour means the same thing throughout.
 C = dict(
@@ -56,29 +55,6 @@ def apply():
         "savefig.pad_inches": 0.01,
         "pdf.fonttype": 42, "ps.fonttype": 42,
     })
-
-
-def panel(fig, ax, letter, dx=0.030, dy=0.012):
-    """Place a panel letter in figure coordinates, above and left of `ax`.
-
-    Because the position comes from the axes bounding box, every panel in a
-    row lands on the same baseline and every panel in a column on the same
-    left margin, regardless of tick labels or axis titles.
-    """
-    fig.canvas.draw()                       # bounding boxes need a draw
-    bb = ax.get_position()
-    fig.text(bb.x0 - dx, bb.y1 + dy, letter.upper(), fontsize=SZ["panel"],
-             fontweight="bold", va="bottom", ha="left")
-
-
-def panel_row(fig, axes, letters, dx=0.030, dy=0.012):
-    """Letter a row of panels on one shared baseline."""
-    fig.canvas.draw()
-    top = max(a.get_position().y1 for a in axes)
-    for a, L in zip(axes, letters):
-        fig.text(a.get_position().x0 - dx, top + dy, L.upper(),
-                 fontsize=SZ["panel"], fontweight="bold", va="bottom",
-                 ha="left")
 
 
 def panel_grid(fig, rows, letters, dx=0.030, dy=0.012):

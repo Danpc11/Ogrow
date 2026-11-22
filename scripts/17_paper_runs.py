@@ -84,7 +84,7 @@ def job_snapshot():
     ends = np.asarray([vt.end[k] for k in range(len(par))], float)
     starts = np.asarray([vt.end[p] if p >= 0 else vt.end[k] for k, p in enumerate(par)], float)
     fin = tr.final
-    tips = fin["tips"][fin["tips"] < len(fin["q"])]
+    tips = fin["tips"]
     np.savez(f, U=np.asarray(U, float), starts=starts, ends=ends,
              radius=np.asarray(vt.radius, float), tips=tips,
              q_tip=fin["q"][tips], P_tip=fin["P"][tips], q_set=REGIMES["liver"]["q_set"])

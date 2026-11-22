@@ -26,6 +26,3 @@ def invariants(msk, zoom):
         axes_cm3=float(np.prod(ax_len)),
         surf_vol=S/max(V, 1e-9),
     )
-
-def dice(a, b):
-    return 2.0*np.logical_and(a, b).sum()/max(a.sum()+b.sum(), 1)

@@ -1,13 +1,13 @@
 regime,condition,readout,relative
 liver,as grown,units,0.9405582922824302
 liver,reactivated,units,0.9413934086347879
-liver,"reactivated, fixed inflow",units,0.9664759250966148
+liver,"reactivated, fixed inflow",units,0.9066361480154583
 liver,as grown,mass,0.8018523049464611
 liver,reactivated,mass,1.7959236476274605
-liver,"reactivated, fixed inflow",mass,1.0092180088309697
+liver,"reactivated, fixed inflow",mass,1.0120444789351728
 liver,as grown,mass_per_unit,0.8525280267325329
 liver,reactivated,mass_per_unit,1.9077291503792397
-liver,"reactivated, fixed inflow",mass_per_unit,1.0442246750534236
+liver,"reactivated, fixed inflow",mass_per_unit,1.116263101962616
 liver,as grown,perfused,0.8223380964489775
 liver,reactivated,perfused,1.9624815871306174
-liver,"reactivated, fixed inflow",perfused,1.0258107835769048
+liver,"reactivated, fixed inflow",perfused,1.0979944909308774

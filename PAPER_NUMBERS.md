@@ -1,6 +1,6 @@
 # Numbers the paper uses
 
-Model version 4.11.0, commit 7555392, generated 2026-11-22 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.12.0, commit 3e4f37a (with uncommitted changes), generated 2026-11-22 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b024.
 
@@ -117,21 +117,21 @@ Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b0
 | allometric | 1.0 | 205 | 430 | 0.60 | 0.43 | 3.4 % |
 | allometric: unit count scales as V^0.57 |  |  |  |  |  |  |
 
-## Injury after closure (day 140, 30 % of the parenchyma removed, read on day 220; three seeds; every entry is day 220 over the day before the injury)
+## Injury after closure (day 140, 30 % of the units removed by a plane cut, read on day 220; three seeds; every entry is day 220 over the day before the injury)
 
 | regime | condition | units | mass | mass per unit | perfused mass |
 |---|---|---|---|---|---|
 | liver | as grown | 0.94 | 0.80 | 0.85 | 0.82 |
 | liver | reactivated | 0.94 | 1.80 | 1.91 | 1.96 |
-| liver | reactivated, fixed inflow | 0.97 | 1.01 | 1.04 | 1.03 |
+| liver | reactivated, fixed inflow | 0.91 | 1.01 | 1.12 | 1.10 |
 | kidney | as grown | 0.70 | 0.70 | 1.00 | 0.71 |
 | kidney | reactivated | 0.70 | 1.82 | 2.60 | 1.99 |
-| kidney | reactivated, fixed inflow | 0.70 | 0.99 | 1.42 | 1.02 |
+| kidney | reactivated, fixed inflow | 0.70 | 0.97 | 1.39 | 1.04 |
 
 ## How far a kidney compensates, growth reactivated and inflow fixed
 
 | regime | lost | units kept | mass per unit | full compensation would need | mass |
 |---|---|---|---|---|---|
-| kidney | 30 % | 0.70 | 1.42 | 1.43 | 0.99 |
-| kidney | 50 % | 0.50 | 1.94 | 2.00 | 0.98 |
+| kidney | 30 % | 0.70 | 1.39 | 1.43 | 0.97 |
+| kidney | 50 % | 0.50 | 1.88 | 2.00 | 0.95 |
 

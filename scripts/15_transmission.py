@@ -40,7 +40,6 @@ REGIMES = {
     "kidney": dict(P0=300.0,  rho=0.00, delta=0.05, q_set=0.6, renewal=0.0),   # pool binds, with loss
     "pancreas": dict(P0=60.0, rho=0.00, delta=0.00, q_set=0.6, renewal=0.0),   # a budget, no loss
 }
-CONDITIONS = ("baseline", "pool", "setpoint")
 Z = np.random.default_rng(2024).normal(size=(max(NREP, 64), 2))
 
 

@@ -117,8 +117,6 @@ axd.bar(x, meas, width=w, color=cols, lw=0, label="measured")
 axd.bar(x + w, quad, width=w, color="none", lw=0.9, edgecolor=K["ink"],
         label="bound, $(N_f/N_i)^2$")
 axd.set_yscale("log"); axd.set_xticks(x)
-short = {"Saturation": "Sat.", "Exhaustion (kidney)": "Exh.\n(kidney)",
-         "Exhaustion (lung)": "Exh.\n(lung)", "Limiting pool": "Pool"}
 axd.set_xticklabels(["Sat.", "Exh.\n(kidney)", "Exh.\n(lung)", "Pool"][:len(names)],
                     fontsize=F.SZ["small"] - 1)
 axd.set_ylim(top=axd.get_ylim()[1] * 8)

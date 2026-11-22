@@ -943,27 +943,32 @@ mass the delivery per unit mass does not fall either. Nothing is ever short.
 **The circulation caps how far the organ goes.** A gut does not send more
 portal blood to a liver because the liver was cut; the remnant receives what
 the intact organ received, which is the mechanism behind small-for-size
-physiology. Holding the inflow fixed at that value, each unit's share is its
-conductance over the tree's, so the delivery per unit mass is inversely
-proportional to the organ's mass. A unit grows while its own delivery per mass
-exceeds a threshold, which is a local rule, and the organ stops when its mass
-matches its blood supply, which is the consequence. The liver then restores
-its mass and stops at 1.01 of what it had.
+physiology. The network is linear, so holding the inflow fixed in place of the
+inlet pressure leaves the distribution of flow unchanged and only rescales the
+solve: the driving pressure falls as the tree grows its conductance. Each
+unit's share is then its own conductance times the pressure its tip delivers,
+which is the tree's answer and not the tissue's, so a unit on a poorly
+perfused branch gets a lower ceiling and one on an occluded branch gets none.
+The delivery per unit mass falls as the organ grows. A unit grows while its
+own delivery per mass exceeds a threshold, which is a local rule, and the
+organ stops when its mass matches its blood supply, which is the consequence.
+The liver then restores its mass and stops at 1.00 of what it had, with the
+flow entering the organ held at its pre-injury value to machine precision.
 
 ### How an organ recovers follows from what it spent
 
 The kidney closed with its pool spent, so it cannot make nephrons. Given the
-two conditions it recovers entirely by enlarging what it kept: 0.70 of the
-count after losing 30 %, 1.4 times the mass per unit, and its function
+two conditions it recovers almost entirely by enlarging what it kept: 0.70 of
+the count after losing 30 %, 1.36 times the mass per unit, and its function
 restored. That is compensatory renal hypertrophy as it is described. The
 liver, whose compartment renews itself, has both routes.
 
-Where the model is wrong is in how far it goes. It compensates in full: 1.42
-against the 1.43 that a 30 % loss requires, and 1.95 against 2.00 at 50 %. A
-kidney that loses half reaches about a half again in volume rather than
-doubling. Nothing in the model caps how large a unit may grow, and in a kidney
-that cap exists; passing it is hyperfiltration injury. The gap is specific and
-it names what the model lacks.
+Where the model is wrong is in how far it goes. It compensates to within a
+twentieth of the whole loss: 1.36 against the 1.43 that a 30 % loss requires,
+and 1.89 against 2.00 at 50 %. A kidney that loses half reaches about a half
+again in volume rather than doubling. Nothing in the model caps how large a
+unit may grow, and in a kidney that cap exists; passing it is hyperfiltration
+injury. The gap is specific and it names what the model lacks.
 
 ### Murray's relation in grown trees
 

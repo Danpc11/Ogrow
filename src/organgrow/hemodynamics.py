@@ -25,7 +25,7 @@ class VascularTree:
 
     __slots__ = ("parent", "start", "end", "radius", "length", "occluded",
                  "flow", "shear", "is_tip",
-                 "pressure_in", "pressure_out", "conductance_total",
+                 "pressure_in", "pressure_out",
                  "r_crit", "below")
 
     def __init__(self, root_start, root_end, r0):
@@ -41,7 +41,6 @@ class VascularTree:
         self.is_tip = [True]
         self.pressure_in = np.zeros(1)
         self.pressure_out = np.zeros(1)
-        self.conductance_total = 0.0
         self.r_crit = np.zeros(1)
         self.below = np.zeros(1)
 
@@ -64,34 +63,6 @@ class VascularTree:
         return len(self.parent) - 1
 
     # ------------------------------------------------------------------ flow
-    def pressures(self, p_in=1.0):
-        """Pressure at each segment, from the root down.
-
-        Shear-only adaptation is unstable: at a uniform setpoint r^3 is
-        proportional to f, so conductance follows flow^(4/3), and with a fixed
-        perfusion pressure the two reinforce each other without bound. The
-        drop along the tree is what breaks the loop, because a segment's
-        setpoint rises with the pressure it carries.
-        """
-        n = len(self.parent)
-        f = np.asarray(self.flow)
-        r = np.asarray(self.radius)
-        l = np.asarray(self.length)
-        w = r ** 4 / np.maximum(l, 1e-6)
-        drop = f / np.maximum(w, 1e-12)
-        p = np.zeros(n)
-        par = np.asarray(self.parent)
-        for k in range(1, n):                 # parents precede daughters
-            p[k] = p[par[k]] - drop[k]
-        # rescale so the root-to-tip span is [p_in, p_in/span]: the absolute
-        # drop depends on units, only the profile along the tree is physical
-        lo = p.min()
-        if lo < p[0]:
-            p = (p - lo) / (p[0] - lo)
-        else:
-            p = np.ones(n)
-        return p_in * np.maximum(p, 1e-2)
-
     def solve(self, tip_demand):
         """Accumulate demand to the root, then set flow and shear per segment.
 
@@ -135,8 +106,12 @@ class VascularTree:
         eff = np.zeros(n)
         par = np.asarray(self.parent)
         for k in range(n - 1, -1, -1):
-            eff[k] = own[k] if below[k] <= 0 else 1.0 / (1.0 / own[k] +
-                                                         1.0 / below[k])
+            if own[k] <= 0:                     # occluded: conducts nothing
+                eff[k] = 0.0
+            elif below[k] <= 0:                 # open drain, see the docstring
+                eff[k] = own[k]
+            else:
+                eff[k] = 1.0 / (1.0 / own[k] + 1.0 / below[k])
             if par[k] >= 0:
                 below[par[k]] += eff[k]
         return float(eff[0])
@@ -184,9 +159,8 @@ class VascularTree:
         # calibre feedback is positive, so it is the floor the segment may not
         # cross. (An earlier version had (3 l / R_below)^(1/4), 1.73 times too
         # large, which kept every calibre above 1.73 r_c.)
-        r_crit = np.where(below > 0, (l * np.maximum(below, 1e-12) / 3.0) ** 0.25, 0.0)
-        r_crit[below <= 0] = 0.0
-        self.r_crit = r_crit
+        self.r_crit = np.where(below > 0,
+                               (l * np.maximum(below, 1e-12) / 3.0) ** 0.25, 0.0)
         self.below = below
 
         kids = [[] for _ in range(n)]
@@ -214,7 +188,6 @@ class VascularTree:
         self.shear = f / np.maximum(r, 1e-6) ** 3
         self.pressure_in = p
         self.pressure_out = pout             # what the tissue at a tip sees
-        self.conductance_total = float(eff[0])
         return f, p, float(eff[0])
 
     # -------------------------------------------------------------- calibres
