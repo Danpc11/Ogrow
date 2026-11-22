@@ -140,11 +140,12 @@ if (RES / "injury.json").exists():
              "perfused": "perfused mass"}
 
     def seedcell(d):
-        """Mean over the seeds, and the seeds, since three of them is few."""
-        return f"{d['mean']:.2f} ({', '.join(f'{x:.2f}' for x in d['seeds'])})"
+        """Mean over the seeds and the range they span, which is the point."""
+        v = d["seeds"]
+        return f"{d['mean']:.2f} [{min(v):.2f}, {max(v):.2f}]"
     w("## Injury after closure (day 140, 30 % of the units removed by a plane cut, "
       "read on day 220; every entry is day 220 over the day before the "
-      "injury, as the mean over three seeds with the seeds in brackets)\n")
+      "injury, as the mean over 24 seeds with the range they span)\n")
     rows = []
     for reg in ("liver", "kidney"):
         for cond in ("as grown", "reactivated", "reactivated, fixed inflow"):

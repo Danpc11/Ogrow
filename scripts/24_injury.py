@@ -4,7 +4,8 @@
 The organ is grown to closure (day 140), then a part of it is destroyed and
 growth runs on for 80 more days. Injuring after closure, rather than during
 growth, is what separates recovery from growth that would have happened
-anyway; the control is the same run with no injury.
+anyway; every quantity is read against the day before the injury in the same
+run, so no separate control is needed.
 
 Three injuries, each a plane cut rather than a random removal, as a lobectomy
 is. "parenchyma" removes the units past the cut and leaves the tree.
@@ -22,6 +23,8 @@ so R = 0 just after the injury and R = 1 at the value before it.
 Usage:  python scripts/24_injury.py        run (cached) and report
 """
 import json
+import os
+from concurrent.futures import ProcessPoolExecutor
 
 import numpy as np
 
@@ -32,7 +35,7 @@ from organgrow.closed import grow
 OUT = ROOT / "results" / "injury"
 OUT.mkdir(parents=True, exist_ok=True)
 S, NU, CLOSE, END, FRAC = 0.6, 8.0, 140, 220, 0.30
-SEEDS = (300, 301, 302)
+SEEDS = tuple(range(300, 324))     # 24, as elsewhere in this work
 REG = {"liver": dict(P0=2600.0, rho=0.10, delta=0.10, q_set=0.6, renewal=1.0),
        "kidney": dict(P0=300.0, rho=0.00, delta=0.05, q_set=0.6, renewal=0.0)}
 FIX = dict(R_unit=650.0, units_per_branch=650 / 600.0, max_vessels=6000)
@@ -80,7 +83,31 @@ def spread(v):
     return dict(mean=float(np.mean(v)), seeds=[float(x) for x in v])
 
 
+def _warm(a):
+    """Populate the cache for one run. Each tag is written by one worker only."""
+    run(*a)
+
+
 if __name__ == "__main__":
+    grid = [(reg, "parenchyma", s, cond, FRAC)
+            for reg in REG for cond in CONDS for s in SEEDS]
+    grid += [("kidney", "parenchyma", s, "reactivated, fixed inflow", frac)
+             for frac in (0.3, 0.5) for s in SEEDS]
+    grid = [g for g in grid
+            if not (OUT / (f"{g[0]}_{g[1]}_{g[3].replace(' ', '').replace(',', '')}"
+                           f"_f{g[4]}_s{g[2]}.json")).exists()]
+    if grid:
+        n = max(1, min(int(os.environ.get("OGROW_JOBS", 0)) or (os.cpu_count() or 1),
+                       len(grid)))
+        print(f"running {len(grid)} simulations on {n} worker(s)")
+        if n > 1:
+            with ProcessPoolExecutor(max_workers=n) as pool:
+                for _ in pool.map(_warm, grid):
+                    pass
+        else:
+            for g in grid:
+                _warm(g)
+
     res = {}
     for reg in REG:
         print(f"\n=== {reg}: {int(100*FRAC)} % lost on day {CLOSE}, read on day {END}; "

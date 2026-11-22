@@ -960,10 +960,17 @@ entering the organ held at its pre-injury value to machine precision.
 The kidney closed with its pool spent, so it cannot make nephrons. Given the
 two conditions it recovers almost entirely by enlarging what it kept: 0.70 of
 the count after losing 30 %, about 1.4 times the mass per unit, and its
-function restored. Across the three seeds the mass per nephron under a held
-inflow spans 1.35 to 1.38, against 2.31 to 2.84 when growth restarts with the
-inlet pressure fixed: the constraint sets where compensation stops and also
-makes where it stops repeatable. That is compensatory renal hypertrophy as it
+function restored. Across 24 seeds the mass per nephron under a held
+inflow spans 1.35 to 1.42, a coefficient of variation of 1.6 %, against 2.31
+to 2.96 and 6.0 % when growth restarts with the inlet pressure fixed. The
+constraint sets where compensation stops and also makes where it stops
+repeatable, and it does so through mass alone: the spread of final mass
+contracts 3.7 fold in both organs, bootstrap intervals 2.5 to 5.6 in the liver
+and 2.6 to 5.2 in the kidney, while the spread of unit count does not move,
+7.2 to 7.9 % in the liver and 0.4 % either way in the kidney. A fixed budget
+fixes the mass and leaves the division of it alone. Only the organ whose count
+is already pinned has its size per unit forced too, which is the
+one-property argument applied to recovery. That is compensatory renal hypertrophy as it
 is described. The
 liver, whose compartment renews itself, has both routes.
 

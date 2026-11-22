@@ -179,13 +179,12 @@ rerun with reactivation and a fixed inflow.
 run is seeded, so one machine repeats a run exactly. The events are discrete
 and sit on floating-point comparisons, though, so the same seed on a different
 platform takes a different path once two quantities that differ in the last
-bits are compared. Running the injury experiment on two machines moved the
-kidney's mass per nephron after a 30 % loss from 1.36 to 1.39, which is the
-size of the spread across the three seeds themselves. Three seeds is few. The
-tables therefore report every seed beside the mean, and the prose quotes only
-the digits that the spread supports. Three is also too few to put a figure on
-the contraction of that spread under a fixed inflow, which is reported as the
-order of magnitude it is and not as a ratio.
+bits are compared. Run on two machines with three seeds, the kidney's mass per
+nephron after a 30 % loss came out 1.36 and 1.39. Both lie inside the range
+that 24 seeds span on one machine, 1.35 to 1.42, so what looked like a
+platform artefact was the spread of the draw. The tables report the range
+beside the mean and the per-seed values are kept in the source data, and the
+prose quotes only the digits that the spread supports.
 
 **The difference between two regimes is tested as if the two were
 independent.** The elasticity of the final unit count to the progenitor pool

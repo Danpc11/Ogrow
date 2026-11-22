@@ -1,6 +1,6 @@
 # Numbers the paper uses
 
-Model version 4.13.0, commit 920650a, generated 2026-11-22 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.14.0, commit 196f39a (with uncommitted changes), generated 2026-11-22 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b024.
 
@@ -117,21 +117,21 @@ Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b0
 | allometric | 1.0 | 205 | 430 | 0.60 | 0.43 | 3.4 % |
 | allometric: unit count scales as V^0.57 |  |  |  |  |  |  |
 
-## Injury after closure (day 140, 30 % of the units removed by a plane cut, read on day 220; every entry is day 220 over the day before the injury, as the mean over three seeds with the seeds in brackets)
+## Injury after closure (day 140, 30 % of the units removed by a plane cut, read on day 220; every entry is day 220 over the day before the injury, as the mean over 24 seeds with the range they span)
 
 | regime | condition | units | mass | mass per unit | perfused mass |
 |---|---|---|---|---|---|
-| liver | as grown | 0.94 (0.95, 0.93, 0.94) | 0.80 (0.81, 0.82, 0.77) | 0.85 (0.85, 0.88, 0.82) | 0.82 (0.82, 0.85, 0.80) |
-| liver | reactivated | 0.94 (0.97, 0.93, 0.93) | 1.80 (1.75, 1.88, 1.76) | 1.91 (1.81, 2.03, 1.89) | 1.96 (1.93, 2.06, 1.89) |
-| liver | reactivated, fixed inflow | 0.91 (0.94, 0.89, 0.89) | 1.01 (1.04, 0.99, 1.01) | 1.12 (1.10, 1.11, 1.13) | 1.10 (1.10, 1.10, 1.10) |
-| kidney | as grown | 0.70 (0.70, 0.70, 0.70) | 0.70 (0.77, 0.60, 0.75) | 1.00 (1.10, 0.85, 1.07) | 0.71 (0.79, 0.56, 0.77) |
-| kidney | reactivated | 0.70 (0.70, 0.70, 0.70) | 1.82 (2.00, 1.53, 1.94) | 2.60 (2.85, 2.18, 2.78) | 1.99 (2.20, 1.66, 2.11) |
-| kidney | reactivated, fixed inflow | 0.70 (0.70, 0.70, 0.70) | 0.97 (0.97, 0.99, 0.96) | 1.39 (1.38, 1.41, 1.37) | 1.04 (1.08, 1.03, 1.02) |
+| liver | as grown | 0.95 [0.77, 1.01] | 0.79 [0.67, 0.86] | 0.84 [0.69, 0.92] | 0.81 [0.67, 0.90] |
+| liver | reactivated | 0.95 [0.80, 1.02] | 1.82 [1.54, 2.07] | 1.93 [1.73, 2.19] | 1.97 [1.76, 2.18] |
+| liver | reactivated, fixed inflow | 0.91 [0.72, 1.05] | 1.01 [0.97, 1.04] | 1.12 [0.94, 1.34] | 1.10 [1.04, 1.15] |
+| kidney | as grown | 0.70 [0.69, 0.70] | 0.71 [0.60, 0.79] | 1.02 [0.85, 1.13] | 0.73 [0.56, 0.82] |
+| kidney | reactivated | 0.70 [0.69, 0.70] | 1.85 [1.53, 2.21] | 2.64 [2.18, 3.18] | 2.02 [1.66, 2.41] |
+| kidney | reactivated, fixed inflow | 0.70 [0.69, 0.70] | 0.97 [0.94, 0.99] | 1.39 [1.35, 1.43] | 1.05 [1.01, 1.09] |
 
 ## How far a kidney compensates, growth reactivated and inflow fixed
 
 | regime | lost | units kept | mass per unit | full compensation would need | mass |
 |---|---|---|---|---|---|
-| kidney | 30 % | 0.70 (0.70, 0.70, 0.70) | 1.39 (1.38, 1.41, 1.37) | 1.43 | 0.97 (0.97, 0.99, 0.96) |
-| kidney | 50 % | 0.50 (0.51, 0.50, 0.50) | 1.88 (1.83, 1.93, 1.89) | 2.00 | 0.95 (0.93, 0.97, 0.94) |
+| kidney | 30 % | 0.70 [0.69, 0.70] | 1.39 [1.35, 1.43] | 1.43 | 0.97 [0.94, 0.99] |
+| kidney | 50 % | 0.50 [0.50, 0.52] | 1.88 [1.79, 1.95] | 2.00 | 0.95 [0.93, 0.98] |
 

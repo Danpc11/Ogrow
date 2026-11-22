@@ -1,7 +1,7 @@
 # The paper: framework, claims and evidence
 
 Target: *Frontiers in Cell and Developmental Biology*, Hypothesis and Theory.
-Reference model: version 4.13.0 (`src/organgrow/closed.py`). Every number from
+Reference model: version 4.14.0 (`src/organgrow/closed.py`). Every number from
 the model that the paper uses is in `PAPER_NUMBERS.md`, written by
 `make paper` with the version and commit that produced it; this file does not
 copy model numbers by hand. Numbers given here are either data (the human
@@ -118,11 +118,18 @@ How an organ recovers follows from what it spent in development. The kidney
 closed with no competent cells left, so it cannot make nephrons and can only
 enlarge what it has: after losing 30 % of its units it ends with 0.70 of the
 count and about 1.4 times the mass per unit, its function restored. The
-constraint also decides how repeatable that landing is. Across seeds the
-kidney's mass per nephron varies by about a tenth when growth restarts without
-it and by about a hundredth when the inflow is held, while the nephron count
-comes out identical in every seed. Where an organ that cannot build new units
-ends up is luck unless something outside it fixes the budget. That is
+constraint also decides how repeatable that landing is, and the way it does
+says what the constraint is. Across 24 seeds, holding the inflow contracts the
+spread of final mass about 3.7 fold in both organs, from 8.5 % of the mean to
+2.3 % in the liver and from 6.1 % to 1.7 % in the kidney, with bootstrap 95 %
+intervals of 2.5 to 5.6 and 2.6 to 5.2. It leaves the spread of unit count
+untouched: 7.2 % against 7.9 % in the liver, 0.4 % against 0.4 % in the
+kidney. A fixed budget fixes the mass and says nothing about how an organ
+divides it. The kidney's count is already pinned by its own biology, so its
+size per nephron is forced as well, 6.0 % down to 1.6 %; the liver's count is
+free to absorb the variation, so its size per unit stays loose, 9.6 % against
+7.2 %. The property that separates the two organs in growth separates how
+they recover. That is
 compensatory renal hypertrophy as it is described after a nephrectomy, where
 no new nephrons form, the remaining ones enlarge and function is maintained.
 The liver, whose competent compartment renews itself, has both routes open.

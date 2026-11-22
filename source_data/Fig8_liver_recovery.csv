@@ -1,13 +1,289 @@
-regime,condition,readout,relative
-liver,as grown,units,0.9405582922824302
-liver,reactivated,units,0.9413934086347879
-liver,"reactivated, fixed inflow",units,0.9066361480154583
-liver,as grown,mass,0.8018523049464611
-liver,reactivated,mass,1.7959236476274605
-liver,"reactivated, fixed inflow",mass,1.0120444789351728
-liver,as grown,mass_per_unit,0.8525559906106306
-liver,reactivated,mass_per_unit,1.909063853823621
-liver,"reactivated, fixed inflow",mass_per_unit,1.116474799625596
-liver,as grown,perfused,0.8223380964489775
-liver,reactivated,perfused,1.9624815871306174
-liver,"reactivated, fixed inflow",perfused,1.0979944909308774
+regime,condition,readout,relative_per_seed
+liver,as grown,units,0.9523809523809523
+liver,as grown,units,0.9333333333333333
+liver,as grown,units,0.9359605911330049
+liver,as grown,units,0.9754901960784313
+liver,as grown,units,0.9067357512953368
+liver,as grown,units,1.014354066985646
+liver,as grown,units,0.964824120603015
+liver,as grown,units,0.9590909090909091
+liver,as grown,units,1.0
+liver,as grown,units,0.9949748743718593
+liver,as grown,units,1.0
+liver,as grown,units,0.8857142857142857
+liver,as grown,units,0.8461538461538461
+liver,as grown,units,0.9264069264069265
+liver,as grown,units,0.989247311827957
+liver,as grown,units,1.0046728971962617
+liver,as grown,units,0.9585062240663901
+liver,as grown,units,0.7729468599033816
+liver,as grown,units,0.9402173913043478
+liver,as grown,units,0.9858490566037735
+liver,as grown,units,0.9653679653679653
+liver,as grown,units,0.9904306220095693
+liver,as grown,units,0.8888888888888888
+liver,as grown,units,0.9587155963302753
+liver,reactivated,units,0.9653679653679653
+liver,reactivated,units,0.9277777777777778
+liver,reactivated,units,0.9310344827586207
+liver,reactivated,units,0.9754901960784313
+liver,reactivated,units,0.8963730569948186
+liver,reactivated,units,0.9904306220095693
+liver,reactivated,units,1.0100502512562815
+liver,reactivated,units,0.9545454545454546
+liver,reactivated,units,1.0170212765957447
+liver,reactivated,units,0.964824120603015
+liver,reactivated,units,0.9827586206896551
+liver,reactivated,units,0.9142857142857143
+liver,reactivated,units,0.8205128205128205
+liver,reactivated,units,0.9134199134199135
+liver,reactivated,units,0.9946236559139785
+liver,reactivated,units,0.985981308411215
+liver,reactivated,units,1.0
+liver,reactivated,units,0.8019323671497585
+liver,reactivated,units,0.9565217391304348
+liver,reactivated,units,0.8915094339622641
+liver,reactivated,units,0.935064935064935
+liver,reactivated,units,1.0047846889952152
+liver,reactivated,units,0.893719806763285
+liver,reactivated,units,0.963302752293578
+liver,"reactivated, fixed inflow",units,0.9393939393939394
+liver,"reactivated, fixed inflow",units,0.8888888888888888
+liver,"reactivated, fixed inflow",units,0.8916256157635468
+liver,"reactivated, fixed inflow",units,0.9705882352941176
+liver,"reactivated, fixed inflow",units,0.8963730569948186
+liver,"reactivated, fixed inflow",units,0.9186602870813397
+liver,"reactivated, fixed inflow",units,0.9597989949748744
+liver,"reactivated, fixed inflow",units,0.9681818181818181
+liver,"reactivated, fixed inflow",units,0.9872340425531915
+liver,"reactivated, fixed inflow",units,0.949748743718593
+liver,"reactivated, fixed inflow",units,0.867816091954023
+liver,"reactivated, fixed inflow",units,0.8761904761904762
+liver,"reactivated, fixed inflow",units,0.8615384615384616
+liver,"reactivated, fixed inflow",units,0.8831168831168831
+liver,"reactivated, fixed inflow",units,1.0483870967741935
+liver,"reactivated, fixed inflow",units,0.9672897196261683
+liver,"reactivated, fixed inflow",units,0.9004149377593361
+liver,"reactivated, fixed inflow",units,0.7198067632850241
+liver,"reactivated, fixed inflow",units,0.8858695652173914
+liver,"reactivated, fixed inflow",units,0.839622641509434
+liver,"reactivated, fixed inflow",units,0.9090909090909091
+liver,"reactivated, fixed inflow",units,0.9090909090909091
+liver,"reactivated, fixed inflow",units,0.8840579710144928
+liver,"reactivated, fixed inflow",units,0.8577981651376146
+liver,as grown,mass,0.8119908657475421
+liver,as grown,mass,0.8239506901167707
+liver,as grown,mass,0.7696153589750704
+liver,as grown,mass,0.671579898387586
+liver,as grown,mass,0.7798834446127793
+liver,as grown,mass,0.7534840589915179
+liver,as grown,mass,0.7498386979133858
+liver,as grown,mass,0.7570960829048811
+liver,as grown,mass,0.8580240825745552
+liver,as grown,mass,0.7999944048728639
+liver,as grown,mass,0.8220547944781612
+liver,as grown,mass,0.7912262783364484
+liver,as grown,mass,0.7571177298493104
+liver,as grown,mass,0.8311985430269275
+liver,as grown,mass,0.7467305774841109
+liver,as grown,mass,0.8478903738348057
+liver,as grown,mass,0.802272405935577
+liver,as grown,mass,0.7133618415027821
+liver,as grown,mass,0.8270377824682628
+liver,as grown,mass,0.8357069159013545
+liver,as grown,mass,0.7977484571509399
+liver,as grown,mass,0.8377203114643662
+liver,as grown,mass,0.805872850577045
+liver,as grown,mass,0.8363042246564042
+liver,reactivated,mass,1.747593577761086
+liver,reactivated,mass,1.878903162512747
+liver,reactivated,mass,1.7612742026085486
+liver,reactivated,mass,1.7875049292163145
+liver,reactivated,mass,1.7256511207380771
+liver,reactivated,mass,1.8387565120940825
+liver,reactivated,mass,1.7449253207937767
+liver,reactivated,mass,1.9081000971792625
+liver,reactivated,mass,2.0721654000684975
+liver,reactivated,mass,1.763107128920836
+liver,reactivated,mass,1.8532982399050406
+liver,reactivated,mass,1.7709855165913204
+liver,reactivated,mass,1.6691679870756733
+liver,reactivated,mass,1.8025844092017669
+liver,reactivated,mass,1.8605432836700826
+liver,reactivated,mass,1.8982189275051204
+liver,reactivated,mass,1.73032263415704
+liver,reactivated,mass,1.5353068788244555
+liver,reactivated,mass,1.854272533280527
+liver,reactivated,mass,1.8628834598839796
+liver,reactivated,mass,2.020682422871415
+liver,reactivated,mass,1.9183976281875306
+liver,reactivated,mass,1.9605836787628426
+liver,reactivated,mass,1.7896922976670777
+liver,"reactivated, fixed inflow",mass,1.0373477113720813
+liver,"reactivated, fixed inflow",mass,0.990134292624265
+liver,"reactivated, fixed inflow",mass,1.0086514328091718
+liver,"reactivated, fixed inflow",mass,1.0290493568163963
+liver,"reactivated, fixed inflow",mass,1.025617878812454
+liver,"reactivated, fixed inflow",mass,1.0047512226494435
+liver,"reactivated, fixed inflow",mass,1.010668207678789
+liver,"reactivated, fixed inflow",mass,1.0298677523495952
+liver,"reactivated, fixed inflow",mass,0.9996956824463745
+liver,"reactivated, fixed inflow",mass,1.0251383826548548
+liver,"reactivated, fixed inflow",mass,0.9909087641111296
+liver,"reactivated, fixed inflow",mass,0.9753520538164798
+liver,"reactivated, fixed inflow",mass,0.9682011293734318
+liver,"reactivated, fixed inflow",mass,1.0149249076663018
+liver,"reactivated, fixed inflow",mass,0.9842769589537437
+liver,"reactivated, fixed inflow",mass,1.0254664889993097
+liver,"reactivated, fixed inflow",mass,1.0311238998128294
+liver,"reactivated, fixed inflow",mass,0.9664860344989532
+liver,"reactivated, fixed inflow",mass,1.0074173493123033
+liver,"reactivated, fixed inflow",mass,1.0200520746758934
+liver,"reactivated, fixed inflow",mass,1.0365067878436263
+liver,"reactivated, fixed inflow",mass,1.0099439736373022
+liver,"reactivated, fixed inflow",mass,1.0049977893608384
+liver,"reactivated, fixed inflow",mass,1.0203155918968718
+liver,as grown,mass_per_unit,0.8525904090349192
+liver,as grown,mass_per_unit,0.8828043108393971
+liver,as grown,mass_per_unit,0.8222732519575753
+liver,as grown,mass_per_unit,0.688453765181244
+liver,as grown,mass_per_unit,0.8601000274872366
+liver,as grown,mass_per_unit,0.7428215487227701
+liver,as grown,mass_per_unit,0.7771765671081446
+liver,as grown,mass_per_unit,0.7893892807539045
+liver,as grown,mass_per_unit,0.8580240825745552
+liver,as grown,mass_per_unit,0.8040347806550501
+liver,as grown,mass_per_unit,0.8220547944781612
+liver,as grown,mass_per_unit,0.8933199916701837
+liver,as grown,mass_per_unit,0.8947754989128214
+liver,as grown,mass_per_unit,0.897228333828132
+liver,as grown,mass_per_unit,0.7548472141958946
+liver,as grown,mass_per_unit,0.8439466976774345
+liver,as grown,mass_per_unit,0.8370028131189353
+liver,as grown,mass_per_unit,0.9229118824442244
+liver,as grown,mass_per_unit,0.8796239998506379
+liver,as grown,mass_per_unit,0.8477027089525702
+liver,as grown,mass_per_unit,0.8263672358828122
+liver,as grown,mass_per_unit,0.8458142275171621
+liver,as grown,mass_per_unit,0.9066069568991757
+liver,as grown,mass_per_unit,0.8723173252396943
+liver,reactivated,mass_per_unit,1.8102875177704525
+liver,reactivated,mass_per_unit,2.0251650853430805
+liver,reactivated,mass_per_unit,1.89173895835733
+liver,reactivated,mass_per_unit,1.8324171133674783
+liver,reactivated,mass_per_unit,1.9251483601297625
+liver,reactivated,mass_per_unit,1.8565222754959578
+liver,reactivated,mass_per_unit,1.7275628797908535
+liver,reactivated,mass_per_unit,1.9989620065687512
+liver,reactivated,mass_per_unit,2.037484807598732
+liver,reactivated,mass_per_unit,1.8273870763294082
+liver,reactivated,mass_per_unit,1.8858122441139011
+liver,reactivated,mass_per_unit,1.9370154087717568
+liver,reactivated,mass_per_unit,2.034298484248477
+liver,reactivated,mass_per_unit,1.9734454906426926
+liver,reactivated,mass_per_unit,1.8706002743926236
+liver,reactivated,mass_per_unit,1.9252078222089846
+liver,reactivated,mass_per_unit,1.73032263415704
+liver,reactivated,mass_per_unit,1.9145091802208571
+liver,reactivated,mass_per_unit,1.9385576484296418
+liver,reactivated,mass_per_unit,2.089583563467744
+liver,reactivated,mass_per_unit,2.1610075911263746
+liver,reactivated,mass_per_unit,1.9092624013866377
+liver,reactivated,mass_per_unit,2.193734170291397
+liver,reactivated,mass_per_unit,1.8578710518639188
+liver,"reactivated, fixed inflow",mass_per_unit,1.10427337017028
+liver,"reactivated, fixed inflow",mass_per_unit,1.113901079202298
+liver,"reactivated, fixed inflow",mass_per_unit,1.1312499495042092
+liver,"reactivated, fixed inflow",mass_per_unit,1.0602326706593175
+liver,"reactivated, fixed inflow",mass_per_unit,1.1441864197156277
+liver,"reactivated, fixed inflow",mass_per_unit,1.0937135704881962
+liver,"reactivated, fixed inflow",mass_per_unit,1.0529998603564346
+liver,"reactivated, fixed inflow",mass_per_unit,1.0637131714408965
+liver,"reactivated, fixed inflow",mass_per_unit,1.0126227817883535
+liver,"reactivated, fixed inflow",mass_per_unit,1.0793785087212493
+liver,"reactivated, fixed inflow",mass_per_unit,1.1418418871214342
+liver,"reactivated, fixed inflow",mass_per_unit,1.113173539681852
+liver,"reactivated, fixed inflow",mass_per_unit,1.1238048823084477
+liver,"reactivated, fixed inflow",mass_per_unit,1.1492532042691948
+liver,"reactivated, fixed inflow",mass_per_unit,0.9388487916174171
+liver,"reactivated, fixed inflow",mass_per_unit,1.0601440997384168
+liver,"reactivated, fixed inflow",mass_per_unit,1.1451652527875202
+liver,"reactivated, fixed inflow",mass_per_unit,1.3427020747737135
+liver,"reactivated, fixed inflow",mass_per_unit,1.1372073145611277
+liver,"reactivated, fixed inflow",mass_per_unit,1.214893482198255
+liver,"reactivated, fixed inflow",mass_per_unit,1.140157466627989
+liver,"reactivated, fixed inflow",mass_per_unit,1.1109383710010323
+liver,"reactivated, fixed inflow",mass_per_unit,1.1368007781294729
+liver,"reactivated, fixed inflow",mass_per_unit,1.1894588183610593
+liver,as grown,perfused,0.8150839676474253
+liver,as grown,perfused,0.8470389432789666
+liver,as grown,perfused,0.8048913784205408
+liver,as grown,perfused,0.6709953712682831
+liver,as grown,perfused,0.8315301316205113
+liver,as grown,perfused,0.7608025680853674
+liver,as grown,perfused,0.7940570221522941
+liver,as grown,perfused,0.743617482682301
+liver,as grown,perfused,0.8694691502713724
+liver,as grown,perfused,0.8193013780997019
+liver,as grown,perfused,0.8867692200412635
+liver,as grown,perfused,0.8093983770324568
+liver,as grown,perfused,0.8027397292021656
+liver,as grown,perfused,0.9028875284045763
+liver,as grown,perfused,0.6978131319733039
+liver,as grown,perfused,0.8406154207543581
+liver,as grown,perfused,0.8620555775990175
+liver,as grown,perfused,0.7717317234399143
+liver,as grown,perfused,0.8534275840673562
+liver,as grown,perfused,0.8148526400686154
+liver,as grown,perfused,0.8160284584723062
+liver,as grown,perfused,0.8432863862137316
+liver,as grown,perfused,0.8499301348149092
+liver,as grown,perfused,0.8204294797194442
+liver,reactivated,perfused,1.9305394866204744
+liver,reactivated,perfused,2.0631002726624947
+liver,reactivated,perfused,1.8938050021088835
+liver,reactivated,perfused,1.9001415721068542
+liver,reactivated,perfused,1.988244873033657
+liver,reactivated,perfused,1.9501577021806882
+liver,reactivated,perfused,1.8959895828560482
+liver,reactivated,perfused,2.0165391049444095
+liver,reactivated,perfused,2.0365256408443155
+liver,reactivated,perfused,1.8797731509739224
+liver,reactivated,perfused,2.0512468886756845
+liver,reactivated,perfused,1.8996495474478865
+liver,reactivated,perfused,1.8758188286625113
+liver,reactivated,perfused,2.051116821802672
+liver,reactivated,perfused,1.8542391455088147
+liver,reactivated,perfused,2.1306719171411643
+liver,reactivated,perfused,1.8259014558114677
+liver,reactivated,perfused,1.7588354037623972
+liver,reactivated,perfused,2.0290166895727664
+liver,reactivated,perfused,2.0672521191396345
+liver,reactivated,perfused,2.181242510415518
+liver,reactivated,perfused,1.9207975460713411
+liver,reactivated,perfused,2.077319968049632
+liver,reactivated,perfused,1.8972521243513953
+liver,"reactivated, fixed inflow",perfused,1.0970666669281575
+liver,"reactivated, fixed inflow",perfused,1.099961295215269
+liver,"reactivated, fixed inflow",perfused,1.0969555106492062
+liver,"reactivated, fixed inflow",perfused,1.0860758812253102
+liver,"reactivated, fixed inflow",perfused,1.0979062040376113
+liver,"reactivated, fixed inflow",perfused,1.0868379694906363
+liver,"reactivated, fixed inflow",perfused,1.089280353099517
+liver,"reactivated, fixed inflow",perfused,1.0768862698591366
+liver,"reactivated, fixed inflow",perfused,1.0806495302834345
+liver,"reactivated, fixed inflow",perfused,1.0987162938606811
+liver,"reactivated, fixed inflow",perfused,1.0957023088355404
+liver,"reactivated, fixed inflow",perfused,1.0982316903301392
+liver,"reactivated, fixed inflow",perfused,1.109849741983636
+liver,"reactivated, fixed inflow",perfused,1.150780162062601
+liver,"reactivated, fixed inflow",perfused,1.042283731497275
+liver,"reactivated, fixed inflow",perfused,1.1379109867935777
+liver,"reactivated, fixed inflow",perfused,1.1158713708830246
+liver,"reactivated, fixed inflow",perfused,1.1093599633598956
+liver,"reactivated, fixed inflow",perfused,1.1082290832521162
+liver,"reactivated, fixed inflow",perfused,1.0871394827306602
+liver,"reactivated, fixed inflow",perfused,1.0953092216204272
+liver,"reactivated, fixed inflow",perfused,1.07498311367231
+liver,"reactivated, fixed inflow",perfused,1.087028996587152
+liver,"reactivated, fixed inflow",perfused,1.091143641360191
