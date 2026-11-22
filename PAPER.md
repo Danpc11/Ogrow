@@ -1,7 +1,7 @@
 # The paper: framework, claims and evidence
 
 Target: *Frontiers in Cell and Developmental Biology*, Hypothesis and Theory.
-Reference model: version 4.15.0 (`src/organgrow/closed.py`). Every number from
+Reference model: version 4.16.0 (`src/organgrow/closed.py`). Every number from
 the model that the paper uses is in `PAPER_NUMBERS.md`, written by
 `make paper` with the version and commit that produced it; this file does not
 copy model numbers by hand. Numbers given here are either data (the human
@@ -64,9 +64,9 @@ compensated, while the liver compensated fully. The model was not fitted to
 that experiment. The ordering is of three organs: across thirteen variants of
 the auxiliary rules the kidney's elasticity exceeds the liver's in every one
 and the pancreas exceeds the kidney in every one, each a sign test at
-P = 0.0002, with the kidney-liver separation the weaker of the two, reaching
-z of 2 or more in ten of the thirteen against twelve for pancreas against
-liver. `PAPER_NUMBERS.md`, Transmission,
+P = 0.0002, with the kidney-liver separation the weaker of the two.
+`PAPER_NUMBERS.md`, The ordering counted over the variants, holds the counts
+and the paired contrasts. `PAPER_NUMBERS.md`, Transmission,
 Elasticities and Robustness; Figures 2B, 2C and 4.
 
 ## In people: size is systemic, shape is positional
@@ -124,16 +124,13 @@ enlarge what it has: after losing 30 % of its units it ends with 0.70 of the
 count and about 1.4 times the mass per unit, its function restored. The
 constraint also decides how repeatable that landing is, and the way it does
 says what the constraint is. Across 24 seeds, holding the inflow contracts the
-spread of final mass about 3.7 fold in both organs, from 8.5 % of the mean to
-2.3 % in the liver and from 6.1 % to 1.7 % in the kidney, with bootstrap 95 %
-intervals of 2.5 to 5.6 and 2.6 to 5.2. It leaves the spread of unit count
-untouched: 7.2 % against 7.9 % in the liver, 0.4 % against 0.4 % in the
-kidney. A fixed budget fixes the mass and says nothing about how an organ
-divides it. The kidney's count is already pinned by its own biology, so its
-size per nephron is forced as well, 6.0 % down to 1.6 %; the liver's count is
-free to absorb the variation, so its size per unit stays loose, 9.6 % against
-7.2 %. The property that separates the two organs in growth separates how
-they recover. That is
+spread of final mass several fold in both organs and leaves the spread of unit
+count untouched. A fixed budget fixes the mass and says nothing about how an
+organ divides it. The kidney's count is already pinned by its own biology, so
+its size per nephron is forced with the mass; the liver's count is free to
+absorb the variation, so its size per unit stays as loose as before. The
+property that separates the two organs in growth separates how they recover.
+`PAPER_NUMBERS.md`, Spread across seeds. That is
 compensatory renal hypertrophy as it is described after a nephrectomy, where
 no new nephrons form, the remaining ones enlarge and function is maintained.
 The liver, whose competent compartment renews itself, has both routes open.

@@ -126,8 +126,12 @@ for j, v in enumerate(order):
     ax[2].errorbar(d, j, xerr=se, fmt="o", ms=3.5, color=K["ink"], lw=0.8, capsize=0)
     ax[2].text(1.03, j, f"z = {d / se:.1f}", va="center", fontsize=F.SZ["small"] - 0.5,
                transform=ax[2].get_yaxis_transform())
-    rrow.append([v, Pn["eps_pool"], Pn["eps_se"], L["eps_pool"], L["eps_se"],
-             d, se, d / se, c["n"] if c else ""])
+    row = [v, Pn["eps_pool"], Pn["eps_se"], L["eps_pool"], L["eps_se"],
+           d, se, d / se, c["n"] if c else ""]
+    for a, b in (("kidney", "liver"), ("pancreas", "kidney")):
+        e = Rb[v].get(f"{a}_minus_{b}")
+        row += [e["mean"], e["se"], e["z"]] if e else ["", "", ""]
+    rrow.append(row)
 ax[2].axvline(0, color=K["grey"], lw=0.6, ls=(0, (2, 2)))
 ax[2].set_yticks(range(len(order))); ax[2].set_yticklabels(labels, fontsize=F.SZ["small"])
 ax[2].invert_yaxis(); ax[2].set_xlim(-0.5, 2.1)
@@ -139,5 +143,7 @@ with open(SD / "Fig5_closure_shares.csv", "w", newline="") as f:
     wr = csv.writer(f); wr.writerow(["regime", "seed", "spent", "held_by_supply", "held_by_room", "active"]); wr.writerows(crow)
 with open(SD / "Fig5_robustness_contrast.csv", "w", newline="") as f:
     wr = csv.writer(f); wr.writerow(["variant", "eps_pancreas", "se_pancreas", "eps_liver", "se_liver",
-                                     "paired_difference", "paired_se", "z", "n_seeds"]); wr.writerows(rrow)
+                                     "paired_difference", "paired_se", "z", "n_seeds",
+                                     "kidney_minus_liver", "se", "z",
+                                     "pancreas_minus_kidney", "se", "z"]); wr.writerows(rrow)
 print("wrote Fig1_closed and Fig5_pool")

@@ -118,6 +118,28 @@ if (RES / "robustness.json").exists():
            "z, kidney minus liver", "z, pancreas minus kidney",
            "z, pancreas minus liver"], rows)
 
+    # The counts the prose refers to, generated rather than written by hand:
+    # a rerun on another machine moves the digits, and these have to move with
+    # them. The sign test is over the variants, two-sided.
+    from math import comb
+    w("## The ordering, counted over the variants\n")
+    nv = len(Rb)
+    rows = [["liver below kidney below pancreas",
+             f"{sum(x['liver']['eps_pool'] < x['kidney']['eps_pool'] < x['pancreas']['eps_pool'] for x in Rb.values())} of {nv}",
+             "-", "-", "-"]]
+    for a, b in (("kidney", "liver"), ("pancreas", "kidney"), ("pancreas", "liver")):
+        c = [x.get(f"{a}_minus_{b}") for x in Rb.values()]
+        if not all(c):
+            continue
+        pos = sum(d["mean"] > 0 for d in c)
+        P = 2 * sum(comb(nv, k) for k in range(pos, nv + 1)) / 2 ** nv
+        ref = Rb.get("reference", {}).get(f"{a}_minus_{b}")
+        rows.append([f"{a} above {b}", f"{pos} of {nv}", f"{min(P, 1.0):.4f}",
+                     f"{sum(d['z'] >= 2 for d in c)} of {nv}",
+                     f"{ref['mean']:+.2f} ± {ref['se']:.2f}, z = {ref['z']:.1f}" if ref else "-"])
+    table(["statement", "variants holding it", "sign test P", "of those, z at least 2",
+           "at the reference setting"], rows)
+
 if (RES / "interventions.json").exists():
     I = json.load(open(RES / "interventions.json"))
     w("## Interventions on the closed state (day 140, then 40 days; six seeds)\n")
@@ -159,6 +181,28 @@ if (RES / "injury.json").exists():
             if v:
                 rows.append([reg, cond] + [seedcell(v[q]) for q in names])
     table(["regime", "condition"] + list(names.values()), rows)
+
+    # How wide the draw is, and how much the budget narrows it. These are the
+    # numbers the prose refers to, generated for the same reason as the counts
+    # above: a rerun moves them.
+    def cv(d):
+        v = np.asarray(d["seeds"], float)
+        return 100.0 * v.std(ddof=1) / v.mean() if v.mean() else float("nan")
+
+    w("## Spread across seeds, and what a fixed inflow does to it "
+      "(coefficient of variation, %, over 24 seeds)\n")
+    rows = []
+    for reg in ("liver", "kidney"):
+        free, held = Ij.get(f"{reg}_reactivated"), Ij.get(f"{reg}_reactivated, fixed inflow")
+        if not (free and held):
+            continue
+        for key, lab in (("mass", "mass"), ("units", "unit count"),
+                         ("mass_per_unit", "mass per unit")):
+            a, b = cv(free[key]), cv(held[key])
+            rows.append([reg, lab, f"{a:.1f}", f"{b:.1f}",
+                         f"{a / b:.1f}" if b else "-"])
+    table(["regime", "readout", "growth reactivated, inlet pressure fixed",
+           "and inflow held", "contraction"], rows)
 
     comp = {k: v for k, v in Ij.items() if "_compensation_" in k}
     if comp:

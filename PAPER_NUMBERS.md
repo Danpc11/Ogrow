@@ -1,6 +1,6 @@
 # Numbers the paper uses
 
-Model version 4.15.0, commit 79d01bd, generated 2026-11-22 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.16.0, commit d3f3476 (with uncommitted changes), generated 2026-11-22 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b024.
 
@@ -88,6 +88,15 @@ Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b0
 | competing_fates | 1.00 | 0.75 | 0.78 / 0.21 | +0.07 ± 0.04 | +0.36 ± 0.03 | +0.71 ± 0.05 | 5.7 | 5.9 | 10.5 |
 | no_self_renewal | 1.00 | 0.75 | 0.70 / 0.19 | +0.24 ± 0.04 | +0.37 ± 0.03 | +0.71 ± 0.05 | 2.9 | 5.7 | 7.6 |
 
+## The ordering, counted over the variants
+
+| statement | variants holding it | sign test P | of those, z at least 2 | at the reference setting |
+|---|---|---|---|---|
+| liver below kidney below pancreas | 13 of 13 | - | - | - |
+| kidney above liver | 13 of 13 | 0.0002 | 12 of 13 | +0.31 ± 0.08, z = 4.1 |
+| pancreas above kidney | 13 of 13 | 0.0002 | 12 of 13 | +0.34 ± 0.06, z = 5.7 |
+| pancreas above liver | 13 of 13 | 0.0002 | 12 of 13 | +0.65 ± 0.08, z = 7.8 |
+
 ## Interventions on the closed state (day 140, then 40 days; six seeds)
 
 | regime | intervention | pool on day 140 | share of that pool released | units added, relative to day 140 |
@@ -127,6 +136,17 @@ Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b0
 | kidney | as grown | 0.70 [0.69, 0.70] | 0.71 [0.60, 0.79] | 1.02 [0.85, 1.13] | 0.73 [0.56, 0.82] |
 | kidney | reactivated | 0.70 [0.69, 0.70] | 1.85 [1.53, 2.21] | 2.64 [2.18, 3.18] | 2.02 [1.66, 2.41] |
 | kidney | reactivated, fixed inflow | 0.70 [0.69, 0.70] | 0.97 [0.94, 0.99] | 1.39 [1.35, 1.43] | 1.05 [1.01, 1.09] |
+
+## Spread across seeds, and what a fixed inflow does to it (coefficient of variation, %, over 24 seeds)
+
+| regime | readout | growth reactivated, inlet pressure fixed | and inflow held | contraction |
+|---|---|---|---|---|
+| liver | mass | 6.3 | 2.1 | 3.0 |
+| liver | unit count | 5.9 | 7.0 | 0.8 |
+| liver | mass per unit | 6.1 | 6.7 | 0.9 |
+| kidney | mass | 8.2 | 1.3 | 6.4 |
+| kidney | unit count | 0.5 | 0.5 | 1.0 |
+| kidney | mass per unit | 8.3 | 1.3 | 6.1 |
 
 ## How far a kidney compensates, growth reactivated and inflow fixed
 

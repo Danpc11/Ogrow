@@ -183,8 +183,11 @@ bits are compared. Run on two machines with three seeds, the kidney's mass per
 nephron after a 30 % loss came out 1.36 and 1.39. Both lie inside the range
 that 24 seeds span on one machine, 1.35 to 1.42, so what looked like a
 platform artefact was the spread of the draw. The tables report the range
-beside the mean and the per-seed values are kept in the source data, and the
-prose quotes only the digits that the spread supports.
+beside the mean and the per-seed values are kept in the source data. Summary
+statistics that a rerun can move, the coefficients of variation, the paired
+contrasts and the counts of variants that clear a threshold, are generated
+into `PAPER_NUMBERS.md` rather than written into the prose, so that the
+manuscript and the machine that regenerated it cannot disagree.
 
 **What the injury experiment is and is not.** Growing an organ to closure,
 destroying a part of it and running on measures recovery rather than further

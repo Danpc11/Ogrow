@@ -733,11 +733,11 @@ tips, which is why it swings from −0.35 to −2.91 across the settings while t
 pool elasticity barely moves.
 
 Because every regime runs the same seeds, the differences between them are
-paired and are reported that way. At the reference setting the kidney exceeds
-the liver by +0.20 ± 0.06 (z = 3.4), the pancreas exceeds the kidney by
-+0.41 ± 0.06 (z = 6.6), and the pancreas exceeds the liver by +0.61 ± 0.07
-(z = 8.6), all on 24 paired replicates. The ordering is of three organs, not
-two.
+paired and are reported that way, for all three pairs, in `PAPER_NUMBERS.md`
+under The ordering counted over the variants. At the reference setting each
+difference is positive with z well above 2 on 24 paired replicates, the
+kidney-liver pair being the smallest of the three. The ordering is of three
+organs, not two.
 
 **One mechanism sets the setpoint elasticity wherever pool is left over.**
 Lowering the setpoint by $\mathrm{d}q$ activates the tips whose supply sits
@@ -905,13 +905,13 @@ $1 - e^{-(\rho+\delta)\Delta t}$ split in proportion to the rates (liver
 paired replicates the full ordering, liver below kidney below pancreas, holds
 in all thirteen variants of the reference version. Each of the three pairwise
 differences is positive in every variant, a sign test at P = 0.0002. The
-pancreas exceeds the liver with z of 2 or more in twelve of the thirteen, the
-exception being the variant without load-driven sprouting, where the liver's
-elasticity has a standard error of 0.45 and the contrast is not resolved in
-either direction; that variant is uninformative rather than contrary. The
-kidney exceeds the liver with z of 2 or more in ten of the thirteen, so that
-separation is real but weaker, which is what a regime intermediate between
-the two should look like.
+variant without load-driven sprouting is the one that resolves no pair: the
+liver's elasticity there has a standard error near half its own range, so that
+variant is uninformative rather than contrary. Elsewhere the pancreas-liver
+difference clears z = 2 throughout, and the kidney-liver difference, the
+smallest of the three, clears it in all but a few, which is what a regime
+intermediate between the two should look like. The counts are generated with
+the tables, since a rerun moves which variants sit near the threshold.
 
 The shares of the pool held by supply and by room are a description of the
 final state. Whether each constraint holds growth is a causal question, asked
