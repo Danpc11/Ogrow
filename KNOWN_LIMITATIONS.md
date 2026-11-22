@@ -62,8 +62,8 @@ regime uses a pool much larger than the units it makes (2,600 progenitors for
 about 200 units), so that its pool does not bind. The one comparison with data
 is the mouse liver contraction, which the model exceeds. Results come from one
 domain scale (0.6); the transmission uses 24 replicates per condition with
-bootstrap intervals, the elasticities six paired replicates at five settings
-per regime, and the robustness checks six seeds in each of twelve variants.
+bootstrap intervals, the elasticities 24 paired replicates at five settings
+per regime, and the robustness checks 24 seeds in each of thirteen variants.
 
 **Three errors in earlier versions, now fixed, that invalidated results.**
 Nucleation truncated its rate to an integer each day, which turned the law
@@ -149,8 +149,8 @@ pancreas's consumable (renewal = 0). This replaces a pool thirteen times
 larger than the units it makes with a mechanism, and it reconciles the liver
 regime with fetal transcriptomes, in which the hepatoblast programme is fully
 converted before birth while lobules keep forming. It does not change the
-results: the liver's elasticity to the initial pool is 0.17 with and without
-it. The difference between organs therefore rests on the size of the pool
+results: the liver's elasticity to the initial pool is 0.13 with it and 0.22
+without, both far below the pancreas at 0.74. The difference between organs therefore rests on the size of the pool
 relative to what supply and room allow, not on self-renewal, and the initial
 pool cannot be made small, because a tip makes at most as many units per step
 as it holds progenitors.
@@ -185,16 +185,6 @@ that 24 seeds span on one machine, 1.35 to 1.42, so what looked like a
 platform artefact was the spread of the draw. The tables report the range
 beside the mean and the per-seed values are kept in the source data, and the
 prose quotes only the digits that the spread supports.
-
-**The difference between two regimes is tested as if the two were
-independent.** The elasticity of the final unit count to the progenitor pool
-is measured per seed, with the same seed list for every regime, so the
-pancreas-liver difference is a paired design. Its z is nonetheless formed from
-the two standard errors combined in quadrature rather than from the paired
-differences. Where the two are positively correlated this overstates the
-standard error, so the reported z is conservative and the ordering it supports
-is if anything stronger than stated. Reporting the paired difference would be
-both more precise and more powerful.
 
 **What the injury experiment is and is not.** Growing an organ to closure,
 destroying a part of it and running on measures recovery rather than further

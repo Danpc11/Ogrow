@@ -705,26 +705,39 @@ its interval reached zero, which looked like filtering and was noise.
 A comparison of spreads between cohorts is dominated, for large input spreads,
 by the individuals at the tail. The local measure is the elasticity of the
 final count, $\varepsilon_x = \partial \ln N / \partial \ln x$, estimated with
-the same seed at $x e^{\pm 0.3}$ (`scripts/19_elasticity.py`, six paired
-replicates, mean ± s.e.).
+the same seed at $x e^{\pm 0.3}$ (`scripts/19_elasticity.py`, 24 paired
+replicates per cell, mean ± s.e.).
 
 | Regime | Setting | $\varepsilon_{P_0}$ | $\varepsilon_{q_{\text{set}}}$ |
 |---|---|---|---|
-| Liver | reference | +0.38 ± 0.13 | −1.19 ± 0.08 |
-| Kidney | $q_{\text{set}}$ 0.5 / 0.6 / 0.7 | +0.59 / +0.55 / +0.51 | −0.40 / −0.91 / −2.95 |
-| Kidney | $\nu$ 4 / 16 | +0.62 / +0.53 | −1.20 / −0.75 |
-| Pancreas | $q_{\text{set}}$ 0.5 / 0.6 / 0.7 | +0.92 / +0.86 / +0.87 | −0.13 / −0.36 / −2.55 |
-| Pancreas | $\nu$ 4 / 16 | +0.68 / +0.83 | −0.53 / −0.29 |
+| Liver | reference | +0.13 ± 0.04 | −1.60 ± 0.25 |
+| Liver | $\nu$ 4 | +0.13 ± 0.04 | −1.52 ± 0.23 |
+| Liver | $\nu$ 16 | +0.11 ± 0.03 | −1.64 ± 0.25 |
+| Liver | $q_{\text{set}}$ 0.5 | +0.03 ± 0.05 | −1.12 ± 0.05 |
+| Liver | $q_{\text{set}}$ 0.7 | +0.03 ± 0.18 | −2.91 ± 0.05 |
+| Kidney | reference | +0.33 ± 0.03 | −1.62 ± 0.06 |
+| Kidney | $\nu$ 4 | +0.34 ± 0.04 | −1.58 ± 0.05 |
+| Kidney | $\nu$ 16 | +0.37 ± 0.03 | −1.61 ± 0.06 |
+| Kidney | $q_{\text{set}}$ 0.5 | +0.38 ± 0.03 | −0.57 ± 0.03 |
+| Kidney | $q_{\text{set}}$ 0.7 | +0.35 ± 0.04 | −2.42 ± 0.04 |
+| Pancreas | reference | +0.74 ± 0.05 | −0.76 ± 0.06 |
+| Pancreas | $\nu$ 4 | +0.77 ± 0.05 | −1.13 ± 0.09 |
+| Pancreas | $\nu$ 16 | +0.73 ± 0.04 | −0.66 ± 0.08 |
+| Pancreas | $q_{\text{set}}$ 0.5 | +0.82 ± 0.05 | −0.35 ± 0.04 |
+| Pancreas | $q_{\text{set}}$ 0.7 | +0.70 ± 0.05 | −2.50 ± 0.06 |
 
 The pool elasticity is stable within a regime and rises from the liver to the
-budget. The setpoint elasticity is not a property of the regime: it depends on
-where the setpoint sits relative to the supply at the tips.
+budget, at every setting. The setpoint elasticity is not a property of the
+regime: it depends on where the setpoint sits relative to the supply at the
+tips, which is why it swings from −0.35 to −2.91 across the settings while the
+pool elasticity barely moves.
 
-The liver was then measured at the same five settings (six paired replicates
-each): $\varepsilon_{P_0}$ = +0.38, +0.39, +0.35, +0.32, +0.36 at reference,
-$\nu$ 4, $\nu$ 16, $q_{\text{set}}$ 0.5 and 0.7, and $\varepsilon_{q_{\text{set}}}$ =
-−1.19, −1.42, −0.94, −0.41, −3.03. At every setting the pool elasticity is
-ordered liver < kidney < budget.
+Because every regime runs the same seeds, the differences between them are
+paired and are reported that way. At the reference setting the kidney exceeds
+the liver by +0.20 ± 0.06 (z = 3.4), the pancreas exceeds the kidney by
++0.41 ± 0.06 (z = 6.6), and the pancreas exceeds the liver by +0.61 ± 0.07
+(z = 8.6), all on 24 paired replicates. The ordering is of three organs, not
+two.
 
 **One mechanism sets the setpoint elasticity wherever pool is left over.**
 Lowering the setpoint by $\mathrm{d}q$ activates the tips whose supply sits
@@ -865,9 +878,9 @@ its exhaustion. The pancreatic multipotent pool over E12.5 to E15.5
 a pool being spent.
 
 The correction leaves the results in place. With renewal = 1 the liver makes
-218 units against 202, closes by supply (0.73) and room (0.20) as before, and
-its elasticity to the initial pool is 0.17 either way, against 0.75 and 0.66
-for the pancreas. So the contrast between organs does not come from renewal;
+212 units, the same as without it, closes by supply (0.80) and room (0.20) as
+before, and its elasticity to the initial pool is 0.13 with renewal against
+0.22 without, both far below the pancreas at 0.74 either way. So the contrast between organs does not come from renewal;
 it comes from the pool relative to what supply and room allow. What renewal
 supplies is the mechanism for why the liver's pool is not limiting, in place
 of a large number. Treating the liver as a consumable pool is kept as the
@@ -877,23 +890,28 @@ Two things the correction does not do. The liver's initial pool is not freed
 to be small: because a tip can make at most as many units per step as it holds
 progenitors, holding the product of rate and pool fixed while shrinking the
 pool still lowers the final count (203 units at a pool of 2600, 97 at 130). And
-the elasticity of 0.17 is a rate effect, not a budget effect: a larger pool
+the elasticity of 0.13 is a rate effect, not a budget effect: a larger pool
 makes units faster and overshoots slightly before supply closes the organ.
 
 ### Closure is stable, and its reversibility differs between regimes
 
 Two more variants complete the test of the progenitor process: four steps a
 day with binomial nucleation (with one, two and four steps the pool
-elasticities stay within noise: liver +0.09, +0.22, +0.17; pancreas +0.80,
-+0.71, +0.85), and division and loss as competing fates, one fate per
+elasticities stay within noise: liver +0.15, +0.11, +0.18; pancreas +0.80,
++0.74, +0.89), and division and loss as competing fates, one fate per
 progenitor per step drawn from a multinomial with total probability
 $1 - e^{-(\rho+\delta)\Delta t}$ split in proportion to the rates (liver
-+0.26, pancreas +0.61, against +0.22 and +0.61 with independent draws). The
-pancreas-liver contrast holds in twelve of the thirteen variants of the
-reference version, with z between 2.5 and 7.9. The exception is the variant
-without load-driven sprouting, where the liver's elasticity has a standard
-error of 1.12 and the contrast is not resolved in either direction; that
-variant is uninformative rather than contrary.
++0.06, pancreas +0.74, against +0.15 and +0.80 with independent draws). On 24
+paired replicates the full ordering, liver below kidney below pancreas, holds
+in all thirteen variants of the reference version. Each of the three pairwise
+differences is positive in every variant, a sign test at P = 0.0002. The
+pancreas exceeds the liver with z of 2 or more in twelve of the thirteen, the
+exception being the variant without load-driven sprouting, where the liver's
+elasticity has a standard error of 0.45 and the contrast is not resolved in
+either direction; that variant is uninformative rather than contrary. The
+kidney exceeds the liver with z of 2 or more in ten of the thirteen, so that
+separation is real but weaker, which is what a regime intermediate between
+the two should look like.
 
 The shares of the pool held by supply and by room are a description of the
 final state. Whether each constraint holds growth is a causal question, asked

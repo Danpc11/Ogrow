@@ -65,7 +65,7 @@ paper:
 	OG_NREP=24 $(PY) scripts/15_transmission.py
 	$(PY) scripts/17_paper_runs.py
 	for r in liver kidney pancreas; do for s in ref nu_lo nu_hi q_lo q_hi; do \
-	  $(PY) scripts/19_elasticity.py $$r $$s 0 6; done; done
+	  $(PY) scripts/19_elasticity.py $$r $$s 0 24; done; done
 	$(PY) scripts/19_elasticity.py
 	$(PY) scripts/21_robustness.py reference root_surface root_random no_deficit no_load no_crowding no_mesenchyme territory binomial binomial_half_day binomial_quarter_day competing_fates no_self_renewal
 	$(PY) scripts/21_robustness.py

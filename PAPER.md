@@ -1,7 +1,7 @@
 # The paper: framework, claims and evidence
 
 Target: *Frontiers in Cell and Developmental Biology*, Hypothesis and Theory.
-Reference model: version 4.14.0 (`src/organgrow/closed.py`). Every number from
+Reference model: version 4.15.0 (`src/organgrow/closed.py`). Every number from
 the model that the paper uses is in `PAPER_NUMBERS.md`, written by
 `make paper` with the version and commit that produced it; this file does not
 copy model numbers by hand. Numbers given here are either data (the human
@@ -61,8 +61,12 @@ the liver, in every variant where it is measurable.
 This is the pattern Stanger, Tanaka and Melton found in mice (*Nature* 2007):
 halving the pancreatic progenitors halved the pancreas, which never
 compensated, while the liver compensated fully. The model was not fitted to
-that experiment. It does not separate the kidney from the liver robustly, so
-it orders two organs and not three. `PAPER_NUMBERS.md`, Transmission,
+that experiment. The ordering is of three organs: across thirteen variants of
+the auxiliary rules the kidney's elasticity exceeds the liver's in every one
+and the pancreas exceeds the kidney in every one, each a sign test at
+P = 0.0002, with the kidney-liver separation the weaker of the two, reaching
+z of 2 or more in ten of the thirteen against twelve for pancreas against
+liver. `PAPER_NUMBERS.md`, Transmission,
 Elasticities and Robustness; Figures 2B, 2C and 4.
 
 ## In people: size is systemic, shape is positional
@@ -236,7 +240,7 @@ smaller step was not tested. The two interventions are not matched in
 strength, so their effects show that both constraints hold the liver, not
 which holds it more. The critical radius is the floor of calibre
 adaptation, so simulated trees cannot show calibres below it. The pool elasticity of the liver is not
-measurable without load-driven sprouting (s.e. 1.12), so one of the thirteen
+measurable without load-driven sprouting (s.e. 0.45), so one of the thirteen
 robustness variants neither supports nor contradicts the contrast. The room left at a tip is
 estimated from trial placements in the final state, which measures residual
 capacity, not whether growth could resume later. The

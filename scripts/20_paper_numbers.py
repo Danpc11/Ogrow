@@ -100,17 +100,23 @@ if (RES / "paper_numbers.json").exists():
 
 if (RES / "robustness.json").exists():
     Rb = json.load(open(RES / "robustness.json"))
-    w("## Robustness to the auxiliary rules (six seeds per cell)\n")
+    w("## Robustness to the auxiliary rules (24 seeds per cell; the contrast is "
+      "paired, seed by seed)\n")
     rows = []
     for v, x in Rb.items():
         L, K_, Pn_ = x["liver"], x["kidney"], x["pancreas"]
-        d = Pn_["eps_pool"] - L["eps_pool"]; s = float(np.hypot(Pn_["eps_se"], L["eps_se"]))
+        zz = []
+        for a, b in (("kidney", "liver"), ("pancreas", "kidney"), ("pancreas", "liver")):
+            c = x.get(f"{a}_minus_{b}")
+            zz.append(f"{c['z']:.1f}" if c else "-")
         rows.append([v, f"{K_['spent']:.2f}", f"{Pn_['spent']:.2f}",
                      f"{L['supply_held']:.2f} / {L['space_held']:.2f}",
                      f"{L['eps_pool']:+.2f} ± {L['eps_se']:.2f}", f"{K_['eps_pool']:+.2f} ± {K_['eps_se']:.2f}",
-                     f"{Pn_['eps_pool']:+.2f} ± {Pn_['eps_se']:.2f}", f"{d / s:.1f}"])
+                     f"{Pn_['eps_pool']:+.2f} ± {Pn_['eps_se']:.2f}"] + zz)
     table(["variant", "kidney pool spent", "pancreas pool spent", "liver held by supply / room",
-           "liver pool elasticity", "kidney", "pancreas", "z, pancreas minus liver"], rows)
+           "liver pool elasticity", "kidney", "pancreas",
+           "z, kidney minus liver", "z, pancreas minus kidney",
+           "z, pancreas minus liver"], rows)
 
 if (RES / "interventions.json").exists():
     I = json.load(open(RES / "interventions.json"))

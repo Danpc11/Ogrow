@@ -19,6 +19,8 @@ Usage:
     python scripts/21_robustness.py                         report
 """
 import json
+import os
+from concurrent.futures import ProcessPoolExecutor
 import sys
 
 import numpy as np
@@ -29,7 +31,7 @@ from organgrow.closed import grow
 
 OUT = ROOT / "results" / "robustness"
 OUT.mkdir(parents=True, exist_ok=True)
-S, DAYS, NU, SEEDS, H = 0.6, 140, 8.0, range(300, 306), 0.3
+S, DAYS, NU, SEEDS, H = 0.6, 140, 8.0, tuple(range(300, 324)), 0.3
 REG = {"liver": dict(P0=2600.0, rho=0.10, delta=0.10, q_set=0.6, renewal=1.0),
        "kidney": dict(P0=300.0, rho=0.00, delta=0.05, q_set=0.6, renewal=0.0),
        "pancreas": dict(P0=60.0, rho=0.00, delta=0.00, q_set=0.6, renewal=0.0)}
@@ -65,7 +67,29 @@ def run(variant, reg, seed, sign):
     return r
 
 
+def _warm(a):
+    """Populate the cache for one run; each file is written by one worker only."""
+    run(*a)
+
+
+def warm(variant):
+    """Run everything this variant needs, in parallel, before it is summarised."""
+    grid = [(variant, reg, s, g) for reg in REG for s in SEEDS for g in "0+-"
+            if not (OUT / f"{variant}_{reg}_s{s}_{g}.json").exists()]
+    if not grid:
+        return
+    n = max(1, min(int(os.environ.get("OGROW_JOBS", 0)) or (os.cpu_count() or 1), len(grid)))
+    if n > 1:
+        with ProcessPoolExecutor(max_workers=n) as pool:
+            for _ in pool.map(_warm, grid):
+                pass
+    else:
+        for g in grid:
+            _warm(g)
+
+
 def summary(variant):
+    warm(variant)
     out = {}
     for reg in REG:
         base = [run(variant, reg, s, "0") for s in SEEDS]
@@ -76,6 +100,17 @@ def summary(variant):
                            for k in ("spent", "supply_held", "space_held", "active", "territory_diff")},
                         eps_pool=float(np.mean(eps)), eps_se=float(np.std(eps, ddof=1) / np.sqrt(len(eps))),
                         eps_each=[float(e) for e in eps])
+    # Each regime runs the same seeds, so a difference between two of them is
+    # paired. Combining the two standard errors in quadrature would throw that
+    # away and overstate the error wherever the two move together. All three
+    # pairs are reported, since the claim is an ordering of three organs.
+    for a, b in (("pancreas", "liver"), ("kidney", "liver"), ("pancreas", "kidney")):
+        d = np.array(out[a]["eps_each"]) - np.array(out[b]["eps_each"])
+        se = float(np.std(d, ddof=1) / np.sqrt(len(d)))
+        out[f"{a}_minus_{b}"] = dict(mean=float(d.mean()), se=se, n=int(len(d)),
+                                     z=float(d.mean() / se) if se > 0 else float("nan"),
+                                     each=[float(x) for x in d])
+    out["contrast"] = out["pancreas_minus_liver"]     # the headline pair
     return out
 
 

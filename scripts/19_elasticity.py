@@ -13,6 +13,8 @@ Usage:
     python scripts/19_elasticity.py                         report
 """
 import json
+import os
+from concurrent.futures import ProcessPoolExecutor
 import sys
 
 import numpy as np
@@ -50,6 +52,11 @@ def run(reg, setting, k, inp, sign):
              q_set=p["q_set"])
 
 
+def _warm(a):
+    """Populate the cache for one run; each file is written by one worker only."""
+    run(*a)
+
+
 def elasticities(reg, setting):
     out = {}
     for inp in ("P0", "q_set"):
@@ -70,10 +77,17 @@ def elasticities(reg, setting):
 if __name__ == "__main__":
     if len(sys.argv) == 5:
         reg, setting, k0, k1 = sys.argv[1], sys.argv[2], int(sys.argv[3]), int(sys.argv[4])
-        for k in range(k0, k1):
-            for inp in ("P0", "q_set"):
-                for sign in (+1, -1):
-                    run(reg, setting, k, inp, sign)
+        grid = [(reg, setting, k, inp, sign) for k in range(k0, k1)
+                for inp in ("P0", "q_set") for sign in (+1, -1)]
+        n = max(1, min(int(os.environ.get("OGROW_JOBS", 0)) or (os.cpu_count() or 1),
+                       len(grid)))
+        if n > 1:
+            with ProcessPoolExecutor(max_workers=n) as pool:
+                for _ in pool.map(_warm, grid):
+                    pass
+        else:
+            for g in grid:
+                _warm(g)
         print(f"{reg} {setting}: replicates {k0} to {k1 - 1} done")
         raise SystemExit(0)
     res = {}

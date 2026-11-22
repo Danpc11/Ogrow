@@ -32,14 +32,22 @@ kept for the record, are not the paper's, and should not be used to check it.
 When the model's version changes, run `make paper` before committing: the
 regenerated `PAPER_NUMBERS.md` belongs in the same commit as the change, so
 that no commit carries numbers from two versions and the check stays green.
-    make paper     # the manuscript: about half an hour on one core
+    make paper     # the manuscript
+
+The three heaviest steps, the elasticities, the robustness variants and the
+injury experiment, run their replicates in parallel and use every core by
+default. Set `OGROW_JOBS` to cap them, for instance `OGROW_JOBS=4 make paper`.
+Each replicate is cached on disk, so an interrupted run resumes where it
+stopped and only `make clean` forces the work again.
 
 No install step is needed: `make` puts `src` on `PYTHONPATH` and picks up
 `python3` when `python` is not on the path. To force an interpreter, use
 `make all PY=/path/to/python`. `pip install -e .` also works if you prefer it.
 
-Python 3.10+, Linux or macOS. A full run takes roughly 1.5 h on one core; the vascular sweep in
-`scripts/11_vascular_disorder.py` is the longest step.
+Python 3.10+, Linux or macOS. A full run takes a few hours on one core and
+well under that on several; the vascular sweep in
+`scripts/11_vascular_disorder.py` is the longest step that does not
+parallelise.
 `make all` runs the analyses, checks every number the figures state against
 the pipeline, and writes `figures/out/Fig1.pdf` to `Fig6.pdf`.
 
