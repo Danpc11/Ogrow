@@ -138,15 +138,19 @@ if (RES / "injury.json").exists():
     Ij = json.load(open(RES / "injury.json"))
     names = {"units": "units", "mass": "mass", "mass_per_unit": "mass per unit",
              "perfused": "perfused mass"}
+
+    def seedcell(d):
+        """Mean over the seeds, and the seeds, since three of them is few."""
+        return f"{d['mean']:.2f} ({', '.join(f'{x:.2f}' for x in d['seeds'])})"
     w("## Injury after closure (day 140, 30 % of the units removed by a plane cut, "
-      "read on day 220; "
-      "three seeds; every entry is day 220 over the day before the injury)\n")
+      "read on day 220; every entry is day 220 over the day before the "
+      "injury, as the mean over three seeds with the seeds in brackets)\n")
     rows = []
     for reg in ("liver", "kidney"):
         for cond in ("as grown", "reactivated", "reactivated, fixed inflow"):
             v = Ij.get(f"{reg}_{cond}")
             if v:
-                rows.append([reg, cond] + [f"{v[q]:.2f}" for q in names])
+                rows.append([reg, cond] + [seedcell(v[q]) for q in names])
     table(["regime", "condition"] + list(names.values()), rows)
 
     comp = {k: v for k, v in Ij.items() if "_compensation_" in k}
@@ -156,9 +160,9 @@ if (RES / "injury.json").exists():
         for k in sorted(comp):
             reg, frac = k.split("_compensation_")
             v = comp[k]
-            rows.append([reg, f"{100 * float(frac):.0f} %", f"{v['units']:.2f}",
-                         f"{v['mass_per_unit']:.2f}", f"{v['full']:.2f}",
-                         f"{v['mass']:.2f}"])
+            rows.append([reg, f"{100 * float(frac):.0f} %", seedcell(v["units"]),
+                         seedcell(v["mass_per_unit"]), f"{v['full']:.2f}",
+                         seedcell(v["mass"])])
         table(["regime", "lost", "units kept", "mass per unit",
                "full compensation would need", "mass"], rows)
 

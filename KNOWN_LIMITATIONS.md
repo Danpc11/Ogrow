@@ -167,13 +167,25 @@ All regimes in this work are reported at one domain scale.
 
 **How far compensation goes is not right.** Given an injury that restores
 the ability of units to enlarge and an inflow held at its pre-injury value,
-the model makes up all but a twentieth of the loss: a kidney that loses 30 %
-of its units ends with 1.36 times the mass per unit, against the 1.43 of full
-compensation, and 1.89 against 2.00 after losing half. A real kidney that
+the model comes close to making up the whole loss: a kidney that loses 30 %
+of its units ends with about 1.4 times the mass per unit, against the 1.43 of
+full compensation, and about 1.9 against 2.00 after losing half. A real kidney that
 loses half grows the remnant by about a half. Nothing in the model limits how
 large a unit may become. The vascular and combined injuries were examined only
 under the original condition, in which no organ recovers, and have not been
 rerun with reactivation and a fixed inflow.
+
+**The digits are not reproducible to two decimals across machines.** Every
+run is seeded, so one machine repeats a run exactly. The events are discrete
+and sit on floating-point comparisons, though, so the same seed on a different
+platform takes a different path once two quantities that differ in the last
+bits are compared. Running the injury experiment on two machines moved the
+kidney's mass per nephron after a 30 % loss from 1.36 to 1.39, which is the
+size of the spread across the three seeds themselves. Three seeds is few. The
+tables therefore report every seed beside the mean, and the prose quotes only
+the digits that the spread supports. Three is also too few to put a figure on
+the contraction of that spread under a fixed inflow, which is reported as the
+order of magnitude it is and not as a ratio.
 
 **The difference between two regimes is tested as if the two were
 independent.** The elasticity of the final unit count to the progenitor pool

@@ -64,9 +64,20 @@ def run(reg, kind, seed, cond="as grown", frac=FRAC):
 
 
 def levels(rows, key):
-    """Where a quantity ends, relative to the day before the injury."""
-    v = [r["series"][key][-1] / max(r["series"][key][CLOSE - 2], 1e-9) for r in rows]
-    return float(np.mean(v)), float(np.std(v, ddof=1) / np.sqrt(len(v)))
+    """Where a quantity ends in each seed, relative to the day before the injury.
+
+    The seeds are returned rather than summarised. Three of them is few enough
+    that a mean alone hides how wide the draw is, and the spread turns out to
+    be the same size as the difference between two machines running the same
+    seed, so a reader needs to see it to judge the digits.
+    """
+    return np.array([r["series"][key][-1] / max(r["series"][key][CLOSE - 2], 1e-9)
+                     for r in rows], float)
+
+
+def spread(v):
+    """Mean and per-seed values, for the table and for the record."""
+    return dict(mean=float(np.mean(v)), seeds=[float(x) for x in v])
 
 
 if __name__ == "__main__":
@@ -78,11 +89,13 @@ if __name__ == "__main__":
               f"{'perfused mass':>14}")
         for cond in CONDS:
             rows = [run(reg, "parenchyma", s, cond) for s in SEEDS]
-            n, _ = levels(rows, "N"); mm, _ = levels(rows, "mass")
-            pf, _ = levels(rows, "perfused")
-            per = mm / max(n, 1e-9)
-            print(f"{cond:>26} {n:>14.2f} {mm:>14.2f} {per:>14.2f} {pf:>14.2f}")
-            res[f"{reg}_{cond}"] = dict(units=n, mass=mm, mass_per_unit=per, perfused=pf)
+            n, mm = levels(rows, "N"), levels(rows, "mass")
+            pf = levels(rows, "perfused")
+            per = mm / np.maximum(n, 1e-9)      # per seed, not a ratio of means
+            print(f"{cond:>26} {n.mean():>14.2f} {mm.mean():>14.2f} "
+                  f"{per.mean():>14.2f} {pf.mean():>14.2f}")
+            res[f"{reg}_{cond}"] = dict(units=spread(n), mass=spread(mm),
+                                        mass_per_unit=spread(per), perfused=spread(pf))
     # how much of the loss the kidney makes up by enlarging what it keeps
     print("\n=== kidney, reactivated and inflow limited: compensation against loss ===")
     print(f"{'lost':>8} {'nephrons kept':>15} {'mass per nephron':>18} "
@@ -90,10 +103,12 @@ if __name__ == "__main__":
     for frac in (0.3, 0.5):
         rows = [run("kidney", "parenchyma", s, "reactivated, fixed inflow", frac)
                 for s in SEEDS]
-        n, _ = levels(rows, "N"); mm, _ = levels(rows, "mass")
-        print(f"{100*frac:>7.0f} % {n:>15.2f} {mm / max(n, 1e-9):>18.2f} "
-              f"{1/(1-frac):>19.2f} {mm:>8.2f}")
-        res[f"kidney_compensation_{frac}"] = dict(units=n, mass=mm,
-                                                  mass_per_unit=mm / max(n, 1e-9),
+        n, mm = levels(rows, "N"), levels(rows, "mass")
+        per = mm / np.maximum(n, 1e-9)
+        print(f"{100*frac:>7.0f} % {n.mean():>15.2f} {per.mean():>18.2f} "
+              f"{1/(1-frac):>19.2f} {mm.mean():>8.2f}   seeds "
+              f"{' '.join(f'{x:.2f}' for x in per)}")
+        res[f"kidney_compensation_{frac}"] = dict(units=spread(n), mass=spread(mm),
+                                                  mass_per_unit=spread(per),
                                                   full=1 / (1 - frac))
     json.dump(res, open(ROOT / "results" / "injury.json", "w"), indent=1)

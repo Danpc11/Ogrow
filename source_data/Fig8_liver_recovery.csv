@@ -5,9 +5,9 @@ liver,"reactivated, fixed inflow",units,0.9066361480154583
 liver,as grown,mass,0.8018523049464611
 liver,reactivated,mass,1.7959236476274605
 liver,"reactivated, fixed inflow",mass,1.0120444789351728
-liver,as grown,mass_per_unit,0.8525280267325329
-liver,reactivated,mass_per_unit,1.9077291503792397
-liver,"reactivated, fixed inflow",mass_per_unit,1.116263101962616
+liver,as grown,mass_per_unit,0.8525559906106306
+liver,reactivated,mass_per_unit,1.909063853823621
+liver,"reactivated, fixed inflow",mass_per_unit,1.116474799625596
 liver,as grown,perfused,0.8223380964489775
 liver,reactivated,perfused,1.9624815871306174
 liver,"reactivated, fixed inflow",perfused,1.0979944909308774

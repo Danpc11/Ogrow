@@ -54,7 +54,7 @@ I = json.load(open(RES / "injury.json"))
 rows_b = []
 for i, key in enumerate(("units", "mass", "mass_per_unit", "perfused")):
     for j, cond in enumerate(CONDS):
-        v = I[f"liver_{cond}"][key]
+        v = I[f"liver_{cond}"][key]["mean"]
         ax[1].bar(i + (j - 1) * 0.26, v, width=0.24,
                   color=[K["grey"], K["warm"], K["liver"]][j], lw=0)
         rows_b.append(["liver", cond, key, v])
@@ -68,8 +68,8 @@ ax[1].set_title("Liver, by condition", fontsize=7, color=K["liver"])
 rows_c = []
 for i, frac in enumerate((0.3, 0.5)):
     d = I[f"kidney_compensation_{frac}"]
-    for j, (lab, v) in enumerate((("nephrons kept", d["units"]),
-                                  ("mass per nephron", d["mass_per_unit"]),
+    for j, (lab, v) in enumerate((("nephrons kept", d["units"]["mean"]),
+                                  ("mass per nephron", d["mass_per_unit"]["mean"]),
                                   ("full compensation", d["full"]))):
         ax[2].bar(i + (j - 1) * 0.26, v, width=0.24,
                   color=[K["kidney"], K["warm"], K["grey"]][j], lw=0,

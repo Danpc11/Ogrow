@@ -952,20 +952,24 @@ perfused branch gets a lower ceiling and one on an occluded branch gets none.
 The delivery per unit mass falls as the organ grows. A unit grows while its
 own delivery per mass exceeds a threshold, which is a local rule, and the
 organ stops when its mass matches its blood supply, which is the consequence.
-The liver then restores its mass and stops at 1.00 of what it had, with the
-flow entering the organ held at its pre-injury value to machine precision.
+The liver then restores the mass it had and stops there, with the flow
+entering the organ held at its pre-injury value to machine precision.
 
 ### How an organ recovers follows from what it spent
 
 The kidney closed with its pool spent, so it cannot make nephrons. Given the
 two conditions it recovers almost entirely by enlarging what it kept: 0.70 of
-the count after losing 30 %, 1.36 times the mass per unit, and its function
-restored. That is compensatory renal hypertrophy as it is described. The
+the count after losing 30 %, about 1.4 times the mass per unit, and its
+function restored. Across the three seeds the mass per nephron under a held
+inflow spans 1.35 to 1.38, against 2.31 to 2.84 when growth restarts with the
+inlet pressure fixed: the constraint sets where compensation stops and also
+makes where it stops repeatable. That is compensatory renal hypertrophy as it
+is described. The
 liver, whose compartment renews itself, has both routes.
 
-Where the model is wrong is in how far it goes. It compensates to within a
-twentieth of the whole loss: 1.36 against the 1.43 that a 30 % loss requires,
-and 1.89 against 2.00 at 50 %. A kidney that loses half reaches about a half
+Where the model is wrong is in how far it goes. It comes close to making up
+the whole loss: about 1.4 against the 1.43 that a 30 % loss requires, and
+about 1.9 against 2.00 at 50 %. A kidney that loses half reaches about a half
 again in volume rather than doubling. Nothing in the model caps how large a
 unit may grow, and in a kidney that cap exists; passing it is hyperfiltration
 injury. The gap is specific and it names what the model lacks.

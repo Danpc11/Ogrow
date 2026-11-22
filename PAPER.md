@@ -1,7 +1,7 @@
 # The paper: framework, claims and evidence
 
 Target: *Frontiers in Cell and Developmental Biology*, Hypothesis and Theory.
-Reference model: version 4.12.0 (`src/organgrow/closed.py`). Every number from
+Reference model: version 4.13.0 (`src/organgrow/closed.py`). Every number from
 the model that the paper uses is in `PAPER_NUMBERS.md`, written by
 `make paper` with the version and commit that produced it; this file does not
 copy model numbers by hand. Numbers given here are either data (the human
@@ -117,14 +117,19 @@ from it. `PAPER_NUMBERS.md`, Injury; Figure 6.
 How an organ recovers follows from what it spent in development. The kidney
 closed with no competent cells left, so it cannot make nephrons and can only
 enlarge what it has: after losing 30 % of its units it ends with 0.70 of the
-count and 1.36 times the mass per unit, its function restored. That is
+count and about 1.4 times the mass per unit, its function restored. The
+constraint also decides how repeatable that landing is. Across seeds the
+kidney's mass per nephron varies by about a tenth when growth restarts without
+it and by about a hundredth when the inflow is held, while the nephron count
+comes out identical in every seed. Where an organ that cannot build new units
+ends up is luck unless something outside it fixes the budget. That is
 compensatory renal hypertrophy as it is described after a nephrectomy, where
 no new nephrons form, the remaining ones enlarge and function is maintained.
 The liver, whose competent compartment renews itself, has both routes open.
 
-The model compensates further than a kidney does. It makes up all but a
-twentieth of the loss, reaching a mass per nephron of 1.36 after a 30 % loss
-and 1.89 after 50 %, against the 1.43 and 2.00 that full compensation
+The model compensates further than a kidney does. It comes close to making up
+the whole loss, reaching a mass per nephron of about 1.4 after a 30 % loss and
+about 1.9 after 50 %, against the 1.43 and 2.00 that full compensation
 requires, whereas a kidney that loses half its mass grows the remnant by about
 a half rather than doubling it.
 Nothing in the model limits how large a unit may become; in a kidney that
