@@ -37,21 +37,30 @@ REG = {"liver": dict(P0=2600.0, rho=0.10, delta=0.10, q_set=0.6, renewal=1.0),
        "kidney": dict(P0=300.0, rho=0.00, delta=0.05, q_set=0.6, renewal=0.0)}
 FIX = dict(R_unit=650.0, units_per_branch=650 / 600.0, max_vessels=6000)
 KINDS = ("control", "parenchyma", "vascular", "combined")
+# Recovery needs two things the growth model does not have on its own. Injury
+# must restore a unit's ability to enlarge, which growth factors do and the
+# decaying growth rate forbids; and the circulation must cap how far it goes,
+# which a fixed inlet pressure does not, since the tree can grow its
+# conductance and draw more. Each condition is run with and without.
+CONDS = {"as grown": dict(),
+         "reactivated": dict(injury_reactivates=1.0),
+         "reactivated, fixed inflow": dict(injury_reactivates=1.0, inflow_limited=True)}
 KEYS = ("N", "mass", "perfused", "Q")
 
 
-def run(reg, kind, seed):
-    f = OUT / f"{reg}_{kind}_s{seed}.json"
+def run(reg, kind, seed, cond="as grown", frac=FRAC):
+    tag = f"{reg}_{kind}_{cond.replace(' ', '').replace(',', '')}_f{frac}_s{seed}"
+    f = OUT / f"{tag}.json"
     if f.exists():
         return json.load(open(f))
     kw = {} if kind == "control" else dict(injure_day=CLOSE, injury=kind,
-                                           injury_fraction=FRAC)
+                                           injury_fraction=frac, **CONDS[cond])
     U, m, vt, tr = grow(lambda x, y, z: sdf("liver", x / S, y / S, z / S), 190 * S,
                         days=END, rng=np.random.default_rng(seed), nu=NU,
                         **FIX, **REG[reg], **kw)
     series = {k: [float(x) for x in getattr(tr, k)] for k in KEYS}
-    r = dict(regime=reg, kind=kind, seed=seed, series=series,
-             injury=tr.injury, closure=tr.closure)
+    r = dict(regime=reg, kind=kind, cond=cond, fraction=frac, seed=seed,
+             series=series, injury=tr.injury, closure=tr.closure)
     json.dump(r, open(f, "w"))
     return r
 
@@ -80,33 +89,37 @@ def versus_control(rows, ctrl, key):
     return float(np.mean(v) / max(np.mean(c), 1e-9))
 
 
+def levels(rows, key):
+    """Where a quantity ends, relative to the day before the injury."""
+    v = [r["series"][key][-1] / max(r["series"][key][CLOSE - 2], 1e-9) for r in rows]
+    return float(np.mean(v)), float(np.std(v, ddof=1) / np.sqrt(len(v)))
+
+
 if __name__ == "__main__":
     res = {}
     for reg in REG:
-        print(f"\n=== {reg}: injured on day {CLOSE}, {int(100*FRAC)} % of the organ, "
-              f"read on day {END} ===")
-        print(f"{'injury':>11} {'lost':>22} | {'recovery of':>12} "
-              f"{'units':>14} {'mass':>14} {'perfused mass':>14} {'root flow':>14}")
-        for kind in KINDS:
-            rows = [run(reg, kind, s) for s in SEEDS]
-            if kind == "control":
-                control_rows = rows
-                drift = {k: float(np.mean([r["series"][k][-1] / max(r["series"][k][CLOSE-2], 1e-9)
-                                           for r in rows])) for k in KEYS}
-                print(f"{'control':>11} {'nothing':>22} | {'drift x':>12} "
-                      + "".join(f"{drift[k]:>14.3f}" for k in KEYS))
-                res[f"{reg}_control"] = drift
-                continue
-            inj = rows[0]["injury"]
-            lost = f"{inj['pre']['N']}->{inj['post']['N']} units"
-            cells = {k: recovery(rows, k) for k in KEYS}
-            rel = {k: versus_control(rows, control_rows, k) for k in KEYS}
-            fmt = lambda k: ("      none" if np.isnan(cells[k][0])
-                             else f"{cells[k][0]:>6.2f}±{cells[k][1]:.2f}")
-            print(f"{kind:>11} {lost:>22} | {'recovered':>12} "
-                  + "".join(f"{fmt(k):>14}" for k in KEYS))
-            print(f"{'':>11} {'':>22} | {'of control':>12} "
-                  + "".join(f"{rel[k]:>14.2f}" for k in KEYS))
-            res[f"{reg}_{kind}"] = {k: dict(recovered=cells[k][0], se=cells[k][1],
-                                            of_control=rel[k]) for k in KEYS}
+        print(f"\n=== {reg}: {int(100*FRAC)} % lost on day {CLOSE}, read on day {END}; "
+              f"all relative to the day before ===")
+        print(f"{'condition':>26} {'units':>14} {'mass':>14} {'mass per unit':>14} "
+              f"{'perfused mass':>14}")
+        for cond in CONDS:
+            rows = [run(reg, "parenchyma", s, cond) for s in SEEDS]
+            n, _ = levels(rows, "N"); mm, _ = levels(rows, "mass")
+            pf, _ = levels(rows, "perfused")
+            per = mm / max(n, 1e-9)
+            print(f"{cond:>26} {n:>14.2f} {mm:>14.2f} {per:>14.2f} {pf:>14.2f}")
+            res[f"{reg}_{cond}"] = dict(units=n, mass=mm, mass_per_unit=per, perfused=pf)
+    # how much of the loss the kidney makes up by enlarging what it keeps
+    print("\n=== kidney, reactivated and inflow limited: compensation against loss ===")
+    print(f"{'lost':>8} {'nephrons kept':>15} {'mass per nephron':>18} "
+          f"{'full compensation':>19} {'mass':>8}")
+    for frac in (0.3, 0.5):
+        rows = [run("kidney", "parenchyma", s, "reactivated, fixed inflow", frac)
+                for s in SEEDS]
+        n, _ = levels(rows, "N"); mm, _ = levels(rows, "mass")
+        print(f"{100*frac:>7.0f} % {n:>15.2f} {mm / max(n, 1e-9):>18.2f} "
+              f"{1/(1-frac):>19.2f} {mm:>8.2f}")
+        res[f"kidney_compensation_{frac}"] = dict(units=n, mass=mm,
+                                                  mass_per_unit=mm / max(n, 1e-9),
+                                                  full=1 / (1 - frac))
     json.dump(res, open(ROOT / "results" / "injury.json", "w"), indent=1)

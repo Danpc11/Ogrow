@@ -136,20 +136,30 @@ if (RES / "scaling.json").exists():
 
 if (RES / "injury.json").exists():
     Ij = json.load(open(RES / "injury.json"))
-    w("## Injury after closure (day 140, 30 % of the organ, read on day 220; three seeds)\n")
-    names = {"N": "units", "mass": "mass", "perfused": "perfused mass", "Q": "root flow"}
+    names = {"units": "units", "mass": "mass", "mass_per_unit": "mass per unit",
+             "perfused": "perfused mass"}
+    w("## Injury after closure (day 140, 30 % of the parenchyma removed, read on day 220; "
+      "three seeds; every entry is day 220 over the day before the injury)\n")
     rows = []
-    for k, v in Ij.items():
-        reg, kind = k.rsplit("_", 1)
-        if kind == "control":
-            continue
-        for q, nm in names.items():
-            c = v[q]
-            rec = "not lowered" if c["recovered"] != c["recovered"] else \
-                  f"{c['recovered']:.2f} ± {c['se']:.2f}"
-            rows.append([reg, kind, nm, rec, f"{c['of_control']:.2f}"])
-    table(["regime", "injury", "readout", "share of the loss recovered",
-           "day 220, relative to uninjured"], rows)
+    for reg in ("liver", "kidney"):
+        for cond in ("as grown", "reactivated", "reactivated, fixed inflow"):
+            v = Ij.get(f"{reg}_{cond}")
+            if v:
+                rows.append([reg, cond] + [f"{v[q]:.2f}" for q in names])
+    table(["regime", "condition"] + list(names.values()), rows)
+
+    comp = {k: v for k, v in Ij.items() if "_compensation_" in k}
+    if comp:
+        w("## How far a kidney compensates, growth reactivated and inflow fixed\n")
+        rows = []
+        for k in sorted(comp):
+            reg, frac = k.split("_compensation_")
+            v = comp[k]
+            rows.append([reg, f"{100 * float(frac):.0f} %", f"{v['units']:.2f}",
+                         f"{v['mass_per_unit']:.2f}", f"{v['full']:.2f}",
+                         f"{v['mass']:.2f}"])
+        table(["regime", "lost", "units kept", "mass per unit",
+               "full compensation would need", "mass"], rows)
 
 open(ROOT / "PAPER_NUMBERS.md", "w").write("\n".join(out) + "\n")
 print("wrote PAPER_NUMBERS.md")

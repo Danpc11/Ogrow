@@ -233,7 +233,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
          root_site="deepest", assign_mode="tip",
          nucleation="poisson_capped", substeps=1, turnover="independent",
          renewal=0.0, injure_day=None, injury=None, injury_fraction=0.3,
-         injury_axis=1,
+         injury_axis=1, injury_reactivates=0.0, inflow_limited=False,
          intervene_day=None, intervene=None, intervene_factor=0.8):
     """Grow one organ. `sdf(x, y, z)` is negative inside the domain.
 
@@ -404,6 +404,9 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
     A = A[np.array([sdf(*p) < 0 for p in A])][:n_attr]
 
     spacing = lam                     # least distance between units
+    g_clock = 0.0                     # injury can set the growth clock back
+    inflow_target = None              # root flow the circulation keeps delivering
+    phi_set = None                    # delivery per unit mass the tissue needs
     tip_of_prev = np.zeros(0, int)    # the assignment of the previous day
     for day in range(1, days + 1):
         # A causal test of closure: on intervene_day the state is changed and
@@ -458,7 +461,20 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                             frac_lost = float(hit_u[served].mean())
                             P[k] = int(round(P[k] * (1.0 - frac_lost)))
                 U = U[~hit_u]; m = m[~hit_u]
-            tr.injury = dict(day=day, kind=injury, fraction=float(injury_fraction),
+            # Injury can restore the ability of a unit to enlarge. The growth
+            # rate decays as exp(-t / tau_g), so by closure a unit can no
+            # longer grow; after damage, real organs enlarge the units they
+            # keep. `injury_reactivates` is the share of the day-zero rate
+            # restored, 0 for no reactivation and 1 for full.
+            if inflow_limited:
+                # fix the delivery at what the intact organ was receiving, and
+                # the demand at the delivery per unit mass it was living on
+                inflow_target = float(tr.Q[-1]) if tr.Q else None
+                if inflow_target and m.sum() > 0:
+                    phi_set = inflow_target / float(pre["mass"])
+            if injury_reactivates > 0:
+                g_clock = day + tau_g * float(np.log(min(injury_reactivates, 1.0)))
+            tr.injury = dict(day=day, kind=injury, reactivates=float(injury_reactivates), fraction=float(injury_fraction),
                              axis=ax, cut=float(cut), pre=pre,
                              post=dict(N=len(U), mass=float(m.sum()),
                                        P=float(sum(P.values()))))
@@ -581,8 +597,26 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
 
         # ---- unit growth: the ceiling is the supply at the unit's tip ------
         if len(U):
-            g = g0 * np.exp(-day / tau_g)
-            ceiling = np.maximum(kappa * q[tip_of], 1e-6)
+            g = g0 * np.exp(-(day - g_clock) / tau_g)
+            if inflow_limited and inflow_target is not None:
+                # The organ is fed by a circulation that does not raise its
+                # delivery on demand: after a resection the gut sends the same
+                # portal flow to a smaller liver. Pressure at the inlet is then
+                # the wrong boundary condition, because the tree can grow its
+                # conductance and draw more. Holding the inflow fixed instead,
+                # each unit's share is its conductance over the tree's, and the
+                # mass it can support is set by the flow that reaches it. With
+                # tissue conductance linear in mass this makes the delivery per
+                # unit mass the same everywhere and inversely proportional to
+                # the organ's mass, so the organ grows until its mass matches
+                # its blood supply and stops. The rule is local; the ceiling on
+                # the whole organ follows from it.
+                gshare = np.maximum(m, 1e-9) ** xi
+                share = gshare / max(gshare.sum(), 1e-12)
+                flow_j = inflow_target * share
+                ceiling = np.maximum(flow_j / phi_set, 1e-6)
+            else:
+                ceiling = np.maximum(kappa * q[tip_of], 1e-6)
             m = m + g * m * (1.0 - m / ceiling)
             m = np.maximum(m, m0)
 

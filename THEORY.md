@@ -908,56 +908,62 @@ a few progenitors left, gains at most a few units from the first. The liver
 closes held by both constraints at once, and its closure can be undone; the
 kidney's cannot.
 
-### Injury after closure: structure recovers, function does not
+### Injury after closure, and the two things recovery needs
 
 The interventions of the previous section relieve a constraint on an intact
-organ, so what follows them is further growth. Recovery is a different
-question and needs tissue to be destroyed. The organ is grown to closure on
-day 140, a part of it is destroyed, and growth runs on to day 220 against the
-same run with no injury (`scripts/24_injury.py`, three seeds, 30 % of the
-organ, cut by a plane as a lobectomy is rather than removed at random).
+organ, so what follows them is further growth. Recovery needs tissue to be
+destroyed. The organ is grown to closure on day 140, a part of it is destroyed
+by a plane cut as a lobectomy is, and growth runs on to day 220 against the
+same run with no injury (`scripts/24_injury.py`).
 
-Three injuries. "Parenchyma" removes the units past the cut and leaves the
-tree. "Vascular" occludes the vessels past the cut, which stops perfusion
-downstream without removing tissue. "Combined" does both. Where the competent
-compartment is the tissue itself ($w = 1$), losing units loses the
-progenitors they carried, in proportion; where it is a separate population
-($w = 0$) it survives parenchymal loss and goes only with the vessels that
-hold its niche.
+Taken as it stands, the model does not recover. The liver makes back most of
+its unit count and almost none of its mass or its perfused function, and the
+kidney makes back nothing. The cause is the rate at which a unit grows,
+$g_0 e^{-t/\tau_g}$, which by day 140 is of order $10^{-6}$: a unit can no
+longer enlarge, so an organ that rebuilds after closure fills with units that
+never mature.
 
-Four readouts, none of which needs a parameter the model does not already
-have: unit count and total unit mass for structure, and for function the mass
-whose supply meets the threshold, $\sum_j \min(q_j/q_{\text{set}}, 1)\,m_j$,
-and the flow through the root.
+That is the first thing recovery needs, and the literature says both organs
+use it. After a partial hepatectomy a liver restores its mass by hypertrophy
+and division of the hepatocytes it keeps, failing to rebuild the lobes that
+were cut and ending as a functional but architecturally different organ; its
+remaining lobules enlarge, some merging into lobules two to four times the
+normal diameter. After a nephrectomy no new nephrons form at all and the
+remaining ones enlarge. **Injury restores the ability of a unit to enlarge**,
+which the model represents by setting the growth clock back on the day of the
+injury.
 
-**The liver recovers its unit count and not its function.** Eighty days after
-losing 30 % of its units it has made back 0.80 of the count, reaching 0.93 of
-the uninjured organ, while mass recovers 0.11 and reaches 0.78, the perfused
-mass recovers nothing and reaches 0.79, and root flow reaches 0.82. The reason
-is in the model's own rules: a new unit starts small and grows at a rate that
-decays with time, so an organ that rebuilds after closure fills with units
-that never mature. Counting units would report a recovered organ; the function
-is not there. This is a prediction, and it is also a warning about the
-observable: unit number is the wrong readout for regeneration.
+With that alone the model overshoots, to nearly twice the mass it had. The
+reason is the boundary condition. Under a fixed pressure at the inlet, the
+tissue demands more, the tree adapts its calibres and grows its conductance,
+and the flow follows: through a recovery in which mass nearly doubles, the
+supply per unit does not move from 0.24, and with tissue conductance linear in
+mass the delivery per unit mass does not fall either. Nothing is ever short.
 
-**The kidney recovers nothing.** The same injury leaves it at 0.70 of the
-uninjured organ in every readout, which is the 30 % removed, because its pool
-was spent at closure and nothing restores it.
+**The circulation caps how far the organ goes.** A gut does not send more
+portal blood to a liver because the liver was cut; the remnant receives what
+the intact organ received, which is the mechanism behind small-for-size
+physiology. Holding the inflow fixed at that value, each unit's share is its
+conductance over the tree's, so the delivery per unit mass is inversely
+proportional to the organ's mass. A unit grows while its own delivery per mass
+exceeds a threshold, which is a local rule, and the organ stops when its mass
+matches its blood supply, which is the consequence. The liver then restores
+its mass and stops at 1.01 of what it had.
 
-**Occluding the vessels of the lost region helps.** Parenchymal loss alone
-leaves perfused mass at 0.79 of control; removing the vessels of the same
-region as well leaves it at 0.88, and the unit count overshoots to 1.04. The
-vasculature of lost tissue keeps drawing flow, and closing it returns supply
-to the tissue that survives, which lifts the supply per unit back above the
-threshold where new units can form. Vascular occlusion alone raises perfused
-mass to 1.17 of control while root flow falls to 0.77: less blood enters, and
-what enters reaches fewer, better served units.
+### How an organ recovers follows from what it spent
 
-What this does not do is validate the model against regeneration. After a
-partial hepatectomy a liver restores mass largely by hypertrophy and division
-of the hepatocytes it keeps, not by building lobules, so the measured
-observable is mass and not unit count. The model produces both, and the
-prediction above is precisely that they come apart.
+The kidney closed with its pool spent, so it cannot make nephrons. Given the
+two conditions it recovers entirely by enlarging what it kept: 0.70 of the
+count after losing 30 %, 1.4 times the mass per unit, and its function
+restored. That is compensatory renal hypertrophy as it is described. The
+liver, whose compartment renews itself, has both routes.
+
+Where the model is wrong is in how far it goes. It compensates in full: 1.42
+against the 1.43 that a 30 % loss requires, and 1.95 against 2.00 at 50 %. A
+kidney that loses half reaches about a half again in volume rather than
+doubling. Nothing in the model caps how large a unit may grow, and in a kidney
+that cap exists; passing it is hyperfiltration injury. The gap is specific and
+it names what the model lacks.
 
 ### Murray's relation in grown trees
 

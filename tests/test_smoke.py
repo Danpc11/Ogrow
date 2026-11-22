@@ -241,6 +241,27 @@ try:
 except ValueError:
     check("unknown injury raises", True)
 
+# growth reactivated after the injury rebuilds; a fixed inflow stops the rebuild
+def _after_injury(**kw):
+    U2, m2, vt2, tr2 = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z / 0.6), 114,
+                             days=70, rng=np.random.default_rng(7), nu=8.0, q_set=0.6,
+                             rho=0.0, delta=0.0, P0=400.0, R_unit=650.0,
+                             units_per_branch=650 / 600.0, max_vessels=3000,
+                             injure_day=40, injury="parenchyma", injury_fraction=0.3, **kw)
+    return float(m2.sum()) / tr2.injury["pre"]["mass"]
+
+_quiet = _after_injury()
+_react = _after_injury(injury_reactivates=1.0)
+_held = _after_injury(injury_reactivates=1.0, inflow_limited=True)
+check("without reactivation the organ stays below its old mass", _quiet < 0.95,
+      f"mass {_quiet:.2f} of pre-injury")
+check("reactivating growth rebuilds the mass", _react > _quiet + 0.2 and _react > 0.95,
+      f"{_quiet:.2f} without, {_react:.2f} with")
+check("at a fixed inlet pressure the rebuild overshoots", _react > 1.3,
+      f"mass {_react:.2f} of pre-injury")
+check("a fixed inflow stops the rebuild at the old size", 0.9 < _held < 1.15,
+      f"mass {_held:.2f} of pre-injury")
+
 print()
 if FAIL:
     print("FAILED:", ", ".join(FAIL))

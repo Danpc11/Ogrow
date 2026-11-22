@@ -165,6 +165,16 @@ $V^{0.74}$ with the allometric scalings of pool, window and rates, against the
 $V^{1}$ that a conserved unit size requires. Replicate spread grows with scale.
 All regimes in this work are reported at one domain scale.
 
+**How far compensation goes is not right.** Given an injury that restores
+the ability of units to enlarge and an inflow held at its pre-injury value,
+the model compensates in full: a kidney that loses 30 % of its units ends with
+1.42 times the mass per unit, against the 1.43 of full compensation, and 1.95
+against 2.00 after losing half. A real kidney that loses half grows the
+remnant by about a half. Nothing in the model limits how large a unit may
+become. The vascular and combined injuries were examined only under the
+original condition, in which no organ recovers, and have not been rerun with
+reactivation and a fixed inflow.
+
 **What the injury experiment is and is not.** Growing an organ to closure,
 destroying a part of it and running on measures recovery rather than further
 growth, which the earlier interventions on an intact organ did not. It is not

@@ -1,4 +1,4 @@
-# The closed model (version 4.10.0)
+# The closed model (version 4.11.0)
 
 `src/organgrow/closed.py` is the model the paper rests on; `make paper`
 builds its results. Its parameters are in `config/params.yaml`, section
@@ -68,7 +68,12 @@ the threshold (`"supply"`) or the least spacing (`"room"`). `injure_day` and
 `injury` destroy a part of the organ past a plane cut along `injury_axis`,
 holding `injury_fraction` of the units: `"parenchyma"` removes those units,
 `"vascular"` occludes the vessels there so they carry no flow, and
-`"combined"` does both. Each day the trace also records `perfused`, the mass
+`"combined"` does both. `injury_reactivates` is the share of the day-zero
+growth rate the injury restores to the units, 0 for none and 1 for full, and
+`inflow_limited` holds the flow entering the organ at what it was receiving
+before the injury, in place of a fixed pressure at the inlet; each unit's
+share is then its conductance over the tree's, and the mass it can support is
+set by the flow that reaches it. Each day the trace also records `perfused`, the mass
 whose supply meets the threshold, counting a unit short of supply in
 proportion to what reaches it.
 

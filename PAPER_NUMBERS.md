@@ -1,6 +1,6 @@
 # Numbers the paper uses
 
-Model version 4.10.0, commit 7a21a60, generated 2026-11-21 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.11.0, commit 9c9d28c (with uncommitted changes), generated 2026-11-22 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b024.
 
@@ -117,32 +117,21 @@ Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b0
 | allometric | 1.0 | 205 | 430 | 0.60 | 0.43 | 3.4 % |
 | allometric: unit count scales as V^0.57 |  |  |  |  |  |  |
 
-## Injury after closure (day 140, 30 % of the organ, read on day 220; three seeds)
+## Injury after closure (day 140, 30 % of the parenchyma removed, read on day 220; three seeds; every entry is day 220 over the day before the injury)
 
-| regime | injury | readout | share of the loss recovered | day 220, relative to uninjured |
-|---|---|---|---|---|
-| liver | parenchyma | units | 0.74 ± 0.03 | 0.88 |
-| liver | parenchyma | mass | 0.13 ± 0.01 | 0.79 |
-| liver | parenchyma | perfused mass | 0.01 ± 0.04 | 0.81 |
-| liver | parenchyma | root flow | -0.15 ± 0.01 | 0.84 |
-| liver | vascular | units | not lowered | 1.13 |
-| liver | vascular | mass | not lowered | 1.03 |
-| liver | vascular | perfused mass | not lowered | 1.17 |
-| liver | vascular | root flow | 0.09 ± 0.05 | 0.78 |
-| liver | combined | units | 1.26 ± 0.38 | 0.98 |
-| liver | combined | mass | 0.20 ± 0.03 | 0.81 |
-| liver | combined | perfused mass | 0.31 ± 0.12 | 0.88 |
-| liver | combined | root flow | 0.12 ± 0.04 | 0.78 |
-| kidney | parenchyma | units | 0.00 ± 0.00 | 0.70 |
-| kidney | parenchyma | mass | 0.00 ± 0.00 | 0.70 |
-| kidney | parenchyma | perfused mass | -0.04 ± 0.04 | 0.71 |
-| kidney | parenchyma | root flow | -0.30 ± 0.13 | 0.72 |
-| kidney | vascular | units | not lowered | 1.00 |
-| kidney | vascular | mass | not lowered | 1.00 |
-| kidney | vascular | perfused mass | not lowered | 1.09 |
-| kidney | vascular | root flow | 0.02 ± 0.01 | 0.64 |
-| kidney | combined | units | 0.00 ± 0.00 | 0.70 |
-| kidney | combined | mass | 0.00 ± 0.00 | 0.70 |
-| kidney | combined | perfused mass | 0.05 ± 0.02 | 0.74 |
-| kidney | combined | root flow | -0.01 ± 0.03 | 0.62 |
+| regime | condition | units | mass | mass per unit | perfused mass |
+|---|---|---|---|---|---|
+| liver | as grown | 0.94 | 0.80 | 0.85 | 0.82 |
+| liver | reactivated | 0.94 | 1.80 | 1.91 | 1.96 |
+| liver | reactivated, fixed inflow | 0.97 | 1.01 | 1.04 | 1.03 |
+| kidney | as grown | 0.70 | 0.70 | 1.00 | 0.71 |
+| kidney | reactivated | 0.70 | 1.82 | 2.60 | 1.99 |
+| kidney | reactivated, fixed inflow | 0.70 | 0.99 | 1.42 | 1.02 |
+
+## How far a kidney compensates, growth reactivated and inflow fixed
+
+| regime | lost | units kept | mass per unit | full compensation would need | mass |
+|---|---|---|---|---|---|
+| kidney | 30 % | 0.70 | 1.42 | 1.43 | 0.99 |
+| kidney | 50 % | 0.50 | 1.94 | 2.00 | 0.98 |
 
