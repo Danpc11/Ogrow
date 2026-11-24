@@ -637,7 +637,9 @@ not how much room the container has.
 
 The exponent is measured off the sweep rather than derived, and it is stated
 at one nucleation rate. Whether a rate matched to the speed of the vascular
-front would carry it towards 1 is not tested here. The replicate spread of the
+front would carry it towards 1 is the question `scripts/25_front.py` asks, by
+repeating the sweep at several rates; it is a diagnostic and its answer is not
+claimed here. The replicate spread of the
 unit count is in the table beside the exponent, and the regimes reported in
 this work are stated at one scale.
 (`PAPER_NUMBERS.md`, Organ size; `scripts/23_scaling.py`.)

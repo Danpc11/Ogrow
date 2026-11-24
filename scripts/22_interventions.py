@@ -77,25 +77,36 @@ if __name__ == "__main__":
         for cond in ("none", "supply", "room"):
             rows = [run(reg, cond, s) for s in SEEDS]
             # A share of a pool that is not there is not a share. The kidney
-            # closes holding nothing, so for it the released share has no
-            # denominator and seeds whose pool is below one cell are dropped
-            # rather than divided by. Units added needs no pool, so it is
-            # taken over every seed: for a regime that closes empty, the zero
-            # it reports is the result, not a missing value.
+            # closes holding nothing, and whether one of its seeds ends on
+            # 0.9 or 1.1 cells out of 300 is arithmetic noise that differs
+            # between machines, so a per-seed threshold is not a criterion:
+            # it also keeps only the seeds that retained a pool, which is
+            # the ones the quantity is largest in. The question is asked of
+            # the regime instead. The ratio is reported when what the regime
+            # holds is a real remnant, one per cent of the pool it started
+            # with and at least one cell, and then it is averaged over every
+            # seed. Units added needs no pool at all, so it is always taken
+            # over every seed: where a regime closes empty, the zero it
+            # reports is the result and not a missing value.
             pool = np.array([r["P0"] for r in rows], float)
-            use = pool >= 1.0
-            rel = np.array([r["released"] for r in rows])[use]
+            floor = max(1.0, 0.01 * REG[reg]["P0"])
+            defined = bool(pool.mean() >= floor)
+            rel = np.array([r["released"] for r in rows])
             add = np.array([(r["N1"] - r["N0"]) / max(r["N0"], 1e-9) for r in rows])
             res[f"{reg}_{cond}"] = dict(pool=float(pool.mean()),
-                                        seeds=int(len(rows)), seeds_used=int(use.sum()),
-                                        released=float(rel.mean()) if len(rel) > 1
+                                        pool_lo=float(pool.min()),
+                                        pool_hi=float(pool.max()),
+                                        pool_floor=float(floor),
+                                        seeds=int(len(rows)), defined=defined,
+                                        released=float(rel.mean()) if defined
                                         else float("nan"),
-                                        se=sem(rel),
+                                        se=sem(rel) if defined else float("nan"),
                                         each=[float(x) for x in rel],
                                         units_added=float(add.mean()),
                                         units_added_se=sem(add))
             r_ = res[f"{reg}_{cond}"]
-            print(f"{reg:>9} {cond:>13} {r_['pool']:>16.0f} "
-                  f"{r_['released']:>20.3f} ± {r_['se']:.3f}  "
-                  f"({r_['seeds_used']}/{r_['seeds']} seeds with a pool)")
+            shown = (f"{r_['released']:>20.3f} ± {r_['se']:.3f}" if defined
+                     else f"{'-':>20}          ")
+            print(f"{reg:>9} {cond:>13} {r_['pool']:>16.1f} {shown}  "
+                  f"(pool floor {floor:.0f} of {REG[reg]['P0']:.0f})")
     json.dump(res, open(ROOT / "results" / "interventions.json", "w"), indent=1)

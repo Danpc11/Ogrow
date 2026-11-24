@@ -172,18 +172,24 @@ if (RES / "interventions.json").exists():
     ns = {v.get("seeds", 0) for v in I.values()}
     w(f"## Interventions on the closed state (day 140, then 40 days; "
       f"{max(ns) if ns else '?'} seeds)\n")
-    w("A regime that closes with nothing held has no pool to release, so its "
-      "share is left out rather than divided by a pool of zero; the last "
-      "column says how many seeds carried one.\n")
+    w("A regime that closes with nothing held has no pool to release, so the "
+      "share is reported only where what the regime still holds is a real "
+      "remnant, one per cent of the pool it started with and at least one "
+      "cell. Where it is not, the entry is left out rather than divided by a "
+      "pool of zero, and the column beside it gives the pool against that "
+      "floor. Units added needs no pool, so it is always over every seed.\n")
 
     def cell(v, k, se):
         return ("-" if v[k] != v[k] else f"{v[k]:.3f} ± {v[se]:.3f}")
 
-    table(["regime", "intervention", "pool on day 140", "share of that pool released",
-           "units added, relative to day 140", "seeds with a pool"],
-          [[k.split("_")[0], k.split("_")[1], f"{v['pool']:.0f}",
-            cell(v, "released", "se"), cell(v, "units_added", "units_added_se"),
-            f"{v.get('seeds_used', 0)} of {v.get('seeds', 0)}"] for k, v in I.items()])
+    table(["regime", "intervention", "pool on day 140", "pool needed for a share",
+           "share of that pool released", "units added, relative to day 140"],
+          [[k.split("_")[0], k.split("_")[1],
+            f"{v['pool']:.1f} [{v.get('pool_lo', float('nan')):.1f}, "
+            f"{v.get('pool_hi', float('nan')):.1f}]",
+            f"{v.get('pool_floor', float('nan')):.0f}",
+            cell(v, "released", "se"), cell(v, "units_added", "units_added_se")]
+           for k, v in I.items()])
 
 if (RES / "scaling.json").exists():
     Sc = json.load(open(RES / "scaling.json"))
