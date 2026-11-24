@@ -1,8 +1,10 @@
 # The paper: framework, claims and evidence
 
-Target: *npj Regenerative Medicine* if the fee is paid, *Cell Systems* as the
-alternative without one. Both take a theory paper of this shape.
-Reference model: version 4.27.0 (`src/organgrow/closed.py`). Every number from
+Target: *Biofabrication* (IOP), with the engineering framing. The manuscript
+itself is `MANUSCRIPT.md`; this file is the ledger of claims and evidence it
+is written from, and `scripts/29_check_manuscript.py` holds the manuscript to
+the regenerated tables.
+Reference model: version 4.28.0 (`src/organgrow/closed.py`). Every number from
 the model that the paper uses is in `PAPER_NUMBERS.md`, written by
 `make paper` with the version and commit that produced it; this file does not
 copy model numbers by hand. Numbers given here are either data (the human
@@ -49,8 +51,8 @@ strands the remainder at tips short of supply. The kidney ends with nothing
 held at all.
 
 The kidney's emptiness, though, is not what the word spent suggests. Of the
-pool it starts with, a quarter is consumed in forming nephrons and three
-quarters is lost to attrition, and both leave the compartment. Only the first
+pool it starts with, less than a third is consumed in forming nephrons and
+more than two thirds is lost to attrition, and both leave the compartment. Only the first
 built anything. A pool that empties and a pool that is used are different
 things, so they are reported apart.
 
@@ -316,4 +318,7 @@ decide one of them.
 
 1. Commit, then `make test` and `make paper` on that commit, so that
    `PAPER_NUMBERS.md` names the current version and a clean commit.
-2. Write the manuscript from this file, `PAPER_NUMBERS.md` and `FIGURES.md`.
+2. `make check`, which now also holds `MANUSCRIPT.md` to those tables.
+3. Fill the references marked as still needed at the end of `MANUSCRIPT.md`,
+   or drop the claims that rest on them.
+4. Draw Figures 3 and 6, which are tables only.

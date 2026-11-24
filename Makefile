@@ -38,6 +38,7 @@ test:
 check:
 	$(PY) -m pyflakes src scripts figures tests
 	$(PY) scripts/check_consistency.py
+	$(PY) scripts/29_check_manuscript.py
 
 # Exploratory runs from the development of the closed model, with parameters
 # from earlier versions. The paper does not use them; see `make paper`.
