@@ -1,6 +1,6 @@
 # Numbers the paper uses
 
-Model version 4.21.0, commit 0db9bd4, generated 2026-11-24 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.24.0, commit 37100b4 (with uncommitted changes), generated 2026-11-24 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b024.
 
@@ -103,30 +103,30 @@ Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b0
 
 | regime | intervention | pool on day 140 | share of that pool released | units added, relative to day 140 |
 |---|---|---|---|---|
-| liver | none | 2398 | 0.002 ± 0.001 | 0.030 ± 0.009 |
-| liver | supply | 2398 | 0.013 ± 0.002 | 0.154 ± 0.026 |
-| liver | room | 2398 | 0.027 ± 0.002 | 0.323 ± 0.029 |
+| liver | none | 2535 | 0.002 ± 0.000 | 0.028 ± 0.003 |
+| liver | supply | 2535 | 0.018 ± 0.002 | 0.226 ± 0.027 |
+| liver | room | 2535 | 0.027 ± 0.002 | 0.323 ± 0.017 |
 | kidney | none | 0 | 0.000 ± 0.000 | 0.000 ± 0.000 |
-| kidney | supply | 0 | 0.000 ± 0.000 | 0.000 ± 0.000 |
+| kidney | supply | 0 | 0.042 ± 0.042 | 0.000 ± 0.000 |
 | kidney | room | 0 | 0.000 ± 0.000 | 0.000 ± 0.000 |
-| pancreas | none | 12 | 0.019 ± 0.019 | 0.003 ± 0.003 |
-| pancreas | supply | 12 | 0.123 ± 0.063 | 0.032 ± 0.022 |
-| pancreas | room | 12 | 0.037 ± 0.037 | 0.007 ± 0.007 |
+| pancreas | none | 15 | 0.008 ± 0.006 | 0.002 ± 0.001 |
+| pancreas | supply | 15 | 0.170 ± 0.030 | 0.062 ± 0.014 |
+| pancreas | room | 15 | 0.015 ± 0.010 | 0.003 ± 0.002 |
 
 ## Organ size: unit count and closure against domain volume (two seeds each)
 
 | sweep | domain scale | days | units | held by supply | held by room | share of close packing |
 |---|---|---|---|---|---|---|
-| geometry | 0.4 | 140 | 116 | 0.97 | 0.02 | 14.5 % |
-| geometry | 0.6 | 140 | 206 | 0.80 | 0.20 | 7.6 % |
-| geometry | 0.8 | 140 | 246 | 0.78 | 0.31 | 3.8 % |
-| geometry | 1.0 | 140 | 442 | 0.70 | 0.42 | 3.5 % |
-| geometry: unit count scales as V^0.44 |  |  |  |  |  |  |
-| allometric | 0.4 | 103 | 98 | 0.96 | 0.14 | 12.3 % |
-| allometric | 0.6 | 140 | 206 | 0.80 | 0.20 | 7.6 % |
-| allometric | 0.8 | 174 | 458 | 0.82 | 0.14 | 7.1 % |
-| allometric | 1.0 | 205 | 430 | 0.60 | 0.43 | 3.4 % |
-| allometric: unit count scales as V^0.57 |  |  |  |  |  |  |
+| geometry | 0.4 | 140 | 130 | 0.89 | 0.09 | 16.2 % |
+| geometry | 0.6 | 140 | 208 | 0.78 | 0.19 | 7.7 % |
+| geometry | 0.8 | 140 | 289 | 0.71 | 0.30 | 4.5 % |
+| geometry | 1.0 | 140 | 520 | 0.63 | 0.37 | 4.2 % |
+| geometry: unit count scales as V^0.45 |  |  |  |  |  |  |
+| allometric | 0.4 | 103 | 107 | 0.86 | 0.15 | 13.3 % |
+| allometric | 0.6 | 140 | 208 | 0.78 | 0.19 | 7.7 % |
+| allometric | 0.8 | 174 | 338 | 0.72 | 0.29 | 5.3 % |
+| allometric | 1.0 | 205 | 572 | 0.64 | 0.37 | 4.6 % |
+| allometric: unit count scales as V^0.58 |  |  |  |  |  |  |
 
 ## Injury after closure (day 140, 30 % of the units removed by a plane cut, read on day 220; the first four entries are day 220 over the day before the injury, the last two the share of what the cut took that is back, each the mean over 24 seeds with the range they span)
 

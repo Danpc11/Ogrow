@@ -88,8 +88,9 @@ formed, at five gestational weeks of human fetal kidney (GSE114530); the
 number above each bar is the cells of the lineage scored at that week.
 (B) Progenitor share of the lineage and number induced per progenitor still
 held, against gestational week, on a log scale, one point per sample; the
-title gives Spearman's rho against stage and its P for each, over the five
-samples. (C) Where the initial progenitor pool goes in the model, for
+open square is the progenitor share of an independent week-14 kidney
+(GSE139280) read the same way, and the title gives Spearman's rho against
+stage and its P for each ratio, over the five samples of the first series. (C) Where the initial progenitor pool goes in the model, for
 the two regimes whose pool is a budget; the liver is not shown because it
 renews, so a share of what it started with is not a denominator for it.
 (D) Progenitor share of the lineage against embryonic day in mouse pancreas,

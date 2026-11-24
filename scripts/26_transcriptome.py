@@ -13,7 +13,11 @@ from: the series carries a single sample per stage, and across the five the
 ratio does not order with stage, so a change over development and a
 difference between samples cannot be told apart here.
 
-    kidney    GSE114530, human fetal, weeks 9 to 18. Cells of the nephron
+    kidney    GSE114530, human fetal, weeks 9 to 18, and GSE139280, an
+              independent week-14 kidney read the same way. The second one is
+              not merged with the first: it is there to show how far two
+              studies at the same stage sit apart, which bounds what a share
+              from any one of them can be read to mean. Cells of the nephron
               lineage are put in one of three states by marker score: cap
               mesenchyme still uncommitted, a pretubular aggregate or renal
               vesicle being induced, and a unit already formed.
@@ -50,6 +54,7 @@ RNG = np.random.default_rng(0)
 KIDNEY_SAMPLES = {9: "GSM3509837_1_wk09", 11: "GSM3509838_2_wk11",
                   13: "GSM3509839_3_wk13", 16: "GSM3143601_4_w16",
                   18: "GSM3509840_5_wk18"}
+KIDNEY2 = {14: "GSM4135994_count_table_H14w_0h"}     # GSE139280, fresh tissue
 NPC = ["SIX2", "CITED1", "MEOX1", "EYA1", "SALL1", "CRYM", "DAPL1", "TMEM100"]
 INDUCED = [g for g in ["WNT4", "LHX1", "PAX8", "JAG1", "DLL1", "HEYL", "CCND1"]
            if g not in NPC]
@@ -108,15 +113,19 @@ def zscore_mean(v):
 
 
 # ----------------------------------------------------------------- kidney
-def kidney_states(d):
+def kidney_states(d, samples=None):
     from scipy.io import mmread
     from scipy import sparse
 
     rows = []
-    for wk, pre in KIDNEY_SAMPLES.items():
-        with gzip.open(d / f"{pre}_genes.tsv.gz", "rt") as f:
+    for wk, pre in (samples or KIDNEY_SAMPLES).items():
+        g = d / f"{pre}_genes.tsv.gz"
+        op = (lambda q: gzip.open(q, "rt")) if g.exists() else open
+        g = g if g.exists() else d / f"{pre}_genes.tsv"
+        with op(g) as f:
             sym = np.array([ln.split("\t")[1].strip() for ln in f])
-        M = mmread(str(d / f"{pre}_matrix.mtx.gz")).tocsc()
+        mx = d / f"{pre}_matrix.mtx.gz"
+        M = mmread(str(mx if mx.exists() else d / f"{pre}_matrix.mtx")).tocsc()
         tot = np.asarray(M.sum(0)).ravel()
         keep = (tot >= 1000) & (np.asarray((M > 0).sum(0)).ravel() >= 500)
         X = M[:, keep].multiply(sparse.csr_matrix(1e4 / tot[keep])).tocsr()
@@ -215,30 +224,44 @@ def liver_states(d):
 
 
 # ------------------------------------------------------------------- main
-def build(name, folder, fn, header, path):
+def build(name, folder, fn, header, path, probe):
+    """Rebuild the derived table from raw matrices, or read the committed one.
+
+    The test is whether the files are there, not whether the folder is: a
+    folder can exist because somebody made it, or because a download stopped
+    half way, and neither of those should turn into a crash in the middle of
+    `make paper`. `probe` is a file the loader cannot do without.
+    """
     d = DATA / folder
-    if d.exists():
-        rows = fn(d)
-        write_table(path, header, rows)
+    if (d / probe).exists():
+        write_table(path, header, fn(d))
         return read_table(path)
     if path.exists():
-        print(f"{name}: using the committed table; put the files under {d} to redo it")
+        where = f"{d}" if d.exists() else f"{d} (no such folder)"
+        print(f"{name}: using the committed table; put the files under {where} "
+              f"to redo it")
         return read_table(path)
-    raise SystemExit(f"{name}: nothing under {d} and no table at {path}")
+    raise SystemExit(f"{name}: no {probe} under {d} and no table at {path}")
 
 
 def main():
     SD.mkdir(parents=True, exist_ok=True)
     k = build("kidney", "GSE114530", kidney_states,
               ["week", "lineage", "npc", "induced", "nephron"],
-              SD / "Fig9_kidney_states.csv")
+              SD / "Fig9_kidney_states.csv",
+              KIDNEY_SAMPLES[9] + "_matrix.mtx.gz")
+    k2 = build("kidney (second study)", "GSE139280",
+               lambda d: kidney_states(d, KIDNEY2),
+               ["week", "lineage", "npc", "induced", "nephron"],
+               SD / "Fig9_kidney2_states.csv",
+               KIDNEY2[14] + "_matrix.mtx")
     p = build("pancreas", "GSE132188", pancreas_states,
               ["stage", "n", "frac_strict", "s_lo", "s_hi",
                "frac_broad", "b_lo", "b_hi"],
-              SD / "Fig9_pancreas_states.csv")
+              SD / "Fig9_pancreas_states.csv", "GSE132188_adata.h5")
     lv = build("liver", "GSE90047", liver_states,
                ["stage", "n", "frac_prog", "lo", "hi", "maturation"],
-               SD / "Fig9_liver_states.csv")
+               SD / "Fig9_liver_states.csv", "GSE90047_sc.txt.gz")
 
     w = np.array(k["week"], float)
     npc, ind, lin = (np.array(k[x], float) for x in ("npc", "induced", "lineage"))
@@ -271,6 +294,14 @@ def main():
     print("one sample per stage, so neither ratio separates development from"
           "\nthe difference between samples")
 
+    sh2 = np.array(k2["npc"], float) / np.maximum(np.array(k2["lineage"], float), 1)
+    near = [float(share[i]) for i in range(len(w)) if 13 <= w[i] <= 16]
+    print(f"\nan independent kidney at week {k2['week'][0]:.0f} (GSE139280) has a "
+          f"progenitor share of {sh2[0]:.3f},")
+    print(f"against {min(near):.3f} to {max(near):.3f} at weeks 13 to 16 in the first "
+          f"series. A share\nis a property of the preparation as much as of the organ, "
+          f"so only presence\nand absence are read across studies here.")
+
     print(f"\n{'organ':9s} {'last stage':>11} {'progenitor share':>17} "
           f"{'of its window':>14}")
     done = {}
@@ -293,7 +324,7 @@ def main():
                    spearman=dict(npc_share=[float(rs_share), float(p_share)],
                                  induced_per_npc=[float(rs_per), float(p_per)],
                                  n_samples=int(len(w))),
-                   windows=done),
+                   windows=done, kidney_second_study=k2),
               open(OUT / "transcriptome.json", "w"), indent=1)
 
 

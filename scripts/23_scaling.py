@@ -16,6 +16,8 @@ units occupy.
 Usage:  python scripts/23_scaling.py          run (cached) and report
 """
 import json
+import os
+from concurrent.futures import ProcessPoolExecutor
 
 import numpy as np
 
@@ -26,7 +28,7 @@ from organgrow.closed import grow
 OUT = ROOT / "results" / "scaling"
 OUT.mkdir(parents=True, exist_ok=True)
 LAM, R0, S0, D0, NU0, P00 = 7.4, 190.0, 0.6, 140, 8.0, 2600.0
-SCALES, SEEDS = (0.4, 0.6, 0.8, 1.0), (300, 301)
+SCALES, SEEDS = (0.4, 0.6, 0.8, 1.0), tuple(range(300, 324))
 LIVER = dict(rho=0.10, delta=0.10, q_set=0.6, renewal=1.0)
 FIX = dict(R_unit=650.0, units_per_branch=650 / 600.0, max_vessels=30000)
 PACK = 0.74                      # close packing of equal spheres
@@ -50,7 +52,26 @@ def run(mode, S, seed):
     return r
 
 
+def _warm(a):
+    """Populate the cache for one run; each file is written by one worker only."""
+    run(*a)
+
+
 if __name__ == "__main__":
+    grid = [g for g in [(mode, S, sd) for mode in ("geometry", "allometric")
+            for S in SCALES for sd in SEEDS] if not (OUT / f"{g[0]}_S{g[1]}_s{g[2]}.json").exists()]
+    if grid:
+        n = max(1, min(int(os.environ.get("OGROW_JOBS", 0)) or (os.cpu_count() or 1),
+                       len(grid)))
+        print(f"running {len(grid)} simulations on {n} worker(s)", flush=True)
+        if n > 1:
+            with ProcessPoolExecutor(max_workers=n) as pool:
+                for _ in pool.map(_warm, grid):
+                    pass
+        else:
+            for g in grid:
+                _warm(g)
+
     res = {}
     print(f"{'sweep':>11} {'S':>4} {'days':>5} {'N':>7} {'supply':>7} {'room':>6} "
           f"{'spent':>6} {'fill':>7}")

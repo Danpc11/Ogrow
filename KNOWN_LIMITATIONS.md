@@ -175,6 +175,19 @@ large a unit may become. The vascular and combined injuries were examined only
 under the original condition, in which no organ recovers, and have not been
 rerun with reactivation and a fixed inflow.
 
+**A progenitor share is not comparable between studies.** An independent
+week-14 human kidney (GSE139280) has two thirds of its nephron lineage in
+progenitors, against a sixth to a third at weeks 13 to 16 in GSE114530: a
+spread at the same stage larger than any change over development these series
+could show. Correcting for batch does not close it. Centring each gene within
+its sample, which is the location adjustment such a correction makes, leaves
+the week-14 study 3.1 times the mean of the weeks that bracket it, against
+2.7 before correcting and 4.4 when every cell is scored on one pooled scale
+(`scripts/28_batch.py`). An expression-level correction aligns shared states
+and does not change which cells a preparation holds, and composition is what
+these two studies differ in. Only presence and absence are read across studies
+here, which is what the reading needs.
+
 **The developmental series carry one sample per stage.** Cells inside a
 sample are not replicates of each other, so the unit is the sample and the
 kidney series gives five of them, the pancreas four and the liver seven. That

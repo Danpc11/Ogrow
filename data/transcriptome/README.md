@@ -19,6 +19,17 @@ Each cell is scored against marker sets for cap mesenchyme, for a pretubular
 aggregate or renal vesicle, and for a formed nephron, and takes the highest
 scoring state. Anything scoring as stroma, endothelium or blood is dropped.
 
+## GSE139280, human fetal kidney, week 14
+
+    GSE139280/GSM4135994_count_table_H14w_0h_genes.tsv
+    GSE139280/GSM4135994_count_table_H14w_0h_matrix.mtx
+
+The fresh sample, read with the same markers and thresholds as the series
+above. It is not merged with it: two studies at the same stage differ several fold
+in progenitor share and a batch correction does not close the gap, so what is
+read across them is presence and absence. `scripts/28_batch.py` is the check,
+and it needs the raw matrices of both kidney series.
+
 ## GSE132188, mouse pancreas, E12.5 to E15.5
 
     GSE132188/GSE132188_adata.h5

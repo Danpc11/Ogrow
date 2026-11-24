@@ -54,9 +54,17 @@ ax[0].legend(handles=[Patch(facecolor=c, label=l) for l, c in
 # B: one sample per stage, and neither ratio orders with stage
 for y, col in ((share, K["kidney"]), (per, K["warm"])):
     ax[1].plot(w, y, "o", ms=3.4, color=col, mew=0)
+k2 = T.get("kidney_second_study")
+if k2:
+    s2 = np.array(k2["npc"], float) / np.maximum(np.array(k2["lineage"], float), 1)
+    ax[1].plot(np.array(k2["week"], float), s2, "s", ms=3.4, color=K["kidney"],
+               mfc="none", mew=0.8)
+    ax[1].annotate("another study", (float(k2["week"][0]), float(s2[0])),
+                   textcoords="offset points", xytext=(4, 4), fontsize=5,
+                   color=K["kidney"])
 sp = T["spearman"]
 ax[1].set_yscale("log"); ax[1].set_xlabel("Gestational week")
-ax[1].set_ylabel("Ratio"); ax[1].set_xlim(7.5, 19.5)
+ax[1].set_ylabel("Ratio"); ax[1].set_xlim(7.5, 20.5)
 ax[1].set_title(f"$\\rho$ = {sp['npc_share'][0]:+.2f}, P = {sp['npc_share'][1]:.2f}"
                 f"   |   $\\rho$ = {sp['induced_per_npc'][0]:+.2f}, "
                 f"P = {sp['induced_per_npc'][1]:.2f}", fontsize=6, color=K["ink"])

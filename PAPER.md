@@ -2,7 +2,7 @@
 
 Target: *npj Regenerative Medicine* if the fee is paid, *Cell Systems* as the
 alternative without one. Both take a theory paper of this shape.
-Reference model: version 4.21.0 (`src/organgrow/closed.py`). Every number from
+Reference model: version 4.24.0 (`src/organgrow/closed.py`). Every number from
 the model that the paper uses is in `PAPER_NUMBERS.md`, written by
 `make paper` with the version and commit that produced it; this file does not
 copy model numbers by hand. Numbers given here are either data (the human
@@ -97,17 +97,25 @@ compartment whether or not that compartment is what stops the organ.
 What separates them is when, measured against the window over which the organ
 is still forming units. In mouse pancreas the multipotent pool falls a
 thousandfold between E12.5 and E15.5 and is gone at the end of the window in
-which that organ specifies its units. In human fetal kidney the progenitor
-share of the nephron lineage is still a sixth of the lineage at week 18, less
-than halfway through a window that runs to weeks 34 to 36 and is known to end
-with those progenitors exhausted. In mouse liver the hepatoblast programme is
-gone by E17.5, a quarter of the way through the window over which hepatocyte
+which that organ specifies its units. In human fetal kidney the progenitors are
+still there at week 18, less than halfway through a window that runs to weeks
+34 to 36 and is known to end with them exhausted. In mouse liver the
+hepatoblast programme is gone by E17.5, a quarter of the way through the
+window over which hepatocyte
 number is still rising, and the liver goes on to gain more than fivefold in
 mass by P20 by dividing the cells it already made. Losing the named
 progenitor does not stop that organ, because in it the differentiated cell is
 the competent one. Two organs are limited by the pool they deplete and one is
 not, which is what the one property predicts and what counting progenitors
 alone would miss.
+
+What is read across these series is presence and absence, not how much. An
+independent week-14 kidney has two thirds of its nephron lineage in
+progenitors against a sixth to a third at weeks 13 to 16 in the first series,
+a spread at the same stage that correcting for batch does not close, because
+an expression-level correction aligns shared states and leaves composition
+alone. A share is a property of the preparation as much as of the organ. An
+absent compartment is not, since no protocol recovers one that is not there.
 
 The law's other prediction cannot be tested here. While the supply term stays
 open, induction should be proportional to the pool, so the number induced per

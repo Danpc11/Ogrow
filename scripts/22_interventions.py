@@ -14,6 +14,8 @@ release almost nothing.
 Usage:  python scripts/22_interventions.py         run (cached) and report
 """
 import json
+import os
+from concurrent.futures import ProcessPoolExecutor
 
 import numpy as np
 
@@ -23,7 +25,7 @@ from organgrow.closed import grow
 
 OUT = ROOT / "results" / "interventions"
 OUT.mkdir(parents=True, exist_ok=True)
-S, NU, DAY0, DAY1, SEEDS = 0.6, 8.0, 140, 180, range(300, 306)
+S, NU, DAY0, DAY1, SEEDS = 0.6, 8.0, 140, 180, tuple(range(300, 324))
 REG = {"liver": dict(P0=2600.0, rho=0.10, delta=0.10, q_set=0.6, renewal=1.0),
        "kidney": dict(P0=300.0, rho=0.00, delta=0.05, q_set=0.6, renewal=0.0),
        "pancreas": dict(P0=60.0, rho=0.00, delta=0.00, q_set=0.6, renewal=0.0)}
@@ -44,7 +46,26 @@ def run(reg, cond, seed):
     return r
 
 
+def _warm(a):
+    """Populate the cache for one run; each file is written by one worker only."""
+    run(*a)
+
+
 if __name__ == "__main__":
+    grid = [g for g in [(reg, cond, sd) for reg in REG for cond in ("none", "supply", "room")
+            for sd in SEEDS] if not (OUT / f"{g[0]}_{g[1]}_s{g[2]}.json").exists()]
+    if grid:
+        n = max(1, min(int(os.environ.get("OGROW_JOBS", 0)) or (os.cpu_count() or 1),
+                       len(grid)))
+        print(f"running {len(grid)} simulations on {n} worker(s)", flush=True)
+        if n > 1:
+            with ProcessPoolExecutor(max_workers=n) as pool:
+                for _ in pool.map(_warm, grid):
+                    pass
+        else:
+            for g in grid:
+                _warm(g)
+
     res = {}
     print(f"{'regime':>9} {'intervention':>13} {'pool on day 140':>16} {'share released by day 180':>27}")
     for reg in REG:
