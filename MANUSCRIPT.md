@@ -8,7 +8,7 @@ Facultad de Ciencias, Universidad Nacional Autónoma de México, Mexico City, Me
 Target journal: *Biofabrication* (IOP). Structure follows IOP's Introduction,
 Methods, Results, Discussion. Abstract is under 300 words.
 
-Reference model version 4.28.0 (`src/organgrow/closed.py`). Every model number
+Reference model version 4.29.0 (`src/organgrow/closed.py`). Every model number
 quoted below is taken from `PAPER_NUMBERS.md`, which `make paper` regenerates
 with the version and commit that produced it, and is checked against the
 result files by `scripts/29_check_manuscript.py`. No model number in this file
@@ -596,17 +596,18 @@ given a source before submission, or the claim removed:
 
 ## Figures
 
-Figure captions are in `FIGURES.md` and are regenerated with the figures by
-`make paper`. The mapping from the figures in the repository to the numbering
-used here is:
+Legends are in `FIGURES.md` and are regenerated with the figures by
+`make paper`. File names in the repository are historical; the mapping is:
 
-| here | repository |
-|---|---|
-| Figure 1 | Fig1_closed, Fig5_pool |
-| Figure 2 | Fig5_pool panels B and C |
-| Figure 3 | interventions, from `PAPER_NUMBERS.md` |
-| Figure 4 | Fig8_injury |
-| Figure 5 | Fig9_transcriptome |
-| Figure 6 | scaling, from `PAPER_NUMBERS.md` |
+| here | file | script |
+|---|---|---|
+| Figure 1 | `Fig1_closed` | `figures/fig_framework.py` |
+| Figure 2 | `Fig5_pool` | `figures/fig_framework.py` |
+| Figure 3 | `Fig3_interventions` | `figures/fig_design.py` |
+| Figure 4 | `Fig8_injury` | `figures/fig_injury.py` |
+| Figure 5 | `Fig9_transcriptome` | `figures/fig_transcriptome.py` |
+| Figure 6 | `Fig6_scaling` | `figures/fig_design.py` |
 
-Figures 3 and 6 do not yet exist as figures and are currently tables only.
+`FIGURES.md` also lists the figures the repository builds that this manuscript
+does not use. They belong to the earlier framing kept in `PAPER.md` and are
+available as supplementary material.
