@@ -1,6 +1,6 @@
 # Numbers the paper uses
 
-Model version 4.34.0, commit 68b5602, generated 2026-11-24 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.36.0, commit 5a5df17, generated 2026-11-24 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b024.
 
@@ -17,7 +17,7 @@ Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b0
 
 ## Regimes at closure (mean ± s.e. over 24 seeds)
 
-`pool spent` is the share of the initial pool no longer held, which is the two columns after it added together. A cell consumed in forming a unit built something; a cell lost to attrition did not. In a renewing pool the loss runs past 1, because the compartment is replaced rather than drawn down: the liver's figure is how many times over it turns. The last column is read off the single trace that the time-series panels show, not off the replicates.
+Two different things are reported here and they do not add up to each other. `pool spent` is a *stock*: the share of the initial pool no longer held at a tip, 1 - P_final/P_0. The two columns after it are *flows* over the whole run, each divided by P_0, and they satisfy the balance the tests check exactly, P_0 + born = consumed + left + lost. In a pool that does not renew, born is zero and the flows do add to the stock. In a renewing pool they do not and cannot: the compartment is replaced rather than drawn down, so the loss runs past 1 and is how many times over the compartment turns, while the stock barely moves. A cell consumed in forming a unit built something; a cell lost to attrition did not. The last column is read off the single trace that the time-series panels show, not off the replicates.
 
 | regime | units | pool spent | of it, consumed into units | of it, lost to attrition | held by supply | held by room | active | units added in the last fifth |
 |---|---|---|---|---|---|---|---|---|
