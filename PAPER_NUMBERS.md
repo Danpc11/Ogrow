@@ -1,6 +1,6 @@
 # Numbers the paper uses
 
-Model version 4.39.0, commit 5ce35b7, generated 2026-11-24 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.40.0, commit f9b4e4a, generated 2026-11-24 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b024.
 
@@ -131,6 +131,30 @@ The unit count is the mean over the seeds with the range they span and its coeff
 | allometric | 0.8 | 174 | 338 [259, 651] | 0.25 | 0.72 | 0.29 | 5.3 % |
 | allometric | 1.0 | 205 | 572 [308, 1052] | 0.40 | 0.64 | 0.37 | 4.6 % |
 | allometric: unit count scales as V^0.58 |  |  |  |  |  |  |  |
+
+## The mass a construct lands on against the flow it is given
+
+The ceiling on a unit is the delivered flow times its share over the delivery per unit mass the tissue needs, and the shares sum to one, so a total of Q/phi is what the rule gives if every unit reaches its ceiling. It is a consequence of the rule, not a measurement. What is measured here is how completely a construct reaches it: `mass / (Q/phi)` away from 1, and the exponent away from 1. `phi` is calibrated on a block of seeds disjoint from the one the sweep is evaluated on. The last column is the mean daily change of mass over the final ten days, which says whether the construct had settled.
+
+**liver**: phi = 0.000752 ± 0.000034, calibrated on seeds 400 to 423, evaluated on seeds 300 to 323. Exponent of mass against delivered flow, one fit per seed: 0.907 ± 0.023, bootstrap 95 % interval [0.899, 0.917].
+
+| delivered flow | mass / pre-injury | mass / (Q/phi) | mass still moving, % per day |
+|---|---|---|---|
+| 0.6 | 0.636 ± 0.021 | 1.733 | nan |
+| 0.8 | 0.825 ± 0.030 | 1.265 | nan |
+| 1.0 | 1.008 ± 0.041 | 0.989 | nan |
+| 1.2 | 1.192 ± 0.049 | 0.812 | nan |
+| 1.4 | 1.372 ± 0.055 | 0.687 | nan |
+
+**kidney**: phi = 0.000905 ± 0.000047, calibrated on seeds 400 to 423, evaluated on seeds 300 to 323. Exponent of mass against delivered flow, one fit per seed: 0.932 ± 0.021, bootstrap 95 % interval [0.924, 0.940].
+
+| delivered flow | mass / pre-injury | mass / (Q/phi) | mass still moving, % per day |
+|---|---|---|---|
+| 0.6 | 0.604 ± 0.031 | 1.674 | nan |
+| 0.8 | 0.788 ± 0.043 | 1.230 | nan |
+| 1.0 | 0.971 ± 0.055 | 0.970 | nan |
+| 1.2 | 1.152 ± 0.066 | 0.798 | nan |
+| 1.4 | 1.330 ± 0.077 | 0.677 | nan |
 
 ## Injury after closure (day 140, 30 % of the units removed by a plane cut, read on day 220; the first four entries are day 220 over the day before the injury, the last two the share of what the cut took that is back, each the mean over 24 seeds with the range they span)
 
