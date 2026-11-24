@@ -61,7 +61,11 @@ root flow held at its pre-injury value; the dashed line marks the injury.
 to the day before the injury, under the three conditions. (C) Kidney after
 30 % and 50 % loss, with growth reactivated and the inflow held: nephrons
 kept, mass per nephron, and the mass per nephron that full compensation would
-require (hatched).
+require (hatched). (D) Day-220 mass against the flow the
+circulation delivers, both relative to the day before the injury, with the
+demand per unit mass measured once on the intact ensemble and held fixed; one
+point per seed, mean with s.d., the fitted exponent, and the dashed line the
+mass the supply budget would give if every unit reached its ceiling.
 
 **Figure 4. When three developing tissues lose the pool they are named for.** (A) Share of the
 nephron lineage in each of three states, cap mesenchyme still uncommitted, a

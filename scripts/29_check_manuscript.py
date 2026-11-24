@@ -126,9 +126,9 @@ if J:
         held = J.get(f"{reg}_reactivated, fixed inflow")
         if not (free and held):
             continue
-        for field, lab in (("mass", "mass"), ("units", "unit count")):
-            need(f"{reg} {lab}, inlet pressure fixed", f"{cv(free[field]):.1f} %")
-            need(f"{reg} {lab}, inflow held", f"{cv(held[field]):.1f} %")
+        # only the mass; the manuscript no longer quotes the unit-count spread
+        need(f"{reg} mass, inlet pressure fixed", f"{cv(free['mass']):.1f} %")
+        need(f"{reg} mass, inflow held", f"{cv(held['mass']):.1f} %")
 
 # ------------------------------------------------- scaling
 Sc = load("scaling.json")

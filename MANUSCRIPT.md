@@ -20,7 +20,7 @@ Ciudad Universitaria, Mexico City, Mexico
 Target journal: *Biofabrication* (IOP). Structure follows IOP's Introduction,
 Methods, Results, Discussion. Abstract is under 300 words.
 
-Reference model version 4.36.0 (`src/organgrow/closed.py`). Every model number
+Reference model version 4.38.0 (`src/organgrow/closed.py`). Every model number
 quoted below is taken from `PAPER_NUMBERS.md`, which `make paper` regenerates
 with the version and commit that produced it, and is checked against the
 result files by `scripts/29_check_manuscript.py`. No model number in this file
@@ -49,7 +49,7 @@ nothing restarts one whose pool is spent. After a 30 % loss of units, how the
 perfusion circuit is driven decides the outcome; at a fixed inlet pressure the
 construct overshoots to 1.82 times its mass without settling, while one held
 at a fixed root flow tracks a supply budget and settles, its mass rising as
-the delivered flow to the power 0.906. Scaling the domain
+the delivered flow to the power 0.908. Scaling the domain
 15-fold raises unit count only as V^0.45, and past an intermediate size the
 unit count also stops being reproducible, its coefficient of variation rising
 from 0.09 to 0.47. The model is not fitted to any construct and its
@@ -359,16 +359,19 @@ such.
 Two things follow that are not consequences of the rule. The first is what the
 construct actually reaches, since with $\xi = 1$ a unit's ceiling moves with
 its own mass and the approach is partial. Setting $\phi$ once on an intact
-ensemble, $\phi = 0.000755 \pm 0.000035$ over 24 seeds, and then varying the
+ensemble, $\phi = 0.000768 \pm 0.000033$ over 24 seeds, and then varying the
 delivered flow between 0.6 and 1.4 times its pre-injury value
-(`scripts/32_inflow_law.py`), the renewing construct lands at 0.637 ± 0.024,
-0.827 ± 0.037, 1.013 ± 0.044, 1.193 ± 0.055 and 1.374 ± 0.068 of its
-pre-injury mass. Mass rises as the delivered flow to the power 0.906. Against
+(`scripts/32_inflow_law.py`), the renewing construct lands at 0.636 ± 0.021,
+0.825 ± 0.030, 1.008 ± 0.041, 1.192 ± 0.049 and 1.372 ± 0.055 of its
+pre-injury mass. Mass rises as the delivered flow to the power 0.908. Against
 the budget itself the construct overshoots when asked to shrink, reaching 1.77
 times $Q/\phi$ at the lowest flow, and falls short when asked to grow,
 reaching 0.70 of it at the highest. A construct fed at constant flow therefore
 tracks its supply, and does so asymmetrically: it grows into a larger budget
-far more readily than it gives up mass to a smaller one.
+far more readily than it gives up mass to a smaller one. The spent-source
+construct behaves the same way, at its own $\phi$ of
+$0.000906 \pm 0.000050$ and an exponent of 0.928, so the asymmetry is a
+property of the rule and not of either cell source.
 
 The second is the contrast with constant pressure, which carries no reference
 to the pre-injury state at all. There the ceiling is the supply at the unit's
@@ -494,7 +497,7 @@ claim its answer here.
 the construct should stop at a target size.** At a fixed inlet pressure the
 model's construct overshoots to 1.82 times its mass after injury and does not
 settle; at fixed root flow it tracks a supply budget, its mass rising as the
-delivered flow to the power 0.906 over a range of 0.6 to 1.4. Nothing in the
+delivered flow to the power 0.908 over a range of 0.6 to 1.4. Nothing in the
 tissue measures its own size in either case. The brake is the supply the
 circuit provides, and where a construct stops is therefore a dial on the pump
 rather than a property of the tissue.

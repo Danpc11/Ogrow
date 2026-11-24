@@ -82,8 +82,9 @@ QS = ["ref", "nu_lo", "nu_hi", "q_lo", "q_hi"]
 fig, ax = plt.subplots(1, 3, figsize=(F.WIDTH_FULL, 62 * F.MM),
                        gridspec_kw=dict(width_ratios=[0.8, 0.9, 0.9]))
 fig.subplots_adjust(left=0.07, right=0.93, bottom=0.27, top=0.88, wspace=0.95)
-parts = [("spent", "spent", "#3a3a3a"), ("supply_held", "held by supply", "#8fb3c9"),
-         ("space_held", "held by room", "#d8c79a"), ("active", "active", "#c8c8c8")]
+# the same four colours Figure 1e uses for the same four shares
+parts = [("spent", "spent", K["ink"]), ("supply_held", "held by supply", K["supply"]),
+         ("space_held", "held by room", K["grey"]), ("active", "active", K["pale"])]
 crow = []
 for i, (reg, name, col) in enumerate(REG):
     runs = [json.load(open(f)) for f in sorted(_glob.glob(str(RES / "robustness" / f"reference_{reg}_s*_0.json")))]

@@ -14,8 +14,12 @@ from organgrow.config import ROOT
 F.apply()
 RES, OUT, SD = ROOT / "results", ROOT / "figures" / "out", ROOT / "source_data"
 OUT.mkdir(parents=True, exist_ok=True); SD.mkdir(parents=True, exist_ok=True)
-K = dict(ink="#2b2b2b", grey="#9a9a9a", kidney="#2e6da4", warm="#b8860b",
-         model="#c0392b", liver="#4a7c3f")
+# One palette for every figure (src/organgrow/figstyle.py). An organ keeps its
+# colour throughout the paper; a state or a fate, which is not an organ, takes
+# one of the three that no organ uses.
+K = dict(ink=F.C["ink"], grey=F.C["grey"], pale=F.C["pale"],
+         kidney=F.C["kidney"], pancreas=F.C["pancreas"], liver=F.C["liver"],
+         state=F.C["supply"], state2=F.C["cells"])
 
 T = json.load(open(RES / "transcriptome.json"))
 w = np.array(T["kidney"]["week"], float)
@@ -34,8 +38,8 @@ ax = [fig.add_subplot(gs[0, 0:2]), fig.add_subplot(gs[0, 2:4]),
 
 # A: the lineage, week by week
 bot = np.zeros(len(w))
-for v, lab, col in ((npc, "progenitor", K["kidney"]),
-                    (ind, "being induced", K["warm"]),
+for v, lab, col in ((npc, "progenitor", K["state"]),
+                    (ind, "being induced", K["state2"]),
                     (neph, "unit formed", K["grey"])):
     ax[0].bar(np.arange(len(w)), v / lin, bottom=bot, width=0.62, color=col, lw=0)
     bot += v / lin
@@ -45,19 +49,19 @@ ax[0].set_xticks(range(len(w))); ax[0].set_xticklabels([f"wk {int(x)}" for x in 
 ax[0].set_ylabel("Share of the nephron lineage"); ax[0].set_ylim(0, 1.1)
 ax[0].set_title("Human fetal kidney", fontsize=7, color=K["kidney"])
 ax[0].legend(handles=[Patch(facecolor=c, label=l) for l, c in
-                      (("progenitor", K["kidney"]), ("being induced", K["warm"]),
+                      (("progenitor", K["state"]), ("being induced", K["state2"]),
                        ("unit formed", K["grey"]))],
              frameon=False, fontsize=5.5, loc="upper center", handlelength=1.1,
              handleheight=0.8, borderpad=0.1, ncol=3, columnspacing=0.8,
              bbox_to_anchor=(0.5, -0.17))
 
 # B: one sample per stage, and neither ratio orders with stage
-for y, col in ((share, K["kidney"]), (per, K["warm"])):
+for y, col in ((share, K["state"]), (per, K["state2"])):
     ax[1].plot(w, y, "o", ms=3.4, color=col, mew=0)
 k2 = T.get("kidney_second_study")
 if k2:
     s2 = np.array(k2["npc"], float) / np.maximum(np.array(k2["lineage"], float), 1)
-    ax[1].plot(np.array(k2["week"], float), s2, "s", ms=3.4, color=K["kidney"],
+    ax[1].plot(np.array(k2["week"], float), s2, "s", ms=3.4, color=K["state"],
                mfc="none", mew=0.8)
     ax[1].annotate("another study", (float(k2["week"][0]), float(s2[0])),
                    textcoords="offset points", xytext=(4, 4), fontsize=5,
@@ -69,8 +73,8 @@ ax[1].set_title(f"$\\rho$ = {sp['npc_share'][0]:+.2f}, P = {sp['npc_share'][1]:.
                 f"   |   $\\rho$ = {sp['induced_per_npc'][0]:+.2f}, "
                 f"P = {sp['induced_per_npc'][1]:.2f}", fontsize=6, color=K["ink"])
 ax[1].legend(handles=[Patch(facecolor=c, label=l) for l, c in
-                      (("progenitor share", K["kidney"]),
-                       ("induced per progenitor", K["warm"]))],
+                      (("progenitor share", K["state"]),
+                       ("induced per progenitor", K["state2"]))],
              frameon=False, fontsize=5.5, loc="lower left", handlelength=1.1,
              handleheight=0.8, borderpad=0.1)
 
@@ -100,7 +104,7 @@ for i, r in enumerate(regs):
     cons, lost, leftv = fate(r)
     tot = max(cons + lost + leftv, 1e-9)
     bot = 0.0
-    for v, col in ((cons, K["kidney"]), (lost, K["model"]), (leftv, K["grey"])):
+    for v, col in ((cons, K["state"]), (lost, K["state2"]), (leftv, K["pale"])):
         ax[2].bar(i, v / tot, bottom=bot, width=0.6, color=col, lw=0)
         bot += v / tot
     rows_c.append([r, cons, lost, leftv])
@@ -111,9 +115,9 @@ _n = RP.get("kidney", {}).get("seeds")
 ax[2].set_title(f"Where the pool goes ({_n} replicates)" if _n
                 else "Where the pool goes, in the model", fontsize=7, color=K["ink"])
 rows_c.append(["liver", *fate("liver")])
-ax[2].legend(handles=[Patch(facecolor=K["kidney"], label="consumed into units"),
-                      Patch(facecolor=K["model"], label="lost to attrition"),
-                      Patch(facecolor=K["grey"], label="still held")],
+ax[2].legend(handles=[Patch(facecolor=K["state"], label="consumed into units"),
+                      Patch(facecolor=K["state2"], label="lost to attrition"),
+                      Patch(facecolor=K["pale"], label="still held")],
              frameon=False, fontsize=5.5, loc="upper center", handlelength=1.1,
              handleheight=0.8, borderpad=0.1, ncol=3, columnspacing=0.8,
              bbox_to_anchor=(0.5, -0.17))
@@ -121,7 +125,7 @@ ax[2].legend(handles=[Patch(facecolor=K["kidney"], label="consumed into units"),
 # D: the two mouse organs, progenitor share against stage
 pan, lv = T["pancreas"], T["liver"]
 for d, key, lo_k, hi_k, lab, col in (
-        (pan, "frac_strict", "s_lo", "s_hi", "pancreas, multipotent", K["warm"]),
+        (pan, "frac_strict", "s_lo", "s_hi", "pancreas, multipotent", K["pancreas"]),
         (lv, "frac_prog", "lo", "hi", "liver, hepatoblast", K["liver"])):
     x = np.array([float(v[1:]) for v in d["stage"]], float)
     y = np.array(d[key], float)
@@ -132,7 +136,7 @@ ax[3].set_yscale("log"); ax[3].set_ylim(2e-5, 2)
 ax[3].set_xlabel("Embryonic day"); ax[3].set_ylabel("Progenitor share\nof the lineage")
 ax[3].set_title("Mouse pancreas and liver", fontsize=7, color=K["ink"])
 ax[3].legend(handles=[Patch(facecolor=c, label=l) for l, c in
-                      (("pancreas, multipotent", K["warm"]),
+                      (("pancreas, multipotent", K["pancreas"]),
                        ("liver, hepatoblast", K["liver"]))],
              frameon=False, fontsize=5.5, loc="lower left", handlelength=1.1,
              handleheight=0.8, borderpad=0.1)
@@ -142,7 +146,7 @@ rows_e = []
 for name, stages, frac, col in (
         ("kidney", w, npc / lin, K["kidney"]),
         ("pancreas", [float(v[1:]) for v in pan["stage"]], np.array(pan["frac_strict"], float),
-         K["warm"]),
+         K["pancreas"]),
         ("liver", [float(v[1:]) for v in lv["stage"]], np.array(lv["frac_prog"], float),
          K["liver"])):
     win = T["windows"][name]
@@ -158,7 +162,7 @@ ax[4].set_xlabel("Fraction of the unit-forming window elapsed")
 ax[4].set_ylabel("Progenitor share,\nrelative to the first stage")
 ax[4].set_title("When each pool goes", fontsize=7, color=K["ink"])
 ax[4].legend(handles=[Patch(facecolor=c, label=l) for l, c in
-                      (("kidney", K["kidney"]), ("pancreas", K["warm"]),
+                      (("kidney", K["kidney"]), ("pancreas", K["pancreas"]),
                        ("liver", K["liver"]))],
              frameon=False, fontsize=5.5, loc="lower left", handlelength=1.1,
              handleheight=0.8, borderpad=0.1, ncol=3, columnspacing=0.8)

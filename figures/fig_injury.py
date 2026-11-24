@@ -15,8 +15,8 @@ from organgrow.config import ROOT
 F.apply()
 RES, OUT, SD = ROOT / "results", ROOT / "figures" / "out", ROOT / "source_data"
 OUT.mkdir(parents=True, exist_ok=True); SD.mkdir(parents=True, exist_ok=True)
-K = dict(ink="#2b2b2b", grey="#9a9a9a", liver="#c0392b", kidney="#2e6da4",
-         warm="#b8860b")
+K = dict(ink=F.C["ink"], grey=F.C["grey"], liver=F.C["liver"],
+         kidney=F.C["kidney"], warm=F.C["cells"])
 CLOSE, FRAC = 140, 0.3
 CONDS = ("as grown", "reactivated", "reactivated, fixed inflow")
 SHORT = ("as grown", "reactivated", "reactivated,\nfixed inflow")
@@ -27,9 +27,11 @@ def load(reg, cond, frac=FRAC, kind="parenchyma"):
     return [json.load(open(f)) for f in sorted(glob.glob(str(RES / "injury" / f"{t}_s*.json")))]
 
 
-fig, ax = plt.subplots(1, 3, figsize=(F.WIDTH_FULL, 54 * F.MM),
-                       gridspec_kw=dict(width_ratios=[1.15, 1.0, 1.0]))
-fig.subplots_adjust(left=0.07, right=0.985, bottom=0.3, top=0.86, wspace=0.42)
+fig = plt.figure(figsize=(F.WIDTH_FULL, 104 * F.MM))
+gs = fig.add_gridspec(2, 2, left=0.075, right=0.985, bottom=0.08, top=0.93,
+                      wspace=0.32, hspace=0.60)
+ax = [fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[0, 1]),
+      fig.add_subplot(gs[1, 0]), fig.add_subplot(gs[1, 1])]
 
 # A: the liver's mass through the injury, under the three conditions
 rows_a = []
@@ -101,14 +103,47 @@ ax[2].legend(handles=[Patch(facecolor=c, label=l, hatch=h, edgecolor=K["grey"]) 
              frameon=False, fontsize=5.5, loc="upper left", handlelength=1.1,
              handleheight=0.8, borderpad=0.1)
 
-F.panel_grid(fig, [list(ax)], ["a", "b", "c"])
+# D: where a construct lands when the delivery it is given is varied, which
+#    is the part of the fixed-inflow result that is not arithmetic
+rows_d = []
+_law = RES / "inflow_law.json"
+if _law.exists():
+    L = json.load(open(_law))["liver"]
+    xs = np.array([r["scale"] for r in L["rows"]], float)
+    for r in L["rows"]:
+        ax[3].plot(np.full(len(r["seeds"]), r["scale"]), r["seeds"], ".",
+                   ms=1.8, color=K["ink"], alpha=0.45, mew=0)
+        rows_d += [["liver", r["scale"], float(v)] for v in r["seeds"]]
+    ys = np.array([r["mass_rel"] for r in L["rows"]], float)
+    es = np.array([r["mass_rel_sd"] for r in L["rows"]], float)
+    ax[3].errorbar(xs, ys, yerr=es, fmt="o-", ms=3.2, lw=1.1, color=K["liver"],
+                   elinewidth=0.7, capsize=1.5, mew=0)
+    ax[3].plot([xs.min(), xs.max()], [xs.min(), xs.max()], ls=(0, (2, 2)),
+               lw=0.8, color=K["grey"])
+    ax[3].text(xs.max(), xs.max() * 1.03, "budget $Q/\\phi$", fontsize=5.5,
+               color=K["grey"], ha="right", va="bottom")
+    ax[3].text(0.04, 0.93, f"mass $\\propto Q^{{{L['slope']:.2f}}}$",
+               transform=ax[3].transAxes, fontsize=6, color=K["liver"])
+    ax[3].set_xlabel("Delivered flow, relative to before injury")
+    ax[3].set_ylabel("Day 220 mass, relative\nto before injury")
+    ax[3].set_title("Liver: the mass follows the supply", fontsize=7,
+                    color=K["liver"])
+else:
+    ax[3].axis("off")
+    ax[3].text(0.5, 0.5, "run scripts/32_inflow_law.py", ha="center",
+               va="center", fontsize=6, color=K["grey"])
+
+F.panel_grid(fig, [ax[:2], ax[2:]], ["a", "b", "c", "d"])
+F.audit(fig, "Fig8_injury")
 fig.savefig(str(OUT / "Fig8_injury.pdf")); fig.savefig(str(OUT / "Fig8_injury.png"), dpi=300)
 plt.close(fig)
 for name, hdr, rows in (("Fig8_trajectories", ["regime", "condition", "day", "mean_relative_mass",
                                              "min_over_seeds", "max_over_seeds"], rows_a),
                         ("Fig8_liver_recovery", ["regime", "condition", "readout", "relative_per_seed"], rows_b),
                         ("Fig8_kidney_compensation",
-                         ["regime", "fraction_lost", "readout", "relative_per_seed"], rows_c)):
+                         ["regime", "fraction_lost", "readout", "relative_per_seed"], rows_c),
+                        ("Fig8_inflow_law",
+                         ["regime", "delivered_flow_relative", "mass_relative_per_seed"], rows_d)):
     with open(SD / f"{name}.csv", "w", newline="") as f:
         w = csv.writer(f); w.writerow(hdr); w.writerows(rows)
 print("wrote Fig8_injury")

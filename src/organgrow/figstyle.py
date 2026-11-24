@@ -65,22 +65,34 @@ def apply():
     })
 
 
-def panel_grid(fig, rows, letters, dx=0.030, dy=0.012):
+def panel_grid(fig, rows, letters, dx=0.008, dy=0.006):
     """Letter a whole figure: `rows` is a list of lists of axes.
 
-    Each row gets one baseline; the first panel of every row gets the same
-    left margin, so the letters form a clean column down the page.
+    Each row gets one baseline and the first panel of every row the same left
+    margin, so the letters form a clean column down the page.
+
+    The letter is placed against each axes' tight bounding box, which includes
+    its tick labels and its y label, rather than against the axes frame. Put
+    at a fixed offset from the frame instead it lands on whichever tick label
+    happens to be widest or tallest, which is what `audit` kept reporting.
     """
     fig.canvas.draw()
-    left = min(r[0].get_position().x0 for r in rows)
+    r = fig.canvas.get_renderer()
+    W, H = fig.canvas.get_width_height()
+
+    def box(a):
+        bb = a.get_tightbbox(r)
+        return bb.x0 / W, bb.y1 / H
+
+    left = min(box(row[0])[0] for row in rows)
     k = 0
     for row in rows:
-        top = max(a.get_position().y1 for a in row)
+        top = max(box(a)[1] for a in row)
         for i, a in enumerate(row):
-            x = left if i == 0 else a.get_position().x0
-            fig.text(x - dx, top + dy, letters[k].upper(),
-                     fontsize=SZ["panel"], fontweight="bold", va="bottom",
-                     ha="left")
+            x = left if i == 0 else box(a)[0]
+            fig.text(max(x - dx, 0.002), min(top + dy, 0.998),
+                     letters[k].upper(), fontsize=SZ["panel"],
+                     fontweight="bold", va="bottom", ha="left")
             k += 1
 
 
@@ -111,7 +123,15 @@ def audit(fig, name="figure", pad=1.0, quiet=False):
             continue
         drawn += [ax.title, ax.xaxis.label, ax.yaxis.label]
         drawn += list(ax.texts)
-        drawn += list(ax.get_xticklabels()) + list(ax.get_yticklabels())
+        # only the ticks inside the view: matplotlib keeps label objects for
+        # ticks it never draws, and they sit wherever they last were
+        if ax.axison:
+            for axis, lim in ((ax.xaxis, ax.get_xlim()),
+                              (ax.yaxis, ax.get_ylim())):
+                lo, hi = sorted(lim)
+                drawn += [lab for loc, lab in zip(axis.get_ticklocs(),
+                                                  axis.get_ticklabels())
+                          if lo - 1e-9 <= loc <= hi + 1e-9]
         lg = ax.get_legend()
         if lg is not None:
             drawn += lg.get_texts()

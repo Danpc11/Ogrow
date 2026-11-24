@@ -34,6 +34,16 @@ found = {
     "CLOSED_MODEL.md": find(r"# The closed model \(version ([0-9.]+)\)", "CLOSED_MODEL.md"),
     "PAPER_NUMBERS.md": find(r"Model version ([0-9.]+)", "PAPER_NUMBERS.md"),
 }
+# No figure may name a colour of its own: one palette lives in
+# src/organgrow/figstyle.py, and a literal here is how Figure 4 came to draw
+# the liver green while every other figure drew it blue.
+_lit = re.compile(r"#[0-9a-fA-F]{6}")
+for _f in sorted((ROOT / "figures").glob("fig_*.py")):
+    _hits = _lit.findall(_f.read_text(encoding="utf-8"))
+    if _hits:
+        fail.append(f"{_f.relative_to(ROOT)} names {len(_hits)} colour(s) of its "
+                    f"own ({', '.join(sorted(set(_hits))[:4])}); use figstyle.C")
+
 print(f"pyproject.toml version {version}")
 for name, v in found.items():
     ok = v == version

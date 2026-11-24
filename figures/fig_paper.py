@@ -220,7 +220,7 @@ if snap.exists() and reps.exists():
     axE.set_title("Where each pool ends up", fontsize=F.SZ["label"])
     F.tidy(axE)
     axE.legend(handles=[Patch(facecolor=c, label=l) for _, l, c in PARTS],
-               loc="upper center", bbox_to_anchor=(0.5, -0.09), ncol=2,
+               loc="upper center", bbox_to_anchor=(0.5, -0.20), ncol=2,
                columnspacing=1.0)
 
     # ---------------------------------------------------- F: the three rows
