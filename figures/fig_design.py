@@ -64,7 +64,7 @@ if Sc:
     ax[0].set_xlabel("Domain volume (relative)"); ax[0].set_ylabel("Units at arrest")
     ax[0].set_xlim(0.045, 1.9)
     ax[0].set_title("One point per seed", fontsize=F.SZ["label"])
-    ax[0].legend(handles=hand, loc="upper center", bbox_to_anchor=(0.5, -0.22),
+    ax[0].legend(handles=hand, loc="upper center", bbox_to_anchor=(0.5, -0.34),
                  ncol=1)
 
     S = sorted({r["S"] for r in Sc["geometry"]["rows"]})
