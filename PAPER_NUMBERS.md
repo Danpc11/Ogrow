@@ -1,6 +1,6 @@
 # Numbers the paper uses
 
-Model version 4.26.0, commit 0ff0c68, generated 2026-11-24 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.27.0, commit 1fa6ca1, generated 2026-11-24 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b024.
 
@@ -101,19 +101,19 @@ Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b0
 
 ## Interventions on the closed state (day 140, then 40 days; 24 seeds)
 
-A regime that closes with nothing held has no pool to release, so its share is left out rather than divided by a pool of zero; the last column says how many seeds carried one.
+A regime that closes with nothing held has no pool to release, so the share is reported only where what the regime still holds is a real remnant, one per cent of the pool it started with and at least one cell. Where it is not, the entry is left out rather than divided by a pool of zero, and the column beside it gives the pool against that floor. Units added needs no pool, so it is always over every seed.
 
-| regime | intervention | pool on day 140 | share of that pool released | units added, relative to day 140 | seeds with a pool |
+| regime | intervention | pool on day 140 | pool needed for a share | share of that pool released | units added, relative to day 140 |
 |---|---|---|---|---|---|
-| liver | none | 2535 | 0.002 ± 0.000 | 0.028 ± 0.003 | 24 of 24 |
-| liver | supply | 2535 | 0.018 ± 0.002 | 0.226 ± 0.027 | 24 of 24 |
-| liver | room | 2535 | 0.027 ± 0.002 | 0.323 ± 0.017 | 24 of 24 |
-| kidney | none | 0 | 0.000 ± 0.000 | 0.000 ± 0.000 | 3 of 24 |
-| kidney | supply | 0 | 0.333 ± 0.333 | 0.000 ± 0.000 | 3 of 24 |
-| kidney | room | 0 | 0.000 ± 0.000 | 0.000 ± 0.000 | 3 of 24 |
-| pancreas | none | 15 | 0.008 ± 0.006 | 0.002 ± 0.001 | 24 of 24 |
-| pancreas | supply | 15 | 0.170 ± 0.030 | 0.062 ± 0.014 | 24 of 24 |
-| pancreas | room | 15 | 0.015 ± 0.010 | 0.003 ± 0.002 | 24 of 24 |
+| liver | none | 2534.8 [2014.0, 3306.0] | 26 | 0.002 ± 0.000 | 0.028 ± 0.003 |
+| liver | supply | 2534.8 [2014.0, 3306.0] | 26 | 0.018 ± 0.002 | 0.226 ± 0.027 |
+| liver | room | 2534.8 [2014.0, 3306.0] | 26 | 0.027 ± 0.002 | 0.323 ± 0.017 |
+| kidney | none | 0.1 [0.0, 1.0] | 3 | - | 0.000 ± 0.000 |
+| kidney | supply | 0.1 [0.0, 1.0] | 3 | - | 0.000 ± 0.000 |
+| kidney | room | 0.1 [0.0, 1.0] | 3 | - | 0.000 ± 0.000 |
+| pancreas | none | 15.0 [4.0, 23.0] | 1 | 0.008 ± 0.006 | 0.002 ± 0.001 |
+| pancreas | supply | 15.0 [4.0, 23.0] | 1 | 0.170 ± 0.030 | 0.062 ± 0.014 |
+| pancreas | room | 15.0 [4.0, 23.0] | 1 | 0.015 ± 0.010 | 0.003 ± 0.002 |
 
 ## Organ size: unit count and closure against domain volume (24 seeds each)
 
