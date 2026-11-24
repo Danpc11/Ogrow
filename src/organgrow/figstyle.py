@@ -16,10 +16,18 @@ MM = 1 / 25.4
 WIDTH_FULL = 180 * MM          # Nature double column
 
 # One palette, used by every figure so a colour means the same thing throughout.
+#
+# The six hues are Okabe-Ito, which is the usual choice for a figure that has
+# to survive colour-blind readers and greyscale printing. The three regimes
+# take blue, vermillion and green, which are the three furthest apart in that
+# set. The three resources of the schematic panels take purple, orange and
+# ink; they never share a panel with a regime colour.
 C = dict(
-    ink="#1a1a1a", grey="#8a8a8a", pale="#dcdcdc", box="#f2f4f5",
-    liver="#c0392b", kidney="#2874a6", pancreas="#b7950b", lung="#117a65",
-    sim="#7d5bb8", warn="#b7950b", good="#117a65", bad="#c0392b",
+    ink="#1a1a1a", grey="#6e6e6e", pale="#d9d9d9", box="#f2f4f5",
+    liver="#0072b2", kidney="#d55e00", pancreas="#009e73",
+    supply="#cc79a7", cells="#e69f00", room="#1a1a1a",
+    lung="#009e73", sim="#cc79a7",            # kept: older figures use these
+    warn="#e69f00", good="#009e73", bad="#d55e00",
 )
 
 # Sizes in points at final print size. Nothing below 6 pt.
@@ -74,6 +82,66 @@ def panel_grid(fig, rows, letters, dx=0.030, dy=0.012):
                      fontsize=SZ["panel"], fontweight="bold", va="bottom",
                      ha="left")
             k += 1
+
+
+def audit(fig, name="figure", pad=1.0, quiet=False):
+    """Report text and legends that overlap, which no figure should ever have.
+
+    Checking this by eye fails: a label that clears one panel at one font size
+    runs into its neighbour at another. So every figure script calls this
+    before it saves, and a hit is printed with both strings and the number of
+    overlapping pixels. Tick labels count, since a crowded axis is the usual
+    way two panels collide.
+
+    Only text that is actually drawn is compared. Collecting every Text in the
+    figure instead picks up tick labels matplotlib never places, which sit at
+    the origin and overlap each other wholesale.
+
+    Returns the list of overlapping pairs, so a caller can fail on it.
+    """
+    import itertools
+
+    fig.canvas.draw()
+    r = fig.canvas.get_renderer()
+    drawn = list(fig.texts)
+    for lg in getattr(fig, "legends", []):
+        drawn += lg.get_texts()
+    for ax in fig.axes:
+        if not ax.get_visible():
+            continue
+        drawn += [ax.title, ax.xaxis.label, ax.yaxis.label]
+        drawn += list(ax.texts)
+        drawn += list(ax.get_xticklabels()) + list(ax.get_yticklabels())
+        lg = ax.get_legend()
+        if lg is not None:
+            drawn += lg.get_texts()
+
+    W, H = fig.canvas.get_width_height()
+    items = []
+    for t in drawn:
+        if t is None or not t.get_visible() or not str(t.get_text()).strip():
+            continue
+        try:
+            bb = t.get_window_extent(renderer=r)
+        except Exception:
+            continue
+        if bb.width <= 0 or bb.height <= 0:
+            continue
+        if bb.x1 < 0 or bb.y1 < 0 or bb.x0 > W or bb.y0 > H:
+            continue
+        items.append((t, bb))
+
+    hits = []
+    for (t1, b1), (t2, b2) in itertools.combinations(items, 2):
+        dx = min(b1.x1, b2.x1) - max(b1.x0, b2.x0) - pad
+        dy = min(b1.y1, b2.y1) - max(b1.y0, b2.y0) - pad
+        if dx > 0 and dy > 0:
+            hits.append((t1.get_text(), t2.get_text(), dx * dy))
+    if hits and not quiet:
+        print(f"  {name}: {len(hits)} overlapping label pair(s)")
+        for a, b, area in sorted(hits, key=lambda h: -h[2])[:12]:
+            print(f"    {area:7.0f} px  {a[:38]!r}  x  {b[:38]!r}")
+    return hits
 
 
 def tidy(ax, hide_left=False):

@@ -15,12 +15,12 @@ Universidad del Papaloapan, Oaxaca, Mexico
 ^4^ Instituto de Fisiología Celular, Universidad Nacional Autónoma de México,
 Ciudad Universitaria, Mexico City, Mexico
 
-\* Corresponding author: Daniel Pérez-Calixto, [email to be added].
+\* Corresponding author: Daniel Pérez-Calixto, dperez@inmegen.gob.mx
 
 Target journal: *Biofabrication* (IOP). Structure follows IOP's Introduction,
 Methods, Results, Discussion. Abstract is under 300 words.
 
-Reference model version 4.34.0 (`src/organgrow/closed.py`). Every model number
+Reference model version 4.36.0 (`src/organgrow/closed.py`). Every model number
 quoted below is taken from `PAPER_NUMBERS.md`, which `make paper` regenerates
 with the version and commit that produced it, and is checked against the
 result files by `scripts/29_check_manuscript.py`. No model number in this file
@@ -47,8 +47,9 @@ setpoint is the stronger lever in every regime. They differ in whether arrest
 can be undone: relieving perfusion or room restarts a renewing construct and
 nothing restarts one whose pool is spent. After a 30 % loss of units, how the
 perfusion circuit is driven decides the outcome; at a fixed inlet pressure the
-construct overshoots to 1.82 times its mass, and holding the root flow at its
-pre-injury value returns it to 1.01 and stops it. Scaling the domain
+construct overshoots to 1.82 times its mass without settling, while one held
+at a fixed root flow tracks a supply budget and settles, its mass rising as
+the delivered flow to the power 0.906. Scaling the domain
 15-fold raises unit count only as V^0.45, and past an intermediate size the
 unit count also stops being reproducible, its coefficient of variation rising
 from 0.09 to 0.47. The model is not fitted to any construct and its
@@ -170,6 +171,21 @@ The second condition is what a circulation imposes on a tissue that is part of
 a body, and it is what a perfusion bioreactor imposes when it is run at
 constant flow rather than constant pressure.
 
+Under it a unit's ceiling is $m_j^{*} = (Q/\phi)\,w_j/\sum_k w_k$, where $Q$
+is the delivered flow and $\phi$ the delivery per unit mass the tissue
+requires. The shares sum to one, so if every unit sits at its ceiling then
+
+$$\sum_j m_j^{*} = Q/\phi .$$
+
+A ceiling on the whole construct therefore follows from a rule that refers
+only to a tip. This is a consequence of the rule and not a measurement, and we
+report it as one: setting $\phi$ to a construct's own pre-injury delivery per
+unit mass forces that construct back to its pre-injury mass by arithmetic, for
+every seed, which is why Section 3.4 sets $\phi$ once on an intact ensemble
+and then varies $Q$. With $\xi = 1$ a unit's ceiling moves with its own mass,
+so the identity above is approached rather than reached, and how closely is
+measured in Section 3.4.
+
 ### 2.4 Readouts, replicates and robustness
 
 Growth runs for 140 days, by which point all three regimes have stopped. At
@@ -266,12 +282,19 @@ than seeding more cells, in all three regimes, by a margin of between two-fold
 and twenty-fold.
 
 The ordering of pool elasticities, renewing below spent-with-loss below
-spent-without-loss, holds in 13 of 13 variants of the auxiliary rules, each a
-sign test at $P = 0.0002$, and the separations reach $z \ge 2$ in 12 of the 13
-(`PAPER_NUMBERS.md`, The ordering counted over the variants). The one variant
-in which it is not resolved is the one without load-driven sprouting, where
-the renewing source's elasticity has a standard error of the order of its own
-range.
+spent-without-loss, holds in all 13 variants of the auxiliary rules, and the
+separation reaches $z \ge 2$ in 12 of them (`PAPER_NUMBERS.md`, The ordering
+counted over the variants). The contrast within each variant is paired seed by
+seed and its $z$ is a test; the count across variants is not, because the
+variants share a model, a parameter set and the same 24 seeds. It says that
+the ordering does not depend on which auxiliary rule is in force, not that it
+has been confirmed 13 times over.
+
+The variant in which it is not resolved is the one without load-driven
+sprouting, where the three contrasts fall to $z$ of 1.5, 0.6 and 1.8. That
+rule is therefore not auxiliary: sprouting driven by load carries part of the
+separation between regimes, and removing it costs both the size of the
+contrast and its precision.
 
 This ordering is also the pattern reported in mice by Stanger, Tanaka and
 Melton [2], who found that halving the pancreatic progenitor pool halved the
@@ -310,7 +333,8 @@ A construct grown to arrest, then stripped of 30 % of its units by a plane
 cut and followed for 80 more days, does not recover on its own
 (`PAPER_NUMBERS.md`, Injury; Figure 3). Left as grown, the renewing construct
 returns to 0.95 [0.77, 1.01] of its unit count but only 0.79 [0.67, 0.86] of
-its mass, and its perfused mass tracks the mass at 0.81 [0.67, 0.90]. The
+its mass, and its perfusion-weighted tissue mass tracks the mass at
+0.81 [0.67, 0.90]. The
 reason is internal to the model: the rate at which a unit grows decays through
 development, so by arrest a unit can no longer enlarge, and a construct that
 rebuilds after arrest fills with units that never mature.
@@ -323,26 +347,47 @@ reaches 1.82 [1.54, 2.07] times its pre-injury mass and the spent-source
 construct 1.85 [1.53, 2.21], because the tree grows its conductance as the
 tissue demands more and perfusion per unit never falls.
 
-Holding the root flow instead at its pre-injury value changes the outcome
-qualitatively. Each unit's share is then its own conductance times the pressure
-its tip delivers, so delivery per unit mass falls as the construct grows. The
-renewing construct restores its mass to 1.01 [0.97, 1.04] and stops. The
-spent-source construct reaches 0.97 [0.94, 0.99]. The rule stays local
-throughout: a unit grows while its own delivery per mass exceeds a threshold,
-and the ceiling on the whole construct follows from that, with nothing
-measuring the whole.
+Holding the root flow fixed instead changes the outcome qualitatively, and
+the reason is the budget of Section 2.3. Each unit's share is its own
+conductance times the pressure its tip delivers, the shares sum to one, so if
+every unit sits at its ceiling the whole construct sits at $Q/\phi$. A ceiling
+on the construct follows from a rule that refers only to a tip, with nothing
+measuring the construct. That is the claim; the value of the ceiling is a
+consequence of the rule and not an independent result, and we report it as
+such.
 
-This is the sharpest prediction in the paper and the cheapest to test. A
-perfusion bioreactor run at constant pressure and one run at constant flow
-should give different final sizes from identical constructs, overshoot in the
-first case and self-limitation in the second.
+Two things follow that are not consequences of the rule. The first is what the
+construct actually reaches, since with $\xi = 1$ a unit's ceiling moves with
+its own mass and the approach is partial. Setting $\phi$ once on an intact
+ensemble, $\phi = 0.000755 \pm 0.000035$ over 24 seeds, and then varying the
+delivered flow between 0.6 and 1.4 times its pre-injury value
+(`scripts/32_inflow_law.py`), the renewing construct lands at 0.637 ± 0.024,
+0.827 ± 0.037, 1.013 ± 0.044, 1.193 ± 0.055 and 1.374 ± 0.068 of its
+pre-injury mass. Mass rises as the delivered flow to the power 0.906. Against
+the budget itself the construct overshoots when asked to shrink, reaching 1.77
+times $Q/\phi$ at the lowest flow, and falls short when asked to grow,
+reaching 0.70 of it at the highest. A construct fed at constant flow therefore
+tracks its supply, and does so asymmetrically: it grows into a larger budget
+far more readily than it gives up mass to a smaller one.
 
-Holding the inflow also makes the outcome more repeatable. Over 24 seeds the
-coefficient of variation of final mass falls from 6.3 % to 2.1 % in the
-renewing construct and from 8.2 % to 1.3 % in the spent-source construct, while
-the spread of unit count is left essentially untouched, 5.9 % to 7.0 % and
-0.5 % to 0.5 % (`PAPER_NUMBERS.md`, Spread across seeds). A fixed supply budget
-fixes the mass and says nothing about how a construct divides it.
+The second is the contrast with constant pressure, which carries no reference
+to the pre-injury state at all. There the ceiling is the supply at the unit's
+tip with no budget, the tree grows its conductance as the tissue demands more,
+and the construct overshoots to 1.82 times its mass without settling.
+
+For completeness, with $\phi$ instead taken from each construct's own
+pre-injury delivery per unit mass, which is what `scripts/24_injury.py` does,
+the renewing construct returns to 1.01 [0.97, 1.04] and the spent-source
+construct to 0.97 [0.94, 0.99] (`PAPER_NUMBERS.md`, Injury). Those numbers,
+and the contraction of the spread of final mass that comes with them from
+6.3 % to 2.1 % and from 8.2 % to 1.3 % (`PAPER_NUMBERS.md`, Spread across
+seeds), are that choice of $\phi$ written out. They are not evidence that the
+construct regulates its own size.
+
+The experiment this asks for is a bioreactor run at several constant flows.
+The model predicts that final mass rises with the delivered flow, close to
+proportionally, and that a construct held at constant pressure does not settle
+at all. Both are cheap to measure and either would falsify the rule.
 
 ### 3.5 A construct that cannot rebuild units enlarges the ones it kept
 
@@ -447,10 +492,12 @@ claim its answer here.
 
 **Drive the perfusion circuit at constant flow, not constant pressure, when
 the construct should stop at a target size.** At a fixed inlet pressure the
-model's construct overshoots to 1.82 times its mass after injury; at fixed root
-flow it returns to 1.01 and stops. Nothing in the tissue measures its own size
-in either case. The brake is the supply the circuit provides. Constant flow also
-tightens the spread of the final mass by a factor of three to six.
+model's construct overshoots to 1.82 times its mass after injury and does not
+settle; at fixed root flow it tracks a supply budget, its mass rising as the
+delivered flow to the power 0.906 over a range of 0.6 to 1.4. Nothing in the
+tissue measures its own size in either case. The brake is the supply the
+circuit provides, and where a construct stops is therefore a dial on the pump
+rather than a property of the tissue.
 
 **Decide whether your cell source renews before deciding how many cells to
 seed.** If it renews, seeding more barely changes the final unit count
@@ -507,15 +554,17 @@ reach them.
 
 Each of the following would decide one result. None has been done.
 
-- **Constant flow against constant pressure.** Two identical perfused
-  constructs, one driven at constant inlet pressure and one at constant flow,
-  followed past the point where growth would arrest. The first should overshoot
-  and the second should stop at a reproducible mass with a tighter
-  construct-to-construct spread.
-- **Count against function.** Unit number and perfused mass measured in the
-  same construct as it rebuilds after arrest. The count should return first and
-  the perfused mass lag or never arrive. A construct whose count and function
-  recover together would contradict the model.
+- **Constant flow against constant pressure, and final mass against flow.**
+  Identical perfused constructs driven at constant inlet pressure and at
+  several constant flows, followed past the point where growth would arrest.
+  The first should not settle; the others should settle at masses that rise
+  close to proportionally with the delivered flow. A construct whose final
+  mass does not depend on the flow it is given would falsify the rule.
+- **Count against perfused tissue.** Unit number and perfusion-weighted
+  tissue mass measured in the same construct as it rebuilds after arrest. The
+  count should return first and the perfusion-weighted mass lag or never
+  arrive. A construct whose count and perfused tissue recover together would
+  contradict the model.
 - **Seeding against source.** Final unit count against seeded pool, in one
   source that renews and one that is spent. The elasticities above are the
   prediction, and they differ by an order of magnitude.
@@ -559,11 +608,23 @@ show calibres below it.
 The developmental series carry one sample per stage, so they support presence
 and absence and not the magnitude of any ratio.
 
+The perfusion-weighted tissue mass is a hydraulic quantity, the mass of each
+unit weighted by its supply against the threshold. It is not a measurement of
+any biological function, and nothing here relates it quantitatively to one.
+
+Recovery after injury requires the ability of a unit to enlarge to be restored
+by hand, through a parameter that resets the growth clock. The model does not
+derive that restoration from the injury, and the consequences of restoring it
+only in part are not swept.
+
 ## 6. Conclusion
 
 The size a perfused tissue reaches, whether its arrest can be undone, and what
 seeding more cells buys all follow from one binary property of the cell source
-and from the boundary condition on the perfusion circuit. Neither is a
+and from the boundary condition on the perfusion circuit. Under a fixed inlet
+pressure there is no ceiling; under a fixed flow the ceiling is the delivered
+flow over what the tissue requires per unit mass, which is a consequence of
+the local rule rather than a separate assumption. Neither is a
 property of the scaffold, and neither requires anything in the tissue to
 measure its own size. Scaling the construct up costs unit density and, past an
 intermediate size, costs reproducibility as well. These are predictions from a
@@ -597,8 +658,8 @@ Universidad del Papaloapan affiliation alone or shares another, since it was
 given for him and Angélica S. Martínez-Ramírez together. Where the three
 authors added last should sit in the order: they are placed here after Genaro
 Vázquez-Victorio and before the senior author, which keeps the corresponding
-author last, but the group decides. The corresponding author's email is
-missing. ORCID identifiers are recommended by IOP and are not yet here.
+author last, but the group decides. ORCID identifiers are recommended by IOP
+and are not yet here.
 
 **Seven claims in the text still need a citation.** Each is in the manuscript
 now and rests on the repository's notes rather than on a verified source.

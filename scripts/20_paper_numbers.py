@@ -55,13 +55,18 @@ if all((RES / "paper" / f"regime_{r}.npz").exists() for r in reg):
     Rp = json.load(open(rp)) if rp.exists() else {}
     nrep = max((v["seeds"] for v in Rp.values()), default=1)
     w(f"## Regimes at closure (mean ± s.e. over {nrep} seeds)\n")
-    w("`pool spent` is the share of the initial pool no longer held, which is "
-      "the two columns after it added together. A cell consumed in forming a "
-      "unit built something; a cell lost to attrition did not. In a renewing "
-      "pool the loss runs past 1, because the compartment is replaced rather "
-      "than drawn down: the liver's figure is how many times over it turns. "
-      "The last column is read off the single trace that the time-series "
-      "panels show, not off the replicates.\n")
+    w("Two different things are reported here and they do not add up to each "
+      "other. `pool spent` is a *stock*: the share of the initial pool no "
+      "longer held at a tip, 1 - P_final/P_0. The two columns after it are "
+      "*flows* over the whole run, each divided by P_0, and they satisfy the "
+      "balance the tests check exactly, P_0 + born = consumed + left + lost. "
+      "In a pool that does not renew, born is zero and the flows do add to "
+      "the stock. In a renewing pool they do not and cannot: the compartment "
+      "is replaced rather than drawn down, so the loss runs past 1 and is how "
+      "many times over the compartment turns, while the stock barely moves. A "
+      "cell consumed in forming a unit built something; a cell lost to "
+      "attrition did not. The last column is read off the single trace that "
+      "the time-series panels show, not off the replicates.\n")
     rows = []
     for r in reg:
         d = np.load(RES / "paper" / f"regime_{r}.npz")

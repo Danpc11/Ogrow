@@ -253,6 +253,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
          nucleation="poisson_capped", substeps=1, turnover="independent",
          renewal=0.0, q_floor=0.0, injure_day=None, injury=None, injury_fraction=0.3,
          injury_axis=1, injury_reactivates=0.0, inflow_limited=False,
+         inflow_scale=1.0, phi_demand=None,
          intervene_day=None, intervene=None, intervene_factor=0.8):
     """Grow one organ. `sdf(x, y, z)` is negative inside the domain.
 
@@ -479,11 +480,25 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                             P[k] = int(round(P[k] * (1.0 - frac_lost)))
                 U = U[~hit_u]; m = m[~hit_u]
             if inflow_limited:
-                # fix the delivery at what the intact organ was receiving, and
-                # the demand at the delivery per unit mass it was living on
-                inflow_target = float(tr.Q[-1]) if tr.Q else None
+                # The circulation keeps delivering `inflow_scale` times what
+                # the intact organ was receiving, and the tissue needs
+                # `phi_demand` of delivery per unit mass.
+                #
+                # Left to itself, phi_demand is read off the intact organ as
+                # its own delivery per unit mass. That is convenient and it is
+                # circular: the equilibrium total mass is inflow_target /
+                # phi_set, so with inflow_scale = 1 and phi_set taken this way
+                # the organ is required to come back to exactly the mass it
+                # had, and the recovery it reports is arithmetic rather than a
+                # prediction. Pass phi_demand, measured once on an intact
+                # ensemble and held fixed, to ask the question properly:
+                # whether the mass a construct lands on follows the delivery
+                # it is given divided by what the tissue needs.
+                q0 = float(tr.Q[-1]) if tr.Q else None
+                inflow_target = q0 * float(inflow_scale) if q0 else None
                 if inflow_target and m.sum() > 0:
-                    phi_set = inflow_target / float(pre["mass"])
+                    phi_set = (float(phi_demand) if phi_demand is not None
+                               else q0 / float(pre["mass"]))
             # Injury can restore the ability of a unit to enlarge. The growth
             # rate decays as exp(-t / tau_g), so by closure a unit can no
             # longer grow; after damage, real organs enlarge the units they

@@ -27,7 +27,7 @@ RES, OUT, SD = ROOT / "results", ROOT / "figures" / "out", ROOT / "source_data"
 OUT.mkdir(parents=True, exist_ok=True)
 SD.mkdir(parents=True, exist_ok=True)
 K = F.C
-SUP, CEL, ROO = K["sim"], K["lung"], K["ink"]          # supply, cells, room
+SUP, CEL, ROO = K["supply"], K["cells"], K["room"]      # the three resources
 SM, TN = F.SZ["small"], 5.4
 REG = (("liver", "renewing", K["liver"]),
        ("kidney", "spent,\nwith loss", K["kidney"]),
@@ -246,6 +246,7 @@ if snap.exists() and reps.exists():
 
     F.panel_grid(fig, [[axA, axB, axC], [axD, axE, axF]],
                  ["a", "b", "c", "d", "e", "f"])
+    F.audit(fig, "Fig1_model")
     fig.savefig(str(OUT / "Fig1_model.pdf"))
     fig.savefig(str(OUT / "Fig1_model.png"), dpi=300)
     plt.close(fig)
@@ -377,6 +378,7 @@ if E and Rb and I:
                columnspacing=1.6)
     F.panel_grid(fig, [[a0, a1, a2], [a3, a4, a5]],
                  ["a", "b", "c", "d", "e", "f"])
+    F.audit(fig, "Fig2_bounds")
     fig.savefig(str(OUT / "Fig2_bounds.pdf"))
     fig.savefig(str(OUT / "Fig2_bounds.png"), dpi=300)
     plt.close(fig)

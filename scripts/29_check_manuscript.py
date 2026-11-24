@@ -13,6 +13,10 @@ formatted string stops matching and this fails with the old text and the new
 value side by side. It does not parse the manuscript or guess at context: a
 number that moved is a failure, and the fix is to edit the sentence.
 
+It is a consistency barrier, not a scientific audit: it holds the prose to the
+tables it quotes, and says nothing about whether a causal claim in the text is
+warranted or whether a number nobody listed here is right.
+
 Run it after `make paper`. It needs only the standard library plus numpy.
 
 Usage:  python scripts/29_check_manuscript.py
@@ -172,6 +176,22 @@ if T:
                  f"{wdw['share']:.4f}")
             need(f"{organ}, fraction of the window elapsed",
                  f"{wdw['window_fraction']:.0%}".replace("%", " %"))
+
+
+# ------------------------------------------------- the supply budget sweep
+L = load("inflow_law.json")
+if L and "liver" in L:
+    d = L["liver"]
+    need("delivery per unit mass of the intact ensemble",
+         f"{d['phi']:.6f} \\pm {d['phi_sd']:.6f}")
+    need("mass against delivered flow, exponent", f"{d['slope']:.3f}")
+    for r in d["rows"]:
+        need(f"mass at {r['scale']} of the pre-injury flow",
+             f"{r['mass_rel']:.3f} ± {r['mass_rel_sd']:.3f}")
+    lo, hi = d["rows"][0], d["rows"][-1]
+    need("overshoot of the budget at the lowest flow", f"{lo['mass_over_law']:.2f}")
+    need("shortfall against the budget at the highest flow",
+         f"{hi['mass_over_law']:.2f}")
 
 
 def main():

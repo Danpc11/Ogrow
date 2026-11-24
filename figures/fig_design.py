@@ -99,6 +99,7 @@ if Sc:
     for a in ax:
         F.tidy(a)
     F.panel_grid(fig, [list(ax)], ["a", "b", "c"])
+    F.audit(fig, "Fig6_scaling")
     fig.savefig(str(OUT / "Fig6_scaling.pdf"))
     fig.savefig(str(OUT / "Fig6_scaling.png"), dpi=300)
     plt.close(fig)

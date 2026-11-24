@@ -274,6 +274,20 @@ check("at a fixed inlet pressure the rebuild overshoots", _react > 1.3,
 check("a fixed inflow stops the rebuild at the old size", 0.9 < _held < 1.15,
       f"mass {_held:.2f} of pre-injury")
 
+# The size it stops at is the delivered flow over what the tissue needs per
+# unit mass. Left to itself the second is read off the organ's own pre-injury
+# state, which forces it back to exactly that mass; these two check that the
+# dial is real and that leaving it alone changes nothing.
+_more = _after_injury(injury_reactivates=1.0, inflow_limited=True, inflow_scale=1.4)
+_less = _after_injury(injury_reactivates=1.0, inflow_limited=True, inflow_scale=0.6)
+check("a larger delivered flow lands the organ on a larger mass",
+      _more > _held + 0.1 and _less < _held - 0.05,
+      f"0.6x {_less:.2f}, 1.0x {_held:.2f}, 1.4x {_more:.2f} of pre-injury")
+_same = _after_injury(injury_reactivates=1.0, inflow_limited=True,
+                      inflow_scale=1.0, phi_demand=None)
+check("leaving the demand unset leaves the reference behaviour untouched",
+      abs(_same - _held) < 1e-12, f"{_same:.6f} against {_held:.6f}")
+
 # the final per-segment state covers every segment, so tips index into it
 from organgrow.closed import _q_full as _qf
 _fin = tr_.final

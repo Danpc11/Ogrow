@@ -164,6 +164,7 @@ ax[4].legend(handles=[Patch(facecolor=c, label=l) for l, c in
              handleheight=0.8, borderpad=0.1, ncol=3, columnspacing=0.8)
 
 F.panel_grid(fig, [ax[:3], ax[3:]], ["a", "b", "c", "d", "e"])
+F.audit(fig, "Fig9_transcriptome")
 fig.savefig(str(OUT / "Fig9_transcriptome.pdf"))
 fig.savefig(str(OUT / "Fig9_transcriptome.png"), dpi=300)
 plt.close(fig)
