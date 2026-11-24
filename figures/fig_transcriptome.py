@@ -51,18 +51,18 @@ ax[0].legend(handles=[Patch(facecolor=c, label=l) for l, c in
              handleheight=0.8, borderpad=0.1, ncol=3, columnspacing=0.8,
              bbox_to_anchor=(0.5, -0.17))
 
-# B: the pool falls, induction per progenitor rises
-for y, lab, col in ((share, "progenitor share of the lineage", K["kidney"]),
-                    (per, "induced per progenitor", K["warm"])):
-    ax[1].plot(w, y, "o", ms=3, color=col, mew=0)
-    s, c = np.polyfit(w, np.log(y), 1)
-    ax[1].plot(w, np.exp(c + s * w), "-", lw=0.9, color=col)
-    ax[1].text(18.4, np.exp(c + s * 18), f"{s:+.3f}/wk", fontsize=5.5, color=col, va="center")
+# B: one sample per stage, and neither ratio orders with stage
+for y, col in ((share, K["kidney"]), (per, K["warm"])):
+    ax[1].plot(w, y, "o", ms=3.4, color=col, mew=0)
+sp = T["spearman"]
 ax[1].set_yscale("log"); ax[1].set_xlabel("Gestational week")
-ax[1].set_ylabel("Ratio"); ax[1].set_xlim(7.5, 21.5)
-ax[1].set_title(f"Fisher exact P = {T['fisher_P']:.0e}", fontsize=6.5, color=K["ink"])
+ax[1].set_ylabel("Ratio"); ax[1].set_xlim(7.5, 19.5)
+ax[1].set_title(f"$\\rho$ = {sp['npc_share'][0]:+.2f}, P = {sp['npc_share'][1]:.2f}"
+                f"   |   $\\rho$ = {sp['induced_per_npc'][0]:+.2f}, "
+                f"P = {sp['induced_per_npc'][1]:.2f}", fontsize=6, color=K["ink"])
 ax[1].legend(handles=[Patch(facecolor=c, label=l) for l, c in
-                      (("progenitor share", K["kidney"]), ("induced per progenitor", K["warm"]))],
+                      (("progenitor share", K["kidney"]),
+                       ("induced per progenitor", K["warm"]))],
              frameon=False, fontsize=5.5, loc="lower left", handlelength=1.1,
              handleheight=0.8, borderpad=0.1)
 

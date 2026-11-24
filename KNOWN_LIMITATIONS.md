@@ -175,6 +175,15 @@ large a unit may become. The vascular and combined injuries were examined only
 under the original condition, in which no organ recovers, and have not been
 rerun with reactivation and a fixed inflow.
 
+**The developmental series carry one sample per stage.** Cells inside a
+sample are not replicates of each other, so the unit is the sample and the
+kidney series gives five of them, the pancreas four and the liver seven. That
+is enough to say where a pool stands at the last stage measured, which is what
+the reading rests on, and not enough to test how a rate changes across
+development: over the five kidney samples neither the progenitor share nor the
+number induced per progenitor orders with stage. A series with replicate
+donors per stage would settle it.
+
 **A budget cannot be spent to the last cell.** This is structural, not a
 choice of parameters. A progenitor is tied to the tip it sits at, so where
 supply there falls short it strands: with no attrition, no initial pool

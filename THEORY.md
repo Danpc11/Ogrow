@@ -910,13 +910,16 @@ without it are not distinguishable. So the ordering of the three organs is
 not an artefact of the term, and only the description of how the kidney closes
 needed correcting.
 
-Human fetal kidney, weeks 9 to 18 (GSE114530), says what is missing. The
-progenitor share of the nephron lineage falls while the number induced per
-progenitor still held rises, +0.072 per week in log, +0.069 without the
-sparsest week, Fisher exact P of 1e-19 between weeks 11 and 18. A law whose
-per-progenitor rate is fixed while the supply term is open cannot produce
-that. The organ is not supply-closed, which the law gets right, and its rate
-rises as the pool falls, which the law does not have.
+Human fetal kidney, weeks 9 to 18 (GSE114530), was read for the law's other
+prediction, that induction per progenitor still held holds steady while the
+supply term is open. It cannot answer it. Over the five samples neither that
+ratio nor the progenitor share orders with stage, Spearman rho +0.30 and
+−0.50 with P of 0.62 and 0.39, and with one sample per stage a change over
+development is not separable from a difference between samples. An earlier
+reading of four of those five reported a rising ratio with a Fisher exact P
+computed over cells; counting cells inside a sample as replicates of each
+other answered a question nobody asked, and the fifth sample does not follow
+the trend. Deciding this needs replicate donors per stage.
 
 ### Closure is stable, and its reversibility differs between regimes
 

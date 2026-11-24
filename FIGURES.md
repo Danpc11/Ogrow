@@ -14,7 +14,7 @@ follow the manuscript numbering; this table is the mapping.
 | Figure 4 | `Fig3_closed.pdf` | `figures/fig3_closed.py` | an individual's spread, and how much of it reaches size |
 | Figure 5 | `Fig6.pdf` | `figures/fig6.py` | 96 human kidneys: size between donors, shape within |
 | Figure 6 | `Fig8_injury.pdf` | `figures/fig_injury.py` | injury after closure: what recovery needs, and what the kidney does instead |
-| 9 | `Fig9_transcriptome` | `figures/fig_transcriptome.py` | a developing kidney against the nucleation law |
+| 9 | `Fig9_transcriptome` | `figures/fig_transcriptome.py` | when three developing organs lose the pool they are named for |
 | Figure 7 | `Fig5_closed.pdf` | `figures/fig_closed_paper.py` | the vascular rules |
 | Figure 8 | `Fig4_closed.pdf` | `figures/fig_closed_paper.py` | contraction of the spread |
 
@@ -81,15 +81,15 @@ line, Spearman correlation and P. (B) CV of unit number at closure against
 its CV at the start of the measured interval, for a spread in maturity
 (offsets of 2 to 10 days), a spread in rate, and the mouse liver.
 
-**Figure 9. A developing kidney against the nucleation law.** (A) Share of the
+**Figure 9. When three developing organs lose the pool they are named for.** (A) Share of the
 nephron lineage in each of three states, cap mesenchyme still uncommitted, a
 pretubular aggregate or renal vesicle being induced, and a unit already
-formed, at four gestational weeks of human fetal kidney (GSE114530); the
+formed, at five gestational weeks of human fetal kidney (GSE114530); the
 number above each bar is the cells of the lineage scored at that week.
 (B) Progenitor share of the lineage and number induced per progenitor still
-held, against gestational week, on a log scale with fitted slopes per week;
-the title gives the Fisher exact P for induced against still held at week 11
-versus week 18. (C) Where the initial progenitor pool goes in the model, for
+held, against gestational week, on a log scale, one point per sample; the
+title gives Spearman's rho against stage and its P for each, over the five
+samples. (C) Where the initial progenitor pool goes in the model, for
 the two regimes whose pool is a budget; the liver is not shown because it
 renews, so a share of what it started with is not a denominator for it.
 (D) Progenitor share of the lineage against embryonic day in mouse pancreas,

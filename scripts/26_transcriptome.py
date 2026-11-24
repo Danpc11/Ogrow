@@ -1,13 +1,17 @@
 #!/usr/bin/env python
 """Three developing organs, read against the law that is supposed to govern them.
 
-The nucleation law is lambda = nu * P * (q - q_set)+, and it says two things
-that a developmental time course can answer. While the supply term stays open,
-induction is proportional to the pool, so the number of progenitors induced
-per progenitor still held does not change as the pool falls; if the supply
-term is closing instead, the pool persists while that ratio drops. And a pool
-that is a budget empties as its organ finishes, while a pool that renews is
-not what limits its organ at all.
+A pool that is a budget empties as its organ finishes; a pool that renews is
+not what limits its organ at all, so it can go early and leave the organ
+building. That is what these three series are read for, and it is a question
+the last measured stage answers.
+
+The nucleation law also says that while the supply term stays open, induction
+is proportional to the pool, so the number induced per progenitor still held
+should hold steady as the pool falls. That one is reported and not concluded
+from: the series carries a single sample per stage, and across the five the
+ratio does not order with stage, so a change over development and a
+difference between samples cannot be told apart here.
 
     kidney    GSE114530, human fetal, weeks 9 to 18. Cells of the nephron
               lineage are put in one of three states by marker score: cap
@@ -44,7 +48,8 @@ SD = ROOT / "source_data"
 RNG = np.random.default_rng(0)
 
 KIDNEY_SAMPLES = {9: "GSM3509837_1_wk09", 11: "GSM3509838_2_wk11",
-                  13: "GSM3509839_3_wk13", 18: "GSM3509840_5_wk18"}
+                  13: "GSM3509839_3_wk13", 16: "GSM3143601_4_w16",
+                  18: "GSM3509840_5_wk18"}
 NPC = ["SIX2", "CITED1", "MEOX1", "EYA1", "SALL1", "CRYM", "DAPL1", "TMEM100"]
 INDUCED = [g for g in ["WNT4", "LHX1", "PAX8", "JAG1", "DLL1", "HEYL", "CCND1"]
            if g not in NPC]
@@ -243,10 +248,13 @@ def main():
     m = w > w.min()
     a2 = float(np.polyfit(w[m], np.log(share[m]), 1)[0])
     b2 = float(np.polyfit(w[m], np.log(per[m]), 1)[0])
-    from scipy.stats import fisher_exact
-    i0 = int(np.flatnonzero(m)[0])
-    P = float(fisher_exact([[int(ind[i0]), int(npc[i0])],
-                            [int(ind[-1]), int(npc[-1])]])[1])
+    # How far either ratio orders with stage at all. Spearman over the stages,
+    # which are the units here: the cells inside one sample are not replicates
+    # of each other, so a test that counts them would answer a question nobody
+    # asked.
+    from scipy.stats import spearmanr
+    rs_share, p_share = spearmanr(w, share)
+    rs_per, p_per = spearmanr(w, per)
 
     print(f"\n{'week':>5} {'lineage':>8} {'NPC':>6} {'induced':>8} {'nephron':>8} "
           f"{'NPC share':>10} {'induced per NPC':>16}")
@@ -257,8 +265,11 @@ def main():
           f"without week {w.min():.0f}: {a2:+.3f}")
     print(f"slope of log(induced per NPC) per week  {b:+.3f}   "
           f"without week {w.min():.0f}: {b2:+.3f}")
-    print(f"induced against still held, week {w[i0]:.0f} vs {w[-1]:.0f}: "
-          f"Fisher exact P = {P:.2e}")
+    print(f"ordering with stage, Spearman over the {len(w)} samples: "
+          f"NPC share rho = {rs_share:+.2f} (P = {p_share:.2f}), "
+          f"induced per NPC rho = {rs_per:+.2f} (P = {p_per:.2f})")
+    print("one sample per stage, so neither ratio separates development from"
+          "\nthe difference between samples")
 
     print(f"\n{'organ':9s} {'last stage':>11} {'progenitor share':>17} "
           f"{'of its window':>14}")
@@ -278,8 +289,11 @@ def main():
     OUT.mkdir(parents=True, exist_ok=True)
     json.dump(dict(kidney=k, pancreas=p, liver=lv, slope_log_npc_share=a,
                    slope_log_induced_per_npc=b, slope_log_npc_share_trimmed=a2,
-                   slope_log_induced_per_npc_trimmed=b2, fisher_P=P,
-                   fisher_weeks=[int(w[i0]), int(w[-1])], windows=done),
+                   slope_log_induced_per_npc_trimmed=b2,
+                   spearman=dict(npc_share=[float(rs_share), float(p_share)],
+                                 induced_per_npc=[float(rs_per), float(p_per)],
+                                 n_samples=int(len(w))),
+                   windows=done),
               open(OUT / "transcriptome.json", "w"), indent=1)
 
 

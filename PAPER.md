@@ -2,7 +2,7 @@
 
 Target: *npj Regenerative Medicine* if the fee is paid, *Cell Systems* as the
 alternative without one. Both take a theory paper of this shape.
-Reference model: version 4.20.0 (`src/organgrow/closed.py`). Every number from
+Reference model: version 4.21.0 (`src/organgrow/closed.py`). Every number from
 the model that the paper uses is in `PAPER_NUMBERS.md`, written by
 `make paper` with the version and commit that produced it; this file does not
 copy model numbers by hand. Numbers given here are either data (the human
@@ -87,43 +87,40 @@ Bonferroni over six invariants, volume ($P$ = 0.0007), flatness and
 surface-per-volume ($P$ < 0.0001) survive. What an individual carries sets how
 large their kidneys are; where each kidney sits sets its shape. Figure 5.
 
-## A developing kidney: the law is right about what binds, wrong about the rate
+## Three developing organs: when each pool goes
 
-The nucleation law can be put to an independent time course. It says induction
-is the pool times how far supply sits above the threshold, so while the supply
-term stays open the number of progenitors induced per progenitor still held
-does not change as the pool falls. If the supply term is closing instead, the
-pool persists while that ratio drops. One developmental series separates the
-two, and this is a test of the law rather than a picture of it.
+Three public developmental series say what happens to the pool each organ is
+supposed to be limited by. All three deplete the progenitor they are named
+for, which on its own settles nothing: differentiation empties a named
+compartment whether or not that compartment is what stops the organ.
 
-In human fetal kidney, weeks nine to eighteen, the progenitor share of the
-nephron lineage falls by 0.092 per week in log, and the number being induced
-per progenitor still held rises by 0.072. Dropping the earliest week, which
-carries 62 cells against several thousand in the rest, leaves these at 0.062
-and 0.069. Comparing week eleven with week eighteen, induced against still
-held, gives a Fisher exact P of 1e-19. The pool is not persisting, so supply
-is not what closes this organ, and that is the law's answer. But the rate per
-surviving progenitor is not fixed either: it rises as the pool empties, which
-a law with a constant per-capita rate cannot produce.
+What separates them is when, measured against the window over which the organ
+is still forming units. In mouse pancreas the multipotent pool falls a
+thousandfold between E12.5 and E15.5 and is gone at the end of the window in
+which that organ specifies its units. In human fetal kidney the progenitor
+share of the nephron lineage is still a sixth of the lineage at week 18, less
+than halfway through a window that runs to weeks 34 to 36 and is known to end
+with those progenitors exhausted. In mouse liver the hepatoblast programme is
+gone by E17.5, a quarter of the way through the window over which hepatocyte
+number is still rising, and the liver goes on to gain more than fivefold in
+mass by P20 by dividing the cells it already made. Losing the named
+progenitor does not stop that organ, because in it the differentiated cell is
+the competent one. Two organs are limited by the pool they deplete and one is
+not, which is what the one property predicts and what counting progenitors
+alone would miss.
 
-The other two organs place that reading. In mouse pancreas the multipotent
-pool falls a thousandfold between E12.5 and E15.5 and is gone at the end of
-the window in which that organ specifies its units, which is a budget spent as
-its organ finishes. In mouse liver the hepatoblast programme is gone by E17.5,
-a quarter of the way through the window over which hepatocyte number is still
-rising, and the liver goes on to gain more than fivefold in mass by P20 by
-dividing the cells it already made. Losing the named progenitor does not stop
-that organ, because in it the differentiated cell is the competent one. Three
-organs deplete a progenitor pool and only two of them are limited by it, which
-is what the one property predicts and what counting progenitors alone would
-miss.
+The law's other prediction cannot be tested here. While the supply term stays
+open, induction should be proportional to the pool, so the number induced per
+progenitor still held should hold steady as the pool falls. Across the five
+kidney samples that ratio does not order with stage, and neither does the
+progenitor share; with a single sample per stage a change over development and
+a difference between samples cannot be told apart. Deciding it needs a series
+with replicate donors per stage.
 
-This is the same gap seen from the other side. The model's kidney reaches an
-empty pool by losing three quarters of it to attrition while a quarter goes
-into nephrons, and a kidney that is running out of progenitors is inducing
-them faster, not dying faster. What the model lacks is a rate that rises as
-the pool falls, which is the final induction that ends nephrogenesis.
-`PAPER_NUMBERS.md`, Regimes; Figure 9.
+Seen from the model's side, its kidney reaches an empty pool by losing three
+quarters of it to attrition while a quarter goes into nephrons, and nothing in
+the model makes a budget empty for the right reason. `PAPER_NUMBERS.md`,
+Regimes; Figure 9.
 
 ## In regeneration: the way an organ stopped decides whether it can restart
 
