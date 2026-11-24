@@ -2,7 +2,7 @@
 
 Target: *npj Regenerative Medicine* if the fee is paid, *Cell Systems* as the
 alternative without one. Both take a theory paper of this shape.
-Reference model: version 4.19.0 (`src/organgrow/closed.py`). Every number from
+Reference model: version 4.20.0 (`src/organgrow/closed.py`). Every number from
 the model that the paper uses is in `PAPER_NUMBERS.md`, written by
 `make paper` with the version and commit that produced it; this file does not
 copy model numbers by hand. Numbers given here are either data (the human
@@ -275,8 +275,9 @@ decide one of them.
   and a larger pool strands more. Two repairs fail for stated reasons. An
   attrition term empties the pool without building anything, which is what the
   kidney regime does now. A residual drive below the threshold empties a
-  budget but wrecks a renewing organ, taking the liver from 201 units to 950
-  and its perfused share from 0.70 to 0.36, and making it organ-specific would
+  budget but wrecks a renewing organ, taking the liver to nearly five times
+  the units and halving the share of its mass the circulation reaches, and
+  making it organ-specific would
   add a second property that differs exactly as `renewal` does, which is the
   claim the paper is testing. The variant is kept as `final_induction`, and
   `scripts/27_pool_fate.py` regenerates the sweeps behind this.

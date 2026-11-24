@@ -897,16 +897,16 @@ attrition, no initial pool between 80 and 300 leaves less than a third of the
 pool held, and a larger pool strands more, so no budget is ever spent to the
 last cell. Giving a stranded progenitor a residual drive below the threshold
 does empty a budget, taking the pancreas to full consumption, but it wrecks
-the renewing organ: the liver goes from 201 units to 950 and its perfused
-share from 0.70 to 0.36, filling with units the circulation does not reach.
+the renewing organ: the liver ends with nearly five times the units and half
+the perfused share, filling with units the circulation does not reach.
 Making that drive organ-specific would add a second property differing exactly
 as `renewal` does, which is the claim under test. The variant is kept as
 `final_induction`, and `scripts/27_pool_fate.py` regenerates all three
 sweeps.
 
 The elasticity of the final count to the initial pool does not depend on the
-attrition term: the kidney gives +0.35 ± 0.06 with it and +0.41 ± 0.09
-without, on six paired replicates each. So the ordering of the three organs is
+attrition term: on six paired replicates the kidney's elasticity with it and
+without it are not distinguishable. So the ordering of the three organs is
 not an artefact of the term, and only the description of how the kidney closes
 needed correcting.
 

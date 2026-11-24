@@ -183,8 +183,9 @@ pool strands more. Two repairs fail for reasons worth stating. An attrition
 term empties the pool without building anything, which is what the kidney
 regime does now, a quarter of its pool consumed in nephrons and three quarters
 lost. A residual drive below the threshold empties a budget but wrecks a
-renewing organ, taking the liver from 201 units to 950 and its perfused share
-from 0.70 to 0.36; making that drive organ-specific would add a second
+renewing organ, taking the liver to nearly five times the units and halving
+the share of its mass the circulation reaches; making that drive
+organ-specific would add a second
 property differing exactly as `renewal` does, which is the claim under test.
 The variant is kept as `final_induction`, and `scripts/27_pool_fate.py`
 regenerates every figure quoted here. What
