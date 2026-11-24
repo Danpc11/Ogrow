@@ -80,6 +80,7 @@ paper:
 	$(PY) figures/fig_injury.py
 	$(PY) figures/fig_transcriptome.py
 	$(PY) figures/fig_design.py
+	$(PY) figures/fig_paper.py
 	$(PY) figures/fig_closed_paper.py
 	$(PY) figures/fig3_closed.py
 	$(PY) figures/fig6.py

@@ -1,19 +1,26 @@
 # Perfusion-limited growth sets the size a vascularised tissue reaches, whether it can be restarted, and how poorly it scales
 
-Daniel Pérez-Calixto^1,2^\*, Hugo Tovar^1^, Genaro Vázquez-Victorio^2^,
-Enrique Hernández-Lemus^1^
+Hugo Tovar^1^, Genaro Vázquez-Victorio^2^, Miguel Ángel Peña-Rico^3^,
+Angélica S. Martínez-Ramírez^3^, Itzel Escobedo-Avila^4^,
+Enrique Hernández-Lemus^1^, Daniel Pérez-Calixto^1,2^\*
 
 ^1^ Instituto Nacional de Medicina Genómica (INMEGEN), Mexico City, Mexico
 
 ^2^ Facultad de Ciencias, Universidad Nacional Autónoma de México, Mexico City,
 Mexico
 
-\* Corresponding author.
+^3^ Centro de Investigaciones Científicas, Instituto de Biotecnología,
+Universidad del Papaloapan, Oaxaca, Mexico
+
+^4^ Instituto de Fisiología Celular, Universidad Nacional Autónoma de México,
+Ciudad Universitaria, Mexico City, Mexico
+
+\* Corresponding author: Daniel Pérez-Calixto, [email to be added].
 
 Target journal: *Biofabrication* (IOP). Structure follows IOP's Introduction,
 Methods, Results, Discussion. Abstract is under 300 words.
 
-Reference model version 4.30.0 (`src/organgrow/closed.py`). Every model number
+Reference model version 4.34.0 (`src/organgrow/closed.py`). Every model number
 quoted below is taken from `PAPER_NUMBERS.md`, which `make paper` regenerates
 with the version and commit that produced it, and is checked against the
 result files by `scripts/29_check_manuscript.py`. No model number in this file
@@ -117,7 +124,8 @@ to the state of the construct as a whole.
 Nucleation is bounded at each tip by three quantities, each of which can run
 out independently: the perfusion available per unit, the competent cells
 present, and the room to place a unit at least a minimum spacing
-$\lambda_{\min}$ from its neighbours.
+$\lambda_{\min}$ from its neighbours. The law, the three bounds and the one
+property of Section 2.2 are drawn in Figure 1a to 1c.
 
 ### 2.2 The cell source
 
@@ -275,7 +283,7 @@ model was not fitted to that experiment.
 At day 140 growth has stopped. Letting it run 40 days further adds 2.8 ± 0.3 %
 more units to the renewing construct and nothing to either spent source, so
 arrest is a state and not a slowdown (`PAPER_NUMBERS.md`, Interventions;
-Figure 3).
+Figure 2).
 
 Arrest can then be probed by relieving one bound at a time. Lowering the
 perfusion setpoint by 20 %, which raises every tip's availability relative to
@@ -300,7 +308,7 @@ change to the circuit or the scaffold will help.
 
 A construct grown to arrest, then stripped of 30 % of its units by a plane
 cut and followed for 80 more days, does not recover on its own
-(`PAPER_NUMBERS.md`, Injury; Figure 4). Left as grown, the renewing construct
+(`PAPER_NUMBERS.md`, Injury; Figure 3). Left as grown, the renewing construct
 returns to 0.95 [0.77, 1.01] of its unit count but only 0.79 [0.67, 0.86] of
 its mass, and its perfused mass tracks the mass at 0.81 [0.67, 0.90]. The
 reason is internal to the model: the rate at which a unit grows decays through
@@ -355,7 +363,7 @@ limit exists, and this is where the model and the biology part company
 The model's central claim is about the cell source, so the one check available
 without new experiments is whether the progenitor pool each tissue is named for
 is present or absent while that tissue is still forming units
-(`PAPER_NUMBERS.md`; Figure 5).
+(`PAPER_NUMBERS.md`; Figure 4).
 
 All three tissues deplete the progenitor they are named for, which on its own
 settles nothing, since differentiation empties a named compartment whether or
@@ -398,7 +406,7 @@ needs a series with replicate donors per stage.
 Scaling the domain over a 15-fold range of volume, with the pool, the window
 and the rates held at the reference, raises the unit count only as
 $V^{0.45}$. Carrying the standard allometric scalings of pool, window and rates
-as well raises it as $V^{0.58}$ (`PAPER_NUMBERS.md`, Organ size; Figure 6).
+as well raises it as $V^{0.58}$ (`PAPER_NUMBERS.md`, Organ size; Figure 5).
 Both are far below the $V^{1}$ that a conserved unit size would require, so
 unit density falls as the construct grows. Doubling the volume buys about 1.4
 times the units.
@@ -582,12 +590,15 @@ vascular system and the cost of blood volume *Proc. Natl Acad. Sci. USA*
 
 ## Notes for the authors, to be removed before submission
 
-**Author order and affiliations are a first proposal, not a decision.** The
-order below puts the author who built the model and wrote the draft first and
-the senior author last. Change it as the group decides. Two items need
-confirming: the spelling of Enrique Hernández-Lemus, and whether he should
-also carry a Centro de Ciencias de la Complejidad, UNAM, affiliation. ORCID
-identifiers are recommended by IOP and are not yet here.
+**Still to confirm on the title page.** The spelling of Enrique
+Hernández-Lemus, and whether he should also carry a Centro de Ciencias de la
+Complejidad, UNAM, affiliation. Whether Miguel Ángel Peña-Rico carries the
+Universidad del Papaloapan affiliation alone or shares another, since it was
+given for him and Angélica S. Martínez-Ramírez together. Where the three
+authors added last should sit in the order: they are placed here after Genaro
+Vázquez-Victorio and before the senior author, which keeps the corresponding
+author last, but the group decides. The corresponding author's email is
+missing. ORCID identifiers are recommended by IOP and are not yet here.
 
 **Seven claims in the text still need a citation.** Each is in the manuscript
 now and rests on the repository's notes rather than on a verified source.
@@ -623,12 +634,14 @@ Legends are in `FIGURES.md` and are regenerated with the figures by
 
 | here | file | script |
 |---|---|---|
-| Figure 1 | `Fig1_closed` | `figures/fig_framework.py` |
-| Figure 2 | `Fig5_pool` | `figures/fig_framework.py` |
-| Figure 3 | `Fig3_interventions` | `figures/fig_design.py` |
-| Figure 4 | `Fig8_injury` | `figures/fig_injury.py` |
-| Figure 5 | `Fig9_transcriptome` | `figures/fig_transcriptome.py` |
-| Figure 6 | `Fig6_scaling` | `figures/fig_design.py` |
+| Figure 1 | `Fig1_model` | `figures/fig_paper.py` |
+| Figure 2 | `Fig2_bounds` | `figures/fig_paper.py` |
+| Figure 3 | `Fig8_injury` | `figures/fig_injury.py` |
+| Figure 4 | `Fig9_transcriptome` | `figures/fig_transcriptome.py` |
+| Figure 5 | `Fig6_scaling` | `figures/fig_design.py` |
+
+Figures 1 and 2 each carry a schematic and the measurement it explains, so the
+argument can be followed from the figures alone.
 
 `FIGURES.md` also lists the figures the repository builds that this manuscript
 does not use. They belong to the earlier framing kept in `PAPER.md` and are

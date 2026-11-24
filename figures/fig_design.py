@@ -1,9 +1,6 @@
-"""Figures 3 and 6 of the manuscript: diagnosing an arrest, and what size costs.
+"""Figure 5 of the manuscript: what domain size costs.
 
-Figure 3 asks what each relief does to a construct that has stopped, which is
-the panel behind the claim that a stalled construct is diagnosable.
-
-Figure 6 is the scaling sweep. Its point is not the exponent but the spread:
+The scaling sweep. Its point is not the exponent but the spread:
 the per-seed counts are drawn, not only their means, because past an
 intermediate domain the same rules and parameters stop giving the same number
 of units, and a mean would hide that.
@@ -36,87 +33,7 @@ def tint(hexcol, f):
     return tuple(1 - f * (1 - c))
 
 
-# ===================================================== Figure 3: interventions
-I = json.load(open(RES / "interventions.json")) if (RES / "interventions.json").exists() else None
-if I:
-    fig, ax = plt.subplots(1, 3, figsize=(F.WIDTH_FULL, 54 * F.MM))
-    fig.subplots_adjust(left=0.07, right=0.99, bottom=0.26, top=0.86, wspace=0.42)
-    x = np.arange(len(REG))
-    w = 0.26
-    rows3 = []
-
-    # A: units added, which needs no pool and so is defined everywhere
-    for j, (cond, lab) in enumerate(COND):
-        v = [100 * I[f"{r}_{cond}"]["units_added"] for r in REG]
-        e = [100 * I[f"{r}_{cond}"]["units_added_se"] for r in REG]
-        ax[0].bar(x + (j - 1) * w, v, w, yerr=e, lw=0, capsize=1.5,
-                  error_kw=dict(elinewidth=0.6),
-                  color=[tint(K[r], SHADE[j]) for r in REG])
-        rows3 += [[r, cond, a, b] for r, a, b in zip(REG, v, e)]
-    ax[0].set_ylabel("Units added by day 180 (%)")
-    ax[0].set_title("What each relief builds", fontsize=F.SZ["label"])
-
-    # B: the share of the pool released, left blank where there is no pool
-    for j, (cond, lab) in enumerate(COND):
-        v = [I[f"{r}_{cond}"]["released"] for r in REG]
-        e = [I[f"{r}_{cond}"]["se"] for r in REG]
-        vv = [0 if a != a else a for a in v]
-        ee = [0 if a != a else a for a in e]
-        ax[1].bar(x + (j - 1) * w, vv, w, yerr=ee, lw=0, capsize=1.5,
-                  error_kw=dict(elinewidth=0.6),
-                  color=[tint(K[r], SHADE[j]) for r in REG])
-    ax[1].set_ylabel("Share of the day-140 pool released")
-    ax[1].set_title("What each relief releases", fontsize=F.SZ["label"])
-    ax[1].set_ylim(0, None)
-    for i, r in enumerate(REG):
-        if not I[f"{r}_none"]["defined"]:
-            ax[1].text(i, ax[1].get_ylim()[1] * 0.06, "nothing held",
-                       ha="center", va="bottom", fontsize=F.SZ["small"],
-                       color=K["ink"], style="italic")
-
-    # C: the pool that denominator needs, against the floor below which
-    #    the ratio is not reported
-    pool = np.array([I[f"{r}_none"]["pool"] for r in REG], float)
-    lo = np.array([I[f"{r}_none"]["pool_lo"] for r in REG], float)
-    hi = np.array([I[f"{r}_none"]["pool_hi"] for r in REG], float)
-    flo = np.array([I[f"{r}_none"]["pool_floor"] for r in REG], float)
-    base = 0.05
-    ax[2].bar(x, np.maximum(pool, base), 0.5, bottom=0, lw=0,
-              color=[tint(K[r], 0.85) for r in REG])
-    ax[2].errorbar(x, np.maximum(pool, base),
-                   yerr=[np.maximum(pool, base) - np.maximum(lo, base),
-                         np.maximum(hi, base) - np.maximum(pool, base)],
-                   fmt="none", ecolor=K["ink"], elinewidth=0.6, capsize=1.5)
-    for i, f in enumerate(flo):
-        ax[2].plot([i - 0.3, i + 0.3], [f, f], ls=(0, (2, 1.5)), lw=0.8, color=K["ink"])
-    ax[2].set_yscale("log"); ax[2].set_ylim(base, 1e4)
-    ax[2].set_ylabel("Progenitors held on day 140")
-    ax[2].set_title("Pool left to release", fontsize=F.SZ["label"])
-    for i, v in enumerate(pool):
-        if v < base:
-            ax[2].text(i, base * 1.25, "0", ha="center", va="bottom",
-                       fontsize=F.SZ["small"], color=K["ink"])
-
-    for a in ax:
-        a.set_xticks(x); a.set_xticklabels(REG, fontsize=F.SZ["tick"])
-        F.tidy(a)
-    fig.legend(handles=[Patch(facecolor=tint(K["grey"], SHADE[j]), label=lab)
-                        for j, (_, lab) in enumerate(COND)]
-               + [plt.Line2D([0], [0], ls=(0, (2, 1.5)), lw=0.8, color=K["ink"],
-                             label="pool a share needs")],
-               loc="lower center", bbox_to_anchor=(0.5, 0.0), ncol=4,
-               columnspacing=1.6)
-    F.panel_grid(fig, [list(ax)], ["a", "b", "c"])
-    fig.savefig(str(OUT / "Fig3_interventions.pdf"))
-    fig.savefig(str(OUT / "Fig3_interventions.png"), dpi=300)
-    plt.close(fig)
-    with open(SD / "Fig3_interventions.csv", "w", newline="") as f:
-        wr = csv.writer(f)
-        wr.writerow(["regime", "intervention", "units_added_pct", "se_pct"])
-        wr.writerows(rows3)
-    print("wrote Fig3_interventions")
-
-# ========================================================= Figure 6: scaling
+# ========================================================= Figure 5: scaling
 Sc = json.load(open(RES / "scaling.json")) if (RES / "scaling.json").exists() else None
 if Sc:
     MODES = [("geometry", "domain alone", K["sim"]),
