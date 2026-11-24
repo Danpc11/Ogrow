@@ -90,8 +90,8 @@ which resource that is follows from one binary property of the cell source.
 
 That property is whether the cell that forms a functional unit is spent in
 forming it. In a liver-like source the cell is not spent, because mononuclear
-hepatocytes are their own progenitors and the compartment is restored by the
-cells it produces. In a kidney-like or pancreas-like source it is spent, and
+hepatocytes are their own progenitors [4] and the compartment is restored by
+the cells it produces. In a kidney-like or pancreas-like source it is spent, and
 the compartment is drawn down. We carry this as a single parameter and show
 that three qualitatively different growth regimes follow from it, together
 with the size of the pool each starts with.
@@ -150,8 +150,9 @@ settings.
 
 The tree grows by sprouting at tips and adapts its calibres under a wall-cost
 objective $\mathcal{C} = Q^2/r^4 + k\,(p\,r^2)^b$ minimised per unit length,
-with wall cross-section proportional to $p\,r^2$ by Laplace's law. This gives
-the branching relation $r_p^{\,b+2} = \sum r_c^{\,b+2}$ and wall shear
+in the sense of Murray [3], with wall cross-section proportional to $p\,r^2$
+by Laplace's law. This gives the branching relation
+$r_p^{\,b+2} = \sum r_c^{\,b+2}$ and wall shear
 proportional to $p^{b/2} r^{\,b-1}$. Shear on a segment in series with its
 tissue peaks at $r_c = (\ell / 3R_t)^{1/4}$, the radius below which a vessel
 regresses.
@@ -211,9 +212,9 @@ self-renewal.
 Four public single-cell series were used to ask whether the progenitor pool
 each tissue is named for is present or absent at a given stage, relative to
 the window over which that tissue is still forming units: human fetal kidney
-(GSE114530, weeks 9, 11, 13, 16, 18; and GSE139280, week 14, as an independent
-preparation), mouse pancreas (GSE132188, E12.5 to E15.5) and mouse liver
-(GSE90047, E10.5 to E17.5, DLK1-sorted). Cell states were assigned by marker
+(GSE114530 [6], weeks 9, 11, 13, 16, 18; and GSE139280 [7], week 14, as an
+independent preparation), mouse pancreas (GSE132188 [8], E12.5 to E15.5) and
+mouse liver (GSE90047 [9], E10.5 to E17.5, DLK1-sorted). Cell states were assigned by marker
 score, z-scored within each sample, with a two-component Gaussian mixture used
 to separate states. Only presence and absence are read across studies, for
 reasons given in Section 3.6.
@@ -428,10 +429,10 @@ pancreas the multipotent pool is at 0.0001 of the lineage at E15.5, the end of
 the window in which that organ specifies its units: 100 % of the window
 elapsed. In human fetal kidney the progenitors are still at 0.1689 of the
 lineage at week 18, 43 % of the way through a window that runs to weeks 34 to
-36. In mouse liver the hepatoblast programme is at 0.0000 by E17.5, 24 % of the
-way through the window over which hepatocyte number is still rising, and the
-liver goes on to gain more than fivefold in mass by P20 by dividing cells it
-has already made.
+36 and closes when those progenitors are exhausted [5]. In mouse liver the
+hepatoblast programme is at 0.0000 by E17.5, 24 % of the way through the window
+over which hepatocyte number is still rising, and the liver goes on to gain
+more than fivefold in mass by P20 by dividing cells it has already made.
 
 Two tissues are limited by the pool they deplete and one is not. That is what
 the single property predicts, and it is what counting progenitors alone would
@@ -598,11 +599,14 @@ paper has been tested against a construct or a tissue.
 The spatial constraint is local exclusion between neighbouring units, not the
 packing limit of the container, which never binds.
 
-The model compensates after injury further than a kidney does, reaching 1.39
-times the mass per unit after a 30 % loss against the 1.43 of full
-compensation, whereas a kidney that loses half its mass grows the remnant by
-about a half rather than doubling it. Nothing in the model limits how large a
-unit may become; in a tissue that limit exists and passing it is injury.
+The model compensates after injury further than a kidney does. After removal of
+one of two kidneys the adult mammalian remnant forms no new nephrons and gains
+about 30 to 50 % in mass, recovering roughly 70 to 80 % of the filtration rate
+rather than all of it [10]. The model, given the same 50 % loss, reaches 1.88
+times the mass per unit against the 2.00 of full compensation: it reproduces
+the mechanism, enlargement of the units that remain with no new ones formed,
+but overshoots its extent. Nothing in the model limits how large a unit may
+become; in a tissue that limit exists and passing it is injury.
 
 The two interventions of Section 3.3 are not matched in strength, so they show
 that both bounds hold the renewing construct, not which holds it more. Room at
@@ -659,6 +663,31 @@ number of embryonic progenitor cells in the pancreas but not the liver
 vascular system and the cost of blood volume *Proc. Natl Acad. Sci. USA*
 **12** 207–14
 
+[4] Wang B et al. 2015 Self-renewing diploid Axin2+ cells fuel homeostatic
+renewal of the liver *Nature* **524** 180–5
+
+[5] Perl A J, Schuh M P and Kopan R 2022 Regulation of nephron progenitor cell
+lifespan and nephron endowment *Nat. Rev. Nephrol.* **18** 683–95
+
+[6] Hochane M et al. 2019 Single-cell transcriptomics reveals gene expression
+dynamics of human fetal kidney development *PLoS Biol.* **17** e3000152
+
+[7] Lindström N O et al. 2021 Spatial transcriptional mapping of the human
+nephrogenic program *Dev. Cell* **56** 2381–98
+
+[8] Bastidas-Ponce A et al. 2019 Comprehensive single cell mRNA profiling
+reveals a detailed roadmap for pancreatic endocrinogenesis *Development*
+**146** dev173716
+
+[9] Yang L et al. 2017 A single-cell transcriptomic analysis reveals precise
+pathways and regulatory mechanisms underlying hepatoblast differentiation
+*Hepatology* **66** 1387–401
+
+[10] Qu X, Shi Y, Li L and Liu T 2026 Compensatory nephron hypertrophy:
+mechanisms, pathophysiology dynamics, and clinical implications in acute kidney
+injury and chronic kidney disease *Kidney Res. Clin. Pract.* advance online
+publication, doi:10.23876/j.krcp.25.405
+
 ## Notes for the authors, to be removed before submission
 
 **Still to confirm on the title page.** The spelling of Enrique
@@ -671,24 +700,48 @@ Vázquez-Victorio and before the senior author, which keeps the corresponding
 author last, but the group decides. ORCID identifiers are recommended by IOP
 and are not yet here.
 
-**Seven claims in the text still need a citation.** Each is in the manuscript
-now and rests on the repository's notes rather than on a verified source.
-Give each one a reference or drop the claim.
+**Of the seven claims that needed a citation, four are now cited** and three
+are still open. References [4] to [10] were located and verified against the
+publishers' own pages; the author lists are given as *et al.* and must be
+expanded to the form Biofabrication asks for, and DOIs added, at submission.
 
-1. Azizoglu et al. 2025, the mouse liver coefficient of variation at the start
-   and at closure, 0.229 and 0.074. This is the single calibration of the
-   model, so it is the most important one to get right.
-2. The human nephrogenesis window, weeks 5 to 35 or 36, ending with the
-   progenitors exhausted.
-3. The mouse pancreatic multipotent window, E9.5 to E15.5.
-4. The mouse liver window over which hepatocyte number is still rising, to
-   P20, with the more than fivefold gain in mass.
-5. Mononuclear hepatocytes acting as their own progenitors.
-6. Compensatory renal hypertrophy after nephrectomy: no new nephrons form, the
-   remaining ones enlarge, function is maintained; and the figure that a
-   kidney losing half its mass grows the remnant by about a half rather than
-   doubling it.
-7. The original publications of the four GEO accessions used in Section 2.5.
+Cited now: mononuclear hepatocytes as their own progenitors [4]; the human
+nephrogenesis window closing with the progenitors exhausted [5]; the four GEO
+accessions [6]–[9]; compensatory renal hypertrophy after nephrectomy [10].
+
+Still open:
+
+1. **The calibration.** The paper is Azizoglu D B, Perez K, Zheng S L,
+   Rahman S, Rim E Y, Anbarchian T, Fish M, Loh K M, Red-Horse K and Nusse R
+   2025 Vascularization of neonatal liver lobules presages adult liver size
+   *Nat. Commun.* **16** 9989, doi:10.1038/s41467-025-64930-w. The two numbers
+   the repository calibrates against, the coefficient of variation of lobule
+   number 0.229 at the start and 0.074 at closure, and the 1.82-fold growth,
+   are **not in that paper's text**. The text reports only a "twofold
+   increase", from n = 3 animals at 1 week to n = 6 at 8 weeks, with mean ± s.d.
+   drawn in Fig. 1g and the values in the Source Data file. Someone must
+   download that Source Data, recompute both coefficients of variation, and
+   either confirm 0.229 and 0.074 or replace them and recalibrate. A
+   coefficient of variation from three animals is a weak estimate and the
+   manuscript should say so wherever the calibration appears.
+2. **The weeks of the human nephrogenesis window.** Reference [5] establishes
+   that nephrogenesis ends with the progenitor population exhausted but gives
+   no gestational weeks. The figures 5 to 34–36 still need their own source.
+3. **The mouse liver window.** The manuscript says hepatocyte number is still
+   rising to P20. The only quantification found says otherwise: Delone G V,
+   Uryvaeva I V, Koretskiĭ V F and Brodskiĭ V Ya 1987 *Ontogenez* **18** 304–8
+   report that in mouse, hepatocyte number rises between one and two months,
+   with growth ending after two months. If that is right the window runs to
+   about P60, not P20, and `WINDOW["liver"]` in `scripts/26_transcriptome.py`
+   is wrong. The correction moves the result in the manuscript's favour: the
+   hepatoblast programme would be gone 10 % of the way through the window
+   instead of 24 %. It changes a checked number, so it needs a decision and a
+   rerun, not an edit.
+
+The mouse pancreatic window E9.5 to E15.5 is covered by [2] for the claim the
+manuscript actually makes about it. If a source for the window itself is
+wanted, Zhou Q et al. 2007 *Dev. Cell* **13** 103–14 is the candidate and has
+not been verified here.
 
 **Four results from the earlier framing are not in this manuscript** and are
 listed in `FIGURES.md` as supplementary: the 96 human kidneys from 48 donors,

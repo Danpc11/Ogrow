@@ -133,8 +133,9 @@ if __name__ == "__main__":
         jobs(reg, [("run", reg, s, x, phi) for x in SCALES for s in SEEDS
                    if not (OUT / f"{reg}_s{s}_x{x}_phi.json").exists()])
 
-        print(f"\n{'inflow':>8} {'mass / pre-injury':>22} {'mass / (Q/phi)':>18} "
-              f"{'units / pre-injury':>19}")
+        # A unit column would separate more units from bigger ones, but the
+        # pre-injury count is not in the cached runs; adding it costs a rebuild.
+        print(f"\n{'inflow':>8} {'mass / pre-injury':>22} {'mass / (Q/phi)':>18}")
         rows = []
         for x in SCALES:
             v = [run(reg, s, x, phi) for s in SEEDS]
