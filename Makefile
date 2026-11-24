@@ -57,8 +57,9 @@ clean:
 distclean: clean
 	rm -rf source_data/*
 
-# The paper: closed model and human cohort. A few minutes on one core for the
-# regime runs, about ten for the transmission; seconds on a multicore machine.
+# The paper: closed model and human cohort. The regime replicates and the
+# transmission are the long parts, tens of minutes on one core each and a few
+# on a multicore machine; every run is cached, so an interrupted build resumes.
 paper:
 	for r in liver kidney pancreas; do for c in baseline pool setpoint; do \
 	  OG_NREP=24 $(PY) scripts/15_transmission.py $$r $$c 0 24; done; done

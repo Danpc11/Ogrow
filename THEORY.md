@@ -632,9 +632,9 @@ of a tip. The model's spatial constraint is the local exclusion of Eq. 13, and
 the organ never approaches the packing limit of its container. A geometry that
 binds at the scale of the organ is not in the model.
 
-Replicate spread also grows with size: at the second largest domain two seeds
-gave 1021 and 276 units. Results at scales far from the reference are not
-reliable, and the regimes reported in this work are stated at one scale.
+Replicate spread also grows with size, by a wide margin at the largest domains
+(`PAPER_NUMBERS.md`, Organ size). Results at scales far from the reference are
+not reliable, and the regimes reported in this work are stated at one scale.
 (`scripts/23_scaling.py`.)
 
 ### Self-averaging, and why it is not yet measured
@@ -944,13 +944,15 @@ the tables, since a rerun moves which variants sit near the threshold.
 The shares of the pool held by supply and by room are a description of the
 final state. Whether each constraint holds growth is a causal question, asked
 here by changing the state on day 140 and running on for 40 days
-(`scripts/22_interventions.py`, six seeds). Unchanged, the liver adds 2.4 % more
+(`scripts/22_interventions.py`). Unchanged, the liver adds a few per cent more
 units and the kidney and pancreas nothing, so closure is stable. A 20 % lower
 threshold, which raises every tip's hydraulic availability relative to it
-without touching the pool, adds 14 % to the liver; a 20 % shorter least
-spacing, which frees room without touching perfusion or the pool, adds 29 %.
-The kidney, with its pool spent, gains nothing from either; the pancreas, with
-a few progenitors left, gains at most a few units from the first. The liver
+without touching the pool, adds several times that to the liver; a 20 % shorter
+least spacing, which frees room without touching perfusion or the pool, adds
+more again. The kidney, with its pool spent and nothing held on the day of the
+intervention, gains nothing from either and has no pool to take a share of; the
+pancreas, with a quarter of its budget left, gains from the first and not from
+the second. The figures are in `PAPER_NUMBERS.md`, Interventions. The liver
 closes held by both constraints at once, and its closure can be undone; the
 kidney's cannot.
 

@@ -51,20 +51,38 @@ if (src / "Fig6bc_variance_partition.csv").exists():
 
 reg = ("liver", "kidney", "pancreas")
 if all((RES / "paper" / f"regime_{r}.npz").exists() for r in reg):
-    w("## Regimes at closure (one organ each)\n")
+    rp = RES / "paper" / "regime_reps.json"
+    Rp = json.load(open(rp)) if rp.exists() else {}
+    nrep = max((v["seeds"] for v in Rp.values()), default=1)
+    w(f"## Regimes at closure (mean ± s.e. over {nrep} seeds)\n")
     w("`pool spent` is the share of the initial pool no longer held, which is "
       "the two columns after it added together. A cell consumed in forming a "
       "unit built something; a cell lost to attrition did not. In a renewing "
       "pool the loss runs past 1, because the compartment is replaced rather "
-      "than drawn down: the liver's figure is how many times over it turns.\n")
+      "than drawn down: the liver's figure is how many times over it turns. "
+      "The last column is read off the single trace that the time-series "
+      "panels show, not off the replicates.\n")
     rows = []
     for r in reg:
         d = np.load(RES / "paper" / f"regime_{r}.npz")
-        c = d["closure"] if "closure" in d.files else [np.nan] * 4
-        fa = d["fate"] if "fate" in d.files else [np.nan] * 4
         Nt = d["N"]; late = (Nt[-1] - Nt[int(0.8 * len(Nt))]) / max(Nt[-1], 1)
-        rows.append([r, int(Nt[-1]), f"{c[0]:.2f}", f"{fa[0]:.2f}", f"{fa[1]:.2f}",
-                     f"{c[1]:.2f}", f"{c[2]:.2f}", f"{c[3]:.2f}",
+        v = Rp.get(r)
+        if v is None:                      # no replicates cached: the one trace
+            c = d["closure"] if "closure" in d.files else [np.nan] * 4
+            fa = d["fate"] if "fate" in d.files else [np.nan] * 4
+            cell = dict(zip(("spent", "supply_held", "space_held", "active"),
+                            (f"{x:.2f}" for x in c)))
+            cell.update(zip(("consumed", "lost"), (f"{x:.2f}" for x in fa)))
+            units = str(int(Nt[-1]))
+        else:
+            def cell_(d_, k):
+                return f"{d_[k]['mean']:.2f} ± {d_[k]['se']:.2f}"
+            cell = {k: cell_(v["closure"], k)
+                    for k in ("spent", "supply_held", "space_held", "active")}
+            cell.update({k: cell_(v["fate"], k) for k in ("consumed", "lost")})
+            units = f"{v['N']['mean']:.0f} ± {v['N']['se']:.0f}"
+        rows.append([r, units, cell["spent"], cell["consumed"], cell["lost"],
+                     cell["supply_held"], cell["space_held"], cell["active"],
                      f"{100 * late:.1f} %"])
     table(["regime", "units", "pool spent", "of it, consumed into units",
            "of it, lost to attrition", "held by supply", "held by room", "active",
@@ -86,9 +104,10 @@ if (RES / "elasticity.json").exists():
     w("## Elasticities of the final count (mean ± s.e., paired replicates)\n")
     rows = [[k.split("_", 1)[0], k.split("_", 1)[1],
              f"{v['P0']['mean']:+.2f} ± {v['P0']['se']:.2f}" if "P0" in v else "-",
-             f"{v['q_set']['mean']:+.2f} ± {v['q_set']['se']:.2f}" if "q_set" in v else "-"]
+             f"{v['q_set']['mean']:+.2f} ± {v['q_set']['se']:.2f}" if "q_set" in v else "-",
+             str(max((v[i]["n"] for i in ("P0", "q_set") if i in v), default=0))]
             for k, v in E.items()]
-    table(["regime", "setting", "pool", "setpoint"], rows)
+    table(["regime", "setting", "pool", "setpoint", "paired replicates"], rows)
 
 if (RES / "paper_numbers.json").exists():
     Pn = json.load(open(RES / "paper_numbers.json"))
@@ -150,15 +169,27 @@ if (RES / "robustness.json").exists():
 
 if (RES / "interventions.json").exists():
     I = json.load(open(RES / "interventions.json"))
-    w("## Interventions on the closed state (day 140, then 40 days; six seeds)\n")
+    ns = {v.get("seeds", 0) for v in I.values()}
+    w(f"## Interventions on the closed state (day 140, then 40 days; "
+      f"{max(ns) if ns else '?'} seeds)\n")
+    w("A regime that closes with nothing held has no pool to release, so its "
+      "share is left out rather than divided by a pool of zero; the last "
+      "column says how many seeds carried one.\n")
+
+    def cell(v, k, se):
+        return ("-" if v[k] != v[k] else f"{v[k]:.3f} ± {v[se]:.3f}")
+
     table(["regime", "intervention", "pool on day 140", "share of that pool released",
-           "units added, relative to day 140"],
-          [[k.split("_")[0], k.split("_")[1], f"{v['pool']:.0f}", f"{v['released']:.3f} ± {v['se']:.3f}",
-            f"{v['units_added']:.3f} ± {v['units_added_se']:.3f}"] for k, v in I.items()])
+           "units added, relative to day 140", "seeds with a pool"],
+          [[k.split("_")[0], k.split("_")[1], f"{v['pool']:.0f}",
+            cell(v, "released", "se"), cell(v, "units_added", "units_added_se"),
+            f"{v.get('seeds_used', 0)} of {v.get('seeds', 0)}"] for k, v in I.items()])
 
 if (RES / "scaling.json").exists():
     Sc = json.load(open(RES / "scaling.json"))
-    w("## Organ size: unit count and closure against domain volume (two seeds each)\n")
+    nse = max(len({r["seed"] for r in v["rows"]}) for v in Sc.values())
+    w(f"## Organ size: unit count and closure against domain volume "
+      f"({nse} seeds each)\n")
     rows = []
     for mode, v in Sc.items():
         for S in sorted({r["S"] for r in v["rows"]}):

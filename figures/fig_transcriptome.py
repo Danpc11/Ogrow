@@ -79,9 +79,25 @@ ax[1].legend(handles=[Patch(facecolor=c, label=l) for l, c in
 # over and a share of what it started with is not a meaningful denominator.
 regs = ("kidney", "pancreas")
 rows_c = []
+_rp = RES / "paper" / "regime_reps.json"
+RP = json.load(open(_rp)) if _rp.exists() else {}
+if not RP:
+    print("fig_transcriptome: no regime_reps.json, panel c falls back to one run "
+          "per regime; run `python scripts/17_paper_runs.py reps` for the means")
+
+
+def fate(r):
+    """Mean over the replicates, with the one-run file as the fallback."""
+    v = RP.get(r)
+    if v is None:
+        fa = np.load(RES / "paper" / f"regime_{r}.npz")["fate"]
+        return float(fa[0]), float(fa[1]), float(fa[3])
+    f = v["fate"]
+    return f["consumed"]["mean"], f["lost"]["mean"], f["left"]["mean"]
+
+
 for i, r in enumerate(regs):
-    fa = np.load(RES / "paper" / f"regime_{r}.npz")["fate"]
-    cons, lost, leftv = float(fa[0]), float(fa[1]), float(fa[3])
+    cons, lost, leftv = fate(r)
     tot = max(cons + lost + leftv, 1e-9)
     bot = 0.0
     for v, col in ((cons, K["kidney"]), (lost, K["model"]), (leftv, K["grey"])):
@@ -91,9 +107,10 @@ for i, r in enumerate(regs):
 ax[2].set_xticks(range(len(regs)))
 ax[2].set_xticklabels(regs, fontsize=6)
 ax[2].set_ylabel("Share of the initial pool"); ax[2].set_ylim(0, 1.0)
-ax[2].set_title("Where the pool goes, in the model", fontsize=7, color=K["ink"])
-_lv = np.load(RES / "paper" / "regime_liver.npz")["fate"]
-rows_c.append(["liver", float(_lv[0]), float(_lv[1]), float(_lv[3])])
+_n = RP.get("kidney", {}).get("seeds")
+ax[2].set_title(f"Where the pool goes ({_n} replicates)" if _n
+                else "Where the pool goes, in the model", fontsize=7, color=K["ink"])
+rows_c.append(["liver", *fate("liver")])
 ax[2].legend(handles=[Patch(facecolor=K["kidney"], label="consumed into units"),
                       Patch(facecolor=K["model"], label="lost to attrition"),
                       Patch(facecolor=K["grey"], label="still held")],

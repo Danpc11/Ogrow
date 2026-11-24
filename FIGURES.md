@@ -28,9 +28,10 @@ closure, for 24 replicates of each regime.
 **Figure 2. What holds each organ's progenitors, and how much of their
 number reaches its size.** (A) Share of the initial progenitor pool spent,
 held at tips short of supply, held for lack of room (estimated by trial
-placements), and still active at closure; mean of six seeds per regime.
-(B) Elasticity of the final unit count to the progenitor pool at five
-settings per regime; bars, s.e. of six paired replicates. (C) Difference in
+placements), and still active at closure; mean over the reference seeds of
+`scripts/21_robustness.py`. (B) Elasticity of the final unit count to the
+progenitor pool at five settings per regime; bars, s.e. over the paired
+replicates (`PAPER_NUMBERS.md`, Elasticities). (C) Difference in
 that elasticity between pancreas and liver under thirteen variants of the
 auxiliary rules, of the progenitor process and of self-renewal, with z;
 bars, s.e.
@@ -58,7 +59,7 @@ trend line, slope and r. (E) The three sources of variation.
 
 **Figure 6. Injury after closure, and the two things recovery needs.** An
 organ loses 30 % of its parenchyma on day 140, after closure, and is read on
-day 220; mean of three seeds. (A) Liver mass against day, relative to the day
+day 220; mean over the seeds of `scripts/24_injury.py`. (A) Liver mass against day, relative to the day
 before the injury, as grown (the growth term has decayed), with growth
 reactivated at a fixed inlet pressure, and with growth reactivated and the
 root flow held at its pre-injury value; the dashed line marks the injury.
@@ -91,8 +92,9 @@ held, against gestational week, on a log scale, one point per sample; the
 open square is the progenitor share of an independent week-14 kidney
 (GSE139280) read the same way, and the title gives Spearman's rho against
 stage and its P for each ratio, over the five samples of the first series. (C) Where the initial progenitor pool goes in the model, for
-the two regimes whose pool is a budget; the liver is not shown because it
-renews, so a share of what it started with is not a denominator for it.
+the two regimes whose pool is a budget, as the mean over the replicates of
+`scripts/17_paper_runs.py reps`; the liver is not shown because it renews, so
+a share of what it started with is not a denominator for it.
 (D) Progenitor share of the lineage against embryonic day in mouse pancreas,
 multipotent cells by the authors' annotation (GSE132188), and mouse liver,
 cells still running the hepatoblast programme among DLK1-sorted cells

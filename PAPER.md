@@ -2,7 +2,7 @@
 
 Target: *npj Regenerative Medicine* if the fee is paid, *Cell Systems* as the
 alternative without one. Both take a theory paper of this shape.
-Reference model: version 4.24.0 (`src/organgrow/closed.py`). Every number from
+Reference model: version 4.25.0 (`src/organgrow/closed.py`). Every number from
 the model that the paper uses is in `PAPER_NUMBERS.md`, written by
 `make paper` with the version and commit that produced it; this file does not
 copy model numbers by hand. Numbers given here are either data (the human
@@ -125,8 +125,8 @@ progenitor share; with a single sample per stage a change over development and
 a difference between samples cannot be told apart. Deciding it needs a series
 with replicate donors per stage.
 
-Seen from the model's side, its kidney reaches an empty pool by losing three
-quarters of it to attrition while a quarter goes into nephrons, and nothing in
+Seen from the model's side, its kidney reaches an empty pool by losing more
+than twice as much of it to attrition as it puts into nephrons, and nothing in
 the model makes a budget empty for the right reason. `PAPER_NUMBERS.md`,
 Regimes; Figure 9.
 
@@ -295,7 +295,6 @@ decide one of them.
   and falling share of close packing, and unit count scales as a power of
   domain volume well below the 1 that a conserved unit size requires.
   `PAPER_NUMBERS.md`, Organ size.
-- That sweep runs two seeds per point, fewer than anything else here.
 - The progenitor processes converge with one, two and four steps a day with
   the tree held fixed within the day. The coupled vascular and tissue dynamics
   run once a day and their convergence with a smaller step was not tested.

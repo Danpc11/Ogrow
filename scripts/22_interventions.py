@@ -46,6 +46,11 @@ def run(reg, cond, seed):
     return r
 
 
+def sem(a):
+    """Standard error of the mean, or nan where one replicate cannot give one."""
+    return float(a.std(ddof=1) / np.sqrt(len(a))) if len(a) > 1 else float("nan")
+
+
 def _warm(a):
     """Populate the cache for one run; each file is written by one worker only."""
     run(*a)
@@ -71,14 +76,26 @@ if __name__ == "__main__":
     for reg in REG:
         for cond in ("none", "supply", "room"):
             rows = [run(reg, cond, s) for s in SEEDS]
-            rel = np.array([r["released"] for r in rows])
+            # A share of a pool that is not there is not a share. The kidney
+            # closes holding nothing, so for it the released share has no
+            # denominator and seeds whose pool is below one cell are dropped
+            # rather than divided by. Units added needs no pool, so it is
+            # taken over every seed: for a regime that closes empty, the zero
+            # it reports is the result, not a missing value.
+            pool = np.array([r["P0"] for r in rows], float)
+            use = pool >= 1.0
+            rel = np.array([r["released"] for r in rows])[use]
             add = np.array([(r["N1"] - r["N0"]) / max(r["N0"], 1e-9) for r in rows])
-            res[f"{reg}_{cond}"] = dict(pool=float(np.mean([r["P0"] for r in rows])),
-                                        released=float(rel.mean()),
-                                        se=float(rel.std(ddof=1) / np.sqrt(len(rel))),
+            res[f"{reg}_{cond}"] = dict(pool=float(pool.mean()),
+                                        seeds=int(len(rows)), seeds_used=int(use.sum()),
+                                        released=float(rel.mean()) if len(rel) > 1
+                                        else float("nan"),
+                                        se=sem(rel),
                                         each=[float(x) for x in rel],
                                         units_added=float(add.mean()),
-                                        units_added_se=float(add.std(ddof=1) / np.sqrt(len(add))))
-            print(f"{reg:>9} {cond:>13} {res[f'{reg}_{cond}']['pool']:>16.0f} "
-                  f"{rel.mean():>20.3f} ± {res[f'{reg}_{cond}']['se']:.3f}")
+                                        units_added_se=sem(add))
+            r_ = res[f"{reg}_{cond}"]
+            print(f"{reg:>9} {cond:>13} {r_['pool']:>16.0f} "
+                  f"{r_['released']:>20.3f} ± {r_['se']:.3f}  "
+                  f"({r_['seeds_used']}/{r_['seeds']} seeds with a pool)")
     json.dump(res, open(ROOT / "results" / "interventions.json", "w"), indent=1)
