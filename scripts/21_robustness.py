@@ -37,6 +37,10 @@ REG = {"liver": dict(P0=2600.0, rho=0.10, delta=0.10, q_set=0.6, renewal=1.0),
        "pancreas": dict(P0=60.0, rho=0.00, delta=0.00, q_set=0.6, renewal=0.0)}
 FIX = dict(R_unit=650.0, units_per_branch=650 / 600.0, max_vessels=6000)
 VARIANTS = {
+    # A residual drive below the supply threshold, so a stranded progenitor is
+    # not held for ever. It empties a budget and wrecks a renewing organ, which
+    # is why the reference version does without it; see KNOWN_LIMITATIONS.md.
+    "final_induction": dict(q_floor=0.03),
     "reference": {},
     "root_surface": dict(root_site="surface"),
     "root_random": dict(root_site="random"),

@@ -289,6 +289,41 @@ check("a segment born after the solve takes its parent's supply",
       list(_qf(np.array([0.4, 0.7]), np.array([-1, 0, 1, 0]), 4)) == [0.4, 0.7, 0.7, 0.4],
       str(list(_qf(np.array([0.4, 0.7]), np.array([-1, 0, 1, 0]), 4))))
 
+# where the pool went has to add up, and a pool that empties is not the same
+# as a pool that was used
+for _lab, _kw in (("renewing", dict(rho=0.10, delta=0.10, renewal=1.0)),
+                  ("budget", dict(rho=0.0, delta=0.05, renewal=0.0))):
+    _U4, _m4, _vt4, _tr4 = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z / 0.6), 114,
+                                 days=50, rng=np.random.default_rng(11), nu=8.0, q_set=0.6,
+                                 P0=300.0, R_unit=650.0, units_per_branch=650 / 600.0,
+                                 max_vessels=3000, **_kw)
+    _f = _tr4.fate
+    check(f"the pool balances in a {_lab} organ", abs(_f["balance"]) < 1e-6,
+          f"P0 + born - (consumed + left + lost) = {_f['balance']:.3g}")
+    check(f"consumed and lost are reported apart in a {_lab} organ",
+          _f["consumed"] >= 0 and _f["lost"] >= 0,
+          f"consumed {_f['consumed']:.2f}, lost {_f['lost']:.2f}")
+
+# q_floor defaults to zero, so the reference model is unchanged by its presence
+_Ua, _ma, _vta, _tra = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z / 0.6), 114,
+                             days=40, rng=np.random.default_rng(5), nu=8.0, q_set=0.6,
+                             rho=0.0, delta=0.0, P0=120.0, R_unit=650.0,
+                             units_per_branch=650 / 600.0, max_vessels=3000)
+_Ub, _mb, _vtb, _trb = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z / 0.6), 114,
+                             days=40, rng=np.random.default_rng(5), nu=8.0, q_set=0.6,
+                             rho=0.0, delta=0.0, P0=120.0, R_unit=650.0, q_floor=0.0,
+                             units_per_branch=650 / 600.0, max_vessels=3000)
+check("q_floor at zero leaves the reference model untouched",
+      _tra.N[-1] == _trb.N[-1] and len(_Ua) == len(_Ub),
+      f"{_tra.N[-1]} against {_trb.N[-1]}")
+_Uc, _mc, _vtc, _trc = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z / 0.6), 114,
+                             days=40, rng=np.random.default_rng(5), nu=8.0, q_set=0.6,
+                             rho=0.0, delta=0.0, P0=120.0, R_unit=650.0, q_floor=0.05,
+                             units_per_branch=650 / 600.0, max_vessels=3000)
+check("a residual drive below threshold spends more of the pool",
+      _trc.fate["consumed"] > _tra.fate["consumed"] + 0.05,
+      f"consumed {_tra.fate['consumed']:.2f} without it, {_trc.fate['consumed']:.2f} with it")
+
 print()
 if FAIL:
     print("FAILED:", ", ".join(FAIL))

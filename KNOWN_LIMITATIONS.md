@@ -175,6 +175,22 @@ large a unit may become. The vascular and combined injuries were examined only
 under the original condition, in which no organ recovers, and have not been
 rerun with reactivation and a fixed inflow.
 
+**A budget cannot be spent to the last cell.** This is structural, not a
+choice of parameters. A progenitor is tied to the tip it sits at, so where
+supply there falls short it strands: with no attrition, no initial pool
+between 80 and 300 leaves less than a third of the pool held, and a larger
+pool strands more. Two repairs fail for reasons worth stating. An attrition
+term empties the pool without building anything, which is what the kidney
+regime does now, a quarter of its pool consumed in nephrons and three quarters
+lost. A residual drive below the threshold empties a budget but wrecks a
+renewing organ, taking the liver from 201 units to 950 and its perfused share
+from 0.70 to 0.36; making that drive organ-specific would add a second
+property differing exactly as `renewal` does, which is the claim under test.
+The variant is kept as `final_induction`, and `scripts/27_pool_fate.py`
+regenerates every figure quoted here. What
+the model lacks is a per-progenitor induction rate that rises as the pool
+falls, which is what the human fetal kidney shows.
+
 **The digits are not reproducible to two decimals across machines.** Every
 run is seeded, so one machine repeats a run exactly. The events are discrete
 and sit on floating-point comparisons, though, so the same seed on a different

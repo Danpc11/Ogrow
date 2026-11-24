@@ -2,7 +2,7 @@
 
 Target: *npj Regenerative Medicine* if the fee is paid, *Cell Systems* as the
 alternative without one. Both take a theory paper of this shape.
-Reference model: version 4.17.0 (`src/organgrow/closed.py`). Every number from
+Reference model: version 4.19.0 (`src/organgrow/closed.py`). Every number from
 the model that the paper uses is in `PAPER_NUMBERS.md`, written by
 `make paper` with the version and commit that produced it; this file does not
 copy model numbers by hand. Numbers given here are either data (the human
@@ -42,15 +42,23 @@ pool each organ starts with.
 
 ## Three ways to stop
 
-With that single difference the three organs close in three ways. The kidney
-spends its pool to the last cell. The pancreas spends most of it and keeps a
-remainder at tips short of supply. The liver keeps nearly all of it, held
-partly where perfusion has fallen to threshold and partly where existing units
-leave no room. These are read from the distribution of the pool over tips at
-closure, with the room at each tip tested by trial placements independent of
-the dynamics, not from an average. They survive thirteen variants of the rules
-that are not the nucleation law. `PAPER_NUMBERS.md`, Regimes and Robustness;
-Figures 1 and 2A, and Figure 3 for the trajectories.
+With that single difference the three organs close in three ways. The liver
+keeps its pool, held partly where perfusion has fallen to threshold and partly
+where existing units leave no room. The pancreas runs its budget down and
+strands the remainder at tips short of supply. The kidney ends with nothing
+held at all.
+
+The kidney's emptiness, though, is not what the word spent suggests. Of the
+pool it starts with, a quarter is consumed in forming nephrons and three
+quarters is lost to attrition, and both leave the compartment. Only the first
+built anything. A pool that empties and a pool that is used are different
+things, so they are reported apart.
+
+These are read from the distribution of the pool over tips at closure, with
+the room at each tip tested by trial placements independent of the dynamics,
+not from an average. They survive thirteen variants of the rules that are not
+the nucleation law. `PAPER_NUMBERS.md`, Regimes and Robustness; Figures 1 and
+2A, and Figure 3 for the trajectories.
 
 ## In development: which resource binds decides what reaches size
 
@@ -78,6 +86,44 @@ $P$ = 0.0005). Left and right differ systematically: by paired Wilcoxon with
 Bonferroni over six invariants, volume ($P$ = 0.0007), flatness and
 surface-per-volume ($P$ < 0.0001) survive. What an individual carries sets how
 large their kidneys are; where each kidney sits sets its shape. Figure 5.
+
+## A developing kidney: the law is right about what binds, wrong about the rate
+
+The nucleation law can be put to an independent time course. It says induction
+is the pool times how far supply sits above the threshold, so while the supply
+term stays open the number of progenitors induced per progenitor still held
+does not change as the pool falls. If the supply term is closing instead, the
+pool persists while that ratio drops. One developmental series separates the
+two, and this is a test of the law rather than a picture of it.
+
+In human fetal kidney, weeks nine to eighteen, the progenitor share of the
+nephron lineage falls by 0.092 per week in log, and the number being induced
+per progenitor still held rises by 0.072. Dropping the earliest week, which
+carries 62 cells against several thousand in the rest, leaves these at 0.062
+and 0.069. Comparing week eleven with week eighteen, induced against still
+held, gives a Fisher exact P of 1e-19. The pool is not persisting, so supply
+is not what closes this organ, and that is the law's answer. But the rate per
+surviving progenitor is not fixed either: it rises as the pool empties, which
+a law with a constant per-capita rate cannot produce.
+
+The other two organs place that reading. In mouse pancreas the multipotent
+pool falls a thousandfold between E12.5 and E15.5 and is gone at the end of
+the window in which that organ specifies its units, which is a budget spent as
+its organ finishes. In mouse liver the hepatoblast programme is gone by E17.5,
+a quarter of the way through the window over which hepatocyte number is still
+rising, and the liver goes on to gain more than fivefold in mass by P20 by
+dividing the cells it already made. Losing the named progenitor does not stop
+that organ, because in it the differentiated cell is the competent one. Three
+organs deplete a progenitor pool and only two of them are limited by it, which
+is what the one property predicts and what counting progenitors alone would
+miss.
+
+This is the same gap seen from the other side. The model's kidney reaches an
+empty pool by losing three quarters of it to attrition while a quarter goes
+into nephrons, and a kidney that is running out of progenitors is inducing
+them faster, not dying faster. What the model lacks is a rate that rises as
+the pool falls, which is the final induction that ends nephrogenesis.
+`PAPER_NUMBERS.md`, Regimes; Figure 9.
 
 ## In regeneration: the way an organ stopped decides whether it can restart
 
@@ -222,6 +268,18 @@ decide one of them.
 
 ## Limitations
 
+- The model cannot spend a budget to the last cell, and this is structural
+  rather than a choice of parameters. A progenitor is tied to the tip it sits
+  at, so where supply there falls short it strands: with no attrition, no
+  initial pool between 80 and 300 leaves less than a third of the pool held,
+  and a larger pool strands more. Two repairs fail for stated reasons. An
+  attrition term empties the pool without building anything, which is what the
+  kidney regime does now. A residual drive below the threshold empties a
+  budget but wrecks a renewing organ, taking the liver from 201 units to 950
+  and its perfused share from 0.70 to 0.36, and making it organ-specific would
+  add a second property that differs exactly as `renewal` does, which is the
+  claim the paper is testing. The variant is kept as `final_induction`, and
+  `scripts/27_pool_fate.py` regenerates the sweeps behind this.
 - The parameters are chosen, not fitted. The one calibration is the mouse
   contraction.
 - Everything runs at one domain scale, so the model's contingent spread cannot

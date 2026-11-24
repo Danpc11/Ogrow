@@ -708,29 +708,15 @@ final count, $\varepsilon_x = \partial \ln N / \partial \ln x$, estimated with
 the same seed at $x e^{\pm 0.3}$ (`scripts/19_elasticity.py`, 24 paired
 replicates per cell, mean ± s.e.).
 
-| Regime | Setting | $\varepsilon_{P_0}$ | $\varepsilon_{q_{\text{set}}}$ |
-|---|---|---|---|
-| Liver | reference | +0.13 ± 0.04 | −1.60 ± 0.25 |
-| Liver | $\nu$ 4 | +0.13 ± 0.04 | −1.52 ± 0.23 |
-| Liver | $\nu$ 16 | +0.11 ± 0.03 | −1.64 ± 0.25 |
-| Liver | $q_{\text{set}}$ 0.5 | +0.03 ± 0.05 | −1.12 ± 0.05 |
-| Liver | $q_{\text{set}}$ 0.7 | +0.03 ± 0.18 | −2.91 ± 0.05 |
-| Kidney | reference | +0.33 ± 0.03 | −1.62 ± 0.06 |
-| Kidney | $\nu$ 4 | +0.34 ± 0.04 | −1.58 ± 0.05 |
-| Kidney | $\nu$ 16 | +0.37 ± 0.03 | −1.61 ± 0.06 |
-| Kidney | $q_{\text{set}}$ 0.5 | +0.38 ± 0.03 | −0.57 ± 0.03 |
-| Kidney | $q_{\text{set}}$ 0.7 | +0.35 ± 0.04 | −2.42 ± 0.04 |
-| Pancreas | reference | +0.74 ± 0.05 | −0.76 ± 0.06 |
-| Pancreas | $\nu$ 4 | +0.77 ± 0.05 | −1.13 ± 0.09 |
-| Pancreas | $\nu$ 16 | +0.73 ± 0.04 | −0.66 ± 0.08 |
-| Pancreas | $q_{\text{set}}$ 0.5 | +0.82 ± 0.05 | −0.35 ± 0.04 |
-| Pancreas | $q_{\text{set}}$ 0.7 | +0.70 ± 0.05 | −2.50 ± 0.06 |
+The fifteen cells are in `PAPER_NUMBERS.md` under Elasticities of the
+final count, generated with the rest so that a rerun cannot leave them
+behind.
 
 The pool elasticity is stable within a regime and rises from the liver to the
 budget, at every setting. The setpoint elasticity is not a property of the
 regime: it depends on where the setpoint sits relative to the supply at the
-tips, which is why it swings from −0.35 to −2.91 across the settings while the
-pool elasticity barely moves.
+tips, which is why it swings by most of an order of magnitude across
+the settings while the pool elasticity barely moves.
 
 Because every regime runs the same seeds, the differences between them are
 paired and are reported that way, for all three pairs, in `PAPER_NUMBERS.md`
@@ -892,6 +878,45 @@ progenitors, holding the product of rate and pool fixed while shrinking the
 pool still lowers the final count (203 units at a pool of 2600, 97 at 130). And
 the elasticity of 0.13 is a rate effect, not a budget effect: a larger pool
 makes units faster and overshoots slightly before supply closes the organ.
+
+### A pool that empties is not a pool that was used
+
+`closure_state` reports the share of the initial pool no longer held, under
+the name `spent`. A cell consumed in forming a unit and a cell lost to
+attrition both leave the compartment and both count there, and only the first
+built anything. Separating them changes what the kidney regime is: of the pool
+it starts with, 0.26 goes into nephrons and 0.74 is lost, so its empty pool at
+closure is mostly attrition. The trace now carries the split, with the
+identity $P_0 + \text{born} = \text{consumed} + \text{left} + \text{lost}$
+checked exactly in every run.
+
+Trying to make the pool empty for the right reason fails, and the failure is
+structural rather than a matter of calibration. A progenitor is tied to the
+tip it sits at, so where supply there falls short it strands. With no
+attrition, no initial pool between 80 and 300 leaves less than a third of the
+pool held, and a larger pool strands more, so no budget is ever spent to the
+last cell. Giving a stranded progenitor a residual drive below the threshold
+does empty a budget, taking the pancreas to full consumption, but it wrecks
+the renewing organ: the liver goes from 201 units to 950 and its perfused
+share from 0.70 to 0.36, filling with units the circulation does not reach.
+Making that drive organ-specific would add a second property differing exactly
+as `renewal` does, which is the claim under test. The variant is kept as
+`final_induction`, and `scripts/27_pool_fate.py` regenerates all three
+sweeps.
+
+The elasticity of the final count to the initial pool does not depend on the
+attrition term: the kidney gives +0.35 ± 0.06 with it and +0.41 ± 0.09
+without, on six paired replicates each. So the ordering of the three organs is
+not an artefact of the term, and only the description of how the kidney closes
+needed correcting.
+
+Human fetal kidney, weeks 9 to 18 (GSE114530), says what is missing. The
+progenitor share of the nephron lineage falls while the number induced per
+progenitor still held rises, +0.072 per week in log, +0.069 without the
+sparsest week, Fisher exact P of 1e-19 between weeks 11 and 18. A law whose
+per-progenitor rate is fixed while the supply term is open cannot produce
+that. The organ is not supply-closed, which the law gets right, and its rate
+rises as the pool falls, which the law does not have.
 
 ### Closure is stable, and its reversibility differs between regimes
 

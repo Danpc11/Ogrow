@@ -92,6 +92,7 @@ class Trace:
     Q: list = field(default_factory=list)      # total flow through the root
     bound: list = field(default_factory=list)   # closure_state, per day
     final: dict = field(default_factory=dict)   # per-segment state at the end
+    fate: dict = field(default_factory=dict)    # where the initial pool went
 
 
 def _p(name, value):
@@ -250,7 +251,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
          attractor_density=None, attractor_reach=None, attractor_kill=None,
          root_site="deepest", assign_mode="tip",
          nucleation="poisson_capped", substeps=1, turnover="independent",
-         renewal=0.0, injure_day=None, injury=None, injury_fraction=0.3,
+         renewal=0.0, q_floor=0.0, injure_day=None, injury=None, injury_fraction=0.3,
          injury_axis=1, injury_reactivates=0.0, inflow_limited=False,
          intervene_day=None, intervene=None, intervene_factor=0.8):
     """Grow one organ. `sdf(x, y, z)` is negative inside the domain.
@@ -556,7 +557,16 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                 Pi = P.get(i, 0.0)
                 if Pi <= 0:
                     continue
-                drive = max(q[i] - q_set, 0.0)
+                # A progenitor at a tip below the threshold contributes nothing
+                # to nucleation and, with `q_floor` at zero, sits there for
+                # good: the pool strands rather than empties. Real budget
+                # organs do empty. In the human fetal kidney the induction per
+                # surviving progenitor rises as the pool falls, which is the
+                # final induction that ends nephrogenesis, so a stranded
+                # progenitor is not held for ever. `q_floor` is the residual
+                # drive it keeps, and the unit it then forms is one the
+                # circulation does not reach, which the perfused mass counts.
+                drive = max(q[i] - q_set, q_floor)
                 lam_i = nu * Pi * drive * dt
                 if nucleation == "binomial":
                     # each progenitor differentiates with hazard nu * drive over
@@ -829,6 +839,19 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
     # q, P and tips are all indexed by segment over the whole final tree, so a
     # caller may index q and P with tips. Reading q straight from the last
     # solve would leave it short of the segments sprouted that day.
+    # Where the pool went, as shares of what it started with. A pool that
+    # empties is not the same as a pool that was used: a cell consumed in
+    # forming a unit and a cell lost to attrition both leave the compartment,
+    # and only the first one built anything. `closure_state` reports the two
+    # together as `spent`, which is the share no longer held; these separate
+    # them. The identity P0 + born = consumed + left + lost holds exactly.
+    _cons = float(len(U) - renewed)
+    tr.fate = dict(consumed=_cons / max(Ptot0, 1e-9),
+                   lost=float(lost) / max(Ptot0, 1e-9),
+                   born=float(born) / max(Ptot0, 1e-9),
+                   left=float(sum(P.values())) / max(Ptot0, 1e-9),
+                   balance=float(Ptot0 + born - (_cons + sum(P.values()) + lost)))
+
     tr.final = dict(territory_diff=_diff,
                     q=_q_full(q, np.asarray(vt.parent), len(vt)),
                     P=np.array([P.get(k, 0.0) for k in range(len(vt))], float),

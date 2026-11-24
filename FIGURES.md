@@ -14,6 +14,7 @@ follow the manuscript numbering; this table is the mapping.
 | Figure 4 | `Fig3_closed.pdf` | `figures/fig3_closed.py` | an individual's spread, and how much of it reaches size |
 | Figure 5 | `Fig6.pdf` | `figures/fig6.py` | 96 human kidneys: size between donors, shape within |
 | Figure 6 | `Fig8_injury.pdf` | `figures/fig_injury.py` | injury after closure: what recovery needs, and what the kidney does instead |
+| 9 | `Fig9_transcriptome` | `figures/fig_transcriptome.py` | a developing kidney against the nucleation law |
 | Figure 7 | `Fig5_closed.pdf` | `figures/fig_closed_paper.py` | the vascular rules |
 | Figure 8 | `Fig4_closed.pdf` | `figures/fig_closed_paper.py` | contraction of the spread |
 
@@ -79,3 +80,25 @@ against nucleation rate for eight livers with individual rates, with trend
 line, Spearman correlation and P. (B) CV of unit number at closure against
 its CV at the start of the measured interval, for a spread in maturity
 (offsets of 2 to 10 days), a spread in rate, and the mouse liver.
+
+**Figure 9. A developing kidney against the nucleation law.** (A) Share of the
+nephron lineage in each of three states, cap mesenchyme still uncommitted, a
+pretubular aggregate or renal vesicle being induced, and a unit already
+formed, at four gestational weeks of human fetal kidney (GSE114530); the
+number above each bar is the cells of the lineage scored at that week.
+(B) Progenitor share of the lineage and number induced per progenitor still
+held, against gestational week, on a log scale with fitted slopes per week;
+the title gives the Fisher exact P for induced against still held at week 11
+versus week 18. (C) Where the initial progenitor pool goes in the model, for
+the two regimes whose pool is a budget; the liver is not shown because it
+renews, so a share of what it started with is not a denominator for it.
+(D) Progenitor share of the lineage against embryonic day in mouse pancreas,
+multipotent cells by the authors' annotation (GSE132188), and mouse liver,
+cells still running the hepatoblast programme among DLK1-sorted cells
+(GSE90047); bars are 95 % intervals over cells, and points at the floor of
+the axis are zero. (E) The same three organs on one axis: progenitor share
+relative to the first stage measured, against the fraction of the organ's
+unit-forming window that has passed, with the window taken from the
+literature as weeks 5 to 35 for human nephrogenesis, E9.5 to E15.5 for the
+mouse pancreatic multipotent window, and E10.5 to P20 for mouse hepatocyte
+number; the dashed line marks the end of the window.

@@ -52,14 +52,22 @@ if (src / "Fig6bc_variance_partition.csv").exists():
 reg = ("liver", "kidney", "pancreas")
 if all((RES / "paper" / f"regime_{r}.npz").exists() for r in reg):
     w("## Regimes at closure (one organ each)\n")
+    w("`pool spent` is the share of the initial pool no longer held, which is "
+      "the two columns after it added together. A cell consumed in forming a "
+      "unit built something; a cell lost to attrition did not. In a renewing "
+      "pool the loss runs past 1, because the compartment is replaced rather "
+      "than drawn down: the liver's figure is how many times over it turns.\n")
     rows = []
     for r in reg:
         d = np.load(RES / "paper" / f"regime_{r}.npz")
         c = d["closure"] if "closure" in d.files else [np.nan] * 4
+        fa = d["fate"] if "fate" in d.files else [np.nan] * 4
         Nt = d["N"]; late = (Nt[-1] - Nt[int(0.8 * len(Nt))]) / max(Nt[-1], 1)
-        rows.append([r, int(Nt[-1]), f"{c[0]:.2f}", f"{c[1]:.2f}", f"{c[2]:.2f}", f"{c[3]:.2f}",
+        rows.append([r, int(Nt[-1]), f"{c[0]:.2f}", f"{fa[0]:.2f}", f"{fa[1]:.2f}",
+                     f"{c[1]:.2f}", f"{c[2]:.2f}", f"{c[3]:.2f}",
                      f"{100 * late:.1f} %"])
-    table(["regime", "units", "pool spent", "held by supply", "held by room", "active",
+    table(["regime", "units", "pool spent", "of it, consumed into units",
+           "of it, lost to attrition", "held by supply", "held by room", "active",
            "units added in the last fifth"], rows)
 
 if (RES / "transmission.json").exists():

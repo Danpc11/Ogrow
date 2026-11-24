@@ -1,6 +1,6 @@
 # Numbers the paper uses
 
-Model version 4.17.0, commit 1c7142b, generated 2026-11-24 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.19.0, commit d98d527 (with uncommitted changes), generated 2026-11-24 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b024.
 
@@ -17,11 +17,13 @@ Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b0
 
 ## Regimes at closure (one organ each)
 
-| regime | units | pool spent | held by supply | held by room | active | units added in the last fifth |
-|---|---|---|---|---|---|---|
-| liver | 231 | 0.00 | 0.91 | 0.24 | 0.00 | 2.6 % |
-| kidney | 77 | 1.00 | 0.00 | 0.00 | 0.00 | 0.0 % |
-| pancreas | 41 | 0.68 | 0.32 | 0.00 | 0.00 | 0.0 % |
+`pool spent` is the share of the initial pool no longer held, which is the two columns after it added together. A cell consumed in forming a unit built something; a cell lost to attrition did not. In a renewing pool the loss runs past 1, because the compartment is replaced rather than drawn down: the liver's figure is how many times over it turns.
+
+| regime | units | pool spent | of it, consumed into units | of it, lost to attrition | held by supply | held by room | active | units added in the last fifth |
+|---|---|---|---|---|---|---|---|---|
+| liver | 231 | 0.00 | 0.00 | 14.70 | 0.91 | 0.24 | 0.00 | 2.6 % |
+| kidney | 77 | 1.00 | 0.26 | 0.74 | 0.00 | 0.00 | 0.00 | 0.0 % |
+| pancreas | 41 | 0.68 | 0.68 | 0.00 | 0.32 | 0.00 | 0.00 | 0.0 % |
 
 ## Transmission of an individual spread (95 % bootstrap interval)
 

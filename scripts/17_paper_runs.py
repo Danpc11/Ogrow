@@ -49,7 +49,9 @@ def run(tag, seed, nu, **p):
     murray = [float(r[a] ** x / sum(r[c] ** x for c in cs))
               for a, cs in kids.items() if len(cs) >= 2]
     b = tr.closure
+    fa = tr.fate
     np.savez(f, closure=np.array([b["spent"], b["supply_held"], b["space_held"], b["active"]]),
+             fate=np.array([fa["consumed"], fa["lost"], fa["born"], fa["left"]]),
              N=np.asarray(tr.N, float), q=np.asarray(tr.q, float),
              P=np.asarray(tr.P, float), vessels=np.asarray(tr.vessels, float),
              murray=np.asarray(murray), nu=nu)
