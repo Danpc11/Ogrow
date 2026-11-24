@@ -1,6 +1,6 @@
 # Numbers the paper uses
 
-Model version 4.28.0, commit 3f08d68, generated 2026-11-24 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.29.0, commit df84be4, generated 2026-11-24 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b024.
 
