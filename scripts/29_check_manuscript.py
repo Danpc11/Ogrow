@@ -182,16 +182,14 @@ if T:
 L = load("inflow_law.json")
 if L and "liver" in L:
     d = L["liver"]
-    need("delivery per unit mass of the intact ensemble",
-         f"{d['phi']:.6f} \\pm {d['phi_sd']:.6f}")
-    need("mass against delivered flow, exponent", f"{d['slope']:.3f}")
-    for r in d["rows"]:
-        need(f"mass at {r['scale']} of the pre-injury flow",
-             f"{r['mass_rel']:.3f} ± {r['mass_rel_sd']:.3f}")
+    # Two decimals: the third moves between machines and between calibration
+    # blocks, and the table in PAPER_NUMBERS carries the full precision.
+    need("mass against delivered flow, exponent", f"exponent of {d['slope']:.2f}")
     lo, hi = d["rows"][0], d["rows"][-1]
-    need("overshoot of the budget at the lowest flow", f"{lo['mass_over_law']:.2f}")
+    need("overshoot of the budget at the lowest flow",
+         f"about {lo['mass_over_law']:.1f} times")
     need("shortfall against the budget at the highest flow",
-         f"{hi['mass_over_law']:.2f}")
+         f"about {hi['mass_over_law']:.1f} of it")
 
 
 def main():

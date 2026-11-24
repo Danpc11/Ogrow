@@ -291,8 +291,10 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
         """Does reaching further buy more than the junction costs?
 
         A branch does not buy conductance. Two daughters at the cost-law
-        ratio conduct 2 * 2^(-4/(b+2)) of the parent, which is less than one:
-        splitting always costs conductance. What it buys is reach, the tissue
+        ratio conduct 2 * 2^(-4/(b+2)) of the parent, which is below one for
+        every b < 2 and so for the exponent this model uses: at that exponent
+        splitting costs conductance. The statement is about this cost law and
+        these geometric assumptions, not about branching in general. What it buys is reach, the tissue
         a terminal branch can serve, and a tip already carrying n units is
         serving n / units_per_tip times what one branch is meant to.
 
@@ -425,6 +427,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
 
     spacing = lam                     # least distance between units
     g_clock = 0.0                     # injury can set the growth clock back
+    p_drive = dP                      # inlet pressure the current solve has
     inflow_target = None              # root flow the circulation keeps delivering
     phi_set = None                    # delivery per unit mass the tissue needs
     tip_of_prev = np.zeros(0, int)    # the assignment of the previous day
@@ -533,6 +536,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
         for t_, mj in zip(tip_of, m):
             tc[int(t_)] = tc.get(int(t_), 0.0) + float(mj) ** xi / R0
         f, p_in, C = vt.perfuse(tc, dP=dP)
+        p_drive = dP                  # reset each day; the rescale below moves it
         if inflow_limited and inflow_target is not None and f[0] > 0:
             # The solve above drives the tree with a fixed inlet pressure. Under
             # a fixed inflow the network is linear, so the same solve holds once
@@ -543,6 +547,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
             # obeyed the pressure, and the organ would report a third more blood
             # than the circulation is sending it.
             sc = float(inflow_target) / float(f[0])
+            p_drive = dP * sc      # the inlet pressure the rescaled solve has
             f = f * sc
             p_in = p_in * sc
             vt.flow = f
@@ -554,7 +559,13 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
 
         # ---- calibres chase their shear setpoint ---------------------------
         # the transmural pressure of a segment is the mean of inlet and outlet
-        vt.relax(tau_set, rate=eta, pressure_exp=pressure_exp, p_in=dP,
+        # The shear setpoint rises with transmural pressure measured against
+        # the inlet. Under a fixed inflow the whole profile is rescaled, so
+        # the inlet is dP * sc and not dP; normalising by dP there would
+        # multiply the setpoint by sc**pressure_exp and leave the calibres
+        # chasing a target that still belonged to the fixed-pressure
+        # boundary condition.
+        vt.relax(tau_set, rate=eta, pressure_exp=pressure_exp, p_in=p_drive,
                  pressures=0.5 * (p_in + p_out),
                  r_min=vt.r_crit, r_max=r_max_factor * r_eq, shrink=shrink,
                  volume_budget=vol_budget, crowding=crowding, junction_cost=junction_cost)

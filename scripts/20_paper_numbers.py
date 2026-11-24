@@ -220,6 +220,33 @@ if (RES / "scaling.json").exists():
     table(["sweep", "domain scale", "days", "units", "CV", "held by supply",
            "held by room", "share of close packing"], rows)
 
+if (RES / "inflow_law.json").exists():
+    Fl = json.load(open(RES / "inflow_law.json"))
+    w("## The mass a construct lands on against the flow it is given\n")
+    w("The ceiling on a unit is the delivered flow times its share over the "
+      "delivery per unit mass the tissue needs, and the shares sum to one, so "
+      "a total of Q/phi is what the rule gives if every unit reaches its "
+      "ceiling. It is a consequence of the rule, not a measurement. What is "
+      "measured here is how completely a construct reaches it: `mass / "
+      "(Q/phi)` away from 1, and the exponent away from 1. `phi` is "
+      "calibrated on a block of seeds disjoint from the one the sweep is "
+      "evaluated on. The last column is the mean daily change of mass over "
+      "the final ten days, which says whether the construct had settled.\n")
+    for reg, d in Fl.items():
+        c, e = d.get("calibration_seeds", ["?", "?"]), d.get("evaluation_seeds", ["?", "?"])
+        ci = d.get("slope_ci", [float("nan")] * 2)
+        w(f"**{reg}**: phi = {d['phi']:.6f} ± {d['phi_sd']:.6f}, calibrated on "
+          f"seeds {c[0]} to {c[1]}, evaluated on seeds {e[0]} to {e[1]}. "
+          f"Exponent of mass against delivered flow, one fit per seed: "
+          f"{d['slope']:.3f} ± {d.get('slope_sd', float('nan')):.3f}, "
+          f"bootstrap 95 % interval [{ci[0]:.3f}, {ci[1]:.3f}].\n")
+        table(["delivered flow", "mass / pre-injury", "mass / (Q/phi)",
+               "mass still moving, % per day"],
+              [[f"{r['scale']:.1f}", f"{r['mass_rel']:.3f} ± {r['mass_rel_sd']:.3f}",
+                f"{r['mass_over_law']:.3f}",
+                f"{100 * r.get('drift_per_day', float('nan')):.2f}"]
+               for r in d["rows"]])
+
 if (RES / "injury.json").exists():
     Ij = json.load(open(RES / "injury.json"))
     names = {"units": "units", "mass": "mass", "mass_per_unit": "mass per unit",
