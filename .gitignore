@@ -7,3 +7,5 @@ results/*
 figures/out/*
 !figures/out/.gitkeep
 .pytest_cache/
+manuscript/*
+!manuscript/.gitkeep

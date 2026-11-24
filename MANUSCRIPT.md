@@ -1,14 +1,19 @@
 # Perfusion-limited growth sets the size a vascularised tissue reaches, whether it can be restarted, and how poorly it scales
 
-Daniel Pérez Calixto
+Daniel Pérez-Calixto^1,2^\*, Hugo Tovar^1^, Genaro Vázquez-Victorio^2^,
+Enrique Hernández-Lemus^1^
 
-Instituto Nacional de Medicina Genómica (INMEGEN), Mexico City, Mexico
-Facultad de Ciencias, Universidad Nacional Autónoma de México, Mexico City, Mexico
+^1^ Instituto Nacional de Medicina Genómica (INMEGEN), Mexico City, Mexico
+
+^2^ Facultad de Ciencias, Universidad Nacional Autónoma de México, Mexico City,
+Mexico
+
+\* Corresponding author.
 
 Target journal: *Biofabrication* (IOP). Structure follows IOP's Introduction,
 Methods, Results, Discussion. Abstract is under 300 words.
 
-Reference model version 4.29.0 (`src/organgrow/closed.py`). Every model number
+Reference model version 4.30.0 (`src/organgrow/closed.py`). Every model number
 quoted below is taken from `PAPER_NUMBERS.md`, which `make paper` regenerates
 with the version and commit that produced it, and is checked against the
 result files by `scripts/29_check_manuscript.py`. No model number in this file
@@ -575,24 +580,41 @@ number of embryonic progenitor cells in the pancreas but not the liver
 vascular system and the cost of blood volume *Proc. Natl Acad. Sci. USA*
 **12** 207–14
 
-<!--
-REFERENCES STILL NEEDED. These claims are in the text and currently rest on
-the repository's notes rather than on a citation I have verified. Each must be
-given a source before submission, or the claim removed:
+## Notes for the authors, to be removed before submission
 
-  a. Azizoglu et al. 2025, the mouse liver CV at start and at closure
-     (0.229 and 0.074). Used as the single calibration.
-  b. The human nephrogenesis window, weeks 5 to 35 or 36, ending with the
-     progenitors exhausted.
-  c. The mouse pancreatic multipotent window, E9.5 to E15.5.
-  d. The mouse liver window over which hepatocyte number is still rising, to
-     P20, with the more than fivefold gain in mass.
-  e. Mononuclear hepatocytes acting as their own progenitors.
-  f. Compensatory renal hypertrophy after nephrectomy: no new nephrons, the
-     remaining ones enlarge, function maintained, and the figure that a kidney
-     losing half its mass grows the remnant by about a half.
-  g. The four GEO accessions' original publications.
--->
+**Author order and affiliations are a first proposal, not a decision.** The
+order below puts the author who built the model and wrote the draft first and
+the senior author last. Change it as the group decides. Two items need
+confirming: the spelling of Enrique Hernández-Lemus, and whether he should
+also carry a Centro de Ciencias de la Complejidad, UNAM, affiliation. ORCID
+identifiers are recommended by IOP and are not yet here.
+
+**Seven claims in the text still need a citation.** Each is in the manuscript
+now and rests on the repository's notes rather than on a verified source.
+Give each one a reference or drop the claim.
+
+1. Azizoglu et al. 2025, the mouse liver coefficient of variation at the start
+   and at closure, 0.229 and 0.074. This is the single calibration of the
+   model, so it is the most important one to get right.
+2. The human nephrogenesis window, weeks 5 to 35 or 36, ending with the
+   progenitors exhausted.
+3. The mouse pancreatic multipotent window, E9.5 to E15.5.
+4. The mouse liver window over which hepatocyte number is still rising, to
+   P20, with the more than fivefold gain in mass.
+5. Mononuclear hepatocytes acting as their own progenitors.
+6. Compensatory renal hypertrophy after nephrectomy: no new nephrons form, the
+   remaining ones enlarge, function is maintained; and the figure that a
+   kidney losing half its mass grows the remnant by about a half rather than
+   doubling it.
+7. The original publications of the four GEO accessions used in Section 2.5.
+
+**Four results from the earlier framing are not in this manuscript** and are
+listed in `FIGURES.md` as supplementary: the 96 human kidneys from 48 donors,
+the Murray ratio in grown trees, the contraction of the spread of unit number
+with its calibration against mouse liver, and the transmission of an
+individual spread. The calibration has the strongest case for returning to the
+main text, since it is the only place the model is anchored to a measurement.
+
 
 ## Figures
 

@@ -85,3 +85,4 @@ paper:
 	$(PY) figures/fig6.py
 	$(PY) scripts/18_paper_tables.py
 	$(PY) scripts/20_paper_numbers.py
+	-$(PY) scripts/30_build_docx.py --keep-notes
