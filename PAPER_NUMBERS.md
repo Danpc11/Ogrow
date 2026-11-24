@@ -1,6 +1,6 @@
 # Numbers the paper uses
 
-Model version 4.25.0, commit ae30c08, generated 2026-11-24 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.26.0, commit 0ff0c68, generated 2026-11-24 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b024.
 
@@ -117,18 +117,20 @@ A regime that closes with nothing held has no pool to release, so its share is l
 
 ## Organ size: unit count and closure against domain volume (24 seeds each)
 
-| sweep | domain scale | days | units | held by supply | held by room | share of close packing |
-|---|---|---|---|---|---|---|
-| geometry | 0.4 | 140 | 130 | 0.89 | 0.09 | 16.2 % |
-| geometry | 0.6 | 140 | 208 | 0.78 | 0.19 | 7.7 % |
-| geometry | 0.8 | 140 | 289 | 0.71 | 0.30 | 4.5 % |
-| geometry | 1.0 | 140 | 520 | 0.63 | 0.37 | 4.2 % |
-| geometry: unit count scales as V^0.45 |  |  |  |  |  |  |
-| allometric | 0.4 | 103 | 107 | 0.86 | 0.15 | 13.3 % |
-| allometric | 0.6 | 140 | 208 | 0.78 | 0.19 | 7.7 % |
-| allometric | 0.8 | 174 | 338 | 0.72 | 0.29 | 5.3 % |
-| allometric | 1.0 | 205 | 572 | 0.64 | 0.37 | 4.6 % |
-| allometric: unit count scales as V^0.58 |  |  |  |  |  |  |
+The unit count is the mean over the seeds with the range they span and its coefficient of variation, because whether a larger domain is reproducible at all is what the exponent rests on.
+
+| sweep | domain scale | days | units | CV | held by supply | held by room | share of close packing |
+|---|---|---|---|---|---|---|---|
+| geometry | 0.4 | 140 | 130 [108, 158] | 0.09 | 0.89 | 0.09 | 16.2 % |
+| geometry | 0.6 | 140 | 208 [174, 241] | 0.09 | 0.78 | 0.19 | 7.7 % |
+| geometry | 0.8 | 140 | 289 [219, 525] | 0.23 | 0.71 | 0.30 | 4.5 % |
+| geometry | 1.0 | 140 | 520 [274, 1074] | 0.47 | 0.63 | 0.37 | 4.2 % |
+| geometry: unit count scales as V^0.45 |  |  |  |  |  |  |  |
+| allometric | 0.4 | 103 | 107 [81, 125] | 0.09 | 0.86 | 0.15 | 13.3 % |
+| allometric | 0.6 | 140 | 208 [174, 241] | 0.09 | 0.78 | 0.19 | 7.7 % |
+| allometric | 0.8 | 174 | 338 [259, 651] | 0.25 | 0.72 | 0.29 | 5.3 % |
+| allometric | 1.0 | 205 | 572 [308, 1052] | 0.40 | 0.64 | 0.37 | 4.6 % |
+| allometric: unit count scales as V^0.58 |  |  |  |  |  |  |  |
 
 ## Injury after closure (day 140, 30 % of the units removed by a plane cut, read on day 220; the first four entries are day 220 over the day before the injury, the last two the share of what the cut took that is back, each the mean over 24 seeds with the range they span)
 
