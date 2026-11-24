@@ -190,16 +190,24 @@ if (RES / "scaling.json").exists():
     nse = max(len({r["seed"] for r in v["rows"]}) for v in Sc.values())
     w(f"## Organ size: unit count and closure against domain volume "
       f"({nse} seeds each)\n")
+    w("The unit count is the mean over the seeds with the range they span and "
+      "its coefficient of variation, because whether a larger domain is "
+      "reproducible at all is what the exponent rests on.\n")
     rows = []
     for mode, v in Sc.items():
         for S in sorted({r["S"] for r in v["rows"]}):
             g = [r for r in v["rows"] if r["S"] == S]
             mm = lambda k: float(np.mean([x[k] for x in g]))
-            rows.append([mode, S, g[0]["days"], f"{mm('N'):.0f}", f"{mm('supply_held'):.2f}",
-                         f"{mm('space_held'):.2f}", f"{100 * mm('fill'):.1f} %"])
-        rows.append([f"{mode}: unit count scales as V^{v['exponent']:.2f}", "", "", "", "", "", ""])
-    table(["sweep", "domain scale", "days", "units", "held by supply", "held by room",
-           "share of close packing"], rows)
+            N = np.array([x["N"] for x in g], float)
+            rows.append([mode, S, g[0]["days"],
+                         f"{N.mean():.0f} [{N.min():.0f}, {N.max():.0f}]",
+                         f"{N.std(ddof=1) / max(N.mean(), 1e-9):.2f}",
+                         f"{mm('supply_held'):.2f}", f"{mm('space_held'):.2f}",
+                         f"{100 * mm('fill'):.1f} %"])
+        rows.append([f"{mode}: unit count scales as V^{v['exponent']:.2f}",
+                     "", "", "", "", "", "", ""])
+    table(["sweep", "domain scale", "days", "units", "CV", "held by supply",
+           "held by room", "share of close packing"], rows)
 
 if (RES / "injury.json").exists():
     Ij = json.load(open(RES / "injury.json"))

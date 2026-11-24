@@ -158,12 +158,13 @@ as it holds progenitors.
 **The spatial constraint is local, not the organ's geometry.** Units are
 excluded within one spacing of each other and are placed near a vascular tip,
 so what the model calls lack of room is crowding at the vascular front. Across
-a 15-fold range of domain volume the units occupy 3 to 17 % of close packing,
-and that fraction falls as the domain grows, so the packing limit of the organ
-never binds. Unit number scales as $V^{0.37}$ with the domain alone and
-$V^{0.74}$ with the allometric scalings of pool, window and rates, against the
-$V^{1}$ that a conserved unit size requires. Replicate spread grows with scale.
-All regimes in this work are reported at one domain scale.
+a 15-fold range of domain volume the units occupy a small and falling fraction
+of close packing, so the packing limit of the organ never binds. Unit number
+scales as a power of volume well below the $V^{1}$ that a conserved unit size
+requires, both with the domain alone and with the allometric scalings of pool,
+window and rates, so unit density falls as the domain grows. The exponents,
+and the spread of the unit count across seeds, are in `PAPER_NUMBERS.md`,
+Organ size. All regimes in this work are reported at one domain scale.
 
 **How far compensation goes is not right.** Given an injury that restores
 the ability of units to enlarge and an inflow held at its pre-injury value,

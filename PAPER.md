@@ -2,7 +2,7 @@
 
 Target: *npj Regenerative Medicine* if the fee is paid, *Cell Systems* as the
 alternative without one. Both take a theory paper of this shape.
-Reference model: version 4.25.0 (`src/organgrow/closed.py`). Every number from
+Reference model: version 4.26.0 (`src/organgrow/closed.py`). Every number from
 the model that the paper uses is in `PAPER_NUMBERS.md`, written by
 `make paper` with the version and commit that produced it; this file does not
 copy model numbers by hand. Numbers given here are either data (the human

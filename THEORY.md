@@ -616,26 +616,31 @@ that fit scale as $M$, supply per unit scales as $M^{-1/4}$: a larger animal
 perfuses each of its units less.
 
 Scaling the domain alone over a 15-fold range of volume, with the pool, the
-window and the rates held at the reference, gives $N \propto V^{0.37}$.
-Carrying the allometries as well gives $N \propto V^{0.74}$. The allometric
-scalings therefore do most of the work, but neither reaches the $V^{1}$ that a
-conserved unit size requires, so the model's organs do not grow in proportion
-to their containers.
+window and the rates held at the reference, gives an exponent well below 1.
+Carrying the allometries as well raises it, and still leaves it below 1. The
+allometric scalings therefore do part of the work, but neither sweep reaches
+the $V^{1}$ that a conserved unit size requires, so the model's organs do not
+grow in proportion to their containers and unit density falls as the domain
+grows. Both exponents are in `PAPER_NUMBERS.md`, Organ size.
 
-The share of the pool held for lack of room rises with size, from 0.09 at the
-smallest domain to 0.50 at the largest, while the share held by supply falls
-from 0.99 to 0.54. That reads as geometry beginning to bind, and it is not:
-the units occupy between 3 and 17 % of what close packing of the domain would
-allow, and that fraction falls as the domain grows. What rises is local
-crowding at the vascular front, where a unit is placed within a fixed distance
-of a tip. The model's spatial constraint is the local exclusion of Eq. 13, and
-the organ never approaches the packing limit of its container. A geometry that
-binds at the scale of the organ is not in the model.
+Which constraint binds changes with size. The share of the pool held for lack
+of room rises across the sweep while the share held by supply falls, so a
+small organ closes held by perfusion and a large one increasingly by room.
+That reads as geometry beginning to bind, and it is not: the units occupy a
+small and falling fraction of what close packing of the domain would allow.
+What rises is local crowding at the vascular front, where a unit is placed
+within a fixed distance of a tip. The model's spatial constraint is the local
+exclusion of Eq. 13, and the organ never approaches the packing limit of its
+container. A geometry that binds at the scale of the organ is not in the
+model. What limits a larger organ is therefore how fast the tree spreads, and
+not how much room the container has.
 
-Replicate spread also grows with size, by a wide margin at the largest domains
-(`PAPER_NUMBERS.md`, Organ size). Results at scales far from the reference are
-not reliable, and the regimes reported in this work are stated at one scale.
-(`scripts/23_scaling.py`.)
+The exponent is measured off the sweep rather than derived, and it is stated
+at one nucleation rate. Whether a rate matched to the speed of the vascular
+front would carry it towards 1 is not tested here. The replicate spread of the
+unit count is in the table beside the exponent, and the regimes reported in
+this work are stated at one scale.
+(`PAPER_NUMBERS.md`, Organ size; `scripts/23_scaling.py`.)
 
 ### Self-averaging, and why it is not yet measured
 
