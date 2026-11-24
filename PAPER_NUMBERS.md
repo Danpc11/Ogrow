@@ -1,6 +1,6 @@
 # Numbers the paper uses
 
-Model version 4.24.0, commit eef86d4, generated 2026-11-24 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.25.0, commit ae30c08, generated 2026-11-24 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b024.
 
@@ -15,15 +15,15 @@ Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b0
 | flat | 0.242 | 5.4e-06 |
 | surf_vol | 0.760 | 4.2e-05 |
 
-## Regimes at closure (one organ each)
+## Regimes at closure (mean ± s.e. over 24 seeds)
 
-`pool spent` is the share of the initial pool no longer held, which is the two columns after it added together. A cell consumed in forming a unit built something; a cell lost to attrition did not. In a renewing pool the loss runs past 1, because the compartment is replaced rather than drawn down: the liver's figure is how many times over it turns.
+`pool spent` is the share of the initial pool no longer held, which is the two columns after it added together. A cell consumed in forming a unit built something; a cell lost to attrition did not. In a renewing pool the loss runs past 1, because the compartment is replaced rather than drawn down: the liver's figure is how many times over it turns. The last column is read off the single trace that the time-series panels show, not off the replicates.
 
 | regime | units | pool spent | of it, consumed into units | of it, lost to attrition | held by supply | held by room | active | units added in the last fifth |
 |---|---|---|---|---|---|---|---|---|
-| liver | 231 | 0.00 | 0.00 | 14.70 | 0.91 | 0.24 | 0.00 | 2.6 % |
-| kidney | 77 | 1.00 | 0.26 | 0.74 | 0.00 | 0.00 | 0.00 | 0.0 % |
-| pancreas | 41 | 0.68 | 0.68 | 0.00 | 0.32 | 0.00 | 0.00 | 0.0 % |
+| liver | 208 ± 4 | 0.06 ± 0.02 | 0.00 ± 0.00 | 13.66 ± 0.15 | 0.78 ± 0.03 | 0.19 ± 0.02 | 0.00 ± 0.00 | 2.6 % |
+| kidney | 89 ± 2 | 1.00 ± 0.00 | 0.30 ± 0.01 | 0.70 ± 0.01 | 0.00 ± 0.00 | 0.00 ± 0.00 | 0.00 ± 0.00 | 0.0 % |
+| pancreas | 45 ± 1 | 0.75 ± 0.02 | 0.75 ± 0.02 | 0.00 ± 0.00 | 0.25 ± 0.02 | 0.00 ± 0.00 | 0.00 ± 0.00 | 0.0 % |
 
 ## Transmission of an individual spread (95 % bootstrap interval)
 
@@ -35,23 +35,23 @@ Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b0
 
 ## Elasticities of the final count (mean ± s.e., paired replicates)
 
-| regime | setting | pool | setpoint |
-|---|---|---|---|
-| liver | ref | +0.07 ± 0.06 | -1.83 ± 0.22 |
-| liver | nu_lo | +0.08 ± 0.06 | -1.54 ± 0.20 |
-| liver | nu_hi | +0.10 ± 0.05 | -1.91 ± 0.23 |
-| liver | q_lo | +0.09 ± 0.04 | -1.16 ± 0.04 |
-| liver | q_hi | +0.37 ± 0.14 | -2.90 ± 0.03 |
-| kidney | ref | +0.37 ± 0.03 | -1.65 ± 0.06 |
-| kidney | nu_lo | +0.33 ± 0.04 | -1.54 ± 0.06 |
-| kidney | nu_hi | +0.36 ± 0.03 | -1.61 ± 0.06 |
-| kidney | q_lo | +0.40 ± 0.03 | -0.64 ± 0.03 |
-| kidney | q_hi | +0.38 ± 0.04 | -2.44 ± 0.04 |
-| pancreas | ref | +0.71 ± 0.05 | -0.77 ± 0.07 |
-| pancreas | nu_lo | +0.76 ± 0.05 | -1.11 ± 0.09 |
-| pancreas | nu_hi | +0.72 ± 0.04 | -0.66 ± 0.08 |
-| pancreas | q_lo | +0.80 ± 0.04 | -0.35 ± 0.04 |
-| pancreas | q_hi | +0.70 ± 0.06 | -2.52 ± 0.06 |
+| regime | setting | pool | setpoint | paired replicates |
+|---|---|---|---|---|
+| liver | ref | +0.07 ± 0.06 | -1.83 ± 0.22 | 24 |
+| liver | nu_lo | +0.08 ± 0.06 | -1.54 ± 0.20 | 24 |
+| liver | nu_hi | +0.10 ± 0.05 | -1.91 ± 0.23 | 24 |
+| liver | q_lo | +0.09 ± 0.04 | -1.16 ± 0.04 | 24 |
+| liver | q_hi | +0.37 ± 0.14 | -2.90 ± 0.03 | 24 |
+| kidney | ref | +0.37 ± 0.03 | -1.65 ± 0.06 | 24 |
+| kidney | nu_lo | +0.33 ± 0.04 | -1.54 ± 0.06 | 24 |
+| kidney | nu_hi | +0.36 ± 0.03 | -1.61 ± 0.06 | 24 |
+| kidney | q_lo | +0.40 ± 0.03 | -0.64 ± 0.03 | 24 |
+| kidney | q_hi | +0.38 ± 0.04 | -2.44 ± 0.04 | 24 |
+| pancreas | ref | +0.71 ± 0.05 | -0.77 ± 0.07 | 24 |
+| pancreas | nu_lo | +0.76 ± 0.05 | -1.11 ± 0.09 | 24 |
+| pancreas | nu_hi | +0.72 ± 0.04 | -0.66 ± 0.08 | 24 |
+| pancreas | q_lo | +0.80 ± 0.04 | -0.35 ± 0.04 | 24 |
+| pancreas | q_hi | +0.70 ± 0.06 | -2.52 ± 0.06 | 24 |
 
 ## Murray ratio in grown trees
 
@@ -99,21 +99,23 @@ Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b0
 | pancreas above kidney | 13 of 13 | 0.0002 | 12 of 13 | +0.34 ± 0.06, z = 5.7 |
 | pancreas above liver | 13 of 13 | 0.0002 | 12 of 13 | +0.65 ± 0.08, z = 7.8 |
 
-## Interventions on the closed state (day 140, then 40 days; six seeds)
+## Interventions on the closed state (day 140, then 40 days; 24 seeds)
 
-| regime | intervention | pool on day 140 | share of that pool released | units added, relative to day 140 |
-|---|---|---|---|---|
-| liver | none | 2535 | 0.002 ± 0.000 | 0.028 ± 0.003 |
-| liver | supply | 2535 | 0.018 ± 0.002 | 0.226 ± 0.027 |
-| liver | room | 2535 | 0.027 ± 0.002 | 0.323 ± 0.017 |
-| kidney | none | 0 | 0.000 ± 0.000 | 0.000 ± 0.000 |
-| kidney | supply | 0 | 0.042 ± 0.042 | 0.000 ± 0.000 |
-| kidney | room | 0 | 0.000 ± 0.000 | 0.000 ± 0.000 |
-| pancreas | none | 15 | 0.008 ± 0.006 | 0.002 ± 0.001 |
-| pancreas | supply | 15 | 0.170 ± 0.030 | 0.062 ± 0.014 |
-| pancreas | room | 15 | 0.015 ± 0.010 | 0.003 ± 0.002 |
+A regime that closes with nothing held has no pool to release, so its share is left out rather than divided by a pool of zero; the last column says how many seeds carried one.
 
-## Organ size: unit count and closure against domain volume (two seeds each)
+| regime | intervention | pool on day 140 | share of that pool released | units added, relative to day 140 | seeds with a pool |
+|---|---|---|---|---|---|
+| liver | none | 2535 | 0.002 ± 0.000 | 0.028 ± 0.003 | 24 of 24 |
+| liver | supply | 2535 | 0.018 ± 0.002 | 0.226 ± 0.027 | 24 of 24 |
+| liver | room | 2535 | 0.027 ± 0.002 | 0.323 ± 0.017 | 24 of 24 |
+| kidney | none | 0 | 0.000 ± 0.000 | 0.000 ± 0.000 | 3 of 24 |
+| kidney | supply | 0 | 0.333 ± 0.333 | 0.000 ± 0.000 | 3 of 24 |
+| kidney | room | 0 | 0.000 ± 0.000 | 0.000 ± 0.000 | 3 of 24 |
+| pancreas | none | 15 | 0.008 ± 0.006 | 0.002 ± 0.001 | 24 of 24 |
+| pancreas | supply | 15 | 0.170 ± 0.030 | 0.062 ± 0.014 | 24 of 24 |
+| pancreas | room | 15 | 0.015 ± 0.010 | 0.003 ± 0.002 | 24 of 24 |
+
+## Organ size: unit count and closure against domain volume (24 seeds each)
 
 | sweep | domain scale | days | units | held by supply | held by room | share of close packing |
 |---|---|---|---|---|---|---|
