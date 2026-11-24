@@ -1,7 +1,8 @@
 # The paper: framework, claims and evidence
 
-Target: *Frontiers in Cell and Developmental Biology*, Hypothesis and Theory.
-Reference model: version 4.16.0 (`src/organgrow/closed.py`). Every number from
+Target: *npj Regenerative Medicine* if the fee is paid, *Cell Systems* as the
+alternative without one. Both take a theory paper of this shape.
+Reference model: version 4.17.0 (`src/organgrow/closed.py`). Every number from
 the model that the paper uses is in `PAPER_NUMBERS.md`, written by
 `make paper` with the version and commit that produced it; this file does not
 copy model numbers by hand. Numbers given here are either data (the human
@@ -65,9 +66,8 @@ that experiment. The ordering is of three organs: across thirteen variants of
 the auxiliary rules the kidney's elasticity exceeds the liver's in every one
 and the pancreas exceeds the kidney in every one, each a sign test at
 P = 0.0002, with the kidney-liver separation the weaker of the two.
-`PAPER_NUMBERS.md`, The ordering counted over the variants, holds the counts
-and the paired contrasts. `PAPER_NUMBERS.md`, Transmission,
-Elasticities and Robustness; Figures 2B, 2C and 4.
+`PAPER_NUMBERS.md`, Transmission, Elasticities, Robustness and The ordering
+counted over the variants; Figures 2B, 2C and 4.
 
 ## In people: size is systemic, shape is positional
 
@@ -94,12 +94,11 @@ correspondence rather than a test. `PAPER_NUMBERS.md`, Interventions.
 
 An organ that can restart is not an organ that recovers. Grown to closure,
 then stripped of 30 % of its units by a plane cut and left for eighty more
-days, the liver makes back 85 % of the units it lost but only a sixth of the
-mass, and its perfused function tracks the mass. The reason is in the model's
-own rules:
-the rate at which a unit grows decays through development, so by closure a
-unit can no longer enlarge, and an organ that rebuilds after closure fills
-with units that never mature.
+days, the liver makes back most of the units it lost and only a small part of
+the mass, and its perfused function tracks the mass. The reason is in the
+model's own rules: the rate at which a unit grows decays through development,
+so by closure a unit can no longer enlarge, and an organ that rebuilds after
+closure fills with units that never mature.
 
 Recovery therefore needs the first of two things that growth does not supply.
 **Injury must restore a unit's ability to enlarge**, which is what the growth
@@ -112,9 +111,9 @@ falls, so the organ overshoots to nearly twice the mass it had. Holding the
 inflow instead at what the intact organ was receiving, which is what a gut
 does to a resected liver, each unit's share is its own conductance times the
 pressure its tip delivers, so delivery per unit mass falls as the organ grows.
-The organ then restores its mass and stops. The rule stays local, a unit grows while its own
-delivery per mass exceeds a threshold; the ceiling on the whole organ follows
-from it. `PAPER_NUMBERS.md`, Injury; Figure 6.
+The organ then restores its mass and stops. The rule stays local: a unit grows
+while its own delivery per mass exceeds a threshold, and the ceiling on the
+whole organ follows from it. `PAPER_NUMBERS.md`, Injury; Figure 6.
 
 ## The organ that cannot rebuild units enlarges the ones it kept
 
@@ -139,9 +138,9 @@ The model compensates further than a kidney does. It comes close to making up
 the whole loss, reaching a mass per nephron of about 1.4 after a 30 % loss and
 about 1.9 after 50 %, against the 1.43 and 2.00 that full compensation
 requires, whereas a kidney that loses half its mass grows the remnant by about
-a half rather than doubling it.
-Nothing in the model limits how large a unit may become; in a kidney that
-limit exists and passing it is hyperfiltration injury.
+a half rather than doubling it. Nothing in the model limits how large a unit
+may become; in a kidney that limit exists and passing it is hyperfiltration
+injury.
 
 ## The machinery underneath
 
@@ -163,10 +162,10 @@ $(N_f/N_i)^2$, which gives 3.31 for the mouse liver against 3.09 measured
 
 Two consequences follow for work that does not use this model.
 
-**Counting units is the wrong readout for regeneration.** A tissue that
-rebuilds after its growth window has closed recovers its unit number long
-before, or without ever, recovering its perfused mass. A study that measures
-recovery by counting would call such a tissue healed.
+**Counting units is the wrong readout for regeneration.** Unit number and
+perfused mass come apart once an organ rebuilds after its growth window has
+closed, so a study that measures recovery by counting can call a tissue healed
+that is not.
 
 **Perfusion comes before cells when building an organ.** In an organ whose
 competent compartment renews itself, adding progenitors barely changes final
@@ -179,11 +178,11 @@ Discussion.
 The results above are predictions, not measurements. Each of these would
 decide one of them.
 
-- **Count is the wrong readout for regeneration.** A tissue that rebuilds
-  units after its growth window has closed, without restoring their ability to
-  enlarge, recovers its unit number long before, or without ever, recovering
-  its perfused mass. Measuring recovery by counting units would call such a
-  tissue healed.
+- **Count is the wrong readout for regeneration.** Measure unit number and
+  perfused mass in the same tissue as it rebuilds after its growth window has
+  closed. The count should return first and the perfused mass lag or never
+  arrive; a tissue whose count and function recover together would contradict
+  this.
 - **What stops compensatory growth is outside the organ.** Holding the inflow
   to a regenerating organ at its pre-injury value should let it restore its
   mass and stop there; raising the inflow with the demand should let it
@@ -195,8 +194,8 @@ decide one of them.
   the same inflow.
 - **A budget organ tracks its progenitors.** Pancreas size should scale with
   progenitor number, as observed, while the liver's should not, because the
-  liver's competent compartment is restored by the cells it makes; a kidney whose
-  progenitors are also lost during induction should track them weakly.
+  liver's competent compartment is restored by the cells it makes; a kidney
+  whose progenitors are also lost during induction should track them weakly.
 - **Paired kidneys.** With the model's elasticities, the share of size
   variance between individuals is
   $(\varepsilon_q^2\sigma_{q,s}^2 + \varepsilon_P^2\sigma_{P,s}^2)$ over that
@@ -223,26 +222,32 @@ decide one of them.
 
 ## Limitations
 
-The model's parameters are chosen, not fitted; the one calibration is the
-mouse contraction. Results come from one domain scale, so the model's
-contingent spread cannot stand in for a human organ's. The spatial constraint
-is the local exclusion between neighbouring units, not the packing limit of
-the organ, which never binds: units occupy 3 to 17 % of close packing across a
-15-fold range of domain volume, and unit count scales as domain volume to the
-0.74 under the allometric scalings of pool, window and rates, against the
-exponent 1 that a conserved unit size requires. The progenitor processes converge with one, two
-and four steps a day with the tree held fixed within the day; the coupled
-vascular and tissue dynamics run once a day, and their convergence with a
-smaller step was not tested. The two interventions are not matched in
-strength, so their effects show that both constraints hold the liver, not
-which holds it more. The critical radius is the floor of calibre
-adaptation, so simulated trees cannot show calibres below it. The pool elasticity of the liver is not
-measurable without load-driven sprouting (s.e. 0.45), so one of the thirteen
-robustness variants neither supports nor contradicts the contrast. The room left at a tip is
-estimated from trial placements in the final state, which measures residual
-capacity, not whether growth could resume later. The
-human data give shape and size but no unit counts, so model and cohort meet
-only through the partition formula, which awaits independent input spreads.
+- The parameters are chosen, not fitted. The one calibration is the mouse
+  contraction.
+- Everything runs at one domain scale, so the model's contingent spread cannot
+  stand in for a human organ's.
+- The spatial constraint is the local exclusion between neighbouring units and
+  not the packing limit of the organ, which never binds: units occupy a small
+  and falling share of close packing, and unit count scales as a power of
+  domain volume well below the 1 that a conserved unit size requires.
+  `PAPER_NUMBERS.md`, Organ size.
+- That sweep runs two seeds per point, fewer than anything else here.
+- The progenitor processes converge with one, two and four steps a day with
+  the tree held fixed within the day. The coupled vascular and tissue dynamics
+  run once a day and their convergence with a smaller step was not tested.
+- The two interventions are not matched in strength, so their effects show
+  that both constraints hold the liver, not which holds it more.
+- The critical radius is the floor of calibre adaptation, so simulated trees
+  cannot show calibres below it.
+- The liver's pool elasticity is not measurable without load-driven sprouting,
+  where its standard error is of the order of its own range, so one of the
+  thirteen robustness variants neither supports nor contradicts the contrast.
+  `PAPER_NUMBERS.md`, Robustness.
+- The room left at a tip is estimated from trial placements in the final
+  state, which measures residual capacity, not whether growth could resume.
+- The human data give shape and size but no unit counts, so model and cohort
+  meet only through the partition formula, which awaits independent input
+  spreads.
 
 ## Before submission
 

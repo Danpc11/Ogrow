@@ -165,21 +165,24 @@ if (RES / "scaling.json").exists():
 if (RES / "injury.json").exists():
     Ij = json.load(open(RES / "injury.json"))
     names = {"units": "units", "mass": "mass", "mass_per_unit": "mass per unit",
-             "perfused": "perfused mass"}
+             "perfused": "perfused mass", "units_made_up": "share of the lost units made up",
+             "mass_made_up": "share of the lost mass made up"}
 
     def seedcell(d):
         """Mean over the seeds and the range they span, which is the point."""
         v = d["seeds"]
         return f"{d['mean']:.2f} [{min(v):.2f}, {max(v):.2f}]"
     w("## Injury after closure (day 140, 30 % of the units removed by a plane cut, "
-      "read on day 220; every entry is day 220 over the day before the "
-      "injury, as the mean over 24 seeds with the range they span)\n")
+      "read on day 220; the first four entries are day 220 over the day before "
+      "the injury, the last two the share of what the cut took that is back, "
+      "each the mean over 24 seeds with the range they span)\n")
     rows = []
     for reg in ("liver", "kidney"):
         for cond in ("as grown", "reactivated", "reactivated, fixed inflow"):
             v = Ij.get(f"{reg}_{cond}")
             if v:
-                rows.append([reg, cond] + [seedcell(v[q]) for q in names])
+                rows.append([reg, cond] + [seedcell(v[q]) if q in v else "-"
+                                           for q in names])
     table(["regime", "condition"] + list(names.values()), rows)
 
     # How wide the draw is, and how much the budget narrows it. These are the

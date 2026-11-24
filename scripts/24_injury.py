@@ -44,6 +44,8 @@ FIX = dict(R_unit=650.0, units_per_branch=650 / 600.0, max_vessels=6000)
 # decaying growth rate forbids; and the circulation must cap how far it goes,
 # which a fixed inlet pressure does not, since the tree can grow its
 # conductance and draw more. Each condition is run with and without.
+SERIES = {"N": "N", "mass": "mass"}     # injury record key -> series key
+
 CONDS = {"as grown": dict(),
          "reactivated": dict(injury_reactivates=1.0),
          "reactivated, fixed inflow": dict(injury_reactivates=1.0, inflow_limited=True)}
@@ -69,13 +71,30 @@ def run(reg, kind, seed, cond="as grown", frac=FRAC):
 def levels(rows, key):
     """Where a quantity ends in each seed, relative to the day before the injury.
 
-    The seeds are returned rather than summarised. Three of them is few enough
-    that a mean alone hides how wide the draw is, and the spread turns out to
-    be the same size as the difference between two machines running the same
-    seed, so a reader needs to see it to judge the digits.
+    The seeds are returned rather than summarised: a mean alone hides how wide
+    the draw is, and the spread turns out to be the size of the difference
+    between two machines running the same seed, so a reader needs to see it to
+    judge the digits.
     """
     return np.array([r["series"][key][-1] / max(r["series"][key][CLOSE - 2], 1e-9)
                      for r in rows], float)
+
+
+def made_up(rows, key):
+    """The share of what the injury took that is back by the end, per seed.
+
+    This is the quantity that separates rebuilding from restoring, so it is
+    computed here rather than left to the prose. It is defined only where the
+    injury actually took something: below a fiftieth of the pre-injury value
+    the denominator is noise, and the seed is dropped.
+    """
+    out = []
+    for r in rows:
+        pre = r["injury"]["pre"][key]
+        post = r["injury"]["post"][key]
+        if pre - post > 0.02 * pre:
+            out.append((r["series"][SERIES[key]][-1] - post) / (pre - post))
+    return np.array(out, float)
 
 
 def spread(v):
@@ -122,7 +141,9 @@ if __name__ == "__main__":
             print(f"{cond:>26} {n.mean():>14.2f} {mm.mean():>14.2f} "
                   f"{per.mean():>14.2f} {pf.mean():>14.2f}")
             res[f"{reg}_{cond}"] = dict(units=spread(n), mass=spread(mm),
-                                        mass_per_unit=spread(per), perfused=spread(pf))
+                                        mass_per_unit=spread(per), perfused=spread(pf),
+                                        units_made_up=spread(made_up(rows, "N")),
+                                        mass_made_up=spread(made_up(rows, "mass")))
     # how much of the loss the kidney makes up by enlarging what it keeps
     print("\n=== kidney, reactivated and inflow limited: compensation against loss ===")
     print(f"{'lost':>8} {'nephrons kept':>15} {'mass per nephron':>18} "
