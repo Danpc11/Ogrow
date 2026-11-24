@@ -20,7 +20,7 @@ Ciudad Universitaria, Mexico City, Mexico
 Target journal: *Biofabrication* (IOP). Structure follows IOP's Introduction,
 Methods, Results, Discussion. Abstract is under 300 words.
 
-Reference model version 4.40.0 (`src/organgrow/closed.py`). Every model number
+Reference model version 4.41.0 (`src/organgrow/closed.py`). Every model number
 quoted below is taken from `PAPER_NUMBERS.md`, which `make paper` regenerates
 with the version and commit that produced it, and is checked against the
 result files by `scripts/29_check_manuscript.py`. No model number in this file
@@ -49,7 +49,7 @@ nothing restarts one whose pool is spent. After a 30 % loss of units, how the
 perfusion circuit is driven decides the outcome; at a fixed inlet pressure the
 construct overshoots to 1.82 times its mass without settling, while one held
 at a fixed root flow tracks a supply budget and settles, its mass rising as
-the delivered flow to an exponent of 0.91. Scaling the domain
+the delivered flow to an exponent of 0.90. Scaling the domain
 15-fold raises unit count only as V^0.45, and past an intermediate size the
 unit count also stops being reproducible, its coefficient of variation rising
 from 0.09 to 0.47. The model is not fitted to any construct and its
@@ -363,9 +363,9 @@ intact ensemble and evaluate on a disjoint block of seeds, so the demand is
 not fitted on the constructs it is applied to, and then vary the delivered
 flow between 0.6 and 1.4 times its pre-injury value
 (`scripts/32_inflow_law.py`; `PAPER_NUMBERS.md`, The mass a construct lands
-on). Mass rises as the delivered flow to an exponent of 0.91, fitted once per
+on). Mass rises as the delivered flow to an exponent of 0.90, fitted once per
 seed. Against the budget itself the construct overshoots when asked to shrink,
-reaching about 1.7 times $Q/\phi$ at the lowest flow, and falls short when
+reaching about 1.8 times $Q/\phi$ at the lowest flow, and falls short when
 asked to grow, reaching about 0.7 of it at the highest. By day 220 the mass is
 changing by well under a tenth of a per cent per day, so these are settled
 states and not a snapshot of something still moving.
@@ -374,10 +374,11 @@ A construct fed at constant flow therefore tracks its supply, and does so
 asymmetrically: it grows into a larger budget far more readily than it gives
 up mass to a smaller one. The spent-source construct behaves the same way, at
 its own $\phi$ and its own exponent, so the asymmetry is a property of the
-rule and not of either cell source. With the demand calibrated out of sample
-the construct no longer returns to exactly its pre-injury mass at unit flow,
-which is the clearest statement of how much of the earlier figure was the
-calibration.
+rule and not of either cell source. Calibrating the demand out of sample barely moves where the construct lands
+at unit flow and roughly doubles the range the seeds span. That is the
+clearest statement of what the earlier figure was: not the mean, which the
+rule gives anyway, but the tightness, which came from handing every construct
+its own pre-injury state as its target.
 
 The second is the contrast with constant pressure, which carries no reference
 to the pre-injury state at all. There the ceiling is the supply at the unit's
@@ -386,10 +387,10 @@ and the construct overshoots to 1.82 times its mass without settling.
 
 For completeness, with $\phi$ instead taken from each construct's own
 pre-injury delivery per unit mass, which is what `scripts/24_injury.py` does,
-the renewing construct returns to 1.01 [0.97, 1.04] and the spent-source
-construct to 0.97 [0.94, 0.99] (`PAPER_NUMBERS.md`, Injury). Those numbers,
+the renewing construct returns to 1.00 [0.95, 1.03] and the spent-source
+construct to 0.97 [0.93, 0.99] (`PAPER_NUMBERS.md`, Injury). Those numbers,
 and the contraction of the spread of final mass that comes with them from
-6.3 % to 2.1 % and from 8.2 % to 1.3 % (`PAPER_NUMBERS.md`, Spread across
+6.3 % to 2.3 % and from 8.2 % to 1.4 % (`PAPER_NUMBERS.md`, Spread across
 seeds), are that choice of $\phi$ written out. They are not evidence that the
 construct regulates its own size.
 
@@ -402,9 +403,9 @@ at all. Both are cheap to measure and either would falsify the rule.
 
 The spent-source construct arrested with no competent cells, so it cannot make
 new units and can only enlarge those it has. After losing 30 % of its units it
-ends with 0.70 [0.69, 0.70] of the count and 1.39 [1.35, 1.43] times the mass
+ends with 0.70 [0.69, 0.70] of the count and 1.39 [1.34, 1.43] times the mass
 per unit, against the 1.43 that full compensation would require, and its mass
-returns to 0.97 [0.94, 0.99]. After a 50 % loss it reaches 1.88 [1.79, 1.95]
+returns to 0.97 [0.93, 0.99]. After a 50 % loss it reaches 1.88 [1.78, 1.94]
 against the 2.00 required. The model therefore compensates almost completely by
 enlargement alone.
 
@@ -503,7 +504,7 @@ claim its answer here.
 the construct should stop at a target size.** At a fixed inlet pressure the
 model's construct overshoots to 1.82 times its mass after injury and does not
 settle; at fixed root flow it tracks a supply budget, its mass rising as the
-delivered flow to an exponent of 0.91 over a range of 0.6 to 1.4. Nothing in the
+delivered flow to an exponent of 0.90 over a range of 0.6 to 1.4. Nothing in the
 tissue measures its own size in either case. The brake is the supply the
 circuit provides, and where a construct stops is therefore a dial on the pump
 rather than a property of the tissue.

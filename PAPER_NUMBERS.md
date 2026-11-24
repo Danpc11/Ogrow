@@ -1,6 +1,6 @@
 # Numbers the paper uses
 
-Model version 4.40.0, commit f9b4e4a, generated 2026-11-24 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.40.0, commit 427f6d5, generated 2026-11-24 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b024.
 
@@ -136,25 +136,25 @@ The unit count is the mean over the seeds with the range they span and its coeff
 
 The ceiling on a unit is the delivered flow times its share over the delivery per unit mass the tissue needs, and the shares sum to one, so a total of Q/phi is what the rule gives if every unit reaches its ceiling. It is a consequence of the rule, not a measurement. What is measured here is how completely a construct reaches it: `mass / (Q/phi)` away from 1, and the exponent away from 1. `phi` is calibrated on a block of seeds disjoint from the one the sweep is evaluated on. The last column is the mean daily change of mass over the final ten days, which says whether the construct had settled.
 
-**liver**: phi = 0.000752 ± 0.000034, calibrated on seeds 400 to 423, evaluated on seeds 300 to 323. Exponent of mass against delivered flow, one fit per seed: 0.907 ± 0.023, bootstrap 95 % interval [0.899, 0.917].
+**liver**: phi = 0.000752 ± 0.000034, calibrated on seeds 400 to 423, evaluated on seeds 300 to 323. Exponent of mass against delivered flow, one fit per seed: 0.899 ± 0.024, bootstrap 95 % interval [0.891, 0.909].
 
 | delivered flow | mass / pre-injury | mass / (Q/phi) | mass still moving, % per day |
 |---|---|---|---|
-| 0.6 | 0.636 ± 0.021 | 1.733 | nan |
-| 0.8 | 0.825 ± 0.030 | 1.265 | nan |
-| 1.0 | 1.008 ± 0.041 | 0.989 | nan |
-| 1.2 | 1.192 ± 0.049 | 0.812 | nan |
-| 1.4 | 1.372 ± 0.055 | 0.687 | nan |
+| 0.6 | 0.645 ± 0.021 | 1.760 | 0.02 |
+| 0.8 | 0.833 ± 0.030 | 1.278 | 0.01 |
+| 1.0 | 1.020 ± 0.041 | 1.001 | 0.02 |
+| 1.2 | 1.203 ± 0.051 | 0.819 | 0.03 |
+| 1.4 | 1.382 ± 0.056 | 0.692 | 0.03 |
 
-**kidney**: phi = 0.000905 ± 0.000047, calibrated on seeds 400 to 423, evaluated on seeds 300 to 323. Exponent of mass against delivered flow, one fit per seed: 0.932 ± 0.021, bootstrap 95 % interval [0.924, 0.940].
+**kidney**: phi = 0.000905 ± 0.000047, calibrated on seeds 400 to 423, evaluated on seeds 300 to 323. Exponent of mass against delivered flow, one fit per seed: 0.932 ± 0.023, bootstrap 95 % interval [0.923, 0.941].
 
 | delivered flow | mass / pre-injury | mass / (Q/phi) | mass still moving, % per day |
 |---|---|---|---|
-| 0.6 | 0.604 ± 0.031 | 1.674 | nan |
-| 0.8 | 0.788 ± 0.043 | 1.230 | nan |
-| 1.0 | 0.971 ± 0.055 | 0.970 | nan |
-| 1.2 | 1.152 ± 0.066 | 0.798 | nan |
-| 1.4 | 1.330 ± 0.077 | 0.677 | nan |
+| 0.6 | 0.603 ± 0.031 | 1.674 | 0.01 |
+| 0.8 | 0.787 ± 0.043 | 1.228 | 0.01 |
+| 1.0 | 0.970 ± 0.055 | 0.968 | 0.02 |
+| 1.2 | 1.150 ± 0.066 | 0.798 | 0.03 |
+| 1.4 | 1.329 ± 0.077 | 0.677 | 0.04 |
 
 ## Injury after closure (day 140, 30 % of the units removed by a plane cut, read on day 220; the first four entries are day 220 over the day before the injury, the last two the share of what the cut took that is back, each the mean over 24 seeds with the range they span)
 
@@ -162,26 +162,26 @@ The ceiling on a unit is the delivered flow times its share over the delivery pe
 |---|---|---|---|---|---|---|---|
 | liver | as grown | 0.95 [0.77, 1.01] | 0.79 [0.67, 0.86] | 0.84 [0.69, 0.92] | 0.81 [0.67, 0.90] | 0.83 [0.24, 1.05] | 0.18 [0.04, 0.30] |
 | liver | reactivated | 0.95 [0.80, 1.02] | 1.82 [1.54, 2.07] | 1.93 [1.73, 2.19] | 1.97 [1.76, 2.18] | 0.82 [0.34, 1.06] | 4.37 [2.79, 6.32] |
-| liver | reactivated, fixed inflow | 0.91 [0.72, 1.05] | 1.01 [0.97, 1.04] | 1.12 [0.94, 1.34] | 1.10 [1.04, 1.15] | 0.69 [0.06, 1.16] | 1.04 [0.88, 1.16] |
+| liver | reactivated, fixed inflow | 0.92 [0.72, 1.05] | 1.00 [0.95, 1.03] | 1.10 [0.90, 1.32] | 1.09 [1.02, 1.13] | 0.72 [0.06, 1.18] | 1.01 [0.83, 1.12] |
 | kidney | as grown | 0.70 [0.69, 0.70] | 0.71 [0.60, 0.79] | 1.02 [0.85, 1.13] | 0.73 [0.56, 0.82] | 0.00 [0.00, 0.00] | -0.00 [-0.00, 0.00] |
 | kidney | reactivated | 0.70 [0.69, 0.70] | 1.85 [1.53, 2.21] | 2.64 [2.18, 3.18] | 2.02 [1.66, 2.41] | 0.00 [0.00, 0.00] | 4.09 [2.31, 6.62] |
-| kidney | reactivated, fixed inflow | 0.70 [0.69, 0.70] | 0.97 [0.94, 0.99] | 1.39 [1.35, 1.43] | 1.05 [1.01, 1.09] | 0.00 [0.00, 0.00] | 0.89 [0.71, 0.96] |
+| kidney | reactivated, fixed inflow | 0.70 [0.69, 0.70] | 0.97 [0.93, 0.99] | 1.39 [1.34, 1.43] | 1.04 [1.00, 1.08] | 0.00 [0.00, 0.00] | 0.88 [0.68, 0.96] |
 
 ## Spread across seeds, and what a fixed inflow does to it (coefficient of variation, %, over 24 seeds)
 
 | regime | readout | growth reactivated, inlet pressure fixed | and inflow held | contraction |
 |---|---|---|---|---|
-| liver | mass | 6.3 | 2.1 | 3.0 |
-| liver | unit count | 5.9 | 7.0 | 0.8 |
+| liver | mass | 6.3 | 2.3 | 2.7 |
+| liver | unit count | 5.9 | 6.9 | 0.9 |
 | liver | mass per unit | 6.1 | 6.7 | 0.9 |
-| kidney | mass | 8.2 | 1.3 | 6.4 |
+| kidney | mass | 8.2 | 1.4 | 5.8 |
 | kidney | unit count | 0.5 | 0.5 | 1.0 |
-| kidney | mass per unit | 8.3 | 1.3 | 6.1 |
+| kidney | mass per unit | 8.3 | 1.5 | 5.6 |
 
 ## How far a kidney compensates, growth reactivated and inflow fixed
 
 | regime | lost | units kept | mass per unit | full compensation would need | mass |
 |---|---|---|---|---|---|
-| kidney | 30 % | 0.70 [0.69, 0.70] | 1.39 [1.35, 1.43] | 1.43 | 0.97 [0.94, 0.99] |
-| kidney | 50 % | 0.50 [0.50, 0.52] | 1.88 [1.79, 1.95] | 2.00 | 0.95 [0.93, 0.98] |
+| kidney | 30 % | 0.70 [0.69, 0.70] | 1.39 [1.34, 1.43] | 1.43 | 0.97 [0.93, 0.99] |
+| kidney | 50 % | 0.50 [0.50, 0.52] | 1.88 [1.78, 1.94] | 2.00 | 0.95 [0.92, 0.98] |
 
