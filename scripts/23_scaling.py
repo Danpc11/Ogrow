@@ -24,6 +24,7 @@ import numpy as np
 from organgrow import sdf
 from organgrow.config import ROOT
 from organgrow.closed import grow
+from organgrow.runcache import fingerprint, cached, save_json, stale
 
 OUT = ROOT / "results" / "scaling"
 OUT.mkdir(parents=True, exist_ok=True)
@@ -34,22 +35,36 @@ FIX = dict(R_unit=650.0, units_per_branch=650 / 600.0, max_vessels=30000)
 PACK = 0.74                      # close packing of equal spheres
 
 
-def run(mode, S, seed):
-    f = OUT / f"{mode}_S{S}_s{seed}.json"
-    if f.exists():
-        return json.load(open(f))
+def spec(mode, S, seed):
+    """The file, the schedule and the fingerprint of one run."""
     g = S / S0
     days = D0 if mode == "geometry" else int(round(D0 * g ** 0.75))
     nu = NU0 if mode == "geometry" else NU0 * g ** -0.75
     P0 = P00 if mode == "geometry" else P00 * g ** 3
+    f = OUT / f"{mode}_S{S}_s{seed}.json"
+    fp = fingerprint(seed=seed, S=S, days=days,
+                     params={**FIX, **LIVER, "nu": nu, "P0": P0})
+    return f, (days, nu, P0), fp
+
+
+def needs(*a):
+    """Must this run be simulated? The filter and the run ask the same thing."""
+    f, _, fp = spec(*a)
+    return stale(f, fp)
+
+
+def run(mode, S, seed):
+    f, (days, nu, P0), fp = spec(mode, S, seed)
+    hit = cached(f, fp)
+    if hit is not None:
+        return hit
     U, m, vt, tr = grow(lambda x, y, z: sdf("liver", x / S, y / S, z / S), R0 * S,
                         days=days, rng=np.random.default_rng(seed), nu=nu, P0=P0,
                         **FIX, **LIVER)
     ceiling = (R0 * S / LAM) ** 3 * PACK
     r = dict(mode=mode, S=S, seed=seed, days=days, nu=nu, P0=P0, N=len(U),
              vessels=len(vt), ceiling=ceiling, fill=len(U) / ceiling, **tr.closure)
-    json.dump(r, open(f, "w"))
-    return r
+    return save_json(f, r, fp)
 
 
 def _warm(a):
@@ -59,7 +74,7 @@ def _warm(a):
 
 if __name__ == "__main__":
     grid = [g for g in [(mode, S, sd) for mode in ("geometry", "allometric")
-            for S in SCALES for sd in SEEDS] if not (OUT / f"{g[0]}_S{g[1]}_s{g[2]}.json").exists()]
+            for S in SCALES for sd in SEEDS] if needs(*g)]
     if grid:
         n = max(1, min(int(os.environ.get("OGROW_JOBS", 0)) or (os.cpu_count() or 1),
                        len(grid)))

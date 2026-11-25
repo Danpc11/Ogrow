@@ -4,12 +4,20 @@
 
 Code, data tables and figures for the manuscript.
 
-A generative model in which liver, kidney and pancreas grow from the same
-local rules: a tree whose tips hold supply, progenitors and room, and one
-nucleation law. Organs differ in which local resource stops their growth, and
-that decides which individual variation reaches their size. Paired human
-kidneys show how variation in a real organ divides between individuals and
-the sides within one.
+A generative model of how a perfused tissue construct stops growing. A
+vascular tree whose tips hold supply, progenitors and room, and one nucleation
+law: a construct arrests when one of those three runs out locally, and which
+one it is decides how much of the variation in what is seeded reaches the
+final size. The manuscript is a tissue-engineering paper and asks what that
+costs a specification. Its three cell sources are named liver-like,
+kidney-like and pancreas-like after the published turnover rates they take,
+and all three grow in the same domain and at the same geometric settings, so
+the contrast between them is the cell source and nothing else.
+
+The repository is wider than the manuscript. It also holds the earlier work
+this grew out of, on liver, kidney and pancreas as organs and on paired human
+kidneys; those tables and figures are kept for the record, and the manuscript
+does not rest on them.
 
 `PAPER.md` lists each claim with its evidence, `PAPER_NUMBERS.md` holds every
 model number, stamped with the version and commit that produced it, and
@@ -44,7 +52,9 @@ No install step is needed: `make` puts `src` on `PYTHONPATH` and picks up
 `python3` when `python` is not on the path. To force an interpreter, use
 `make all PY=/path/to/python`. `pip install -e .` also works if you prefer it.
 
-Python 3.10+, Linux or macOS. A full run takes a few hours on one core and
+Python 3.9 or later, Linux or macOS, as `pyproject.toml` requires and as CI
+tests on 3.9 and 3.12. The stamped numbers in `PAPER_NUMBERS.md` were produced
+on Python 3.9.6 on macOS. A full run takes a few hours on one core and
 well under that on several; the vascular sweep in
 `scripts/11_vascular_disorder.py` is the longest step that does not
 parallelise.

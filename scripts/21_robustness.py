@@ -28,6 +28,7 @@ import numpy as np
 from organgrow import sdf
 from organgrow.config import ROOT
 from organgrow.closed import grow
+from organgrow.runcache import fingerprint, cached, save_json, stale
 
 OUT = ROOT / "results" / "robustness"
 OUT.mkdir(parents=True, exist_ok=True)
@@ -57,18 +58,31 @@ VARIANTS = {
 }
 
 
-def run(variant, reg, seed, sign):
-    f = OUT / f"{variant}_{reg}_s{seed}_{sign}.json"
-    if f.exists():
-        return json.load(open(f))
+def spec(variant, reg, seed, sign):
+    """The file, the growth parameters and the fingerprint of one run."""
     p = dict(REG[reg]); p["P0"] *= float(np.exp({"0": 0.0, "+": H, "-": -H}[sign]))
     p.update(VARIANTS[variant])          # a variant overrides the regime's own value
+    f = OUT / f"{variant}_{reg}_s{seed}_{sign}.json"
+    return f, p, fingerprint(seed=seed, S=S, days=DAYS,
+                             params={**FIX, "nu": NU, **p})
+
+
+def needs(*a):
+    """Must this run be simulated? The filters and the run ask the same thing."""
+    f, _, fp = spec(*a)
+    return stale(f, fp)
+
+
+def run(variant, reg, seed, sign):
+    f, p, fp = spec(variant, reg, seed, sign)
+    hit = cached(f, fp)
+    if hit is not None:
+        return hit
     U, m, vt, tr = grow(lambda x, y, z: sdf("liver", x / S, y / S, z / S), 190 * S,
                         days=DAYS, rng=np.random.default_rng(seed), nu=NU, **FIX, **p)
     r = dict(N=len(U), vessels=len(vt), territory_diff=tr.final["territory_diff"],
              **tr.closure)
-    json.dump(r, open(f, "w"))
-    return r
+    return save_json(f, r, fp)
 
 
 def _warm(a):
@@ -79,7 +93,7 @@ def _warm(a):
 def warm(variant):
     """Run everything this variant needs, in parallel, before it is summarised."""
     grid = [(variant, reg, s, g) for reg in REG for s in SEEDS for g in "0+-"
-            if not (OUT / f"{variant}_{reg}_s{s}_{g}.json").exists()]
+            if needs(variant, reg, s, g)]
     if not grid:
         return
     n = max(1, min(int(os.environ.get("OGROW_JOBS", 0)) or (os.cpu_count() or 1), len(grid)))
@@ -124,8 +138,8 @@ if __name__ == "__main__":
             summary(v); print(f"{v}: done", flush=True)
         raise SystemExit(0)
     res = {v: summary(v) for v in VARIANTS
-           if all((OUT / f"{v}_{r}_s{s}_{g}.json").exists()
-                  for r in REG for s in SEEDS for g in "0+-")}
+           if not any(needs(v, r, s, g)
+                      for r in REG for s in SEEDS for g in "0+-")}
     json.dump(res, open(ROOT / "results" / "robustness.json", "w"), indent=1)
     print(f"{'variant':>14} {'regime':>9} {'N':>5} {'spent':>6} {'supply':>7} {'room':>6} {'eps_pool':>14}  order")
     for v, R in res.items():

@@ -31,6 +31,7 @@ import numpy as np
 from organgrow import sdf
 from organgrow.config import ROOT
 from organgrow.closed import grow
+from organgrow.runcache import fingerprint, cached, save_json, stale
 
 OUT = ROOT / "results" / "injury"
 OUT.mkdir(parents=True, exist_ok=True)
@@ -52,20 +53,34 @@ CONDS = {"as grown": dict(),
 KEYS = ("N", "mass", "perfused", "Q")
 
 
-def run(reg, kind, seed, cond="as grown", frac=FRAC):
+def spec(reg, kind, seed, cond="as grown", frac=FRAC):
+    """The file, the growth parameters and the fingerprint of one run."""
     tag = f"{reg}_{kind}_{cond.replace(' ', '').replace(',', '')}_f{frac}_s{seed}"
-    f = OUT / f"{tag}.json"
-    if f.exists():
-        return json.load(open(f))
     kw = dict(injure_day=CLOSE, injury=kind, injury_fraction=frac, **CONDS[cond])
+    f = OUT / f"{tag}.json"
+    fp = fingerprint(seed=seed, S=S, days=END,
+                     params={**FIX, "nu": NU, **REG[reg], **kw})
+    return f, kw, fp
+
+
+def needs(*a):
+    """Must this run be simulated? The filter and the run ask the same thing."""
+    f, _, fp = spec(*a)
+    return stale(f, fp)
+
+
+def run(reg, kind, seed, cond="as grown", frac=FRAC):
+    f, kw, fp = spec(reg, kind, seed, cond, frac)
+    hit = cached(f, fp)
+    if hit is not None:
+        return hit
     U, m, vt, tr = grow(lambda x, y, z: sdf("liver", x / S, y / S, z / S), 190 * S,
                         days=END, rng=np.random.default_rng(seed), nu=NU,
                         **FIX, **REG[reg], **kw)
     series = {k: [float(x) for x in getattr(tr, k)] for k in KEYS}
     r = dict(regime=reg, kind=kind, cond=cond, fraction=frac, seed=seed,
              series=series, injury=tr.injury, closure=tr.closure)
-    json.dump(r, open(f, "w"))
-    return r
+    return save_json(f, r, fp)
 
 
 def levels(rows, key):
@@ -112,9 +127,7 @@ if __name__ == "__main__":
             for reg in REG for cond in CONDS for s in SEEDS]
     grid += [("kidney", "parenchyma", s, "reactivated, fixed inflow", frac)
              for frac in (0.3, 0.5) for s in SEEDS]
-    grid = [g for g in grid
-            if not (OUT / (f"{g[0]}_{g[1]}_{g[3].replace(' ', '').replace(',', '')}"
-                           f"_f{g[4]}_s{g[2]}.json")).exists()]
+    grid = [g for g in grid if needs(*g)]
     if grid:
         n = max(1, min(int(os.environ.get("OGROW_JOBS", 0)) or (os.cpu_count() or 1),
                        len(grid)))

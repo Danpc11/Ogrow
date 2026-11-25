@@ -28,9 +28,14 @@ from organgrow.closed import grow
 
 S, DAYS, NU, H = 0.6, 140, 8.0, 0.3
 FIX = dict(R_unit=650.0, units_per_branch=650 / 600.0, max_vessels=6000)
+# The three published regimes, as the other scripts define them. The kidney's
+# loss rate read 0.0 here, so job_floor measured a kidney that is not the
+# paper's; the sweeps that vary the loss rate pass their own and are
+# unaffected. check_consistency.py now holds the canonical table and fails on
+# any disagreement between the scripts that copy it.
 BASE = {"liver": dict(P0=2600.0, rho=0.10, delta=0.10, renewal=1.0),
-        "kidney": dict(P0=300.0, rho=0.0, delta=0.0, renewal=0.0),
-        "pancreas": dict(P0=60.0, rho=0.0, delta=0.0, renewal=0.0)}
+        "kidney": dict(P0=300.0, rho=0.00, delta=0.05, renewal=0.0),
+        "pancreas": dict(P0=60.0, rho=0.00, delta=0.00, renewal=0.0)}
 SEEDS = (300, 301, 302)
 
 

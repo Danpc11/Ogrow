@@ -39,7 +39,7 @@ import numpy as np
 from organgrow import sdf
 from organgrow.config import ROOT
 from organgrow.closed import grow, _p
-from organgrow.runcache import fingerprint, cached
+from organgrow.runcache import fingerprint, cached, save_json
 
 OUT = ROOT / "results" / "involution"
 OUT.mkdir(parents=True, exist_ok=True)
@@ -87,7 +87,7 @@ def intact(reg, seed):
     r = dict(regime=reg, seed=seed, mass=float(np.asarray(tr.mass)[-1]),
              Q=float(np.asarray(tr.Q)[-1]), N=len(U), fingerprint=fp)
     r["phi"] = r["Q"] / max(r["mass"], 1e-12)
-    json.dump(r, open(f, "w"))
+    save_json(f, r, fp)
     return r
 
 
@@ -143,7 +143,7 @@ def run(reg, seed, rate, phi, trig=None):
              vessels=int(tr.vessels[-1]) if tr.vessels else 0,
              Q_end=float(np.asarray(tr.Q)[-1]), C_end=float(np.asarray(tr.C)[-1]),
              balance=float(tr.fate["balance"]), fingerprint=fp)
-    json.dump(r, open(f, "w"))
+    save_json(f, r, fp)
     return r
 
 

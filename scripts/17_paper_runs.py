@@ -26,6 +26,7 @@ import numpy as np
 from organgrow import sdf
 from organgrow.config import ROOT, CFG
 from organgrow.closed import grow
+from organgrow.runcache import fingerprint, save_npz, stale
 
 OUT = ROOT / "results" / "paper"
 OUT.mkdir(parents=True, exist_ok=True)
@@ -39,9 +40,15 @@ REGIMES = {
 FIX = dict(R_unit=650.0, units_per_branch=650 / 600.0, max_vessels=6000)
 
 
+def fp_of(seed, nu, **p):
+    """What decides this run. The job filters test the same thing the run does."""
+    return fingerprint(seed=seed, S=S, days=DAYS, params={**FIX, "nu": nu, **p})
+
+
 def run(tag, seed, nu, **p):
     f = OUT / f"{tag}.npz"
-    if f.exists():
+    fp = fp_of(seed, nu, **p)
+    if not stale(f, fp):
         return
     rng = np.random.default_rng(seed)
     U, m, vt, tr = grow(lambda x, y, z: sdf("liver", x / S, y / S, z / S),
@@ -56,7 +63,8 @@ def run(tag, seed, nu, **p):
               for a, cs in kids.items() if len(cs) >= 2]
     b = tr.closure
     fa = tr.fate
-    np.savez(f, closure=np.array([b["spent"], b["supply_held"], b["space_held"], b["active"]]),
+    save_npz(f, fp,
+             closure=np.array([b["spent"], b["supply_held"], b["space_held"], b["active"]]),
              fate=np.array([fa["consumed"], fa["lost"], fa["born"], fa["left"]]),
              N=np.asarray(tr.N, float), q=np.asarray(tr.q, float),
              P=np.asarray(tr.P, float), vessels=np.asarray(tr.vessels, float),
@@ -89,7 +97,7 @@ def job_reps():
     """
     grid = [(_tag(reg, k), SEED0 + k, p)
             for reg, p in REGIMES.items() for k in range(NSEED)
-            if not (OUT / f"{_tag(reg, k)}.npz").exists()]
+            if stale(OUT / f"{_tag(reg, k)}.npz", fp_of(SEED0 + k, NU, **p))]
     if grid:
         n = max(1, min(int(os.environ.get("OGROW_JOBS", 0)) or (os.cpu_count() or 1),
                        len(grid)))
@@ -106,9 +114,13 @@ def job_reps():
     ckeys = ("spent", "supply_held", "space_held", "active")
     out = {}
     for reg in REGIMES:
-        fa = np.array([np.load(OUT / f"{_tag(reg, k)}.npz")["fate"] for k in range(NSEED)])
-        cl = np.array([np.load(OUT / f"{_tag(reg, k)}.npz")["closure"] for k in range(NSEED)])
-        N = np.array([np.load(OUT / f"{_tag(reg, k)}.npz")["N"][-1] for k in range(NSEED)])
+        rows = []
+        for k in range(NSEED):
+            with np.load(OUT / f"{_tag(reg, k)}.npz") as z:
+                rows.append((z["fate"], z["closure"], z["N"][-1]))
+        fa = np.array([r[0] for r in rows])
+        cl = np.array([r[1] for r in rows])
+        N = np.array([r[2] for r in rows])
 
         def ms(A, names):
             return {n: dict(mean=float(A[:, i].mean()),
@@ -139,7 +151,9 @@ def job_rate():
 def job_snapshot():
     """Geometry of one liver at closure, for the schematic of Figure 1."""
     f = OUT / "snapshot_liver.npz"
-    if f.exists():
+    fp = fingerprint(job="snapshot", seed=SEED0, S=S, days=DAYS,
+                     params={**FIX, "nu": NU, **REGIMES["liver"]})
+    if not stale(f, fp):
         return
     rng = np.random.default_rng(SEED0)
     U, m, vt, tr = grow(lambda x, y, z: sdf("liver", x / S, y / S, z / S),
@@ -149,7 +163,7 @@ def job_snapshot():
     starts = np.asarray([vt.end[p] if p >= 0 else vt.end[k] for k, p in enumerate(par)], float)
     fin = tr.final
     tips = fin["tips"]
-    np.savez(f, U=np.asarray(U, float), starts=starts, ends=ends,
+    save_npz(f, fp, U=np.asarray(U, float), starts=starts, ends=ends,
              radius=np.asarray(vt.radius, float), tips=tips,
              q_tip=fin["q"][tips], P_tip=fin["P"][tips], q_set=REGIMES["liver"]["q_set"])
     print(f"  snapshot_liver: N={len(U)}, vessels={len(par)}", flush=True)

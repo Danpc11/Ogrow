@@ -46,7 +46,7 @@ from organgrow import sdf
 from organgrow import closed as _closed
 from organgrow.config import ROOT
 from organgrow.closed import grow
-from organgrow.runcache import fingerprint, cached
+from organgrow.runcache import fingerprint, cached, save_json
 
 OUT = ROOT / "results" / "inflow_law"
 OUT.mkdir(parents=True, exist_ok=True)
@@ -111,7 +111,7 @@ def run(reg, seed, scale, phi):
              mass=float(M[-1]), N=len(U), Q=float(np.asarray(tr.Q)[-1]),
              drift_per_day=drift, residual=eps, floor_share=floor_share,
              fingerprint=fp)
-    json.dump(r, open(f, "w"))
+    save_json(f, r, fp)
     return r
 
 
@@ -128,7 +128,7 @@ def intact(reg, seed):
     r = dict(regime=reg, seed=seed, mass=float(np.asarray(tr.mass)[-1]),
              Q=float(np.asarray(tr.Q)[-1]), N=len(U), fingerprint=fp)
     r["phi"] = r["Q"] / max(r["mass"], 1e-12)
-    json.dump(r, open(f, "w"))
+    save_json(f, r, fp)
     return r
 
 

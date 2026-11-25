@@ -24,7 +24,12 @@ Reference model version 4.60.0 (`src/organgrow/closed.py`). Every model number
 quoted below is taken from `PAPER_NUMBERS.md`, which `make paper` regenerates
 with the version and commit that produced it, and is checked against the
 result files by `scripts/29_check_manuscript.py`. No model number in this file
-is written by hand.
+is written by hand. That check reads the result files, which continuous
+integration does not carry, so it runs under `make check` on a machine that
+has them rather than on every push. What runs on every push is
+`scripts/check_consistency.py`, which holds the version and the stamp
+together and fails if anything under `src`, `config` or `scripts` has changed
+since the numbers were stamped.
 
 ---
 
@@ -159,15 +164,20 @@ One binary parameter, `renewal` ($w$), states whether the cell that forms a
 unit is spent. With $w = 1$ the compartment is restored by the cells it
 produces and forming a unit does not draw it down. With $w = 0$ the cell is
 consumed. Three regimes are defined by this parameter together with the
-initial pool $P_0$ and a loss rate $\delta$:
+initial pool $P_0$ and the rates at which that pool divides and is lost,
+$\rho$ and $\delta$:
 
-| regime | $w$ | $P_0$ | $\delta$ |
-|---|---|---|---|
-| liver-like, renewing source | 1 | 2600 | 0.10 |
-| kidney-like, spent source with loss | 0 | 300 | 0.05 |
-| pancreas-like, spent source without loss | 0 | 60 | 0.00 |
+| regime | $w$ | $P_0$ | $\rho$ | $\delta$ |
+|---|---|---|---|---|
+| liver-like, renewing source | 1 | 2600 | 0.10 | 0.10 |
+| kidney-like, spent source with loss | 0 | 300 | 0.00 | 0.05 |
+| pancreas-like, spent source without loss | 0 | 60 | 0.00 | 0.00 |
 
-No other parameter differs between the three. All runs use
+Four parameters differ and no others. The division rate $\rho$ belongs with
+the loss rate: the liver-like source divides as fast as it is lost and holds
+its pool, while neither of the other two divides at all. Section 3.7 treats
+the pair as one axis for that reason, and reports that it is the axis that
+most often decides which bound ends the growth. All runs use
 $\nu = 8$, $q_{\mathrm{set}} = 0.6$, and the same vascular and geometric
 settings.
 
@@ -877,7 +887,7 @@ Each of the following would decide one result. None has been done.
 ## 5. Limitations
 
 No parameter in this paper is fitted to data. The values are chosen, the same
-values are used for all three regimes except the four that define a regime,
+values are used for all three regimes except the four listed in Section 2.2,
 and what we report are ratios, orderings and contrasts rather than absolute
 sizes, because those are what a chosen parameter set can support. During the
 development of the model an earlier version was tuned so that its renewing

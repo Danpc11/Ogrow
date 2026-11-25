@@ -1,4 +1,8 @@
-.PHONY: all clean distclean figures analyses audit source_data test closed paper check python-ok
+.PHONY: help all clean distclean figures analyses audit source_data test closed paper check python-ok
+# The first rule below is python-ok, which would otherwise be what a bare
+# `make` runs: an environment check and nothing else, which tells a newcomer
+# nothing about which of the two pipelines is the paper's.
+.DEFAULT_GOAL := help
 PY ?= $(shell command -v python3 2>/dev/null || command -v python)
 # the package is importable from src without installing anything
 export PYTHONPATH := $(CURDIR)/src:$(PYTHONPATH)
@@ -23,6 +27,26 @@ python-ok:
 	       echo "  The import error follows."; \
 	       echo ""; \
 	       $(PY) -c "import yaml, numpy, scipy, matplotlib, organgrow"; }
+
+help:
+	@echo ""
+	@echo "  The manuscript"
+	@echo "    make paper     every number, figure and table the manuscript uses,"
+	@echo "                   from the closed model, and PAPER_NUMBERS.md"
+	@echo "    make check     static analysis; the version, the stamp and the"
+	@echo "                   manuscript's numbers agree"
+	@echo "    make test      under a minute: derivations, conservation, the cache"
+	@echo ""
+	@echo "  Not the manuscript"
+	@echo "    make all       the earlier figures, from the open engine in"
+	@echo "                   src/organgrow/engine.py. Kept for the record; they"
+	@echo "                   are not the paper's and do not check it."
+	@echo "    make closed    exploratory runs from the development of the model,"
+	@echo "                   with parameters from earlier versions"
+	@echo ""
+	@echo "  OGROW_JOBS=n sets the worker count; OGROW_ADOPT_CACHE=1 stamps the"
+	@echo "  cache on disk as current instead of recomputing it. See README.md."
+	@echo ""
 
 all: figures
 
@@ -111,4 +135,8 @@ paper: python-ok
 	$(PY) figures/fig6.py
 	$(PY) scripts/18_paper_tables.py
 	$(PY) scripts/20_paper_numbers.py
+	# The leading - is deliberate. The Word file is derived from MANUSCRIPT.md
+	# and needs pandoc, which is not a dependency of the model: a machine
+	# without it still produces every number, figure and table above, and the
+	# script says what is missing rather than writing a half-converted file.
 	-$(PY) scripts/30_build_docx.py --keep-notes

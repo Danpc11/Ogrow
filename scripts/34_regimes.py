@@ -50,7 +50,7 @@ import numpy as np
 from organgrow import sdf
 from organgrow.config import ROOT
 from organgrow.closed import grow
-from organgrow.runcache import fingerprint, cached
+from organgrow.runcache import fingerprint, cached, save_json
 
 OUT = ROOT / "results" / "regimes"
 OUT.mkdir(parents=True, exist_ok=True)
@@ -114,7 +114,7 @@ def run(renewal, P0, turn, seed):
              supply_held=float(c["supply_held"]),
              space_held=float(c["space_held"]), active=float(c["active"]),
              fingerprint=fp)
-    json.dump(r, open(f, "w"))
+    save_json(f, r, fp)
     return r
 
 

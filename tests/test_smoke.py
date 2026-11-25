@@ -626,6 +626,77 @@ check("a run that hits the unit cap still agrees with one at a time",
       _cap_batched == _cap_scalar and _cap_batched[-1] <= 25,
       f"{_cap_batched[-1]} units against {_cap_scalar[-1]}, cap 25")
 
+# ---------------------------------------------------------------- run cache
+# The cache decides whether a stored run is reused, so a fault in it does not
+# fail loudly: it puts an answer to an old question into the paper. These
+# check the four ways that can happen.
+import os                                                             # noqa: E402
+import re                                                             # noqa: E402
+import tempfile                                                       # noqa: E402
+from pathlib import Path                                              # noqa: E402
+
+from organgrow import runcache                                        # noqa: E402
+
+with tempfile.TemporaryDirectory() as _d:
+    _d = Path(_d)
+    _fa = runcache.fingerprint(regime="liver", seed=1, params=dict(P0=100.0))
+    _fb = runcache.fingerprint(regime="liver", seed=1, params=dict(P0=100.1))
+    check("a changed parameter changes the fingerprint", _fa != _fb)
+
+    _j = _d / "r.json"
+    runcache.save_json(_j, dict(N=7), _fa)
+    check("a stored run is reused for its own question",
+          (runcache.cached(_j, _fa) or {}).get("N") == 7)
+    check("a stored run is not reused for another question",
+          runcache.cached(_j, _fb) is None and runcache.stale(_j, _fb))
+
+    _n = _d / "r.npz"
+    runcache.save_npz(_n, _fa, N=np.arange(5.0))
+    check("an .npz is reused for its own question", not runcache.stale(_n, _fa))
+    check("an .npz is not reused for another question", runcache.stale(_n, _fb))
+    with np.load(_n) as _z:
+        check("the stored arrays survive the stamp", _z["N"].tolist() == [0, 1, 2, 3, 4])
+
+    # A file truncated by a killed process must look absent, not finished.
+    _j.write_text('{"N": 7, "fing')
+    check("a truncated record is not read as a finished run",
+          runcache.cached(_j, _fa) is None)
+    _n.write_bytes(_n.read_bytes()[:40])
+    check("a truncated .npz is not read as a finished run", runcache.stale(_n, _fa))
+
+    # Adoption is the escape hatch, and it must restamp both kinds in place.
+    runcache.save_json(_j, dict(N=7), _fa)
+    runcache.save_npz(_n, _fa, N=np.arange(5.0))
+    os.environ["OGROW_ADOPT_CACHE"] = "1"
+    _ad = runcache.cached(_j, _fb)
+    _adn = not runcache.stale(_n, _fb)
+    del os.environ["OGROW_ADOPT_CACHE"]
+    check("adoption restamps a record and leaves its content",
+          (_ad or {}).get("N") == 7 and _ad.get("fingerprint") == _fb)
+    check("adoption restamps an .npz", _adn and not runcache.stale(_n, _fb))
+    check("adoption is off again afterwards", runcache.stale(_j, _fa))
+
+# ------------------------------------------------- does this machine agree?
+# PAPER_NUMBERS.md is produced on one machine. If this one does not reproduce
+# the reference run, the numbers in it are not portable here, and the paper
+# cannot claim that the repository reproduces them anywhere.
+from organgrow import reference                                       # noqa: E402
+
+_got, _n, _v = reference.digest()
+_pn = Path(__file__).resolve().parents[1] / "PAPER_NUMBERS.md"
+_want = None
+if _pn.exists():
+    _m = re.search(r"Reference run digest `([0-9a-f]+)`", _pn.read_text())
+    _want = _m.group(1) if _m else None
+if _want is None:
+    print(f"  note the reference run gives {_got} ({_n} units, {_v} vessels) here; "
+          f"PAPER_NUMBERS.md carries no digest to compare it with yet")
+else:
+    check("this environment reproduces the stamped reference run", _got == _want,
+          f"{_got} here against {_want} stamped -- if these differ the stamped "
+          f"numbers are not portable to this machine, which is a result and "
+          f"not a broken test")
+
 print()
 if FAIL:
     print("FAILED:", ", ".join(FAIL))

@@ -22,6 +22,7 @@ import numpy as np
 from organgrow import sdf
 from organgrow.config import ROOT
 from organgrow.closed import grow
+from organgrow.runcache import fingerprint, stale, save_npz
 
 OUT = ROOT / "results" / "elasticity"
 OUT.mkdir(parents=True, exist_ok=True)
@@ -40,18 +41,25 @@ SETTINGS = {"ref": {}, "nu_lo": dict(nu=4.0), "nu_hi": dict(nu=16.0),
 FIX = dict(R_unit=650.0, units_per_branch=650 / 600.0, max_vessels=6000)
 
 
-def run(reg, setting, k, inp, sign):
-    f = OUT / f"{reg}_{setting}_{inp}{'+' if sign > 0 else '-'}_k{k}.npz"
-    if f.exists():
-        return
+def spec(reg, setting, k, inp, sign):
+    """The file, the growth parameters and the fingerprint of one perturbation."""
     p = dict(BASE[reg]); p.update(SETTINGS[setting])
     p[inp] = p[inp] * float(np.exp(sign * H))
+    f = OUT / f"{reg}_{setting}_{inp}{'+' if sign > 0 else '-'}_k{k}.npz"
+    return f, p, fingerprint(seed=SEED0 + k, S=S, days=DAYS, params={**FIX, **p})
+
+
+def run(reg, setting, k, inp, sign):
+    f, p, fp = spec(reg, setting, k, inp, sign)
+    if not stale(f, fp):
+        return
     rng = np.random.default_rng(SEED0 + k)
     U, m, vt, tr = grow(lambda x, y, z: sdf("liver", x / S, y / S, z / S),
                         190 * S, days=DAYS, rng=rng, **FIX, **p)
     fin = tr.final
-    np.savez(f, N=np.asarray(tr.N, float), C=np.asarray(tr.C, float), Q=np.asarray(tr.Q, float),
-             q=np.asarray(tr.q, float), P=np.asarray(tr.P, float),
+    save_npz(f, fp, N=np.asarray(tr.N, float), C=np.asarray(tr.C, float),
+             Q=np.asarray(tr.Q, float), q=np.asarray(tr.q, float),
+             P=np.asarray(tr.P, float),
              q_tip=fin["q"][fin["tips"]], P_tip=fin["P"][fin["tips"]],
              q_set=p["q_set"])
 
@@ -66,11 +74,12 @@ def elasticities(reg, setting):
     for inp in ("P0", "q_set"):
         e = []
         for k in range(NSEED):
-            a = OUT / f"{reg}_{setting}_{inp}+_k{k}.npz"
-            b = OUT / f"{reg}_{setting}_{inp}-_k{k}.npz"
-            if not (a.exists() and b.exists()):
+            a, _, fa = spec(reg, setting, k, inp, +1)
+            b, _, fb = spec(reg, setting, k, inp, -1)
+            if stale(a, fa) or stale(b, fb):
                 continue
-            e.append((np.log(np.load(a)["N"][-1]) - np.log(np.load(b)["N"][-1])) / (2 * H))
+            with np.load(a) as za, np.load(b) as zb:
+                e.append((np.log(za["N"][-1]) - np.log(zb["N"][-1])) / (2 * H))
         if e:
             e = np.array(e)
             out[inp] = dict(mean=float(e.mean()), se=float(e.std(ddof=1) / np.sqrt(len(e)))

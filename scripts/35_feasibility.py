@@ -59,7 +59,7 @@ import numpy as np
 from organgrow import sdf
 from organgrow.config import ROOT, CFG
 from organgrow.closed import grow
-from organgrow.runcache import fingerprint, cached
+from organgrow.runcache import fingerprint, cached, save_json
 
 OUT = ROOT / "results" / "feasibility"
 OUT.mkdir(parents=True, exist_ok=True)
@@ -233,7 +233,7 @@ def run(S, P0, nu, days, src, seed, sub=1, nuc=None, var=None):
              #: shorter than the arrest window is the only way to reach it
              late_growth=float(min(growth, 1e6)),
              arrested=bool(growth < ARREST_TOL), fingerprint=fp)
-    json.dump(r, open(f, "w"))
+    save_json(f, r, fp)
     return r
 
 

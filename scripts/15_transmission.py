@@ -29,6 +29,7 @@ import numpy as np
 from organgrow import sdf
 from organgrow.config import ROOT
 from organgrow.closed import grow
+from organgrow.runcache import fingerprint, cached, save_json, stale
 
 OUT = ROOT / "results" / "transmission"
 OUT.mkdir(parents=True, exist_ok=True)
@@ -43,31 +44,43 @@ REGIMES = {
     "pancreas": dict(P0=60.0, rho=0.00, delta=0.00, q_set=0.6, renewal=0.0),   # a budget, no loss
 }
 Z = np.random.default_rng(2024).normal(size=(max(NREP, 64), 2))
+FIX = dict(nu=8.0, R_unit=650.0, units_per_branch=650 / 600.0, max_vessels=6000)
 
 
-def run_rep(regime, cond, k):
-    f = OUT / f"{regime}_{cond}_k{k}.json"
-    if f.exists():
-        return
+def spec(regime, cond, k):
+    """The file, the growth parameters and the fingerprint of one replicate.
+
+    Both the run and the report go through this, so a cached file is read only
+    by the question it answered.
+    """
     p = dict(REGIMES[regime])
     if cond == "pool":
         p["P0"] *= float(np.exp(SIG_P * Z[k, 0]))
     if cond == "setpoint":
         p["q_set"] *= float(np.exp(SIG_Q * Z[k, 1]))
+    f = OUT / f"{regime}_{cond}_k{k}.json"
+    fp = fingerprint(regime=regime, cond=cond, seed=SEED0 + k, S=S, days=DAYS,
+                     params={**FIX, **p})
+    return f, p, fp
+
+
+def run_rep(regime, cond, k):
+    f, p, fp = spec(regime, cond, k)
+    if not stale(f, fp):
+        return
     rng = np.random.default_rng(SEED0 + k)
     U, m, vt, tr = grow(lambda x, y, z: sdf("liver", x / S, y / S, z / S),
-                        190 * S, days=DAYS, rng=rng, nu=8.0, R_unit=650.0,
-                        units_per_branch=650 / 600.0, max_vessels=6000, **p)
+                        190 * S, days=DAYS, rng=rng, **FIX, **p)
     P = np.asarray(tr.P, float)
-    json.dump(dict(N=len(U), q_final=float(tr.q[-1]),
-                   pool_final=float(P[-1]), **p), open(f, "w"))
+    save_json(f, dict(N=len(U), q_final=float(tr.q[-1]),
+                      pool_final=float(P[-1]), **p), fp)
 
 
 def cv(regime, cond):
-    fs = [OUT / f"{regime}_{cond}_k{k}.json" for k in range(NREP)]
-    if not all(f.exists() for f in fs):
+    rows = [cached(f, fp) for f, _, fp in
+            (spec(regime, cond, k) for k in range(NREP))]
+    if any(r is None for r in rows):
         return None, None
-    rows = [json.load(open(f)) for f in fs]
     N = np.array([r["N"] for r in rows], float)
     return float(N.std(ddof=1) / N.mean()), rows
 

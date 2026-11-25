@@ -45,6 +45,12 @@ w(f"Model version {organgrow.__version__}, commit {commit}, generated "
   f"{datetime.date.today().isoformat()} by `scripts/20_paper_numbers.py`. Do not edit by hand.\n")
 w(f"Python {platform.python_version()}, numpy {np.__version__}, scipy {scipy.__version__}; "
   f"`config/params.yaml` sha256 {cfg_hash}.\n")
+# The reference run of organgrow.reference, so that another environment can
+# check that it reproduces this one before trusting the numbers below.
+# `make test` reads this line.
+from organgrow.reference import digest as _refdigest           # noqa: E402
+_rd, _rn, _rv = _refdigest()
+w(f"Reference run digest `{_rd}` ({_rn} units, {_rv} vessels).\n")
 
 def table(header, rows):
     w("| " + " | ".join(header) + " |")

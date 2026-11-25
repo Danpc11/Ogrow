@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# Full reproduction. See MANIFEST.md for what each step produces.
+# The legacy pipeline: the earlier figures, from the open engine in
+# src/organgrow/engine.py, kept for the record. This is NOT the manuscript and
+# does not check it; the manuscript is `make paper`. See MANIFEST.md for what
+# each step here produces and README.md for the separation of the two.
 set -euo pipefail
 PY="${PY:-$(command -v python3 || command -v python)}"
 export PYTHONPATH="$(cd "$(dirname "$0")" && pwd)/src:${PYTHONPATH:-}"

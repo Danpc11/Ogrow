@@ -208,8 +208,11 @@ which a vessel regresses. `PAPER_NUMBERS.md`, Murray; Figure 7.
 
 **Capacity closure contracts the spread of unit number.** If every individual
 gains the same increment of $N^2$, the ratio of initial to final CV is
-$(N_f/N_i)^2$, which gives 3.31 for the mouse liver against 3.09 measured
-(Azizoglu et al. 2025). `PAPER_NUMBERS.md`, Contraction; Figure 8.
+$(N_f/N_i)^2$, which gives 3.31 for the mouse liver against 3.09 read off
+Fig. 1g of Azizoglu et al. 2025. That study counted lobules at two ages only,
+three animals at one week and six at eight weeks, and gives no spread in its
+text, so the comparison is thin evidence and is not a fit: nothing in the model
+is set by it. `PAPER_NUMBERS.md`, Contraction; Figure 8.
 
 ## What this is for
 
@@ -288,8 +291,13 @@ decide one of them.
   add a second property that differs exactly as `renewal` does, which is the
   claim the paper is testing. The variant is kept as `final_induction`, and
   `scripts/27_pool_fate.py` regenerates the sweeps behind this.
-- The parameters are chosen, not fitted. The one calibration is the mouse
-  contraction.
+- No parameter is fitted. The parameters are chosen, and the results are
+  ratios and orderings rather than absolute sizes. The one tuning against data
+  that the repository ever did, against mouse lobule number, lives in
+  `scripts/12_calibrate_closed.py`, which is labelled there as exploratory,
+  carries parameters from earlier versions, is not run by `make paper`, and
+  determines nothing in `PAPER_NUMBERS.md`: `nu = 8` is a chosen value used
+  throughout.
 - Everything runs at one domain scale, so the model's contingent spread cannot
   stand in for a human organ's.
 - The spatial constraint is the local exclusion between neighbouring units and
