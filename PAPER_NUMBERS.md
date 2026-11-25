@@ -1,6 +1,6 @@
 # Numbers the paper uses
 
-Model version 4.50.0, commit 036573f, generated 2026-11-24 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.54.0, commit ccb2091, generated 2026-11-25 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b024.
 
@@ -52,6 +52,77 @@ Two different things are reported here and they do not add up to each other. `po
 | pancreas | nu_hi | +0.72 ± 0.04 | -0.66 ± 0.08 | 24 |
 | pancreas | q_lo | +0.80 ± 0.04 | -0.35 ± 0.04 | 24 |
 | pancreas | q_hi | +0.70 ± 0.06 | -2.52 ± 0.06 | 24 |
+
+## What separates the regimes: renewal against pool and turnover
+
+The three regimes differ in several parameters at once, so the binary property cannot be credited with the separation until the others are held fixed. This varies each independently and reports where the pool stands at arrest. Division and loss are one axis rather than two, swept over the pairings the three sources use, because a pool that divides without being lost grows without bound and because the kidney and the pancreas do not divide at all. The last column names the largest of the four shares, which is the bound that ended the growth (`scripts/34_regimes.py`).
+
+| renewal | pool | turnover | division | loss | units | spent | supply | room | active | what holds growth | named regime |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 0 | 60 | static | 0.00 | 0.00 | 45.0 ± 4.6 | 0.75 | 0.25 | 0.00 | 0.00 | spent | pancreas-like |
+| 0 | 60 | decaying | 0.00 | 0.05 | 39.5 ± 3.0 | 1.00 | 0.00 | 0.00 | 0.00 | spent |  |
+| 0 | 60 | balanced | 0.10 | 0.10 | 43.3 ± 6.1 | 0.74 | 0.28 | 0.00 | 0.00 | spent |  |
+| 0 | 300 | static | 0.00 | 0.00 | 121.9 ± 8.7 | 0.41 | 0.49 | 0.10 | 0.00 | supply |  |
+| 0 | 300 | decaying | 0.00 | 0.05 | 89.0 ± 7.8 | 1.00 | 0.00 | 0.00 | 0.00 | spent | kidney-like |
+| 0 | 300 | balanced | 0.10 | 0.10 | 116.0 ± 11.9 | 0.41 | 0.51 | 0.08 | 0.00 | supply |  |
+| 0 | 2600 | static | 0.00 | 0.00 | 212.6 ± 15.1 | 0.08 | 0.74 | 0.18 | 0.00 | supply |  |
+| 0 | 2600 | decaying | 0.00 | 0.05 | 154.8 ± 13.1 | 1.00 | 0.00 | 0.00 | 0.00 | spent |  |
+| 0 | 2600 | balanced | 0.10 | 0.10 | 211.0 ± 16.8 | 0.12 | 0.70 | 0.19 | 0.00 | supply |  |
+| 1 | 60 | static | 0.00 | 0.00 | 87.8 ± 18.8 | 0.00 | 0.75 | 0.25 | 0.01 | supply |  |
+| 1 | 60 | decaying | 0.00 | 0.05 | 51.5 ± 7.7 | 1.00 | 0.00 | 0.00 | 0.00 | spent |  |
+| 1 | 60 | balanced | 0.10 | 0.10 | 77.4 ± 21.0 | 0.21 | 1.03 | 0.18 | 0.00 | supply |  |
+| 1 | 300 | static | 0.00 | 0.00 | 143.7 ± 21.0 | 0.00 | 0.78 | 0.22 | 0.00 | supply |  |
+| 1 | 300 | decaying | 0.00 | 0.05 | 98.4 ± 8.4 | 1.00 | 0.00 | 0.00 | 0.00 | spent |  |
+| 1 | 300 | balanced | 0.10 | 0.10 | 140.3 ± 12.9 | 0.06 | 0.78 | 0.32 | 0.01 | supply |  |
+| 1 | 2600 | static | 0.00 | 0.00 | 223.7 ± 22.9 | 0.00 | 0.80 | 0.20 | 0.00 | supply |  |
+| 1 | 2600 | decaying | 0.00 | 0.05 | 152.0 ± 14.8 | 1.00 | 0.00 | 0.00 | 0.00 | spent |  |
+| 1 | 2600 | balanced | 0.10 | 0.10 | 208.1 ± 17.9 | 0.06 | 0.78 | 0.19 | 0.00 | supply | liver-like |
+
+Changing renewal alone, with the pool and the turnover held fixed, changes which bound ends the growth in 2 of 9 settings of the two.
+
+The elasticity of the final unit count to the seeded pool is reported elsewhere at each regime's own pool size, so a renewing source at 2600 is compared with a spent one at 60. Here the pool and the turnover are matched between the two sources and only the binary property differs.
+
+| pool | turnover | spent source | renewing source | gap |
+|---|---|---|---|---|
+| 2600 | balanced | +0.24 ± 0.04 | +0.07 ± 0.06 | +0.17 |
+| 300 | decaying | +0.37 ± 0.03 | +0.34 ± 0.05 | +0.04 |
+| 60 | static | +0.71 ± 0.05 | +0.44 ± 0.12 | +0.28 |
+
+## Designing to a specification: where the requirements can be met
+
+A joint specification is imposed at each target volume and the knobs an operator sets are searched for a configuration meeting all of it: units occupying at least 10% of the domain's close packing, at most 2500 vessel segments, and a coefficient of variation of the unit count across realisations of at most 0.15. The knobs are the seeded pool, the nucleation propensity, the culture duration and the cell source. The configuration is chosen on 16 seeds by maximin, the largest smallest slack, and re-run on 24 seeds the search never saw. Configurations that had not arrested are excluded (`scripts/35_feasibility.py`).
+
+What any configuration reaches at each volume, one requirement at a time. The three are reached by different configurations, so no single construct has all three at once.
+
+| scale | volume | best fill | fewest vessels | lowest CV | arrested |
+|---|---|---|---|---|---|
+| 0.4 | 0.064 | 20.17% | 193 | 0.065 | 37/48 |
+| 0.6 | 0.216 | 10.88% | 364 | 0.051 | 35/48 |
+| 0.8 | 0.512 | 6.62% | 735 | 0.041 | 34/48 |
+| 1.0 | 1.000 | 5.10% | 1468 | 0.057 | 27/48 |
+
+| scale | feasible | pool | nu | days | source | fill | vessels | CV | fill, held out | CV, held out |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 0.4 | yes | 9000 | 24 | 280 | renewing | 20.17% | 424 | 0.078 | 19.75% | 0.069 |
+| 0.6 | yes | 9000 | 12 | 280 | renewing | 10.14% | 1032 | 0.072 | 10.13% | 0.053 |
+| 0.8 | no | - | - | - | - | - | - | - | - | - |
+| 1.0 | no | - | - | - | - | - | - | - | - | - |
+
+At scale 0.8 no configuration met the specification. The requirement none could meet is density; the best any configuration came to it was a slack of -0.34, where zero would be meeting it exactly.
+
+At scale 1.0 no configuration met the specification. The requirement none could meet is density; the best any configuration came to it was a slack of -0.49, where zero would be meeting it exactly.
+
+The margin measured on the search block understates the margin on the held-out block by 0.03 on average, because the configuration is chosen partly for the realisations that happened to favour it. The held-out column is the honest one. Held-out seeds are new realisations of the same model and not new evidence about it, so this measures reproducibility across batches and is not a validation against a construct.
+
+The largest volume that stays feasible as the density and reproducibility requirements change, at the same vascular budget. An entry is the domain scale; `none` means no volume admits a configuration.
+
+| fill >= | CV <= 0.10 | CV <= 0.15 | CV <= 0.20 | CV <= 0.30 | CV <= 0.50 |
+|---|---|---|---|---|---|
+| 0.04 | 0.8 | 0.8 | 0.8 | 0.8 | 0.8 |
+| 0.06 | 0.6 | 0.6 | 0.6 | 0.8 | 0.8 |
+| 0.08 | 0.6 | 0.6 | 0.6 | 0.6 | 0.6 |
+| 0.10 | 0.6 | 0.6 | 0.6 | 0.6 | 0.6 |
+| 0.14 | 0.4 | 0.4 | 0.4 | 0.4 | 0.4 |
 
 ## Murray ratio in grown trees
 
