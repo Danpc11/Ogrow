@@ -1,6 +1,6 @@
 # Numbers the paper uses
 
-Model version 4.59.0, commit 2a9537d, generated 2026-11-25 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.60.0, commit 0345892, generated 2026-11-25 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b024.
 
@@ -163,6 +163,34 @@ Each chosen configuration again on the held-out seeds, with the cellular step sp
 | 0.6 | poisson_capped | 4 | 11.65% | 1079 | 0.485 | -2.23 | no |
 
 The verdict moves in 3 of 8 refinements: scale 0.6 under the binomial law at 2 substeps, scale 0.6 under the binomial law at 4 substeps, scale 0.6 under the poisson_capped law at 4 substeps.
+
+The same question in quantities an experiment reads. A unit counts toward viability by its supply over the setpoint capped at one, the way the model already counts perfused mass; the vascular cost is lumen and junction volume as a fraction of the construct, against the budget the model carries (8 %); and the variation is of the viable count. The worked requirement is 0.04 of close packing in viable units.
+
+| scale | best viable | least vascular | lowest CV | feasible | binding requirement |
+|---|---|---|---|---|---|
+| 0.4 | 6.15% | 2.45% | 0.037 | yes | viability |
+| 0.6 | 4.15% | 1.49% | 0.038 | no | viability |
+| 0.8 | 3.53% | 0.85% | 0.056 | no | viability |
+| 1.0 | 3.35% | 0.50% | 0.070 | no | viability |
+
+The largest volume that stays feasible as the viable-density requirement changes, at the model's own vascular budget.
+
+| viable >= | largest scale |
+|---|---|
+| 0.01 | 1.0 |
+| 0.02 | 0.8 |
+| 0.04 | 0.4 |
+| 0.06 | none |
+| 0.10 | none |
+
+The whole search again under variants of the auxiliary rules, on the search seeds. Each cell is whether some configuration meets the model's specification and then whether some configuration meets the physical one.
+
+| variant | S = 0.4 | S = 0.6 | S = 0.8 | S = 1.0 |
+|---|---|---|---|---|
+| no_mesenchyme | yes / yes | yes / no | no / no | no / no |
+| reference | yes / yes | yes / no | no / no | no / no |
+| root_random | no / no | no / no | no / no | no / no |
+| territory | yes / yes | yes / no | no / no | no / no |
 
 The largest volume that stays feasible as the density and reproducibility requirements change, at the same vascular budget. An entry is the domain scale; `none` means no volume admits a configuration.
 
