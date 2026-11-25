@@ -206,15 +206,24 @@ if (RES / "feasibility.json").exists():
 
     w("What any configuration reaches at each volume, one requirement at a "
       "time. The three are reached by different configurations, so no single "
-      "construct has all three at once.\n")
-    table(["scale", "volume", "best fill", "fewest vessels", "lowest CV",
-           "arrested"],
-          [[S, f"{float(S) ** 3:.3f}",
-            f"{100 * r['best_fill']['fill']:.2f}%",
-            f"{r['fewest_vessels']['vessels']:.0f}",
-            f"{r['lowest_cv']['cv']:.3f}",
-            f"{r['arrested']}/{r['configs']}"]
-           for S, r in sorted(Fe["reach"].items())])
+      "construct has all three at once. Each row also carries what the "
+      "winning configuration does on the other two requirements, because a "
+      "column read on its own can be won by a construct that is useless: the "
+      "lowest variation is easiest to reach by building almost nothing.\n")
+
+    def _cfg(c):
+        return (f"{c['src']}, pool {c['P0']:.0f}, nu {c['nu']:.0f}, "
+                f"{c['days']} d")
+
+    for S, r in sorted(Fe["reach"].items()):
+        w(f"At scale {S}, volume {float(S) ** 3:.3f}, "
+          f"{r['arrested']} of {r['configs']} configurations had arrested.\n")
+        table(["requirement won", "configuration", "fill", "vessels", "CV"],
+              [[name, _cfg(r[k]), f"{100 * r[k]['fill']:.2f}%",
+                f"{r[k]['vessels']:.0f}", f"{r[k]['cv']:.3f}"]
+               for name, k in (("most dense", "best_fill"),
+                               ("fewest vessels", "fewest_vessels"),
+                               ("least variable", "lowest_cv"))])
 
     rows = []
     for S in sorted(set(Fe["chosen"]) | set(Fe["infeasible"])):
@@ -246,6 +255,33 @@ if (RES / "feasibility.json").exists():
           f"seeds are new realisations of the same model and not new evidence "
           f"about it, so this measures reproducibility across batches and is "
           f"not a validation against a construct.\n")
+
+    cv_ = Fe.get("convergence") or {}
+    if cv_:
+        w("Each chosen configuration again on the held-out seeds, with the "
+          "cellular step split two and four ways, under the reference capped "
+          "Poisson law and under the binomial law. Only the binomial one is a "
+          "step refinement: the capped law applies its per-day cap once per "
+          "substep, so splitting the day loosens it. A verdict that moves "
+          "here is a verdict about the step and not about the construct.\n")
+        table(["scale", "law", "substeps", "fill", "vessels", "CV", "margin",
+               "meets spec"],
+              [[f"{v['S']}", v["law"], v["sub"], f"{100 * v['fill']:.2f}%",
+                f"{v['vessels']:.0f}", f"{v['cv']:.3f}", f"{v['margin']:+.2f}",
+                "yes" if v["margin"] >= 0 else "no"]
+               for _, v in sorted(cv_.items(),
+                                  key=lambda kv: (kv[1]["S"], kv[1]["law"],
+                                                  kv[1]["sub"]))])
+        base = {(v["S"], v["law"]): v["margin"] >= 0 for v in cv_.values()
+                if v["sub"] == 1}
+        moved = [v for v in cv_.values() if v["sub"] != 1
+                 and (v["margin"] >= 0) != base[(v["S"], v["law"])]]
+        tried = sum(1 for v in cv_.values() if v["sub"] != 1)
+        w(f"The verdict moves in {len(moved)} of {tried} refinements"
+          + (": " + ", ".join(sorted(f"scale {v['S']} under the {v['law']} "
+                                     f"law at {v['sub']} substeps"
+                                     for v in moved)) + ".\n"
+             if moved else ".\n"))
 
     fr = Fe.get("frontier") or {}
     if fr:

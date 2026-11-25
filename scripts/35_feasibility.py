@@ -97,20 +97,35 @@ HOLDOUT = tuple(range(600, 624))
 
 #: the spec sweep: the largest volume that each pair of requirements admits
 FILL_GRID = (0.04, 0.06, 0.08, 0.10, 0.14)
+#: how finely the cellular step is split when the chosen configurations are
+#: re-run, to see whether a verdict depends on the integration step
+SUBSTEPS = (2, 4)
+#: and under which nucleation law. None is the reference, the capped Poisson
+#: draw; the binomial draw is the one whose hazard composes across substeps,
+#: so it is the one in which splitting the day is a refinement and not a
+#: change of model.
+LAWS = (None, "binomial")
 CV_GRID = (0.10, 0.15, 0.20, 0.30, 0.50)
 
 
-def key(S, P0, nu, days, src, seed):
-    return f"S{S}_P{P0:.0f}_nu{nu:g}_d{days}_{src}_s{seed}"
+def key(S, P0, nu, days, src, seed, sub=1, nuc=None):
+    tail = "" if sub == 1 else f"_x{sub}"
+    tail += "" if nuc is None else f"_{nuc}"
+    return f"S{S}_P{P0:.0f}_nu{nu:g}_d{days}_{src}_s{seed}{tail}"
 
 
-def params(P0, nu, src):
-    return dict(nu=float(nu), P0=float(P0), **FIX, **SOURCE[src])
+def params(P0, nu, src, sub=1, nuc=None):
+    p = dict(nu=float(nu), P0=float(P0), **FIX, **SOURCE[src])
+    if sub != 1:
+        p["substeps"] = int(sub)
+    if nuc is not None:
+        p["nucleation"] = nuc
+    return p
 
 
-def fp_of(S, P0, nu, days, src, seed):
+def fp_of(S, P0, nu, days, src, seed, sub=1, nuc=None):
     return fingerprint(seed=seed, S=S, days=days,
-                       params=params(P0, nu, src))
+                       params=params(P0, nu, src, sub, nuc))
 
 
 def late_growth(N_day):
@@ -125,20 +140,21 @@ def late_growth(N_day):
     return (N_day[-1] - back) / max(back, 1.0)
 
 
-def run(S, P0, nu, days, src, seed):
+def run(S, P0, nu, days, src, seed, sub=1, nuc=None):
     """One construct, grown to `days` at scale `S`, with its readouts."""
-    f = OUT / f"{key(S, P0, nu, days, src, seed)}.json"
-    fp = fp_of(S, P0, nu, days, src, seed)
+    f = OUT / f"{key(S, P0, nu, days, src, seed, sub, nuc)}.json"
+    fp = fp_of(S, P0, nu, days, src, seed, sub, nuc)
     hit = cached(f, fp)
     if hit is not None:
         return hit
     U, m, vt, tr = grow(lambda x, y, z: sdf("liver", x / S, y / S, z / S),
                         R0 * S, days=days, rng=np.random.default_rng(seed),
-                        **params(P0, nu, src))
+                        **params(P0, nu, src, sub, nuc))
     ceiling = (R0 * S / LAM) ** 3 * PACK
     #: the arrest criterion of section 3.3, off the daily trace
     growth = late_growth(list(tr.N))
-    r = dict(S=S, P0=P0, nu=nu, days=days, src=src, seed=seed, N=len(U),
+    r = dict(S=S, P0=P0, nu=nu, days=days, src=src, seed=seed, sub=sub,
+             nucleation=nuc or "poisson_capped", N=len(U),
              vessels=len(vt), ceiling=ceiling, fill=len(U) / ceiling,
              mass=float(m.sum()),
              #: clamped so the record stays valid JSON for any reader; a run
@@ -182,11 +198,12 @@ def jobs(grid):
                       f"{time.time() - t0:.0f}s", flush=True)
 
 
-def cell(S, P0, nu, days, src, seeds):
+def cell(S, P0, nu, days, src, seeds, sub=1, nuc=None):
     """The three specified quantities for one configuration over one block."""
-    v = [run(S, P0, nu, days, src, s) for s in seeds]
+    v = [run(S, P0, nu, days, src, s, sub, nuc) for s in seeds]
     N = np.array([x["N"] for x in v], float)
-    return dict(S=S, P0=P0, nu=nu, days=days, src=src, seeds=len(v),
+    return dict(S=S, P0=P0, nu=nu, days=days, src=src, sub=sub,
+                nucleation=nuc or "poisson_capped", seeds=len(v),
                 N=float(N.mean()),
                 fill=float(np.mean([x["fill"] for x in v])),
                 vessels=float(np.mean([x["vessels"] for x in v])),
@@ -307,6 +324,53 @@ if __name__ == "__main__":
               "chosen on one batch holds\n  on another. It is not a validation "
               "against a construct.")
 
+        # A chosen configuration can sit on its requirement rather than above
+        # it, and then whether it is called feasible is a question about the
+        # integration step as much as about the construct. The cellular step
+        # is the one the model can refine, so each chosen configuration is
+        # re-run on the held-out seeds with that step split two and four ways.
+        # This does not establish convergence of the coupled system: the
+        # vascular solve, the calibre relaxation and the sprouting rules are
+        # taken once a day either way, and refining them is not offered here.
+        jobs([(S, w["P0"], w["nu"], w["days"], w["src"], sd, sub, nuc)
+              for S, w in chosen.items() for nuc in LAWS
+              for sub in ((1,) + tuple(SUBSTEPS) if nuc else SUBSTEPS)
+              for sd in HOLDOUT])
+        print("\nThe chosen configurations on the held-out seeds again, with "
+              "the cellular step\nsplit more finely. A verdict that moves "
+              "here is a verdict about the step:\n")
+        print(f"{'S':>5} {'law':>15} {'substeps':>9} {'fill':>8} "
+              f"{'vessels':>8} {'CV':>7} {'margin':>8}  meets spec")
+        conv, flips, tried = {}, [], 0
+        for S, w in chosen.items():
+            for nuc in LAWS:
+                for sub in (1,) + tuple(SUBSTEPS):
+                    c = (held[S] if (sub == 1 and nuc is None)
+                         else cell(S, w["P0"], w["nu"], w["days"], w["src"],
+                                   HOLDOUT, sub, nuc))
+                    nm = nuc or "poisson_capped"
+                    k = f"S{S}_{nm}_x{sub}"
+                    conv[k] = dict(S=S, law=nm, sub=sub, fill=c["fill"],
+                                   vessels=c["vessels"], cv=c["cv"],
+                                   margin=margin(c, SPEC))
+                    if sub != 1:
+                        tried += 1
+                        if ((margin(c, SPEC) >= 0)
+                                != (conv[f"S{S}_{nm}_x1"]["margin"] >= 0)):
+                            flips.append(k)
+                    print(f"{S:>5.1f} {nm:>15} {sub:>9d} "
+                          f"{100 * c['fill']:>7.2f}% {c['vessels']:>8.0f} "
+                          f"{c['cv']:>7.3f} {margin(c, SPEC):>+8.2f}  "
+                          f"{'yes' if margin(c, SPEC) >= 0 else 'no'}",
+                          flush=True)
+        print(f"\n  {len(flips)} of {tried} refinements change the verdict"
+              + (f": {', '.join(sorted(flips))}" if flips else "."))
+        print("  Under the capped Poisson law the per-day cap is applied once "
+              "per substep, so\n  splitting the day loosens it and the "
+              "comparison is not a pure refinement. The\n  binomial law "
+              "composes, its hazard over four quarter-days equalling one "
+              "day's,\n  and it is the one to read as a step refinement.")
+
     # How the frontier moves with the specification, so that the result is a
     # map and not one hand-picked triple of thresholds.
     print(f"\nLargest volume that stays feasible, as the density and "
@@ -343,7 +407,7 @@ if __name__ == "__main__":
         chosen={str(S): c for S, c in chosen.items()},
         held_out={str(S): c for S, c in held.items()},
         infeasible={str(S): v for S, v in infeasible.items()},
-        frontier=frontier,
+        frontier=frontier, convergence=conv if held else {},
         optimism=float(np.mean(optimism)) if held else None,
         arrest=dict(window=ARREST_WINDOW, tol=ARREST_TOL))
     json.dump(res, open(ROOT / "results" / "feasibility.json", "w"), indent=1)

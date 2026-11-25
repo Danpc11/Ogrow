@@ -20,7 +20,7 @@ Ciudad Universitaria, Mexico City, Mexico
 Target journal: *Biofabrication* (IOP). Structure follows IOP's Introduction,
 Methods, Results, Discussion. Abstract is under 300 words.
 
-Reference model version 4.58.0 (`src/organgrow/closed.py`). Every model number
+Reference model version 4.59.0 (`src/organgrow/closed.py`). Every model number
 quoted below is taken from `PAPER_NUMBERS.md`, which `make paper` regenerates
 with the version and commit that produced it, and is checked against the
 result files by `scripts/29_check_manuscript.py`. No model number in this file
@@ -63,10 +63,13 @@ recover mass need not recover the architecture it was designed around.
 Scaling the domain
 15-fold raises unit count only as V^0.45, and past an intermediate size the
 unit count also stops being reproducible, its coefficient of variation rising
-from 0.09 to 0.47. Posed as a design problem, a joint requirement on unit
-density, vascular cost and reproducibility is met up to an intermediate volume
-and at none larger: what fails is density, while the reproducibility that
-collapses with size is recovered by choosing the cell source. The model is not
+from 0.09 to 0.47. Posed as a design problem over 48 settings of the knobs an
+operator controls, a joint requirement on unit density, vascular cost and
+reproducibility is met at the smallest volume and by nothing in that search at
+the two largest, while the volume between them sits on the boundary and
+changes verdict when the cellular step is refined; what fails at size is
+density, and the configuration that varies least at the largest volume does so
+because it builds almost nothing. The model is not
 fitted to any construct and its predictions are untested; we state the
 measurements that would decide each.
 
@@ -678,14 +681,23 @@ the search never saw, and configurations that had not arrested by the
 criterion of Section 3.3 are excluded (`PAPER_NUMBERS.md`, Designing to a
 specification; `scripts/35_feasibility.py`).
 
+The search is over four knobs at four fixed values, three, two and two, so it
+covers 48 configurations at each volume and no more. Everything below is a
+statement about those 48 and not about the model at large.
+
+The two cell sources are strategies rather than single parameters. Each sets
+the binary property together with the division and loss rates that go with it,
+exactly the bundling Section 3.7 takes apart, so nothing here attributes an
+effect to renewal alone.
+
 The three requirements are met by three different configurations, which is the
 whole of the difficulty. At the largest domain the best density any
 configuration reaches is 5.10 % of close packing, the fewest segments any
 reaches is 1468, and the lowest variation any reaches is 0.057; no single
 construct has all three.
 
-The specification is met at the two smaller volumes and at neither of the two
-larger. What fails is density: at the third volume the best any configuration
+The specification is met at the smaller volumes and by nothing in the search
+at either of the two larger. What fails is density: at the third volume the best any configuration
 comes to the requirement is a slack of −0.34, and at the largest a slack of
 −0.49. Both solutions put the knobs at their stops, the largest pool and the
 longest culture. The first has a margin of +0.48 on the search seeds and +0.54
@@ -698,16 +710,44 @@ realisations they were chosen on.
 
 Sweeping the specification rather than quoting one triple, no combination of
 five density requirements and five reproducibility requirements admits the
-largest volume. Loosening reproducibility all the way to 0.50 buys a larger
+largest volume from within this search. Loosening reproducibility all the way to 0.50 buys a larger
 volume at one density requirement only; at every other, density alone decides.
 
-That is the result worth carrying into Section 4.1, and it sharpens Section
-3.8 rather than repeating it. The reproducibility that collapses with size
-there, a coefficient of variation of 0.47 at the largest domain, is a property
-of the reference configuration and not of the volume: searching the knobs
-recovers 0.057 at that same volume, with a spent source. Reproducibility at
-size is recoverable by choosing the cell source. Density at size is not
-recoverable by any setting we searched.
+One column must not be read on its own, and reading it on its own was our own
+first error. The reproducibility that collapses with size in Section 3.8, a
+coefficient of variation of 0.47 at the largest domain, is a property of the
+reference configuration rather than of the volume, and the search does find a
+configuration at that volume whose variation is 0.057. That configuration
+fills under one per cent of close packing (`PAPER_NUMBERS.md`, Designing to a
+specification, the per-volume tables). It is reproducible because it builds
+almost nothing, which is the trivial way to be reproducible and no use to
+anyone. The honest reading is the stronger one: the three requirements are not
+merely met by different configurations, they are met by configurations that
+are worthless for the others, and at the largest volume the most dense
+construct in the search varies by half its own count.
+
+A configuration that sits on its requirement raises a question the held-out
+seeds cannot answer: whether it is called feasible is then a statement about
+the integration step as much as about the construct. We re-ran each chosen
+configuration on the held-out seeds with the cellular step split two and four
+ways, under the reference law and under the binomial law. Only the second is a
+refinement: the reference law applies its per-day cap once per substep, so
+splitting the day loosens the cap rather than resolving the step, while the
+binomial hazard over four quarter-days equals one day's.
+
+The smallest volume holds under every refinement, with margins from +0.31 to
++0.48. The second does not. Under both laws its verdict moves from met to
+unmet at the finest step, driven by the variation rather than the density
+(`PAPER_NUMBERS.md`, Designing to a specification). We therefore do not claim
+a feasible construct at that volume. What the search establishes is that the
+specification is met at the smallest volume and robustly so, that it is met by
+nothing we searched at the two largest, and that the volume between them sits
+on the boundary and is not settled by this model at this resolution.
+
+This is a limit of the numerical work and we report it as one. The coupled
+system is not shown to have converged: the vascular solve, the calibre
+relaxation and the sprouting rules are taken once a day whatever the cellular
+step, and refining them is not something the present code offers.
 
 Held-out seeds are new realisations of the same model and not new evidence
 about it. What this measures is whether a configuration chosen on one batch
@@ -755,14 +795,16 @@ want, before optimising any of them.** Density, vascular cost and
 reproducibility are reached by different settings of the same knobs, so a
 construct that is best at one is not best at the others. In this model a
 requirement of 10 % of close packing, 2500 segments and a coefficient of
-variation of 0.15 is met up to an intermediate volume and at no larger one,
-and what fails is density: at the largest domain no setting we searched
-exceeds 5.10 % of close packing. Reproducibility is the requirement that looks
-hopeless at size and is not, since choosing a spent source recovers a
-coefficient of variation of 0.057 where the reference configuration gives 0.47.
-The boundary is a boundary of this model and not a measured limit of any
-construct, and it is the kind of statement a design study should produce
-whether or not it falls where one hoped.
+variation of 0.15 is met at the smallest volume and by nothing we searched at
+the two largest, with the volume between them on the boundary and its verdict
+moving when the cellular step is refined, and what fails at size is density: at the largest domain
+no setting we searched exceeds 5.10 % of close packing. Reproducibility looks
+like the exception and is not. A configuration at that volume does reach a
+coefficient of variation of 0.057 where the reference gives 0.47, and it fills
+under one per cent of close packing: it is steady because it is nearly empty.
+Read one requirement at a time and a design study will award itself a prize
+for building nothing. The boundary is a boundary of this model, over the
+configurations searched, and not a measured limit of any construct.
 
 **Match the seeding rate to the speed of the vascular front, rather than
 maximising it.** This one is a hypothesis the model raises and does not yet
