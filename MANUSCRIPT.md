@@ -20,7 +20,7 @@ Ciudad Universitaria, Mexico City, Mexico
 Target journal: *Biofabrication* (IOP). Structure follows IOP's Introduction,
 Methods, Results, Discussion. Abstract is under 300 words.
 
-Reference model version 4.57.0 (`src/organgrow/closed.py`). Every model number
+Reference model version 4.58.0 (`src/organgrow/closed.py`). Every model number
 quoted below is taken from `PAPER_NUMBERS.md`, which `make paper` regenerates
 with the version and commit that produced it, and is checked against the
 result files by `scripts/29_check_manuscript.py`. No model number in this file
@@ -947,21 +947,23 @@ number of embryonic progenitor cells in the pancreas but not the liver
 vascular system and the cost of blood volume *Proc. Natl Acad. Sci. USA*
 **12** 207–14
 
-[4] Wang B et al. 2015 Self-renewing diploid Axin2+ cells fuel homeostatic
-renewal of the liver *Nature* **524** 180–5
+[4] Wang B, Zhao L, Fish M, Logan C Y and Nusse R 2015 Self-renewing diploid
+Axin2+ cells fuel homeostatic renewal of the liver *Nature* **524** 180–5
 
 [5] Perl A J, Schuh M P and Kopan R 2022 Regulation of nephron progenitor cell
 lifespan and nephron endowment *Nat. Rev. Nephrol.* **18** 683–95
 
-[6] Hochane M et al. 2019 Single-cell transcriptomics reveals gene expression
-dynamics of human fetal kidney development *PLoS Biol.* **17** e3000152
+[6] Hochane M, van den Berg P R, Fan X, Bérenger-Currias N, Adegeest E,
+Bialecka M, Nieveen M, Menschaart M, Chuva de Sousa Lopes S M and Semrau S
+2019 Single-cell transcriptomics reveals gene expression dynamics of human
+fetal kidney development *PLoS Biol.* **17** e3000152
 
 [7] Lindström N O et al. 2021 Spatial transcriptional mapping of the human
 nephrogenic program *Dev. Cell* **56** 2381–98
 
 [8] Bastidas-Ponce A et al. 2019 Comprehensive single cell mRNA profiling
 reveals a detailed roadmap for pancreatic endocrinogenesis *Development*
-**146** dev173716
+**146** dev173849
 
 [9] Yang L et al. 2017 A single-cell transcriptomic analysis reveals precise
 pathways and regulatory mechanisms underlying hepatoblast differentiation
@@ -1001,11 +1003,16 @@ wrong in four places when checked: the paper appeared in 2025 and not 2023, in
 volume 388 at pages 1198–204 and not volume 382 as an article number, and its
 first author is Sexton Z A. It had been outside the set that was verified.
 
-**The *et al.* in the reference list.** IOP asks for every author up to ten and
-allows *et al.* only beyond that, so [1] and [11] are already in the house
-style, at fifteen and eleven authors. The remaining five, [4], [6], [7], [8]
-and [9], still need their author counts checked and the short ones expanded,
-and DOIs should be added at submission.
+**The *et al.* in the reference list.** IOP asks for every author up to ten
+and allows *et al.* only beyond that. Every author count was checked against
+the publisher's own page. [1], [7], [8] and [11] keep *et al.* at fifteen,
+twenty-three, twelve and eleven authors. [4] and [6] were expanded, at five
+and ten. Only [9] is unresolved: its citation is confirmed as *Hepatology*
+**66** 1387–401 but no source that could be reached lists its authors, so the
+count has not been established and the *et al.* stands unverified. Checking
+[8] also turned up an error: it carried the article number dev173716, which
+belongs to van Gurp et al. on alpha and beta cell differentiation in the same
+volume. The correct number is dev173849. DOIs should be added at submission.
 
 **The two open fields are closed.** [11] is *EBioMedicine* **27** 275–83,
 read off the article's own running head. [10] is still epub ahead of print,
