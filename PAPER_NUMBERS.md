@@ -1,6 +1,6 @@
 # Numbers the paper uses
 
-Model version 4.54.0, commit ccb2091, generated 2026-11-25 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.55.0, commit ae11488, generated 2026-11-25 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b024.
 
@@ -78,7 +78,13 @@ The three regimes differ in several parameters at once, so the binary property c
 | 1 | 2600 | decaying | 0.00 | 0.05 | 152.0 ± 14.8 | 1.00 | 0.00 | 0.00 | 0.00 | spent |  |
 | 1 | 2600 | balanced | 0.10 | 0.10 | 208.1 ± 17.9 | 0.06 | 0.78 | 0.19 | 0.00 | supply | liver-like |
 
-Changing renewal alone, with the pool and the turnover held fixed, changes which bound ends the growth in 2 of 9 settings of the two.
+Each axis is asked the same question: holding the other two fixed, in how many of those settings does moving along this axis change which bound ends the growth?
+
+| axis varied | settings of the other two | in how many the bound changes |
+|---|---|---|
+| renewal | 9 | 2 |
+| turnover | 6 | 5 |
+| pool | 6 | 2 |
 
 The elasticity of the final unit count to the seeded pool is reported elsewhere at each regime's own pool size, so a renewing source at 2600 is compared with a spent one at 60. Here the pool and the turnover are matched between the two sources and only the binary property differs.
 
