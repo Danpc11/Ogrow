@@ -221,7 +221,20 @@ if __name__ == "__main__":
     print(f"\n  renewal changes which bound holds growth in {flips} of "
           f"{ncell} settings of the pool and the turnover.")
 
-    # And does the pool or the turnover change it at fixed renewal?
+    # And how often does each of the other two axes change it? The three
+    # counts are what decide whether the binary property owns the separation,
+    # so each axis is asked the same question: holding the other two fixed,
+    # in how many of those settings does moving along this axis change which
+    # bound ends the growth?
+    turn_flips = sum(len({holds(cells[(w, P0, t)]) for t, _, _ in TURNOVER}) > 1
+                     for w in RENEWAL for P0 in POOL)
+    pool_flips = sum(len({holds(cells[(w, P0, t)]) for P0 in POOL}) > 1
+                     for w in RENEWAL for t, _, _ in TURNOVER)
+    nother = len(RENEWAL) * len(POOL)
+    print(f"  the turnover changes it in {turn_flips} of {nother} settings of "
+          f"renewal and the pool.")
+    print(f"  the pool changes it in {pool_flips} of {nother} settings of "
+          f"renewal and the turnover.")
     for w in RENEWAL:
         seen = {holds(cells[(w, P0, t)]) for P0 in POOL for t, _, _ in TURNOVER}
         print(f"  at renewal {w:.0f}, the {ncell} settings of pool and turnover "
@@ -258,6 +271,8 @@ if __name__ == "__main__":
                         pool=list(POOL),
                         turnover=[dict(name=n, rho=r, delta=d)
                                   for n, r, d in TURNOVER],
-                        renewal_flips=flips, cells=ncell, H=H)
+                        renewal_flips=flips, turnover_flips=turn_flips,
+                        pool_flips=pool_flips, cells=ncell, other_cells=nother,
+                        H=H)
     res["_elasticity_matched"] = els
     json.dump(res, open(ROOT / "results" / "regimes.json", "w"), indent=1)

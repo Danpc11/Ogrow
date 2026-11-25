@@ -162,10 +162,16 @@ if (RES / "regimes.json").exists():
            "supply", "room", "active", "what holds growth", "named regime"],
           rows)
     if "renewal_flips" in meta:
-        w(f"Changing renewal alone, with the pool and the turnover held "
-          f"fixed, changes which bound ends the growth in "
-          f"{meta['renewal_flips']} of {meta.get('cells', '?')} settings of "
-          f"the two.\n")
+        w("Each axis is asked the same question: holding the other two "
+          "fixed, in how many of those settings does moving along this axis "
+          "change which bound ends the growth?\n")
+        table(["axis varied", "settings of the other two",
+               "in how many the bound changes"],
+              [["renewal", meta.get("cells", "?"), meta["renewal_flips"]],
+               ["turnover", meta.get("other_cells", "?"),
+                meta.get("turnover_flips", "?")],
+               ["pool", meta.get("other_cells", "?"),
+                meta.get("pool_flips", "?")]])
 
     el = Rg.get("_elasticity_matched") or {}
     if el:

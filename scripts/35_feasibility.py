@@ -327,6 +327,13 @@ if __name__ == "__main__":
             row.append(f"{max(good):>9.1f}" if good else f"{'none':>9}")
         print(f"{fmin:>8.2f} " + " ".join(row))
 
+    # the margins are quoted in the manuscript, so they are stored rather
+    # than left to be recomputed by whatever reads this
+    for S, c in chosen.items():
+        c["margin"] = margin(c, SPEC)
+    for S, h in held.items():
+        h["margin"] = margin(h, SPEC)
+
     res = dict(
         spec=SPEC, scales=list(SCALES), search_seeds=list(SEARCH),
         holdout_seeds=list(HOLDOUT), configs=len(CONFIGS),

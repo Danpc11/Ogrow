@@ -252,14 +252,70 @@ if Iv and "liver" in Iv and "kidney" in Iv:
              f"source between {u_k[0]:.2f} and {u_k[1]:.2f}")
 
 
+# ------------------------------------------------- what separates the regimes
+Rg = load("regimes.json")
+if Rg:
+    mt = Rg.get("_meta", {})
+    if "turnover_flips" in mt:
+        need("renewal changes the bound",
+             f"in {mt['renewal_flips']} of the {mt['cells']} settings of the "
+             f"other two")
+        need("turnover changes the bound",
+             f"in {mt['turnover_flips']} of the {mt['other_cells']} settings "
+             f"of renewal and the pool")
+        need("pool changes the bound",
+             f"the pool alone in {mt['pool_flips']} of {mt['other_cells']}")
+    el = Rg.get("_elasticity_matched") or {}
+    #: the gap the binary property keeps once the pool and the turnover are
+    #: matched, at each of the three published corners
+    corner = {"balanced": "liver-like", "decaying": "kidney-like",
+              "static": "pancreas-like"}
+    for v in el.values():
+        nm = corner.get(v.get("turnover"))
+        if nm:
+            need(f"matched elasticity gap, {nm}",
+                 f"{v['spent'][0] - v['renewing'][0]:+.2f} at the {nm}")
+
+# ------------------------------------------------- designing to a specification
+Fe = load("feasibility.json")
+if Fe:
+    reach, big = Fe.get("reach") or {}, max(Fe.get("scales") or [0])
+    r = reach.get(str(big))
+    if r:
+        need("largest volume, best density",
+             f"reaches is {100 * r['best_fill']['fill']:.2f} % of close packing")
+        need("largest volume, fewest segments",
+             f"any reaches is {r['fewest_vessels']['vessels']:.0f}")
+        need("largest volume, lowest variation",
+             f"lowest variation any reaches is {r['lowest_cv']['cv']:.3f}")
+    for S, b in sorted((Fe.get("infeasible") or {}).items()):
+        need(f"slack of the binding requirement at scale {S}",
+             f"a slack of {b['best'][b['binding']]:+.2f}")
+    for S, c in sorted((Fe.get("chosen") or {}).items()):
+        if "margin" in c:
+            need(f"margin of the chosen configuration at scale {S}",
+                 f"a margin of {c['margin']:+.2f} on the search seeds")
+    for S, h in sorted((Fe.get("held_out") or {}).items()):
+        if "margin" in h:
+            need(f"held-out margin at scale {S}",
+                 f"{h['margin']:+.2f} held out")
+    if Fe.get("optimism") is not None:
+        need("optimism of the search block",
+             f"by {abs(Fe['optimism']):.2f} on average")
+
+
 def main():
     if not DOC.exists():
         raise SystemExit(f"no manuscript at {DOC}")
-    # the manuscript sets a minus as U+2212; compare against a plain hyphen
-    text = DOC.read_text(encoding="utf-8").replace("\u2212", "-")
+    # The manuscript sets a minus as U+2212; compare against a plain hyphen.
+    # It is also hard-wrapped, so a quoted phrase can fall across two lines
+    # and a literal search would miss it. Runs of whitespace collapse to one
+    # space on both sides, which only ever makes a match easier to find.
+    text = " ".join(DOC.read_text(encoding="utf-8").replace("\u2212", "-").split())
     if not checks:
         print("no results to check against; run `make paper` first")
         return 0
+    checks[:] = [(lb, " ".join(w.split())) for lb, w in checks]
     bad = [(label, want) for label, want in checks if want not in text]
     for label, want in checks:
         print(f"  {'ok  ' if want in text else 'FAIL'} {label}: {want}")

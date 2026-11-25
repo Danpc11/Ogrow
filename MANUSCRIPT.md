@@ -20,7 +20,7 @@ Ciudad Universitaria, Mexico City, Mexico
 Target journal: *Biofabrication* (IOP). Structure follows IOP's Introduction,
 Methods, Results, Discussion. Abstract is under 300 words.
 
-Reference model version 4.54.0 (`src/organgrow/closed.py`). Every model number
+Reference model version 4.55.0 (`src/organgrow/closed.py`). Every model number
 quoted below is taken from `PAPER_NUMBERS.md`, which `make paper` regenerates
 with the version and commit that produced it, and is checked against the
 result files by `scripts/29_check_manuscript.py`. No model number in this file
@@ -93,24 +93,31 @@ The model contains one nucleation law and three local bounds. It contains no
 term that measures the size of the whole construct. Size is an outcome, not a
 setpoint, and the question "how does the tissue know when it is big enough"
 does not arise in it: the tissue stops when a local resource is exhausted, and
-which resource that is follows from one binary property of the cell source.
+which resource that is follows from how the cell source is maintained.
 
 That property is whether the cell that forms a functional unit is spent in
 forming it. In a liver-like source the cell is not spent, because mononuclear
 hepatocytes are their own progenitors [4] and the compartment is restored by
 the cells it produces. In a kidney-like or pancreas-like source it is spent, and
 the compartment is drawn down. We carry this as a single parameter and show
-that three qualitatively different growth regimes follow from it, together
-with the size of the pool each starts with.
+that three qualitatively different growth regimes follow from it together with
+the size of the pool each starts with and the rates at which that pool divides
+and is lost. Section 3.7 separates the three contributions and finds the
+turnover the largest of them.
 
-We report five results and their reading for biofabrication. First, the three
+We report six results and their reading for biofabrication. First, the three
 regimes and what distinguishes them at arrest. Second, that what seeding more
 cells buys depends on which bound is active, and that the perfusion setpoint
 is the stronger lever in all three. Third, that arrest is stable, and whether
-it can be undone is set by the same property. Fourth, that after injury the
+it can be undone is set by what the pool has left, which the turnover decides
+more often than the binary property does. Fourth, that after injury the
 boundary condition on the perfusion circuit, not anything the tissue
 remembers, decides the final size. Fifth, that scaling the domain up loses
 unit density and, past an intermediate size, loses reproducibility as well.
+Sixth, that a joint specification on density, vascular cost and reproducibility
+is met up to an intermediate volume and not beyond it, and that what fails is
+density, while reproducibility at size is recovered by the choice of cell
+source.
 
 None of these predictions has been tested against a construct. We state in the
 Discussion the measurements that would decide each of them.
@@ -237,12 +244,13 @@ series are public under the accessions above.
 
 ## 3. Results
 
-### 3.1 One property of the cell source separates three growth regimes
+### 3.1 The three cell sources arrest in three different states
 
 The three sources arrest in three different states (`PAPER_NUMBERS.md`,
-Regimes at closure; Figure 1). They differ in three parameters at once, so
-Section 3.7 asks which of the three does the work before the binary property
-is credited with the separation.
+Regimes at closure; Figure 1). They differ in three parameters at once, and
+Section 3.7 separates them: the binary property is one of the three and the
+weakest, while how the pool turns over is what most often decides which bound
+ends the growth.
 
 The renewing source reaches 208 ± 4 units and keeps essentially its whole
 pool, held partly where perfusion has fallen to threshold (0.78 ± 0.03 of the
@@ -282,8 +290,9 @@ runs at $P_0 e^{\pm 0.3}$ over 24 seeds, separates the regimes sharply
 Two readings follow. First, doubling the number of cells seeded into a
 renewing construct changes its final unit count by a few per cent, while
 doubling it into a spent-source construct changes it by most of a factor of
-two. Which of those a given construct does is set by one property of its cell
-source, and it can be determined before any cells are seeded.
+two. Which of those a given construct does is set by its cell source and by the
+pool it starts with, both of which are fixed before any cells are seeded;
+Section 3.7 reports how much of the difference each contributes.
 
 Second, and in every regime, the perfusion setpoint is the stronger lever. Its
 elasticity is negative and of order one to two, against a pool elasticity
@@ -311,7 +320,7 @@ Melton [2], who found that halving the pancreatic progenitor pool halved the
 pancreas, which never compensated, while the liver compensated fully. The
 model was not fitted to that experiment.
 
-### 3.3 Arrest is stable, and whether it can be undone follows from the same property
+### 3.3 Arrest is stable, and whether it can be undone follows from what the pool has left
 
 We call a construct arrested when letting it run a further 40 days, nearly a
 third again of its growth, adds less than 5 % to its unit count. That is an
@@ -500,7 +509,7 @@ Nothing in the model limits how large a unit may become. In a real tissue that
 limit exists, and this is where the model and the biology part company
 (Section 5).
 
-### 3.6 The one property, checked against three developing tissues
+### 3.6 The cell source, checked against three developing tissues
 
 The model's central claim is about the cell source, so the one check available
 without new experiments is whether the progenitor pool each tissue is named for
@@ -528,8 +537,8 @@ fraction a tenth rather than a quarter. Either way the liver goes on building
 after its named programme is gone, by dividing cells it has already made.
 
 Two tissues are limited by the pool they deplete and one is not. That is what
-the single property predicts, and it is what counting progenitors alone would
-miss.
+the model predicts from the cell source together with its turnover
+(Section 3.7), and it is what counting progenitors alone would miss.
 
 Only presence and absence are read across studies, and the reason is
 measurable. An independent week-14 kidney has 0.662 of its nephron lineage in
@@ -569,12 +578,41 @@ are what a regime is here, so a regime that survives a change of $P_0$ and of
 the turnover at fixed $w$ is one the binary property owns
 (`PAPER_NUMBERS.md`, What separates the regimes; `scripts/34_regimes.py`).
 
+The grid does not credit the binary property. Changing it alone, with the pool
+and the turnover held fixed, changes which bound ends the growth in 2 of the 9
+settings of the other two, and both are at the smallest pool. Changing the
+turnover alone changes it in 5 of the 6 settings of renewal and the pool, and
+changing the pool alone in 2 of 6. The binary property is one of three things
+that decide which bound ends growth, and on this grid the weakest of them.
+
+The pattern behind those counts reads off the table. A decaying turnover, loss
+without division, ends with the pool gone in all six of its cells, whatever
+the binary property and whatever the pool size. A renewing source is not
+spared: a cell returned when a unit forms is still lost at rate $\delta$ on
+every day it forms none. Under a static or a balanced turnover the pool
+survives and perfusion binds instead, except at the smallest pool with a spent
+source, which is the pancreas-like corner. The binary property shifts where
+the boundary between those two outcomes falls; the turnover decides which
+outcomes are available at all.
+
 The same grid settles a confound in the elasticity of Section 3.2. That
 elasticity is measured at each regime's own pool size, so a renewing source at
 $P_0 = 2600$ is compared with a spent one at 60, and a difference between them
 could be a difference in what renewal does or in where on the curve each
 regime sits. We measure it again with $P_0$ and the turnover matched between
-the two sources, leaving the binary property as the only difference.
+the two sources, leaving the binary property as the only difference. Matched,
+the gap is +0.17 at the liver-like corner and +0.28 at the pancreas-like one,
+each about two standard errors from zero, and +0.04 at the kidney-like corner,
+which is not. The unmatched comparison reports +0.71 against +0.07, a gap of
+0.64. So under half of the published contrast is the binary property and the
+rest is the difference between a pool of 60 and a pool of 2600.
+
+Three sources that differ in three things at once cannot be read as a
+demonstration about one of them. The binary property does change the final
+unit count, the elasticity and, at a small pool, which bound ends growth, and
+those effects are real and measured. They are also smaller than the comparison
+between the three regimes makes them look, and the turnover is what most often
+decides where a construct arrests.
 
 ### 3.8 Scaling up loses unit density, and past an intermediate size loses reproducibility
 
@@ -616,9 +654,62 @@ one nucleation rate. Whether a rate matched to the speed of the vascular front
 would carry it towards 1 is the question `scripts/25_front.py` asks; we do not
 claim its answer here.
 
+### 3.9 A joint specification is met up to an intermediate volume, and it is density that fails
+
+The design rules above say what a supply constraint fixes. Put to them as a
+specification, they can also be asked to fail. We require of a construct, at a
+target volume, that its units occupy at least 10 % of the domain's close
+packing, that the tree use at most 2500 segments, and that the unit count vary
+by at most 0.15 across independent realisations. We then search the four
+things an operator sets, the seeded pool, the nucleation propensity of the
+medium, the culture duration and the cell source, for a setting that meets all
+three at once. Selection is maximin on the slack each requirement has in its
+own units, so the chosen configuration is the one with the most room to spare
+on its tightest requirement. It is chosen on 16 seeds and re-run on 24 that
+the search never saw, and configurations that had not arrested by the
+criterion of Section 3.3 are excluded (`PAPER_NUMBERS.md`, Designing to a
+specification; `scripts/35_feasibility.py`).
+
+The three requirements are met by three different configurations, which is the
+whole of the difficulty. At the largest domain the best density any
+configuration reaches is 5.10 % of close packing, the fewest segments any
+reaches is 1468, and the lowest variation any reaches is 0.057; no single
+construct has all three.
+
+The specification is met at the two smaller volumes and at neither of the two
+larger. What fails is density: at the third volume the best any configuration
+comes to the requirement is a slack of −0.34, and at the largest a slack of
+−0.49. Both solutions put the knobs at their stops, the largest pool and the
+longest culture. The first has a margin of +0.48 on the search seeds and +0.54
+held out. The second sits on its requirement rather than above it, with a
+margin of +0.01 on the search seeds and +0.01 held out: it meets the
+specification, and nothing about it is comfortable. On these runs the search
+block understated the held-out margin by 0.03 on average rather than
+overstating it, so the configurations did not owe their selection to the
+realisations they were chosen on.
+
+Sweeping the specification rather than quoting one triple, no combination of
+five density requirements and five reproducibility requirements admits the
+largest volume. Loosening reproducibility all the way to 0.50 buys a larger
+volume at one density requirement only; at every other, density alone decides.
+
+That is the result worth carrying into Section 4.1, and it sharpens Section
+3.8 rather than repeating it. The reproducibility that collapses with size
+there, a coefficient of variation of 0.47 at the largest domain, is a property
+of the reference configuration and not of the volume: searching the knobs
+recovers 0.057 at that same volume, with a spent source. Reproducibility at
+size is recoverable by choosing the cell source. Density at size is not
+recoverable by any setting we searched.
+
+Held-out seeds are new realisations of the same model and not new evidence
+about it. What this measures is whether a configuration chosen on one batch
+holds on another, which is reproducibility across batches. It is not a
+validation of the model against a construct, and the boundary it draws is a
+boundary of the model.
+
 ## 4. Discussion
 
-### 4.1 Four design rules, stated as the model gives them
+### 4.1 Five design rules, stated as the model gives them
 
 **A constant flow gives a tunable brake on total mass that a constant pressure
 does not.** At a fixed inlet pressure the model's construct overshoots to 1.82
@@ -635,17 +726,35 @@ pressure, shear damage, and the capacity of the perfusion circuit are
 constraints the model does not carry, and any of them could decide the question
 in practice.
 
-**Decide whether your cell source renews before deciding how many cells to
-seed.** If it renews, seeding more barely changes the final unit count
-(elasticity +0.07 ± 0.06) and the vasculature sets the size. If it is spent in
-forming units, the seeded pool sets the size directly (+0.71 ± 0.05) and there
-is no second chance once it is gone.
+**What seeding more cells buys depends on the source and on the pool you
+are already at, and more on the second than on the first.** Across the three
+regimes as published the elasticity of the final unit count to the seeded pool
+runs from +0.07 ± 0.06 to +0.71 ± 0.05, and it is tempting to read the range as
+the difference between a renewing source and a spent one. Matched for pool and
+turnover, under half of that range is the source (Section 3.7). The operational
+rule is the narrower one: a small pool repays seeding and a large one does not,
+whichever source it is, and a source that is spent in forming units offers no
+second chance once the pool is gone.
 
 **Lower the perfusion a unit requires before seeding more cells.** The
 setpoint elasticity is between −0.77 and −1.83 across the three regimes,
 against a pool elasticity between +0.07 and +0.71. In every regime the
 threshold is the stronger lever, and in the renewing regime it is the only one
 that matters.
+
+**Check that your specifications are jointly reachable at the volume you
+want, before optimising any of them.** Density, vascular cost and
+reproducibility are reached by different settings of the same knobs, so a
+construct that is best at one is not best at the others. In this model a
+requirement of 10 % of close packing, 2500 segments and a coefficient of
+variation of 0.15 is met up to an intermediate volume and at no larger one,
+and what fails is density: at the largest domain no setting we searched
+exceeds 5.10 % of close packing. Reproducibility is the requirement that looks
+hopeless at size and is not, since choosing a spent source recovers a
+coefficient of variation of 0.057 where the reference configuration gives 0.47.
+The boundary is a boundary of this model and not a measured limit of any
+construct, and it is the kind of statement a design study should produce
+whether or not it falls where one hoped.
 
 **Match the seeding rate to the speed of the vascular front, rather than
 maximising it.** This one is a hypothesis the model raises and does not yet
@@ -940,15 +1049,15 @@ criterion (Section 3.3), the limitations no longer say the model has no
 involution while Section 3.4 reports it, and the drift of the factor between
 the two starvation criteria is measured rather than assumed (Section 3.4).
 
-Its strongest finding is open as work, and Section 3.7 is the answer in
-outline: the three regimes differ in the binary property, the seeded pool and
-the turnover at once, so the separation cannot be credited to the first until
-the others are held fixed. `scripts/34_regimes.py` runs that grid and measures
-the elasticity again with the pool and the turnover matched, which also
-settles a confound the review did not raise: the published contrast of +0.71
-against +0.07 is measured at pool sizes of 60 and 2600. The headings of
-Sections 3.1, 3.3 and 3.6 still say "one property" and should be revisited
-once that grid has run.
+Its strongest finding is answered in Section 3.7, and the answer went against
+the framing this manuscript was written in. The three regimes differ in the
+binary property, the seeded pool and the turnover at once, so the separation
+could not be credited to the first until the others were held fixed. Held
+fixed, the binary property changes which bound ends growth in 2 of 9 settings
+against the turnover's 5 of 6, and under half of the elasticity contrast
+survives matching. Sections 3.1, 3.3 and 3.6 were headed "one property" and
+are no longer: what they report is unchanged, and what it is evidence for is
+narrower than those headings claimed.
 
 **Four results from the earlier framing are not in this manuscript** and are
 listed in `FIGURES.md` as supplementary: the 96 human kidneys from 48 donors,
