@@ -32,7 +32,11 @@ Usage:  python scripts/32_inflow_law.py [REGIME ...]     default: both
 
     OGROW_SEEDS   replicates, default 24
     OGROW_JOBS    workers
+    OGROW_ADOPT_CACHE=1   stamp the cache on disk as current instead of
+                  re-simulating it; an assertion, not a check
 """
+import hashlib
+import inspect
 import json
 import os
 import sys
@@ -41,6 +45,7 @@ from concurrent.futures import ProcessPoolExecutor
 import numpy as np
 
 from organgrow import sdf
+from organgrow import closed as _closed
 from organgrow.config import ROOT
 from organgrow.closed import grow
 
@@ -56,17 +61,55 @@ REG = {"liver": dict(P0=2600.0, rho=0.10, delta=0.10, q_set=0.6, renewal=1.0),
 FIX = dict(R_unit=650.0, units_per_branch=650 / 600.0, max_vessels=6000)
 LOSS = 0.3
 
+# A cached run is only the answer to the question that produced it. The file
+# name carries the regime, the seed and the flow, but not the demand phi, nor
+# the engine, nor the fixed parameters: change the calibration seeds and phi
+# moves, while every evaluation run keeps its old name and is silently reused.
+# Each file therefore also carries a fingerprint of everything that determines
+# its contents, and is re-simulated when that fingerprint does not match.
+# OGROW_ADOPT_CACHE=1 stamps whatever is on disk as current instead. It is an
+# assertion by the person running it that the existing files came from this
+# code and these parameters; nothing checks it.
+CODE = hashlib.sha256(inspect.getsource(_closed).encode()).hexdigest()[:12]
+ADOPT = os.environ.get("OGROW_ADOPT_CACHE") == "1"
+
+
+def _fingerprint(reg, kw, seed, phi=None):
+    """Everything that decides what one simulation returns."""
+    payload = dict(code=CODE, regime=reg, seed=int(seed), S=S, NU=NU,
+                   CLOSE=CLOSE, END=END, LOSS=LOSS,
+                   phi=None if phi is None else f"{float(phi):.12e}",
+                   params={**FIX, **REG[reg], **kw})
+    return hashlib.sha256(
+        json.dumps(payload, sort_keys=True, default=str).encode()).hexdigest()[:16]
+
+
+def _cached(f, fp):
+    """The stored run if it answers the same question, otherwise None."""
+    if not f.exists():
+        return None
+    r = json.load(open(f))
+    if r.get("fingerprint") == fp:
+        return r
+    if ADOPT:
+        r["fingerprint"] = fp
+        json.dump(r, open(f, "w"))
+        return r
+    return None
+
 
 def run(reg, seed, scale, phi):
     """One construct: grown, injured on day CLOSE, followed to END."""
     tag = f"{reg}_s{seed}_x{scale}" + ("" if phi is None else "_phi")
     f = OUT / f"{tag}.json"
-    if f.exists():
-        return json.load(open(f))
     kw = dict(injure_day=CLOSE, injury="parenchyma", injury_fraction=LOSS,
               injury_reactivates=1.0, inflow_limited=True, inflow_scale=scale)
     if phi is not None:
         kw["phi_demand"] = float(phi)
+    fp = _fingerprint(reg, kw, seed, phi)
+    hit = _cached(f, fp)
+    if hit is not None:
+        return hit
     U, m, vt, tr = grow(lambda x, y, z: sdf("liver", x / S, y / S, z / S), 190 * S,
                         days=END, rng=np.random.default_rng(seed), nu=NU,
                         **FIX, **REG[reg], **kw)
@@ -75,10 +118,22 @@ def run(reg, seed, scale, phi):
     # is it still moving? the mean daily change over the last ten days,
     # relative to the mass, which is what "settled" has to mean here
     drift = float(abs(M[-1] - M[-11]) / max(M[-1], 1e-12) / 10.0)
+    # A small drift is necessary for equilibrium but not sufficient: the growth
+    # rate decays, so the construct can stop short of its ceilings and sit
+    # there. The residual says which of the two happened, and the share of
+    # units left at the mass floor says what the construct looks like inside.
+    c = tr.final.get("ceiling")
+    if c is None:
+        eps = floor_share = float("nan")
+    else:
+        c = np.asarray(c, float)
+        eps = float(np.abs(m - c).sum() / max(c.sum(), 1e-12))
+        floor_share = float((m <= 1.05 * float(_closed._p("m0", None))).mean())
     r = dict(regime=reg, seed=seed, scale=scale, phi=phi,
              pre_mass=float(pre["mass"]), pre_Q=float(tr.Q[CLOSE - 1]),
              mass=float(M[-1]), N=len(U), Q=float(np.asarray(tr.Q)[-1]),
-             drift_per_day=drift)
+             drift_per_day=drift, residual=eps, floor_share=floor_share,
+             fingerprint=fp)
     json.dump(r, open(f, "w"))
     return r
 
@@ -86,16 +141,31 @@ def run(reg, seed, scale, phi):
 def intact(reg, seed):
     """The intact organ at arrest, which is where phi_demand is measured."""
     f = OUT / f"intact_{reg}_s{seed}.json"
-    if f.exists():
-        return json.load(open(f))
+    fp = _fingerprint(reg, {}, seed)
+    hit = _cached(f, fp)
+    if hit is not None:
+        return hit
     U, m, vt, tr = grow(lambda x, y, z: sdf("liver", x / S, y / S, z / S), 190 * S,
                         days=CLOSE, rng=np.random.default_rng(seed), nu=NU,
                         **FIX, **REG[reg])
     r = dict(regime=reg, seed=seed, mass=float(np.asarray(tr.mass)[-1]),
-             Q=float(np.asarray(tr.Q)[-1]), N=len(U))
+             Q=float(np.asarray(tr.Q)[-1]), N=len(U), fingerprint=fp)
     r["phi"] = r["Q"] / max(r["mass"], 1e-12)
     json.dump(r, open(f, "w"))
     return r
+
+
+def _stale(kind, reg, seed, scale=None, phi=None):
+    """Does this run still need doing? Used to build the parallel warm-up."""
+    if kind == "intact":
+        return _cached(OUT / f"intact_{reg}_s{seed}.json",
+                       _fingerprint(reg, {}, seed)) is None
+    kw = dict(injure_day=CLOSE, injury="parenchyma", injury_fraction=LOSS,
+              injury_reactivates=1.0, inflow_limited=True, inflow_scale=scale)
+    if phi is not None:
+        kw["phi_demand"] = float(phi)
+    tag = f"{reg}_s{seed}_x{scale}" + ("" if phi is None else "_phi")
+    return _cached(OUT / f"{tag}.json", _fingerprint(reg, kw, seed, phi)) is None
 
 
 def _warm(a):
@@ -122,7 +192,7 @@ if __name__ == "__main__":
     res = {}
     for reg in regimes:
         jobs(reg, [("intact", reg, s) for s in CAL
-                   if not (OUT / f"intact_{reg}_s{s}.json").exists()])
+                   if _stale("intact", reg, s)])
         ref = [intact(reg, s) for s in CAL]
         phi = float(np.mean([r["phi"] for r in ref]))
         phi_sd = float(np.std([r["phi"] for r in ref], ddof=1))
@@ -131,20 +201,24 @@ if __name__ == "__main__":
               f"sweep below is evaluated on seeds {SEEDS[0]} to {SEEDS[-1]}")
 
         jobs(reg, [("run", reg, s, x, phi) for x in SCALES for s in SEEDS
-                   if not (OUT / f"{reg}_s{s}_x{x}_phi.json").exists()])
+                   if _stale("run", reg, s, x, phi)])
 
-        # A unit column would separate more units from bigger ones, but the
-        # pre-injury count is not in the cached runs; adding it costs a rebuild.
-        print(f"\n{'inflow':>8} {'mass / pre-injury':>22} {'mass / (Q/phi)':>18}")
+        print(f"\n{'inflow':>8} {'mass / pre-injury':>22} {'mass / (Q/phi)':>18} "
+              f"{'residual':>10} {'at floor':>9}")
         rows = []
         for x in SCALES:
             v = [run(reg, s, x, phi) for s in SEEDS]
             rel = np.array([r["mass"] / max(r["pre_mass"], 1e-12) for r in v])
             law = np.array([r["mass"] / max(x * r["pre_Q"] / phi, 1e-12) for r in v])
+            eps = np.array([r.get("residual", float("nan")) for r in v])
+            fl = np.array([r.get("floor_share", float("nan")) for r in v])
             print(f"{x:>8.1f} {rel.mean():>14.3f} [{rel.min():.2f}, {rel.max():.2f}] "
-                  f"{law.mean():>12.3f} [{law.min():.2f}, {law.max():.2f}]")
+                  f"{law.mean():>12.3f} [{law.min():.2f}, {law.max():.2f}] "
+                  f"{np.nanmean(eps):>10.3f} {np.nanmean(fl):>9.2f}")
             dr = np.array([r.get("drift_per_day", float("nan")) for r in v])
             rows.append(dict(scale=x, drift_per_day=float(np.nanmax(dr)),
+                             residual=float(np.nanmean(eps)),
+                             floor_share=float(np.nanmean(fl)),
                              mass_rel=float(rel.mean()),
                              mass_rel_sd=float(rel.std(ddof=1)),
                              mass_over_law=float(law.mean()),
@@ -156,6 +230,15 @@ if __name__ == "__main__":
         worst = max(r["drift_per_day"] for r in rows)
         print(f"  largest daily change of mass over the last ten days, "
               f"across every seed and flow: {100 * worst:.2f} % per day")
+        eps_w = max(r["residual"] for r in rows)
+        fl_w = max(r["floor_share"] for r in rows)
+        print(f"  but the mass has stopped moving, not arrived: the largest "
+              f"residual\n  sum |m - ceiling| / sum ceiling is {eps_w:.2f}, "
+              f"and up to {fl_w:.0%} of units sit at the\n  mass floor. The "
+              f"growth rate decays as exp(-t / tau_g), so the total growth\n"
+              f"  available after the injury is finite and a unit can stop "
+              f"short of its\n  ceiling. A small drift alone does not "
+              f"establish equilibrium with supply.")
 
         # One exponent per seed, so the spread is the spread of constructs
         # and not the residual of a fit to five averages.

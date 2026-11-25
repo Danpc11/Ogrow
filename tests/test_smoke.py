@@ -288,6 +288,26 @@ _same = _after_injury(injury_reactivates=1.0, inflow_limited=True,
 check("leaving the demand unset leaves the reference behaviour untouched",
       abs(_same - _held) < 1e-12, f"{_same:.6f} against {_held:.6f}")
 
+# A plateau in the total is not the same as every unit reaching its ceiling.
+# The ceilings are reported so the two can be told apart; this checks that they
+# are there, one per unit, and that the total mass can match the budget while
+# the units are individually still far from theirs.
+_Uc, _mc, _vtc, _trc = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z / 0.6), 114,
+                             days=70, rng=np.random.default_rng(7), nu=8.0, q_set=0.6,
+                             rho=0.0, delta=0.0, P0=400.0, R_unit=650.0,
+                             units_per_branch=650 / 600.0, max_vessels=3000,
+                             injure_day=40, injury="parenchyma", injury_fraction=0.3,
+                             injury_reactivates=1.0, inflow_limited=True)
+_cl = _trc.final["ceiling"]
+check("the ceiling is reported, one per unit",
+      _cl is not None and len(_cl) == len(_mc), f"units {len(_mc)}, ceilings "
+      f"{'none' if _cl is None else len(_cl)}")
+_eps = float(np.abs(_mc - _cl).sum() / max(_cl.sum(), 1e-12))
+check("the total can sit on the budget while the units do not",
+      abs(float(_mc.sum()) / max(float(_cl.sum()), 1e-12) - 1.0) < 0.25 and _eps > 0.02,
+      f"total {float(_mc.sum()) / max(float(_cl.sum()), 1e-12):.3f} of the "
+      f"budget, residual {_eps:.3f}")
+
 # the final per-segment state covers every segment, so tips index into it
 from organgrow.closed import _q_full as _qf
 _fin = tr_.final

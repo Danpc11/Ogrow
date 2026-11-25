@@ -428,6 +428,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
     spacing = lam                     # least distance between units
     g_clock = 0.0                     # injury can set the growth clock back
     p_drive = dP                      # inlet pressure the current solve has
+    ceiling = np.zeros(0)             # last mass ceiling, per unit; see tr.final
     inflow_target = None              # root flow the circulation keeps delivering
     phi_set = None                    # delivery per unit mass the tissue needs
     tip_of_prev = np.zeros(0, int)    # the assignment of the previous day
@@ -878,8 +879,16 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                    left=float(sum(P.values())) / max(Ptot0, 1e-9),
                    balance=float(Ptot0 + born - (_cons + sum(P.values()) + lost)))
 
+    # The ceiling each unit was growing towards on the last day. A plateau in
+    # the total mass does not by itself mean the units reached their ceilings:
+    # the growth rate decays as exp(-t / tau_g), so the total accumulated
+    # growth after the clock is set is finite, g0 * tau_g, and a unit can stop
+    # moving while still well short. Reporting the ceilings lets a caller tell
+    # the two apart, by the residual sum |m - ceiling| / sum ceiling.
     tr.final = dict(territory_diff=_diff,
                     q=_q_full(q, np.asarray(vt.parent), len(vt)),
                     P=np.array([P.get(k, 0.0) for k in range(len(vt))], float),
-                    tips=np.asarray(_tips, int))
+                    tips=np.asarray(_tips, int),
+                    ceiling=(np.asarray(ceiling, float)
+                             if len(ceiling) == len(m) else None))
     return U, m, vt, tr
