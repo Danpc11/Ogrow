@@ -125,6 +125,134 @@ if (RES / "elasticity.json").exists():
             for k, v in E.items()]
     table(["regime", "setting", "pool", "setpoint", "paired replicates"], rows)
 
+if (RES / "regimes.json").exists():
+    Rg = json.load(open(RES / "regimes.json"))
+    meta = Rg.get("_meta", {})
+    w("## What separates the regimes: renewal against pool and turnover\n")
+    w("The three regimes differ in several parameters at once, so the binary "
+      "property cannot be credited with the separation until the others are "
+      "held fixed. This varies each independently and reports where the pool "
+      "stands at arrest. Division and loss are one axis rather than two, "
+      "swept over the pairings the three sources use, because a pool that "
+      "divides without being lost grows without bound and because the kidney "
+      "and the pancreas do not divide at all. The last column names the "
+      "largest of the four shares, which is the bound that ended the growth "
+      "(`scripts/34_regimes.py`).\n")
+    named = {("1.0", "2600", "balanced"): "liver-like",
+             ("0.0", "300", "decaying"): "kidney-like",
+             ("0.0", "60", "static"): "pancreas-like"}
+
+    def _holds(c):
+        k = max(("spent", "supply_held", "space_held", "active"),
+                key=lambda n: c[n])
+        return {"spent": "spent", "supply_held": "supply",
+                "space_held": "room", "active": "still active"}[k]
+
+    rows = []
+    for k, c in Rg.items():
+        if k.startswith("_"):
+            continue
+        key = (f"{c['renewal']}", f"{c['P0']:.0f}", c["turnover"])
+        rows.append([f"{c['renewal']:.0f}", f"{c['P0']:.0f}", c["turnover"],
+                     f"{c['rho']:.2f}", f"{c['delta']:.2f}",
+                     f"{c['N']:.1f} ± {c['N_sd']:.1f}", f"{c['spent']:.2f}",
+                     f"{c['supply_held']:.2f}", f"{c['space_held']:.2f}",
+                     f"{c['active']:.2f}", _holds(c), named.get(key, "")])
+    table(["renewal", "pool", "turnover", "division", "loss", "units", "spent",
+           "supply", "room", "active", "what holds growth", "named regime"],
+          rows)
+    if "renewal_flips" in meta:
+        w(f"Changing renewal alone, with the pool and the turnover held "
+          f"fixed, changes which bound ends the growth in "
+          f"{meta['renewal_flips']} of {meta.get('cells', '?')} settings of "
+          f"the two.\n")
+
+    el = Rg.get("_elasticity_matched") or {}
+    if el:
+        w("The elasticity of the final unit count to the seeded pool is "
+          "reported elsewhere at each regime's own pool size, so a renewing "
+          "source at 2600 is compared with a spent one at 60. Here the pool "
+          "and the turnover are matched between the two sources and only the "
+          "binary property differs.\n")
+        table(["pool", "turnover", "spent source", "renewing source", "gap"],
+              [[f"{v['P0']:.0f}", v.get("turnover", "-"),
+                f"{v['spent'][0]:+.2f} ± {v['spent'][1]:.2f}",
+                f"{v['renewing'][0]:+.2f} ± {v['renewing'][1]:.2f}",
+                f"{v['spent'][0] - v['renewing'][0]:+.2f}"]
+               for v in el.values()])
+
+if (RES / "feasibility.json").exists():
+    Fe = json.load(open(RES / "feasibility.json"))
+    sp = Fe["spec"]
+    w("## Designing to a specification: where the requirements can be met\n")
+    w(f"A joint specification is imposed at each target volume and the knobs "
+      f"an operator sets are searched for a configuration meeting all of it: "
+      f"units occupying at least {100 * sp['fill_min']:.0f}% of the domain's "
+      f"close packing, at most {sp['vessel_max']:.0f} vessel segments, and a "
+      f"coefficient of variation of the unit count across realisations of at "
+      f"most {sp['cv_max']:.2f}. The knobs are the seeded pool, the "
+      f"nucleation propensity, the culture duration and the cell source. The "
+      f"configuration is chosen on {len(Fe['search_seeds'])} seeds by "
+      f"maximin, the largest smallest slack, and re-run on "
+      f"{len(Fe['holdout_seeds'])} seeds the search never saw. Configurations "
+      f"that had not arrested are excluded "
+      f"(`scripts/35_feasibility.py`).\n")
+
+    w("What any configuration reaches at each volume, one requirement at a "
+      "time. The three are reached by different configurations, so no single "
+      "construct has all three at once.\n")
+    table(["scale", "volume", "best fill", "fewest vessels", "lowest CV",
+           "arrested"],
+          [[S, f"{float(S) ** 3:.3f}",
+            f"{100 * r['best_fill']['fill']:.2f}%",
+            f"{r['fewest_vessels']['vessels']:.0f}",
+            f"{r['lowest_cv']['cv']:.3f}",
+            f"{r['arrested']}/{r['configs']}"]
+           for S, r in sorted(Fe["reach"].items())])
+
+    rows = []
+    for S in sorted(set(Fe["chosen"]) | set(Fe["infeasible"])):
+        if S in Fe["chosen"]:
+            c, h = Fe["chosen"][S], Fe["held_out"].get(S, {})
+            rows.append([S, "yes", f"{c['P0']:.0f}", f"{c['nu']:.0f}",
+                         f"{c['days']}", c["src"],
+                         f"{100 * c['fill']:.2f}%", f"{c['vessels']:.0f}",
+                         f"{c['cv']:.3f}",
+                         f"{100 * h['fill']:.2f}%" if h else "-",
+                         f"{h['cv']:.3f}" if h else "-"])
+        else:
+            rows.append([S, "no", "-", "-", "-", "-", "-", "-", "-", "-", "-"])
+    table(["scale", "feasible", "pool", "nu", "days", "source",
+           "fill", "vessels", "CV", "fill, held out", "CV, held out"], rows)
+    for S, b in sorted(Fe["infeasible"].items()):
+        w(f"At scale {S} no configuration met the specification. The "
+          f"requirement none could meet is {b['binding']}; the best any "
+          f"configuration came to it was a slack of "
+          f"{b['best'][b['binding']]:+.2f}, where zero would be meeting it "
+          f"exactly.\n")
+    if Fe.get("optimism") is not None:
+        o = Fe["optimism"]
+        w(f"The margin measured on the search block "
+          f"{'overstates' if o >= 0 else 'understates'} the margin on the "
+          f"held-out block by {abs(o):.2f} on average, because the "
+          f"configuration is chosen partly for the realisations that happened "
+          f"to favour it. The held-out column is the honest one. Held-out "
+          f"seeds are new realisations of the same model and not new evidence "
+          f"about it, so this measures reproducibility across batches and is "
+          f"not a validation against a construct.\n")
+
+    fr = Fe.get("frontier") or {}
+    if fr:
+        fills = sorted({float(k.split("_")[0][1:]) for k in fr})
+        cvs = sorted({float(k.split("_cv")[1]) for k in fr})
+        w("The largest volume that stays feasible as the density and "
+          "reproducibility requirements change, at the same vascular budget. "
+          "An entry is the domain scale; `none` means no volume admits a "
+          "configuration.\n")
+        table(["fill >="] + [f"CV <= {c:.2f}" for c in cvs],
+              [[f"{f:.2f}"] + [(lambda v: f"{v:.1f}" if v else "none")(
+                  fr.get(f"f{f}_cv{c}")) for c in cvs] for f in fills])
+
 if (RES / "paper_numbers.json").exists():
     Pn = json.load(open(RES / "paper_numbers.json"))
     w("## Murray ratio in grown trees\n")

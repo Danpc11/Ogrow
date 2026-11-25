@@ -73,6 +73,16 @@ from .hemodynamics import VascularTree
 
 _CL = CFG.get("closed", {})
 
+#: How many nucleation candidates are tested in one batch, and how many of
+#: them are measured against the existing units at a time. Neither changes a
+#: result: they bound the temporaries the batched path allocates, and past
+#: `_BATCH` candidates a tip falls back to testing them one at a time. A tip
+#: whose pool has grown can attempt tens of thousands of placements in a day
+#: and those are the ones worth batching, so the cap is high; what it bounds
+#: is only a (candidates, 3) array, while the (candidates, units, 3) distance
+#: temporary is bounded by `_CHUNK` instead.
+_BATCH, _CHUNK = 1 << 20, 128
+
 
 @dataclass
 class Trace:
@@ -644,21 +654,104 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                 k = min(k, int(Pi))
                 tried[i] += k
                 placed = 0
-                for _ in range(k):
-                    if len(U) + len(new_pos) >= max_units:
-                        break
-                    c = vt.end[i] * scale + rng.normal(0, nucleation_spread * lam, 3)
-                    if sdf(c[0] / s, c[1] / s, c[2] / s) >= 0:
-                        no_room[i] += 1
-                        continue
-                    if len(U) and np.min(((U - c) ** 2).sum(-1)) < spacing * spacing:
-                        no_room[i] += 1
-                        continue
-                    if new_pos and np.min(((np.asarray(new_pos) - c) ** 2).sum(-1)) < spacing * spacing:
-                        no_room[i] += 1
-                        continue
-                    new_pos.append(c); new_tip.append(i)
-                    placed += 1
+                # Where the pool stays large the drive stays positive, so a
+                # saturated organ attempts tens of thousands of placements a
+                # day and refuses almost all of them: a run is paid for by
+                # refused attempts, not by the tissue it builds. Neither the
+                # domain test nor the distance to the units already standing
+                # depends on what this tip has placed, so both are taken for
+                # every candidate at once and only the survivors are walked.
+                # The draws, the arithmetic, the order of acceptance and the
+                # refusal count are unchanged, so the two paths agree bit for
+                # bit; `tests/test_smoke.py` asserts it on three settings.
+                room = max_units - len(U) - len(new_pos)
+                batched = False
+                if _BATCH >= k > 0 and room > 0:
+                    # One at a time stops the instant the unit cap is reached
+                    # and so would draw fewer candidates than a batch of k.
+                    # The draw is therefore provisional: the generator state
+                    # is kept, and if the cap turns out to bite, it is wound
+                    # back and the tip is redone one at a time.
+                    st = rng.bit_generator.state
+                    cs = vt.end[i] * scale + rng.normal(
+                        0, nucleation_spread * lam, (k, 3))
+                    bad = np.asarray(sdf(cs[:, 0] / s, cs[:, 1] / s,
+                                         cs[:, 2] / s)) >= 0
+                    # only candidates that landed inside are measured against
+                    # the units, which is the order one at a time tests them
+                    # in and the reason it is cheap on a saturated organ
+                    live = np.flatnonzero(~bad)
+                    if len(U) and len(live):
+                        # A candidate lands within a few spreads of its own
+                        # tip, so almost no unit in the organ can be the one
+                        # that refuses it. Only the units inside the box that
+                        # holds every candidate, grown by one spacing, can be
+                        # closer than a spacing to any of them, so the rest
+                        # cannot change the test and are dropped before it.
+                        # The box is a superset by construction: a unit within
+                        # a spacing of a candidate is within a spacing of it
+                        # along each axis too. The comparison that remains is
+                        # the same arithmetic on the same numbers.
+                        # chunked twice over: the box is taken per chunk,
+                        # because the box over every candidate of a tip that
+                        # attempted thousands of them is as wide as the tails
+                        # of the spread and selects nothing, and the chunk
+                        # also keeps the (candidates, units, 3) difference
+                        # from becoming a large temporary.
+                        for ch in range(0, len(live), _CHUNK):
+                            g = live[ch:ch + _CHUNK]
+                            z = cs[g]
+                            near = U[((U >= z.min(0) - spacing)
+                                      & (U <= z.max(0) + spacing)).all(1)]
+                            if len(near):
+                                # the three terms written out, rather than a
+                                # reduction over an axis of three, which is
+                                # the same sum in the same order without the
+                                # (candidates, units, 3) temporary
+                                dx = near[None, :, 0] - z[:, None, 0]
+                                dy = near[None, :, 1] - z[:, None, 1]
+                                dz = near[None, :, 2] - z[:, None, 2]
+                                bad[g[(dx * dx + dy * dy + dz * dz).min(1)
+                                      < spacing * spacing]] = True
+                        live = np.flatnonzero(~bad)
+                    refused, took, capped = int(bad.sum()), [], False
+                    for j in live:
+                        if len(took) >= room:
+                            capped = True
+                            break
+                        c = cs[j]
+                        if new_pos and np.min(((np.asarray(new_pos) - c) ** 2).sum(-1)) < spacing * spacing:
+                            refused += 1
+                            continue
+                        if took and np.min(((np.asarray(took) - c) ** 2).sum(-1)) < spacing * spacing:
+                            refused += 1
+                            continue
+                        took.append(c)
+                    if capped:
+                        rng.bit_generator.state = st
+                    else:
+                        no_room[i] += refused
+                        for c in took:
+                            new_pos.append(c); new_tip.append(i)
+                            placed += 1
+                        batched = True
+                if not batched:
+                    for _ in range(k):
+                        if len(U) + len(new_pos) >= max_units:
+                            break
+                        c = vt.end[i] * scale + rng.normal(0, nucleation_spread * lam, 3)
+                        if sdf(c[0] / s, c[1] / s, c[2] / s) >= 0:
+                            no_room[i] += 1
+                            continue
+                        if len(U) and np.min(((U - c) ** 2).sum(-1)) < spacing * spacing:
+                            no_room[i] += 1
+                            continue
+                        if new_pos and np.min(((np.asarray(new_pos) - c) ** 2).sum(-1)) < spacing * spacing:
+                            no_room[i] += 1
+                            continue
+                        new_pos.append(c); new_tip.append(i)
+                        placed += 1
+
                 # Whether making a unit spends a progenitor is the organ's
                 # defining property. Where the differentiated cell is its own
                 # progenitor, as mononuclear hepatocytes are in the liver, the

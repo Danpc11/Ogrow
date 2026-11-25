@@ -423,9 +423,9 @@ check("involution at zero leaves the reference model untouched",
 # Checked where the floor population is largest: a renewing construct held at a
 # fixed inflow after injury, which is where the share rule strands units on
 # tips that deliver almost nothing.
-def _inv(rate):
+def _inv(rate, days=70):
     U6, m6, vt6, tr6 = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z / 0.6), 114,
-                             days=70, rng=np.random.default_rng(7), nu=8.0, q_set=0.6,
+                             days=days, rng=np.random.default_rng(7), nu=8.0, q_set=0.6,
                              rho=0.10, delta=0.10, P0=400.0, R_unit=650.0,
                              units_per_branch=650 / 600.0, max_vessels=3000,
                              injure_day=40, injury="parenchyma", injury_fraction=0.3,
@@ -433,11 +433,11 @@ def _inv(rate):
                              involution=rate)
     q6 = np.asarray(tr6.final["q"], float)[np.asarray(tr6.final["tip_of"], int)]
     return (float((m6 <= 1.05 * 0.02).mean()), len(m6), tr6.fate,
-            float(q6.min() / 0.6) if len(q6) else float("nan"))
+            float(q6.min() / 0.6) if len(q6) else float("nan"), m6, tr6)
 
 
-_f0, _n0, _fa0, _q0 = _inv(0.0)
-_f1, _n1, _fa1, _q1 = _inv(0.05)
+_f0, _n0, _fa0, _q0, _m0arr, _tr0 = _inv(0.0)
+_f1, _n1, _fa1, _q1, _m1arr, _tr1 = _inv(0.05)
 check("involution clears units stranded at the mass floor", _f1 < _f0 - 0.1,
       f"{_f0:.2f} of units at the floor without it, {_f1:.2f} with it")
 check("involution removes units rather than renaming the count",
@@ -447,6 +447,24 @@ check("the pool still balances when units are removed",
       abs(_fa1["balance"]) < 1e-6, f"balance {_fa1['balance']:.3g}")
 check("what involution leaves behind is supplied", _q1 > _q0,
       f"worst supply {_q0:.3f} of the setpoint without it, {_q1:.3f} with it")
+
+# Which model floors the mass at m0 is a property of the model and not of the
+# day. With involution off the floor is applied every day, so nothing can sit
+# below m0; with it on the floor is never applied, so a shrinking unit passes
+# below m0 on its way out and stays there whether or not anything was removed
+# that day. Reading the two branches as one per-timestep decision would make a
+# surviving unit's mass depend on whether some other unit happened to cross the
+# exit threshold, which is what these two checks rule out.
+check("the reference model holds every unit at or above the mass it is born with",
+      bool((_m0arr >= 0.02 * (1 - 1e-12)).all()),
+      f"smallest of {len(_m0arr)} masses {float(_m0arr.min()):.6f} against m0 0.02")
+_below = int((_m1arr < 0.02).sum())
+_quiet = np.diff(np.concatenate([[0], np.asarray(_tr1.involuted, int)]))[-1] == 0
+check("under involution a surviving unit may sit below it, on a day that removed nothing"
+      if _quiet else "under involution a surviving unit may sit below it",
+      _below > 0 and float(_m1arr.min()) < 0.02,
+      f"{_below} of {len(_m1arr)} units below m0, smallest {float(_m1arr.min()):.6f}"
+      + (", and the last day removed none" if _quiet else ""))
 
 
 # Removing units leaves the tree standing, so the tree has to be coherent
@@ -479,6 +497,134 @@ _idle0, _idle1 = _tr8.idle_tips[39], _tr8.idle_tips[-1]
 check("tips left serving nothing are counted, and involution makes more of them",
       _idle1 > _idle0, f"{_idle0} before the injury, {_idle1} at the end of "
       f"{_tr8.vessels[-1]} segments")
+
+print("\ndesigning to a specification")
+# The feasibility search decides, from three readouts that are not in the same
+# units, whether a construct meets a specification and which configuration
+# meets it best. Each check below is a way of getting that arithmetic wrong
+# that would still produce a plausible-looking table.
+import importlib.util                                # noqa: E402
+
+_s35 = importlib.util.spec_from_file_location(
+    "feas35", Path(__file__).resolve().parents[1] / "scripts" / "35_feasibility.py")
+_fe = importlib.util.module_from_spec(_s35)
+_s35.loader.exec_module(_fe)
+
+_SP = dict(fill_min=0.10, vessel_max=2000.0, cv_max=0.20)
+
+
+def _c(fill, vessels, cv):
+    return dict(fill=fill, vessels=vessels, cv=cv)
+
+
+# A specification is a conjunction. Averaging the three slacks, or scoring on
+# the best of them, would call this configuration feasible on the strength of
+# its density alone while it spends twice its vascular budget.
+_two_of_three = _c(0.30, 4000.0, 0.05)
+check("failing one requirement fails the whole specification",
+      _fe.margin(_two_of_three, _SP) < 0,
+      f"margin {_fe.margin(_two_of_three, _SP):+.2f} at fill 0.30 and 4000 vessels")
+_sl = _fe.slacks(_two_of_three, _SP)
+check("each slack carries the sign its direction implies",
+      _sl["density"] > 0 and _sl["vascular"] < 0 and _sl["reproducibility"] > 0,
+      f"density {_sl['density']:+.2f}, vascular {_sl['vascular']:+.2f}, "
+      f"reproducibility {_sl['reproducibility']:+.2f}")
+_exact = _fe.slacks(_c(0.10, 2000.0, 0.20), _SP)
+check("a slack is zero exactly when its requirement is met exactly",
+      all(abs(v) < 1e-12 for v in _exact.values()),
+      "at fill 0.10, 2000 vessels, CV 0.20")
+
+# Maximin takes the largest smallest slack, so a configuration with room to
+# spare everywhere beats one that is excellent twice and marginal once.
+# Scoring on the mean of the slacks would reverse this.
+_lopsided, _even = _c(0.15, 1000.0, 0.199), _c(0.12, 1600.0, 0.16)
+check("the chosen configuration is the one with the best worst requirement",
+      max((_lopsided, _even), key=lambda c: _fe.margin(c, _SP)) is _even,
+      f"lopsided {_fe.margin(_lopsided, _SP):+.3f}, even {_fe.margin(_even, _SP):+.3f}")
+
+# When nothing is feasible the report names the requirement nothing came close
+# to, which is the one whose best slack over all configurations is lowest, not
+# the one that fails in the most configurations.
+_who, _best = _fe.binding(
+    [_c(0.02, 500.0, 0.05), _c(0.03, 600.0, 0.30), _c(0.01, 9000.0, 0.10)], _SP)
+check("the binding requirement is the one no configuration came closest to",
+      _who == "density",
+      "best slacks " + ", ".join(f"{k} {v:+.2f}" for k, v in sorted(_best.items())))
+
+# Arrest is read off the tail of the daily trace. Comparing the wrong pair of
+# days, or dividing by the wrong one, would pass a construct still filling up.
+_w = _fe.ARREST_WINDOW
+check("a flat tail counts as arrested", _fe.late_growth([10.0] * (_w + 5)) == 0.0,
+      f"over the last {_w} days of a {_w + 5}-day trace")
+check("arrest is the gain across the window, relative to its start",
+      abs(_fe.late_growth(list(range(1, _w + 12))) - _w / 11.0) < 1e-9,
+      f"a trace rising by one a day gives "
+      f"{_fe.late_growth(list(range(1, _w + 12))):.4f}, against {_w / 11.0:.4f}")
+check("a trace shorter than the window is not called arrested",
+      _fe.late_growth([1.0] * _w) > _fe.ARREST_TOL,
+      f"{_w} days against a {_w}-day window")
+
+print("\nbatched nucleation")
+# Nucleation candidates are tested in batches: the domain test and the
+# distance to the units already standing do not depend on what the same day
+# has placed, so they are taken for every candidate at once and only the
+# survivors are walked one at a time. The batch must be a pure speed-up. Three
+# settings are compared on one run: the batch as shipped, `_BATCH = 0` which
+# forces every candidate down the one-at-a-time path, and `_CHUNK = 1` which
+# drives the chunk loop to its smallest step. A disagreement between any two
+# means the change moved a number, which is the one thing it may not do.
+def _nuc_run():
+    U_, m_, vt_, tr_ = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z / 0.6),
+                             114, days=60, rng=np.random.default_rng(11), nu=8.0,
+                             q_set=0.6, rho=0.10, delta=0.0, P0=600.0, renewal=1.0,
+                             R_unit=650.0, units_per_branch=650 / 600.0,
+                             max_vessels=3000)
+    return (U_.tobytes(), m_.tobytes(), np.asarray(vt_.end, float).tobytes(),
+            np.asarray(vt_.radii(), float).tobytes(),
+            np.asarray(tr_.N, float).tobytes(),
+            np.asarray(tr_.mass, float).tobytes(),
+            np.asarray(tr_.vessels, float).tobytes(),
+            tuple(sorted(tr_.closure.items())), len(U_))
+
+
+_b0, _c0 = closed._BATCH, closed._CHUNK
+_batched = _nuc_run()
+closed._BATCH = 0
+_scalar = _nuc_run()
+closed._BATCH, closed._CHUNK = _b0, 1
+_chunk1 = _nuc_run()
+closed._BATCH, closed._CHUNK = _b0, _c0
+
+check("the batch is taken and the run is not trivial",
+      _b0 > 0 and _c0 > 0 and _batched[-1] > 20,
+      f"batch {_b0}, chunk {_c0}, {_batched[-1]} units formed")
+check("batched nucleation matches one candidate at a time, bit for bit",
+      _batched == _scalar,
+      f"{_batched[-1]} units against {_scalar[-1]}")
+check("the chunk size does not move a number", _batched == _chunk1,
+      f"{_batched[-1]} units against {_chunk1[-1]} at chunk 1")
+
+# The one case the batch must refuse is the unit cap, because the cap stops a
+# day part way through and so consumes fewer draws than the batch would.
+_cap = dict(days=60, rng=None, nu=8.0, q_set=0.6, rho=0.10, delta=0.0, P0=600.0,
+            renewal=1.0, R_unit=650.0, units_per_branch=650 / 600.0,
+            max_vessels=3000, max_units=25)
+
+
+def _cap_run():
+    _cap["rng"] = np.random.default_rng(11)
+    U_, m_, vt_, tr_ = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z / 0.6),
+                             114, **_cap)
+    return U_.tobytes(), m_.tobytes(), len(U_)
+
+
+_cap_batched = _cap_run()
+closed._BATCH = 0
+_cap_scalar = _cap_run()
+closed._BATCH = _b0
+check("a run that hits the unit cap still agrees with one at a time",
+      _cap_batched == _cap_scalar and _cap_batched[-1] <= 25,
+      f"{_cap_batched[-1]} units against {_cap_scalar[-1]}, cap 25")
 
 print()
 if FAIL:

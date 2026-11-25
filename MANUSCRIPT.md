@@ -20,7 +20,7 @@ Ciudad Universitaria, Mexico City, Mexico
 Target journal: *Biofabrication* (IOP). Structure follows IOP's Introduction,
 Methods, Results, Discussion. Abstract is under 300 words.
 
-Reference model version 4.50.0 (`src/organgrow/closed.py`). Every model number
+Reference model version 4.54.0 (`src/organgrow/closed.py`). Every model number
 quoted below is taken from `PAPER_NUMBERS.md`, which `make paper` regenerates
 with the version and commit that produced it, and is checked against the
 result files by `scripts/29_check_manuscript.py`. No model number in this file
@@ -38,9 +38,9 @@ geometry and then treat growth as a separate problem. We study a single
 nucleation law on a perfused vascular tree: a functional unit forms at a tip
 at a rate proportional to the competent cells held there and to the excess of
 local perfusion over a setpoint, bounded locally by perfusion per unit, by
-competent cells, and by room. Three tissue-like regimes follow from one binary
-property of the cell source, whether the cell that forms a unit is spent in
-forming it. The regimes differ in what seeding buys: doubling the seeded pool
+competent cells, and by room. Three tissue-like regimes follow from how the cell
+source is maintained: whether the cell that forms a unit is spent in forming
+it, and, where it is spent, how fast what remains is lost. The regimes differ in what seeding buys: doubling the seeded pool
 changes the final unit count by an elasticity of +0.07 ± 0.06 when the source
 renews and +0.71 ± 0.05 when it does not, while lowering the perfusion
 setpoint is the stronger lever in every regime. They differ in whether arrest
@@ -239,8 +239,10 @@ series are public under the accessions above.
 
 ### 3.1 One property of the cell source separates three growth regimes
 
-With the single difference of Section 2.2, the three sources arrest in three
-different states (`PAPER_NUMBERS.md`, Regimes at closure; Figure 1).
+The three sources arrest in three different states (`PAPER_NUMBERS.md`,
+Regimes at closure; Figure 1). They differ in three parameters at once, so
+Section 3.7 asks which of the three does the work before the binary property
+is credited with the separation.
 
 The renewing source reaches 208 ± 4 units and keeps essentially its whole
 pool, held partly where perfusion has fallen to threshold (0.78 ± 0.03 of the
@@ -311,10 +313,17 @@ model was not fitted to that experiment.
 
 ### 3.3 Arrest is stable, and whether it can be undone follows from the same property
 
-At day 140 growth has stopped. Letting it run 40 days further adds 2.8 ± 0.3 %
-more units to the renewing construct and nothing to either spent source, so
-arrest is a state and not a slowdown (`PAPER_NUMBERS.md`, Interventions;
-Figure 2).
+We call a construct arrested when letting it run a further 40 days, nearly a
+third again of its growth, adds less than 5 % to its unit count. That is an
+operational criterion and not a claim that no cell could ever divide again:
+what it rules out is a construct still climbing slowly enough to be mistaken
+for a stopped one. By it, all three regimes are arrested at day 140. The
+renewing construct adds 2.8 ± 0.3 % more units over those 40 days and either
+spent source adds nothing, so for the spent sources the arrest is also
+terminal, the pool having no competent cells left to spend
+(`PAPER_NUMBERS.md`, Interventions; Figure 2). The distinction matters for what
+follows: a bound that still holds a pool can be relieved, and an exhausted
+pool cannot.
 
 Arrest can then be probed by relieving one bound at a time. Lowering the
 perfusion setpoint by 20 %, which raises every tip's availability relative to
@@ -421,6 +430,16 @@ mass is therefore the tip supply $q_j$ times a quantity common to every unit
 in the construct, so a threshold on either selects the same units in the same
 order and the two differ only in where the cut falls. The criterion is the
 supply the circulation actually provides, not a proxy for it.
+
+Where the cut falls is a separate question, because $Q / \sum_k m_k q_k$ is a
+property of the construct and could drift as it rebuilds or as the delivered
+flow is changed, so that a fixed threshold on $q_j$ would not be a fixed
+requirement in delivery per unit mass. Measured across three delivered flows
+and three seeds at day 220, it spans a factor of 1.04. The threshold sweep
+covers a factor of ten and moves the result very little, so a four per cent
+drift in the conversion between the two decides nothing here. The argument
+does not carry to $\xi \neq 1$, where the mass no longer cancels and the two
+criteria would have to be compared again.
 
 The residual falls with it, to 0.23 in the renewing construct and to 0.18 in
 the spent source, and does not approach zero. Clearing the stranded units
@@ -531,7 +550,33 @@ $\rho = +0.30$, $P = 0.62$), and neither does the progenitor share
 development and a difference between samples cannot be told apart. Deciding it
 needs a series with replicate donors per stage.
 
-### 3.7 Scaling up loses unit density, and past an intermediate size loses reproducibility
+### 3.7 Which of the three parameters separates the regimes
+
+The three regimes differ in the binary property $w$, in the size of the
+seeded pool $P_0$, and in how the pool turns over, all at once, so none of the
+three can be credited with the separation from the comparison alone. Turnover
+is a division rate and a loss rate together, and the two are swept as one axis
+over the pairings the three sources use: static ($\rho = \delta = 0$),
+decaying ($\rho = 0$, $\delta = 0.05$) and balanced ($\rho = \delta = 0.10$).
+Separating them would name cells after the kidney and the pancreas that are
+not those regimes, since neither divides, and would pair a dividing pool with
+no loss, which grows without bound because a refused nucleation does not spend
+a progenitor. We vary each axis independently over a grid of two values of
+$w$, three of $P_0$ and three of the turnover, and read where the pool stands
+at arrest in every cell: spent, held where perfusion has fallen to threshold,
+held where units leave no room, or still able to nucleate. Those four shares
+are what a regime is here, so a regime that survives a change of $P_0$ and of
+the turnover at fixed $w$ is one the binary property owns
+(`PAPER_NUMBERS.md`, What separates the regimes; `scripts/34_regimes.py`).
+
+The same grid settles a confound in the elasticity of Section 3.2. That
+elasticity is measured at each regime's own pool size, so a renewing source at
+$P_0 = 2600$ is compared with a spent one at 60, and a difference between them
+could be a difference in what renewal does or in where on the curve each
+regime sits. We measure it again with $P_0$ and the turnover matched between
+the two sources, leaving the binary property as the only difference.
+
+### 3.8 Scaling up loses unit density, and past an intermediate size loses reproducibility
 
 Scaling the domain over a 15-fold range of volume, with the pool, the window
 and the rates held at the reference, raises the unit count only as
@@ -691,13 +736,18 @@ reported here is structural.
 The spatial constraint is local exclusion between neighbouring units, not the
 packing limit of the container, which never binds.
 
-The model has no involution. A unit that loses its supply stops growing and
-stays at the mass floor, where a tissue would atrophy and resorb it. This is
-why a construct held at a fixed inflow reaches its budget in total while most
-of its units sit far below their own ceilings, and it is the clearest place
-where the model is missing a process rather than a parameter. Section 3.4
-reports what happens when the process is supplied; the rate it runs at is
-calibrated against nothing, which is why that stays a sensitivity.
+**The reference model excludes involution; an extended model introduces it as
+an uncalibrated sensitivity.** In the reference model a unit that loses its
+supply stops growing and stays at the mass floor, where a tissue would atrophy
+and resorb it, and that is why a construct held at a fixed inflow reaches its
+budget in total while most of its units sit far below their own ceilings. It
+is the clearest place where the model is missing a process rather than a
+parameter. The extended model supplies the process, and Section 3.4 reports
+what it does; none of the four numbers it runs on is measured, which is why
+every result above is the reference model's. The two also differ in what the
+mass floor is: the reference model holds every unit at or above the mass a
+unit is born with, and the extended one lets a shrinking unit pass below it on
+its way out.
 
 The model compensates after injury further than a kidney does. After removal of
 one of two kidneys the adult mammalian remnant forms no new nephrons and gains
@@ -751,8 +801,8 @@ no unit is reported alongside the rest.
 ## 6. Conclusion
 
 The size a perfused tissue reaches, whether its arrest can be undone, and what
-seeding more cells buys all follow from one binary property of the cell source
-and from the boundary condition on the perfusion circuit. Under a fixed inlet
+seeding more cells buys all follow from how the cell source is maintained and
+from the boundary condition on the perfusion circuit. Under a fixed inlet
 pressure there is no ceiling; under a fixed flow the ceiling is the delivered
 flow over what the tissue requires per unit mass, which is a consequence of
 the local rule rather than a separate assumption. Neither is a
@@ -869,13 +919,36 @@ manuscript actually makes about it. If a source for the window itself is
 wanted, Zhou Q et al. 2007 *Dev. Cell* **13** 103–14 is the candidate and has
 not been verified here.
 
-**Open from the fourth review, as work rather than text.** The involution
-sensitivity sweeps its rate and the supply at which a unit counts as starving.
-It does not sweep the mass at which a unit is removed, nor a requirement that
-a unit stay unsupplied for some days before it goes, and it reports an endpoint
-at day 220 rather than a trajectory. Section 5 says so. Adding the two
-thresholds to `scripts/33_involution.py` and recording N(t) and M(t) would
-close it, at the cost of another few hundred simulations.
+**Closed since the fourth review.** The involution sensitivity now sweeps all
+four of its choices, the rate and the three conditions that turn it on, and
+reports the day by which nine tenths of the removals have happened alongside
+the endpoint (`PAPER_NUMBERS.md`, Involution, as a sensitivity). The tree is
+checked for coherence after a removal in `tests/test_smoke.py`.
+
+**From the fifth review.** One of its findings did not survive checking: it
+read the mass floor as a per-timestep decision, so that a surviving unit's
+mass would depend on whether some other unit happened to be removed that day.
+It is not. The `else` that re-applies the floor belongs to `if involution >
+0.0`, not to the removal branch, so the floor is a property of which model is
+running and not of the day. The reference model applies it every day and the
+extended model never does. Two checks in `tests/test_smoke.py` now pin both
+halves; one of them ends a run on a day that removed nothing and finds units
+below the floor, which could not happen if the reading were right.
+
+Three of its findings are in the text above: arrest now carries a stated
+criterion (Section 3.3), the limitations no longer say the model has no
+involution while Section 3.4 reports it, and the drift of the factor between
+the two starvation criteria is measured rather than assumed (Section 3.4).
+
+Its strongest finding is open as work, and Section 3.7 is the answer in
+outline: the three regimes differ in the binary property, the seeded pool and
+the turnover at once, so the separation cannot be credited to the first until
+the others are held fixed. `scripts/34_regimes.py` runs that grid and measures
+the elasticity again with the pool and the turnover matched, which also
+settles a confound the review did not raise: the published contrast of +0.71
+against +0.07 is measured at pool sizes of 60 and 2600. The headings of
+Sections 3.1, 3.3 and 3.6 still say "one property" and should be revisited
+once that grid has run.
 
 **Four results from the earlier framing are not in this manuscript** and are
 listed in `FIGURES.md` as supplementary: the 96 human kidneys from 48 donors,
