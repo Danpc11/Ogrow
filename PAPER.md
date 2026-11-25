@@ -4,7 +4,7 @@ Target: *Biofabrication* (IOP), with the engineering framing. The manuscript
 itself is `MANUSCRIPT.md`; this file is the ledger of claims and evidence it
 is written from, and `scripts/29_check_manuscript.py` holds the manuscript to
 the regenerated tables.
-Reference model: version 4.49.0 (`src/organgrow/closed.py`). Every number from
+Reference model: version 4.50.0 (`src/organgrow/closed.py`). Every number from
 the model that the paper uses is in `PAPER_NUMBERS.md`, written by
 `make paper` with the version and commit that produced it; this file does not
 copy model numbers by hand. Numbers given here are either data (the human

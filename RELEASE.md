@@ -17,7 +17,11 @@ checkout, and then the rest.
    A release that disagrees with itself about its own version is not citable.
 2. **The stamp is real.** `PAPER_NUMBERS.md` names the commit that produced
    its numbers, that commit is in the history of HEAD, and the tree carried no
-   uncommitted changes when it was written.
+   uncommitted changes when it was written. The dirty check covers the whole
+   tree apart from what the run writes itself, because the Makefile decides
+   which Python runs and the first version of this check did not watch it.
+   Getting a clean stamp takes two commits: commit the code, then run
+   `make paper` and commit the regenerated numbers.
 3. **The manuscript matches the results.** `scripts/29_check_manuscript.py`
    recomputes every model number from the result files, formats it as the
    manuscript writes it, and requires that string to be present.
@@ -62,6 +66,10 @@ accession to put where to redo them.
 ## Before the first release
 
 - ORCID identifiers for all seven authors are missing from `CITATION.cff`.
+- `pandoc` is not installed on the machine the numbers are generated on, so
+  `make paper` cannot build the Word file and skips it. The manuscript is
+  `MANUSCRIPT.md` either way, but the coauthors' copy with the notes needs it:
+  `brew install pandoc`.
 - Reference [11] in the manuscript needs its page range, and [10] needs a
   volume if one has been assigned since it appeared online.
 - The three figures the manuscript does not use are listed in `FIGURES.md` as

@@ -22,9 +22,20 @@ w = out.append
 try:
     commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT,
                             capture_output=True, text=True).stdout.strip()
-    dirty = subprocess.run(["git", "status", "--porcelain", "src", "scripts", "config"],
-                           cwd=ROOT, capture_output=True, text=True).stdout.strip()
-    commit = (commit or "unknown") + (" (with uncommitted changes)" if dirty else "")
+    # The whole tree, not just src, scripts and config. A run is reproducible
+    # from the named commit only if everything that shaped it is in that
+    # commit, and the Makefile decides which Python runs and over what. The
+    # paths skipped here are the ones this run writes itself, so their being
+    # modified says nothing about the code that produced the numbers.
+    _mine = ("PAPER_NUMBERS.md", "source_data/", "results/", "figures/out/")
+    _lines = subprocess.run(["git", "status", "--porcelain"], cwd=ROOT,
+                            capture_output=True, text=True).stdout.splitlines()
+    _paths = sorted({ln[3:].strip().strip('"') for ln in _lines if len(ln) > 3})
+    dirty = [p for p in _paths if not any(p.startswith(m) for m in _mine)]
+    commit = (commit or "unknown") + (
+        " (with uncommitted changes to " + ", ".join(dirty[:4])
+        + (f" and {len(dirty) - 4} more" if len(dirty) > 4 else "") + ")"
+        if dirty else "")
 except Exception:
     commit = "unknown"
 w("# Numbers the paper uses\n")
