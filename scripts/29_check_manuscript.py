@@ -211,6 +211,46 @@ if L:
             need(f"{_lab}, largest share at the mass floor",
                  f"up to {round(100 * max(_flo))} %")
 
+# The involution sensitivity. Each string below sits on one line of the
+# manuscript, because a check that spanned a line break would fail on
+# rewrapping rather than on a number moving.
+Iv = load("involution.json")
+if Iv and "liver" in Iv and "kidney" in Iv:
+    def _at(reg, rate):
+        for r in Iv[reg]["rows"]:
+            if abs(r["rate"] - rate) < 1e-12:
+                return r
+        return None
+
+    lv0, lv5 = _at("liver", 0.0), _at("liver", 0.05)
+    kd0, kd5 = _at("kidney", 0.0), _at("kidney", 0.05)
+    if lv0 and lv5 and kd0 and kd5:
+        need("renewing construct under involution, mass",
+             f"{lv5['mass_rel']:.2f} of its pre-injury mass, against "
+             f"{lv0['mass_rel']:.2f} without the mechanism")
+        need("renewing construct under involution, units",
+             f"with {lv5['units_rel']:.2f} of its pre-injury unit count rather "
+             f"than {lv0['units_rel']:.2f}")
+        need("spent source under involution, units and mass",
+             f"units to {kd5['units_rel']:.2f} at an unchanged "
+             f"{kd5['mass_rel']:.2f} of its mass")
+        need("share at the mass floor under involution",
+             f"floor falls from {lv0['floor_share']:.2f} to "
+             f"{lv5['floor_share']:.2f} in the renewing construct and from "
+             f"{kd0['floor_share']:.2f} to {kd5['floor_share']:.2f}")
+        # Only where it lands. The residual without the mechanism is already
+        # checked above, at two decimals of a value whose third decimal sits
+        # on a rounding boundary, and one claim should not carry two of those.
+        need("residual under involution",
+             f"to {lv5['residual']:.2f} in the renewing construct and to "
+             f"{kd5['residual']:.2f} in")
+    u_l, u_k = Iv["liver"].get("units_rel_on"), Iv["kidney"].get("units_rel_on")
+    if u_l and u_k:
+        need("units kept across the rates, renewing",
+             f"keeps between {u_l[0]:.2f} and {u_l[1]:.2f} of its units")
+        need("units kept across the rates, spent",
+             f"source between {u_k[0]:.2f} and {u_k[1]:.2f}")
+
 
 def main():
     if not DOC.exists():

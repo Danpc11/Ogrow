@@ -386,15 +386,31 @@ to one; the units individually do not reach their ceilings.
 What separates the two is a mechanism the model does not have. A unit whose
 share of the delivery collapses has no way to disappear, so it stays at the
 mass floor rather than involuting, and the construct ends as a few large units
-among many vestigial ones. Supplying that mechanism as a rate at which a unit
-below a tenth of the setpoint loses mass and is then removed leaves the mass
-where it was, clears most of the floor population, and leaves the construct
-with a smaller number of larger units; the answer barely moves over a tenfold
-range of the rate, so it rests on the mechanism existing and not on its speed
+among many vestigial ones.
+
+Supplying that mechanism, as a rate at which a unit whose supply has fallen
+below a tenth of the setpoint loses mass and is then removed, changes what the
+construct is made of and not how much of it there is
 (`scripts/33_involution.py`; `PAPER_NUMBERS.md`, Involution, as a
-sensitivity). We report it there rather than here because its rate is
-calibrated against nothing, and the result of this section should not depend
-on a number we chose.
+sensitivity). At a rate of 0.05 per day the renewing construct still returns to
+0.97 of its pre-injury mass, against 1.02 without the mechanism, but it does so
+with 0.37 of its pre-injury unit count rather than 0.91: the same mass carried
+by fewer and larger units, which is the behaviour Section 3.5 reports for the
+construct that cannot make new ones. The spent source goes from 0.70 of its
+units to 0.52 at an unchanged 0.97 of its mass. The share left at the mass
+floor falls from 0.72 to 0.13 in the renewing construct and from 0.40 to 0.04
+in the spent source. Over a tenfold range of the rate, 0.02 to 0.20 per day,
+the renewing construct keeps between 0.35 and 0.40 of its units and the spent
+source between 0.51 and 0.53, so the answer rests on the mechanism existing and
+not on how fast it runs.
+
+The residual falls with it, to 0.23 in the renewing construct and to 0.18 in
+the spent source, and does not approach zero. Clearing the stranded units
+does not give a surviving unit
+back the growth it would need to reach its ceiling, so these are two separate
+defects and involution addresses one of them. We keep it out of the result
+above because its rate is calibrated against nothing, and what this section
+reports should not rest on a number we chose.
 
 A construct fed at constant flow therefore tracks its supply in the aggregate,
 and does so asymmetrically: it grows into a larger budget far more readily

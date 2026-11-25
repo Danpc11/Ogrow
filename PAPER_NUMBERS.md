@@ -1,6 +1,6 @@
 # Numbers the paper uses
 
-Model version 4.45.0, commit a11d98e, generated 2026-11-24 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.46.0, commit 567bfb7, generated 2026-11-24 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b024.
 
@@ -134,27 +134,63 @@ The unit count is the mean over the seeds with the range they span and its coeff
 
 ## The mass a construct lands on against the flow it is given
 
-The ceiling on a unit is the delivered flow times its share over the delivery per unit mass the tissue needs, and the shares sum to one, so a total of Q/phi is what the rule gives if every unit reaches its ceiling. It is a consequence of the rule, not a measurement. What is measured here is how completely a construct reaches it: `mass / (Q/phi)` away from 1, and the exponent away from 1. `phi` is calibrated on a block of seeds disjoint from the one the sweep is evaluated on. The last column is the mean daily change of mass over the final ten days, which says whether the construct had settled.
+The ceiling on a unit is the delivered flow times its share over the delivery per unit mass the tissue needs, and the shares sum to one, so a total of Q/phi is what the rule gives if every unit reaches its ceiling. It is a consequence of the rule, not a measurement. What is measured here is how completely a construct reaches it: `mass / (Q/phi)` away from 1, and the exponent away from 1. `phi` is calibrated on a block of seeds disjoint from the one the sweep is evaluated on.
 
-**liver**: phi = 0.000752 ± 0.000034, calibrated on seeds 400 to 423, evaluated on seeds 300 to 323. Exponent of mass against delivered flow, one fit per seed: 0.899 ± 0.024, bootstrap 95 % interval [0.891, 0.909].
+A small daily change of mass is necessary for equilibrium with the supply and not sufficient. The growth rate decays as exp(-t/tau_g), so the growth available after the injury is finite and a unit can stop moving while still far from its ceiling. The residual column is `sum |m - ceiling| / sum ceiling` over the units, and the column beside it is the share of units ending at the mass floor. The two together say that the total lands where the budget puts it while the units individually do not.
 
-| delivered flow | mass / pre-injury | mass / (Q/phi) | mass still moving, % per day |
-|---|---|---|---|
-| 0.6 | 0.645 ± 0.021 | 1.760 | 0.02 |
-| 0.8 | 0.833 ± 0.030 | 1.278 | 0.01 |
-| 1.0 | 1.020 ± 0.041 | 1.001 | 0.02 |
-| 1.2 | 1.203 ± 0.051 | 0.819 | 0.03 |
-| 1.4 | 1.382 ± 0.056 | 0.692 | 0.03 |
+In this section the spread after ± is a standard deviation over seeds, not the standard error used elsewhere in this file.
 
-**kidney**: phi = 0.000905 ± 0.000047, calibrated on seeds 400 to 423, evaluated on seeds 300 to 323. Exponent of mass against delivered flow, one fit per seed: 0.932 ± 0.023, bootstrap 95 % interval [0.923, 0.941].
+**liver**: phi = 0.000752 ± 0.000034 (s.d.), calibrated on seeds 400 to 423, evaluated on seeds 300 to 323. Exponent of mass against delivered flow, one fit per seed: 0.899 ± 0.024 (s.d.), bootstrap 95 % interval [0.891, 0.909].
 
-| delivered flow | mass / pre-injury | mass / (Q/phi) | mass still moving, % per day |
-|---|---|---|---|
-| 0.6 | 0.603 ± 0.031 | 1.674 | 0.01 |
-| 0.8 | 0.787 ± 0.043 | 1.228 | 0.01 |
-| 1.0 | 0.970 ± 0.055 | 0.968 | 0.02 |
-| 1.2 | 1.150 ± 0.066 | 0.798 | 0.03 |
-| 1.4 | 1.329 ± 0.077 | 0.677 | 0.04 |
+| delivered flow | mass / pre-injury | mass / (Q/phi) | mass still moving, % per day | residual | units at the mass floor |
+|---|---|---|---|---|---|
+| 0.6 | 0.645 ± 0.021 | 1.760 | 0.02 | 0.377 | 0.74 |
+| 0.8 | 0.833 ± 0.030 | 1.278 | 0.01 | 0.349 | 0.73 |
+| 1.0 | 1.020 ± 0.041 | 1.001 | 0.02 | 0.335 | 0.72 |
+| 1.2 | 1.203 ± 0.051 | 0.819 | 0.03 | 0.334 | 0.73 |
+| 1.4 | 1.382 ± 0.056 | 0.692 | 0.03 | 0.328 | 0.73 |
+
+Across the whole range of flows the residual stays between 0.33 and 0.38, and between 72% and 74% of units end at the mass floor. Neither improves at any flow, so this is the regime and not an edge of the sweep.
+
+**kidney**: phi = 0.000905 ± 0.000047 (s.d.), calibrated on seeds 400 to 423, evaluated on seeds 300 to 323. Exponent of mass against delivered flow, one fit per seed: 0.932 ± 0.023 (s.d.), bootstrap 95 % interval [0.923, 0.941].
+
+| delivered flow | mass / pre-injury | mass / (Q/phi) | mass still moving, % per day | residual | units at the mass floor |
+|---|---|---|---|---|---|
+| 0.6 | 0.603 ± 0.031 | 1.674 | 0.01 | 0.243 | 0.49 |
+| 0.8 | 0.787 ± 0.043 | 1.228 | 0.01 | 0.218 | 0.43 |
+| 1.0 | 0.970 ± 0.055 | 0.968 | 0.02 | 0.206 | 0.40 |
+| 1.2 | 1.150 ± 0.066 | 0.798 | 0.03 | 0.199 | 0.36 |
+| 1.4 | 1.329 ± 0.077 | 0.677 | 0.04 | 0.195 | 0.35 |
+
+Across the whole range of flows the residual stays between 0.19 and 0.24, and between 35% and 49% of units end at the mass floor. Neither improves at any flow, so this is the regime and not an edge of the sweep.
+
+## Involution, as a sensitivity
+
+The units stranded at the mass floor above are there because the reference model has no way to remove a unit that loses its supply. `involution` is a rate per day at which a unit whose supply has fallen below a tenth of the setpoint loses mass, after which it is removed; the rate of zero is the reference model, so the first row of each table is the published result. The rate is not calibrated against any measurement, which is why this is a sensitivity and not the result. Everything is at unit flow, with the demand calibrated out of sample as above (`scripts/33_involution.py`).
+
+**liver**: phi = 0.000752, calibrated on seeds 400 to 423, evaluated on seeds 300 to 323, 24 seeds.
+
+| involution, per day | mass / pre-injury | units / pre-injury | residual | units at the mass floor |
+|---|---|---|---|---|
+| 0.00 | 1.020 [0.91, 1.08] | 0.91 [0.72, 1.04] | 0.335 | 0.72 |
+| 0.02 | 0.954 [0.84, 1.01] | 0.35 [0.29, 0.45] | 0.231 | 0.14 |
+| 0.05 | 0.966 [0.89, 1.07] | 0.37 [0.28, 0.50] | 0.233 | 0.13 |
+| 0.10 | 0.965 [0.83, 1.03] | 0.40 [0.25, 0.77] | 0.234 | 0.15 |
+| 0.20 | 0.977 [0.89, 1.05] | 0.39 [0.28, 0.46] | 0.227 | 0.14 |
+
+Over a tenfold range of the rate the construct keeps 0.35 to 0.40 of its units, against 0.91 with the mechanism absent; the share at the mass floor falls from 0.72 to between 0.13 and 0.15, and the residual from 0.33 to between 0.23 and 0.23. The rate sets how fast, not where it lands.
+
+**kidney**: phi = 0.000905, calibrated on seeds 400 to 423, evaluated on seeds 300 to 323, 24 seeds.
+
+| involution, per day | mass / pre-injury | units / pre-injury | residual | units at the mass floor |
+|---|---|---|---|---|
+| 0.00 | 0.970 [0.87, 1.05] | 0.70 [0.69, 0.70] | 0.206 | 0.40 |
+| 0.02 | 0.966 [0.86, 1.05] | 0.51 [0.30, 0.63] | 0.177 | 0.04 |
+| 0.05 | 0.969 [0.86, 1.05] | 0.52 [0.33, 0.63] | 0.178 | 0.04 |
+| 0.10 | 0.971 [0.86, 1.06] | 0.52 [0.30, 0.63] | 0.176 | 0.03 |
+| 0.20 | 0.973 [0.86, 1.06] | 0.53 [0.38, 0.64] | 0.177 | 0.03 |
+
+Over a tenfold range of the rate the construct keeps 0.51 to 0.53 of its units, against 0.70 with the mechanism absent; the share at the mass floor falls from 0.40 to between 0.03 and 0.04, and the residual from 0.21 to between 0.18 and 0.18. The rate sets how fast, not where it lands.
 
 ## Injury after closure (day 140, 30 % of the units removed by a plane cut, read on day 220; the first four entries are day 220 over the day before the injury, the last two the share of what the cut took that is back, each the mean over 24 seeds with the range they span)
 
