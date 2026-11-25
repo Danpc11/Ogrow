@@ -265,6 +265,13 @@ if Rg:
              f"of renewal and the pool")
         need("pool changes the bound",
              f"the pool alone in {mt['pool_flips']} of {mt['other_cells']}")
+        # the abstract states the same two counts in its own words, and a
+        # count that moved must fail there too rather than quietly survive
+        need("renewal changes the bound, abstract",
+             f"in {mt['renewal_flips']} of {mt['cells']} settings of the "
+             f"other two")
+        need("turnover changes the bound, abstract",
+             f"the turnover in {mt['turnover_flips']} of {mt['other_cells']}")
     el = Rg.get("_elasticity_matched") or {}
     #: the gap the binary property keeps once the pool and the turnover are
     #: matched, at each of the three published corners

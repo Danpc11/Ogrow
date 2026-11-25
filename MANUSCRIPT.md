@@ -20,7 +20,7 @@ Ciudad Universitaria, Mexico City, Mexico
 Target journal: *Biofabrication* (IOP). Structure follows IOP's Introduction,
 Methods, Results, Discussion. Abstract is under 300 words.
 
-Reference model version 4.55.0 (`src/organgrow/closed.py`). Every model number
+Reference model version 4.56.0 (`src/organgrow/closed.py`). Every model number
 quoted below is taken from `PAPER_NUMBERS.md`, which `make paper` regenerates
 with the version and commit that produced it, and is checked against the
 result files by `scripts/29_check_manuscript.py`. No model number in this file
@@ -40,10 +40,14 @@ at a rate proportional to the competent cells held there and to the excess of
 local perfusion over a setpoint, bounded locally by perfusion per unit, by
 competent cells, and by room. Three tissue-like regimes follow from how the cell
 source is maintained: whether the cell that forms a unit is spent in forming
-it, and, where it is spent, how fast what remains is lost. The regimes differ in what seeding buys: doubling the seeded pool
-changes the final unit count by an elasticity of +0.07 ± 0.06 when the source
-renews and +0.71 ± 0.05 when it does not, while lowering the perfusion
-setpoint is the stronger lever in every regime. They differ in whether arrest
+it, and how fast the pool divides and is lost. A factorial over those axes
+finds the second the larger: the binary property changes which bound ends
+growth in 2 of 9 settings of the other two, and the turnover in 5 of 6. The
+regimes differ in what seeding buys: doubling the seeded pool changes the
+final unit count by an elasticity of +0.07 ± 0.06 in the renewing regime and
++0.71 ± 0.05 in the spent one, of which under half survives holding the pool
+and its turnover fixed, while lowering the perfusion setpoint is the stronger
+lever in every regime. They differ in whether arrest
 can be undone: relieving perfusion or room restarts a renewing construct and
 nothing restarts one whose pool is spent. After a 30 % loss of units, how the
 perfusion circuit is driven decides the outcome; at a fixed inlet pressure the
@@ -59,8 +63,12 @@ recover mass need not recover the architecture it was designed around.
 Scaling the domain
 15-fold raises unit count only as V^0.45, and past an intermediate size the
 unit count also stops being reproducible, its coefficient of variation rising
-from 0.09 to 0.47. The model is not fitted to any construct and its
-predictions are untested; we state the measurements that would decide each.
+from 0.09 to 0.47. Posed as a design problem, a joint requirement on unit
+density, vascular cost and reproducibility is met up to an intermediate volume
+and at none larger: what fails is density, while the reproducibility that
+collapses with size is recovered by choosing the cell source. The model is not
+fitted to any construct and its predictions are untested; we state the
+measurements that would decide each.
 
 **Keywords:** tissue engineering, vascularisation, perfusion, computational
 model, scale-up, organ growth, design rules
