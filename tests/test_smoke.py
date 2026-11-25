@@ -354,6 +354,26 @@ for _lab, _kw in (("renewing", dict(rho=0.10, delta=0.10, renewal=1.0)),
               f"balance {_g5['balance']:.3g}, formed {_g5['units_formed']}, "
               f"left {_g5['units_left']}, culled {_g5['culled']:.2f}")
 
+# Where the competent compartment is the tissue, a parenchymal cut has to take
+# part of the pool with it on whatever day it falls. The assignment this rule
+# reads is recorded before the day's nucleation, so it is shorter than the unit
+# array whenever a unit was added since; a version of this that required the
+# two lengths to match fired only on days when none had been, which made the
+# rule depend on an accident of alignment and differ between machines.
+_drop = []
+for _d in (36, 38, 40, 42, 44):
+    _U7, _m7, _vt7, _tr7 = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z / 0.6), 114,
+                                 days=70, rng=np.random.default_rng(11), nu=8.0,
+                                 q_set=0.6, P0=300.0, R_unit=650.0,
+                                 units_per_branch=650 / 600.0, max_vessels=3000,
+                                 injure_day=_d, injury="parenchyma",
+                                 injury_fraction=0.3, rho=0.10, delta=0.10,
+                                 renewal=1.0)
+    _j7 = _tr7.injury
+    _drop.append(_j7["post"]["P"] < _j7["pre"]["P"])
+check("the pool rides with the tissue on every injury day", all(_drop),
+      f"{sum(_drop)} of {len(_drop)} days took pool with the cut")
+
 # q_floor defaults to zero, so the reference model is unchanged by its presence
 _Ua, _ma, _vta, _tra = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z / 0.6), 114,
                              days=40, rng=np.random.default_rng(5), nu=8.0, q_set=0.6,

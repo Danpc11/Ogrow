@@ -47,8 +47,8 @@ closed:
 	$(PY) scripts/13_phase_diagram.py
 	$(PY) scripts/14_size_sweep.py
 	for r in liver kidney pancreas; do for c in baseline pool setpoint; do \
-	  OG_NREP=24 $(PY) scripts/15_transmission.py $$r $$c 0 24; done; done
-	OG_NREP=24 $(PY) scripts/15_transmission.py
+	  OGROW_SEEDS=24 $(PY) scripts/15_transmission.py $$r $$c 0 24; done; done
+	OGROW_SEEDS=24 $(PY) scripts/15_transmission.py
 
 # clean keeps source_data: the Figure 6 tables come from the human cohort and
 # cannot be regenerated without it
@@ -63,8 +63,8 @@ distclean: clean
 # on a multicore machine; every run is cached, so an interrupted build resumes.
 paper:
 	for r in liver kidney pancreas; do for c in baseline pool setpoint; do \
-	  OG_NREP=24 $(PY) scripts/15_transmission.py $$r $$c 0 24; done; done
-	OG_NREP=24 $(PY) scripts/15_transmission.py
+	  OGROW_SEEDS=24 $(PY) scripts/15_transmission.py $$r $$c 0 24; done; done
+	OGROW_SEEDS=24 $(PY) scripts/15_transmission.py
 	$(PY) scripts/17_paper_runs.py
 	for r in liver kidney pancreas; do for s in ref nu_lo nu_hi q_lo q_hi; do \
 	  $(PY) scripts/19_elasticity.py $$r $$s 0 24; done; done

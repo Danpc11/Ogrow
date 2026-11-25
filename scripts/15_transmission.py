@@ -21,6 +21,7 @@ Usage:
     python scripts/15_transmission.py                          report
 """
 import json
+import os
 import sys
 
 import numpy as np
@@ -31,9 +32,10 @@ from organgrow.closed import grow
 
 OUT = ROOT / "results" / "transmission"
 OUT.mkdir(parents=True, exist_ok=True)
-import os
 S, DAYS, SEED0 = 0.6, 140, 300
-NREP = int(os.environ.get('OG_NREP', 8))
+# OGROW_SEEDS is the name the rest of the scripts use; OG_NREP is kept so that
+# an older command line still works.
+NREP = int(os.environ.get("OGROW_SEEDS") or os.environ.get("OG_NREP") or 8)
 SIG_P, SIG_Q = 0.30, 0.30   # equal input spreads, so the two transmissions are comparable
 REGIMES = {
     "liver":  dict(P0=2600.0, rho=0.10, delta=0.10, q_set=0.6, renewal=1.0),   # supply binds
@@ -78,9 +80,13 @@ if __name__ == "__main__":
         print(f"{reg} {cond}: replicates {k0} to {min(k1, NREP) - 1} done")
         raise SystemExit(0)
     res = {}
-    print(f"{'regime':>8} {'input':>9} {'CV of N':>8} {'transmission':>13} {'bound'}")
+    print(f"{'regime':>8} {'input':>9} {'CV of N':>8} {'transmission':>13}")
     for reg in REGIMES:
         base, _ = cv(reg, "baseline")
+        if base is None:
+            print(f"{reg:>8}  (baseline incomplete; transmission needs it to "
+                  f"subtract demographic noise)")
+            continue
         for cond, sig in (("baseline", 0.0), ("pool", SIG_P), ("setpoint", SIG_Q)):
             c, rows = cv(reg, cond)
             if c is None:
@@ -101,9 +107,9 @@ if __name__ == "__main__":
                 lo, hi = np.percentile(bs, [2.5, 97.5])
             # what holds an organ's pool is read from its distribution over
             # tips (closed.closure_state, scripts/21_robustness.py), not from
-            # a mean supply, so no label is given here
-            bound = ""
-            res[f"{reg}_{cond}"] = dict(cv=c, transmission=tr, ci95=[float(lo), float(hi)], bound=bound,
+            # a mean supply, so this table gives no such label
+            res[f"{reg}_{cond}"] = dict(cv=c, transmission=tr,
+                                        ci95=[float(lo), float(hi)],
                                         N=[r["N"] for r in rows])
-            print(f"{reg:>8} {cond:>9} {c:>8.3f} {tr:>13.2f}  [{lo:.2f}, {hi:.2f}]  {bound}")
+            print(f"{reg:>8} {cond:>9} {c:>8.3f} {tr:>13.2f}  [{lo:.2f}, {hi:.2f}]")
     json.dump(res, open(ROOT / "results" / "transmission.json", "w"), indent=1)

@@ -340,8 +340,11 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
     # domain. The vascular budget is a fraction of it, in units of lam^3.
     # (An earlier version used 2 * prod(box / lam), a quarter of the box and
     # not the organ.) The same volume sets the attractor count.
+    # sdf is elementwise, so these three grids are evaluated in one call each.
+    # Called point by point they were two thirds of all sdf calls and about a
+    # third of the running time of a short simulation, for the same arithmetic.
     _g = np.stack(np.meshgrid(*[np.linspace(-1, 1, 25)] * 3, indexing="ij"), -1).reshape(-1, 3) * box
-    _vol_dom = float(np.prod(2.0 * box)) * float(np.mean([sdf(*p) < 0 for p in _g]))
+    _vol_dom = float(np.prod(2.0 * box)) * float(np.mean(sdf(_g[:, 0], _g[:, 1], _g[:, 2]) < 0))
     vol_budget = vascular_fraction * _vol_dom / lam ** 3
 
     # Design point: a terminal branch carries the handful of units below it.
@@ -380,7 +383,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
     # random draw above is kept so the generator stream is unchanged.
     _g = np.stack(np.meshgrid(*[np.linspace(-1, 1, 41)] * 3,
                               indexing="ij"), -1).reshape(-1, 3) * box
-    _d = np.array([sdf(*p) for p in _g])
+    _d = np.asarray(sdf(_g[:, 0], _g[:, 1], _g[:, 2]), float)
     s0 = _g[int(np.argmin(_d))]
     # Alternatives, for testing how much the results depend on this choice:
     # "surface" enters from the organ's surface, walking from the deepest
@@ -435,7 +438,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
     # _vol_dom: the organ volume computed with the vascular budget above
     n_attr = int(round(attractor_density * _vol_dom / lam ** 3))
     A = rng.uniform(-1, 1, (max(n_attr * 3, 10), 3)) * box
-    A = A[np.array([sdf(*p) < 0 for p in A])][:n_attr]
+    A = A[np.asarray(sdf(A[:, 0], A[:, 1], A[:, 2])) < 0][:n_attr]
 
     spacing = lam                     # least distance between units
     g_clock = 0.0                     # injury can set the growth clock back
@@ -488,11 +491,16 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                         culled += int(P[k])     # destroyed with the niche
                         P[k] = 0
             if injury in ("parenchyma", "combined") and len(U):
-                # tip_of_prev is the assignment made before the units grew, so
-                # it is only usable here while it still describes the same
-                # units: involution can have removed some since.
+                # tip_of_prev was recorded before the day's nucleation, so it
+                # describes the first len(tip_of_prev) units and is a prefix of
+                # the current array. It is shorter whenever units were added
+                # since, which is most days while the organ is still growing,
+                # and the loss fraction is then measured over the units that
+                # had an assignment. Requiring the two lengths to be equal
+                # would make this rule fire or not according to whether a unit
+                # happened to be nucleated the day before.
                 if (renewal > 0 and hit_u.any()
-                        and len(tip_of_prev) == len(hit_u)):
+                        and 0 < len(tip_of_prev) <= len(hit_u)):
                     # the pool rides with the tissue it is made of. What the
                     # cut takes is destroyed, not lost to attrition, so it is
                     # counted apart and kept in the pool identity.
@@ -747,8 +755,10 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                 if not keep.all():
                     U, m, tip_of = U[keep], m[keep], tip_of[keep]
                     ceiling = ceiling[keep]
-                    if len(tip_of_prev) == len(keep):
-                        tip_of_prev = tip_of_prev[keep]
+                    # tip_of_prev covers the first units only, so it is cut by
+                    # the same mask over that prefix. Keeping it a prefix of
+                    # the surviving units is what lets the injury block use it.
+                    tip_of_prev = tip_of_prev[keep[:len(tip_of_prev)]]
                     n_at = np.bincount(tip_of, minlength=len(vt))
                 # The cell that made a removed unit was spent or returned when
                 # the unit formed, and that is already in the books: `formed`

@@ -1,4 +1,4 @@
-# The closed model (version 4.44.0)
+# The closed model (version 4.45.0)
 
 `src/organgrow/closed.py` is the model the paper rests on; `make paper`
 builds its results. Its parameters are in `config/params.yaml`, section

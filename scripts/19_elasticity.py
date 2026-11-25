@@ -26,6 +26,10 @@ from organgrow.closed import grow
 OUT = ROOT / "results" / "elasticity"
 OUT.mkdir(parents=True, exist_ok=True)
 S, DAYS, SEED0, H = 0.6, 140, 300, 0.3
+# How many replicates the report reads. 24 is what the rest of this work uses;
+# the loop used to read a hard-coded 64, which silently ignored anything past
+# it and disagreed with what the Makefile writes.
+NSEED = int(os.environ.get("OGROW_SEEDS", 24))
 BASE = {
     "liver":    dict(P0=2600.0, rho=0.10, delta=0.10, q_set=0.6, renewal=1.0, nu=8.0),
     "kidney":   dict(P0=300.0,  rho=0.00, delta=0.05, q_set=0.6, renewal=0.0, nu=8.0),
@@ -61,7 +65,7 @@ def elasticities(reg, setting):
     out = {}
     for inp in ("P0", "q_set"):
         e = []
-        for k in range(64):
+        for k in range(NSEED):
             a = OUT / f"{reg}_{setting}_{inp}+_k{k}.npz"
             b = OUT / f"{reg}_{setting}_{inp}-_k{k}.npz"
             if not (a.exists() and b.exists()):
