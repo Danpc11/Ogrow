@@ -20,7 +20,7 @@ Ciudad Universitaria, Mexico City, Mexico
 Target journal: *Biofabrication* (IOP). Structure follows IOP's Introduction,
 Methods, Results, Discussion. Abstract is under 300 words.
 
-Reference model version 4.41.0 (`src/organgrow/closed.py`). Every model number
+Reference model version 4.49.0 (`src/organgrow/closed.py`). Every model number
 quoted below is taken from `PAPER_NUMBERS.md`, which `make paper` regenerates
 with the version and commit that produced it, and is checked against the
 result files by `scripts/29_check_manuscript.py`. No model number in this file
@@ -731,16 +731,22 @@ by hand, through a parameter that resets the growth clock. The model does not
 derive that restoration from the injury, and the consequences of restoring it
 only in part are not swept.
 
-The involution of Section 3.4 is swept over its rate and over the supply at
-which a unit counts as starving, and not over the two other choices it
-carries: the mass below which a unit is removed rather than left to shrink,
-and the absence of any requirement that a unit stay unsupplied for a time
-before it goes. A unit that dips below the threshold on one day and recovers
-on the next is treated the same as one that never recovers. Nor does the
-vascular tree lose a branch when the tissue under it goes. Calibres adapt and
-a vessel below its critical radius regresses, so a branch that loses its
-tissue loses its flow and narrows over the following days, but that is slower
-than the loss it answers and the model does not prune.
+The involution of Section 3.4 carries four choices and all four are swept: the
+rate, the supply at which a unit counts as starving, the consecutive days it
+must stay there before it begins to lose mass, and the mass at which it is
+removed rather than left to shrink (`PAPER_NUMBERS.md`, Involution, as a
+sensitivity). What they move is when the removals happen, not what the
+construct ends as. That is a sweep and not a calibration: none of the four is
+measured, and a mechanism whose every setting gives the same answer is still a
+mechanism nobody has yet observed in a construct.
+
+The vascular tree does not lose a branch when the tissue under it goes.
+Calibres adapt and a vessel below its critical radius regresses, so a branch
+that loses its tissue loses its flow and narrows over the following days, but
+that is slower than the loss it answers and the model does not prune. The
+removal does leave the tree coherent, with flow conserved and every surviving
+unit still hanging from a segment that exists, and the share of tips serving
+no unit is reported alongside the rest.
 
 ## 6. Conclusion
 

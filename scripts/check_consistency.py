@@ -33,6 +33,11 @@ found = {
     "PAPER.md": find(r"Reference model: version ([0-9.]+)", "PAPER.md"),
     "CLOSED_MODEL.md": find(r"# The closed model \(version ([0-9.]+)\)", "CLOSED_MODEL.md"),
     "PAPER_NUMBERS.md": find(r"Model version ([0-9.]+)", "PAPER_NUMBERS.md"),
+    # The manuscript names the version of the model its numbers came from, and
+    # CITATION.cff names the version a release is tagged as. The first had
+    # drifted seven versions behind the code before it was checked here.
+    "MANUSCRIPT.md": find(r"Reference model version ([0-9.]+)", "MANUSCRIPT.md"),
+    "CITATION.cff": find(r"(?m)^version: ([0-9.]+)", "CITATION.cff"),
 }
 # No figure may name a colour of its own: one palette lives in
 # src/organgrow/figstyle.py, and a literal here is how Figure 4 came to draw

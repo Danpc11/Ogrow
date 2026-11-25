@@ -448,6 +448,38 @@ check("the pool still balances when units are removed",
 check("what involution leaves behind is supplied", _q1 > _q0,
       f"worst supply {_q0:.3f} of the setpoint without it, {_q1:.3f} with it")
 
+
+# Removing units leaves the tree standing, so the tree has to be coherent
+# afterwards: every unit still hangs from a segment that exists, flow is still
+# conserved at every branch when the final state is re-solved, and the tips
+# that now carry nothing are counted rather than quietly left.
+_U8, _m8, _vt8, _tr8 = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z / 0.6), 114,
+                             days=70, rng=np.random.default_rng(7), nu=8.0, q_set=0.6,
+                             rho=0.10, delta=0.10, P0=400.0, R_unit=650.0,
+                             units_per_branch=650 / 600.0, max_vessels=3000,
+                             injure_day=40, injury="parenchyma", injury_fraction=0.3,
+                             injury_reactivates=1.0, inflow_limited=True,
+                             involution=0.05)
+_t8 = np.asarray(_tr8.final["tip_of"], int)
+check("every surviving unit still hangs from a segment that exists",
+      len(_t8) == len(_m8) and bool((_t8 >= 0).all()) and int(_t8.max(initial=-1)) < len(_vt8),
+      f"{len(_m8)} units, {len(_vt8)} segments, largest index {int(_t8.max(initial=-1))}")
+_tc8 = {}
+for _k, _mj in zip(_t8, _m8):
+    _tc8[int(_k)] = _tc8.get(int(_k), 0.0) + float(_mj) / 650.0
+_f8, _pin8, _C8 = _vt8.perfuse(_tc8, dP=1.0)
+check("flow is still conserved once units have been removed",
+      all(abs(_f8[k] - sum(_f8[c] for c in range(len(_vt8)) if _vt8.parent[c] == k)) < 1e-9
+          for k in range(len(_vt8)) if not _vt8.is_tip[k]),
+      f"re-solved over {len(_vt8)} segments carrying {len(_tc8)} tissue loads")
+check("the tree conducts no more than the tissue hanging from it",
+      _C8 <= sum(_tc8.values()) * (1 + 1e-9),
+      f"C={_C8:.4g} tissue={sum(_tc8.values()):.4g}")
+_idle0, _idle1 = _tr8.idle_tips[39], _tr8.idle_tips[-1]
+check("tips left serving nothing are counted, and involution makes more of them",
+      _idle1 > _idle0, f"{_idle0} before the injury, {_idle1} at the end of "
+      f"{_tr8.vessels[-1]} segments")
+
 print()
 if FAIL:
     print("FAILED:", ", ".join(FAIL))

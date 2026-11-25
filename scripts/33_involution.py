@@ -45,6 +45,15 @@ OUT = ROOT / "results" / "involution"
 OUT.mkdir(parents=True, exist_ok=True)
 S, NU, CLOSE, END = 0.6, 8.0, 140, 220
 RATES = (0.0, 0.02, 0.05, 0.10, 0.20)
+# The rate says how fast the mechanism runs. These say what turns it on and
+# when a unit is gone, which is a different question: a result that moved with
+# them would be a result about the algorithm. REF is the setting the rate sweep
+# uses, so each sweep below crosses the rate sweep at one point.
+REF = dict(rate=0.05, q=0.1, hold=1, exit=0.5)
+TRIGGERS = (("involution_q", "q", (0.03, 0.05, 0.10, 0.20, 0.30)),
+            ("involution_hold", "hold", (1, 3, 5, 10)),
+            ("involution_exit", "exit", (0.25, 0.50, 0.75, 0.90)))
+RECOVER = 0.90          # share of pre-injury mass whose first crossing we time
 NSEED = int(os.environ.get("OGROW_SEEDS", 24))
 SEEDS = tuple(range(300, 300 + NSEED))          # where the sweep is evaluated
 CAL = tuple(range(400, 400 + NSEED))            # where phi is calibrated
@@ -55,10 +64,13 @@ LOSS, SCALE = 0.3, 1.0
 M0 = float(_p("m0", None))
 
 
-def _kw(reg, rate, phi):
+def _kw(reg, rate, phi, q=None, hold=None, exit_=None):
     return dict(injure_day=CLOSE, injury="parenchyma", injury_fraction=LOSS,
                 injury_reactivates=1.0, inflow_limited=True,
-                inflow_scale=SCALE, phi_demand=float(phi), involution=float(rate))
+                inflow_scale=SCALE, phi_demand=float(phi), involution=float(rate),
+                involution_q=float(REF["q"] if q is None else q),
+                involution_hold=int(REF["hold"] if hold is None else hold),
+                involution_exit=float(REF["exit"] if exit_ is None else exit_))
 
 
 def intact(reg, seed):
@@ -79,10 +91,20 @@ def intact(reg, seed):
     return r
 
 
-def run(reg, seed, rate, phi):
-    """One construct, injured and then followed with involution at `rate`."""
-    f = OUT / f"{reg}_s{seed}_i{rate}.json"
-    kw = _kw(reg, rate, phi)
+def run(reg, seed, rate, phi, trig=None):
+    """One construct, injured and then followed with involution at `rate`.
+
+    `trig` overrides the conditions that turn the mechanism on: the supply at
+    which a unit counts as starving, the consecutive days it must stay there,
+    and the mass at which it is removed. Empty means the reference setting.
+    """
+    trig = dict(trig or {})
+    tag = f"{reg}_s{seed}_i{rate}"
+    if trig:
+        tag += "_" + "_".join(f"{k}{v}" for k, v in sorted(trig.items()))
+    f = OUT / f"{tag}.json"
+    kw = _kw(reg, rate, phi, **{k + ("_" if k == "exit" else ""): v
+                                for k, v in trig.items()})
     fp = fingerprint(regime=reg, seed=seed, S=S, NU=NU, days=END,
                      params={**FIX, **REG[reg], **kw})
     hit = cached(f, fp)
@@ -95,13 +117,31 @@ def run(reg, seed, rate, phi):
     M = np.asarray(tr.mass, float)
     c = tr.final.get("ceiling")
     c = None if c is None else np.asarray(c, float)
-    r = dict(regime=reg, seed=seed, rate=rate, phi=phi,
+    # When the mass first comes back to RECOVER of what it was, counted from
+    # the injury. The endpoint can be reached along different trajectories, so
+    # a result that is flat in the rate at day 220 need not be flat in time.
+    want = RECOVER * float(pre["mass"])
+    after = M[CLOSE:]
+    hit_day = np.flatnonzero(after >= want)
+    # Mass comes back in days, because the surviving units are far below much
+    # larger ceilings and the growth clock has just been reset. The trajectory
+    # that belongs to this mechanism is the removals: the day by which nine
+    # tenths of them have happened, counted from the injury.
+    iv = np.asarray(tr.involuted, float)[CLOSE:]
+    done = np.flatnonzero(iv >= 0.9 * iv[-1]) if len(iv) and iv[-1] > 0 else []
+    r = dict(regime=reg, seed=seed, rate=rate, phi=phi, trig=dict(trig),
              pre_mass=float(pre["mass"]), pre_N=int(pre["N"]),
              pre_Q=float(tr.Q[CLOSE - 1]), mass=float(M[-1]), N=len(U),
              residual=(float("nan") if c is None
                        else float(np.abs(m - c).sum() / max(c.sum(), 1e-12))),
              floor_share=float((m <= 1.05 * M0).mean()) if len(m) else float("nan"),
              drift_per_day=float(abs(M[-1] - M[-11]) / max(M[-1], 1e-12) / 10.0),
+             days_to_recover=(int(hit_day[0]) if len(hit_day) else -1),
+             days_to_clear=(int(done[0]) if len(done) else -1),
+             involuted=int(tr.fate.get("units_involuted", 0)),
+             idle_tips=int(tr.idle_tips[-1]) if tr.idle_tips else 0,
+             vessels=int(tr.vessels[-1]) if tr.vessels else 0,
+             Q_end=float(np.asarray(tr.Q)[-1]), C_end=float(np.asarray(tr.C)[-1]),
              balance=float(tr.fate["balance"]), fingerprint=fp)
     json.dump(r, open(f, "w"))
     return r
@@ -126,6 +166,52 @@ def jobs(grid):
             _warm(g)
 
 
+def summarise(reg, phi, rate, trig=None):
+    """Mean behaviour over the seeds at one setting."""
+    v = [run(reg, s, rate, phi, trig) for s in SEEDS]
+    rel = np.array([r["mass"] / max(r["pre_mass"], 1e-12) for r in v])
+    un = np.array([r["N"] / max(r["pre_N"], 1) for r in v])
+    day = np.array([r["days_to_recover"] for r in v], float)
+    got = day >= 0
+    clr = np.array([r.get("days_to_clear", -1) for r in v], float)
+    gotc = clr >= 0
+    return dict(rate=rate, trig=dict(trig or {}),
+                mass_rel=float(rel.mean()), mass_rel_sd=float(rel.std(ddof=1)),
+                mass_rel_lo=float(rel.min()), mass_rel_hi=float(rel.max()),
+                units_rel=float(un.mean()),
+                units_rel_lo=float(un.min()), units_rel_hi=float(un.max()),
+                residual=float(np.nanmean([r["residual"] for r in v])),
+                floor_share=float(np.nanmean([r["floor_share"] for r in v])),
+                drift=float(max(r["drift_per_day"] for r in v)),
+                involuted=float(np.mean([r["involuted"] for r in v])),
+                idle_frac=float(np.mean([r["idle_tips"] / max(r["vessels"], 1)
+                                         for r in v])),
+                Q_end=float(np.mean([r["Q_end"] for r in v])),
+                recovered=int(got.sum()), seeds=len(v),
+                days_to_recover=(float(day[got].mean()) if got.any() else float("nan")),
+                days_to_clear=(float(clr[gotc].mean()) if gotc.any() else float("nan")),
+                days_to_clear_lo=(float(clr[gotc].min()) if gotc.any() else float("nan")),
+                days_to_clear_hi=(float(clr[gotc].max()) if gotc.any() else float("nan")),
+                balance=float(max(abs(r["balance"]) for r in v)))
+
+
+def line(label, d):
+    rec = ("-" if d["recovered"] == 0
+           else f"{d['days_to_recover']:.0f} d")
+    clr = ("-" if d["days_to_clear"] != d["days_to_clear"]
+           else f"{d['days_to_clear']:.0f} [{d['days_to_clear_lo']:.0f}, "
+                f"{d['days_to_clear_hi']:.0f}]")
+    return (f"{label:>14} {d['mass_rel']:>8.3f} [{d['mass_rel_lo']:.2f}, "
+            f"{d['mass_rel_hi']:.2f}] {d['units_rel']:>10.2f} "
+            f"{d['residual']:>9.3f} {d['floor_share']:>9.2f} "
+            f"{d['idle_frac']:>10.2f} {rec:>8} {clr:>16}")
+
+
+HEAD = (f"{'setting':>14} {'mass / pre-injury':>21} {'units/pre':>10} "
+        f"{'residual':>9} {'at floor':>9} {'idle tips':>10} "
+        f"{'90 % mass':>8} {'90 % removed':>16}")
+
+
 if __name__ == "__main__":
     regimes = [a for a in sys.argv[1:] if a in REG] or list(REG)
     res = {}
@@ -146,29 +232,39 @@ if __name__ == "__main__":
                                     params={**FIX, **REG[reg],
                                             **_kw(reg, x, phi)})) is None])
 
-        print(f"\n{'involution':>11} {'mass / pre-injury':>22} {'residual':>9} "
-              f"{'at floor':>9} {'units / pre-injury':>19} {'balance':>8}")
-        rows = []
-        for x in RATES:
-            v = [run(reg, s, x, phi) for s in SEEDS]
-            rel = np.array([r["mass"] / max(r["pre_mass"], 1e-12) for r in v])
-            un = np.array([r["N"] / max(r["pre_N"], 1) for r in v])
-            eps = np.array([r["residual"] for r in v])
-            fl = np.array([r["floor_share"] for r in v])
-            print(f"{x:>11.2f} {rel.mean():>14.3f} [{rel.min():.2f}, {rel.max():.2f}] "
-                  f"{np.nanmean(eps):>9.3f} {np.nanmean(fl):>9.2f} "
-                  f"{un.mean():>13.2f} [{un.min():.2f}, {un.max():.2f}] "
-                  f"{max(abs(r['balance']) for r in v):>8.1g}", flush=True)
-            rows.append(dict(rate=x, mass_rel=float(rel.mean()),
-                             mass_rel_sd=float(rel.std(ddof=1)),
-                             mass_rel_lo=float(rel.min()), mass_rel_hi=float(rel.max()),
-                             units_rel=float(un.mean()),
-                             units_rel_lo=float(un.min()), units_rel_hi=float(un.max()),
-                             residual=float(np.nanmean(eps)),
-                             floor_share=float(np.nanmean(fl)),
-                             drift=float(max(r["drift_per_day"] for r in v))))
+        print("\n  the rate: how fast the mechanism runs\n")
+        print(HEAD)
+        rows = [summarise(reg, phi, x) for x in RATES]
+        for d in rows:
+            print(line(f"rate {d['rate']:.2f}", d), flush=True)
+
+        # The conditions that turn it on, each crossing the rate sweep at the
+        # reference setting, so the sweeps agree where they meet.
+        trig_rows = {}
+        for name, key, vals in TRIGGERS:
+            want = [{key: v} for v in vals if v != REF[key]]
+            jobs([("run", reg, s_, REF["rate"], phi, t) for t in want for s_ in SEEDS
+                  if cached(OUT / (f"{reg}_s{s_}_i{REF['rate']}_"
+                                   + "_".join(f"{k}{x}" for k, x in sorted(t.items()))
+                                   + ".json"),
+                            fingerprint(regime=reg, seed=s_, S=S, NU=NU, days=END,
+                                        params={**FIX, **REG[reg],
+                                                **_kw(reg, REF["rate"], phi,
+                                                      **{k + ("_" if k == "exit" else ""): x
+                                                         for k, x in t.items()})})) is None])
+            print(f"\n  {name}: what turns it on\n")
+            print(HEAD)
+            out = []
+            for v in vals:
+                d = summarise(reg, phi, REF["rate"],
+                              None if v == REF[key] else {key: v})
+                out.append(d)
+                print(line(f"{key} {v}", d), flush=True)
+            trig_rows[name] = out
+
         on = [r for r in rows if r["rate"] > 0]
         res[reg] = dict(phi=phi, seeds=len(SEEDS), rows=rows,
+                        reference=dict(REF), triggers=trig_rows,
                         calibration_seeds=[CAL[0], CAL[-1]],
                         evaluation_seeds=[SEEDS[0], SEEDS[-1]],
                         units_rel_on=[min(r["units_rel"] for r in on),
@@ -177,14 +273,18 @@ if __name__ == "__main__":
                                   max(r["floor_share"] for r in on)],
                         residual_on=[min(r["residual"] for r in on),
                                      max(r["residual"] for r in on)])
-        d = res[reg]
-        print(f"  Across a tenfold range of the rate the construct keeps "
-              f"{d['units_rel_on'][0]:.2f} to {d['units_rel_on'][1]:.2f} of its "
-              f"units\n  against {rows[0]['units_rel']:.2f} with the mechanism "
-              f"absent, the share at the mass floor\n  falls from "
-              f"{rows[0]['floor_share']:.2f} to between {d['floor_on'][0]:.2f} and "
-              f"{d['floor_on'][1]:.2f}, and the residual from "
-              f"{rows[0]['residual']:.2f}\n  to between {d['residual_on'][0]:.2f} "
-              f"and {d['residual_on'][1]:.2f}. The rate sets how fast, not where "
-              f"it lands.", flush=True)
+        every = on + [d for v in trig_rows.values() for d in v if d["rate"] > 0]
+        u = [d["units_rel"] for d in every]
+        mm = [d["mass_rel"] for d in every]
+        res[reg]["units_rel_any"] = [min(u), max(u)]
+        res[reg]["mass_rel_any"] = [min(mm), max(mm)]
+        d0 = rows[0]
+        print(f"\n  Across every setting of the rate and of the three conditions "
+              f"that turn it on,\n  the construct keeps {min(u):.2f} to {max(u):.2f} "
+              f"of its units against {d0['units_rel']:.2f} with the\n  mechanism "
+              f"absent, and its mass stays between {min(mm):.2f} and {max(mm):.2f} "
+              f"of pre-injury\n  against {d0['mass_rel']:.2f}. What the mechanism "
+              f"changes is the architecture, not the\n  mass, and that holds "
+              f"however it is switched on.", flush=True)
+
     json.dump(res, open(ROOT / "results" / "involution.json", "w"), indent=1)

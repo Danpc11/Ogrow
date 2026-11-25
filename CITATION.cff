@@ -1,0 +1,62 @@
+cff-version: 1.2.0
+title: >-
+  Ogrow: perfusion-limited growth of vascularised tissue from one nucleation
+  law
+message: >-
+  If you use this software or its results, please cite both the software and
+  the paper it belongs to.
+type: software
+abstract: >-
+  A generative model in which liver-like, kidney-like and pancreas-like
+  constructs grow from the same local rules on a perfused vascular tree: a
+  functional unit forms at a tip at a rate set by the competent cells held
+  there and by the excess of local perfusion over a setpoint, bounded by
+  perfusion per unit, by competent cells and by room. Three growth regimes
+  follow from one binary property of the cell source, whether the cell that
+  forms a unit is spent in forming it. The repository regenerates every number
+  and figure of the accompanying manuscript with `make paper`, and checks the
+  manuscript against the results it quotes.
+authors:
+  - family-names: Tovar
+    given-names: Hugo
+    affiliation: Instituto Nacional de Medicina Genómica (INMEGEN), Mexico City, Mexico
+  - family-names: Vázquez-Victorio
+    given-names: Genaro
+    affiliation: >-
+      Facultad de Ciencias, Universidad Nacional Autónoma de México, Mexico
+      City, Mexico
+  - family-names: Peña-Rico
+    given-names: Miguel Ángel
+    affiliation: >-
+      Centro de Investigaciones Científicas, Instituto de Biotecnología,
+      Universidad del Papaloapan, Oaxaca, Mexico
+  - family-names: Martínez-Ramírez
+    given-names: Angélica S.
+    affiliation: >-
+      Centro de Investigaciones Científicas, Instituto de Biotecnología,
+      Universidad del Papaloapan, Oaxaca, Mexico
+  - family-names: Escobedo-Avila
+    given-names: Itzel
+    affiliation: >-
+      Instituto de Fisiología Celular, Universidad Nacional Autónoma de México,
+      Ciudad Universitaria, Mexico City, Mexico
+  - family-names: Hernández-Lemus
+    given-names: Enrique
+    affiliation: Instituto Nacional de Medicina Genómica (INMEGEN), Mexico City, Mexico
+  - family-names: Pérez-Calixto
+    given-names: Daniel
+    email: dperez@inmegen.gob.mx
+    affiliation: >-
+      Instituto Nacional de Medicina Genómica (INMEGEN) and Facultad de
+      Ciencias, Universidad Nacional Autónoma de México, Mexico City, Mexico
+repository-code: https://github.com/Danpc11/Ogrow
+license: MIT
+version: 4.49.0
+date-released: '2026-11-24'
+keywords:
+  - tissue engineering
+  - vascularisation
+  - perfusion
+  - computational model
+  - organ growth
+  - scale-up

@@ -280,21 +280,55 @@ if (RES / "involution.json").exists():
         c, e = d.get("calibration_seeds", ["?", "?"]), d.get("evaluation_seeds", ["?", "?"])
         w(f"**{reg}**: phi = {d['phi']:.6f}, calibrated on seeds {c[0]} to "
           f"{c[1]}, evaluated on seeds {e[0]} to {e[1]}, {d['seeds']} seeds.\n")
-        table(["involution, per day", "mass / pre-injury", "units / pre-injury",
-               "residual", "units at the mass floor"],
-              [[f"{r['rate']:.2f}",
-                f"{r['mass_rel']:.3f} [{r['mass_rel_lo']:.2f}, {r['mass_rel_hi']:.2f}]",
-                f"{r['units_rel']:.2f} [{r['units_rel_lo']:.2f}, {r['units_rel_hi']:.2f}]",
-                f"{r['residual']:.3f}", f"{r['floor_share']:.2f}"]
-               for r in d["rows"]])
+        cols = ["setting", "mass / pre-injury", "units / pre-injury", "residual",
+                "units at the mass floor", "tips serving nothing",
+                "days to 90 % of the removals"]
+
+        def row(r, label):
+            cl = r.get("days_to_clear", float("nan"))
+            return [label,
+                    f"{r['mass_rel']:.3f} [{r['mass_rel_lo']:.2f}, {r['mass_rel_hi']:.2f}]",
+                    f"{r['units_rel']:.2f} [{r['units_rel_lo']:.2f}, {r['units_rel_hi']:.2f}]",
+                    f"{r['residual']:.3f}", f"{r['floor_share']:.2f}",
+                    f"{r.get('idle_frac', float('nan')):.2f}",
+                    "-" if cl != cl else f"{cl:.0f} [{r['days_to_clear_lo']:.0f}, "
+                                         f"{r['days_to_clear_hi']:.0f}]"]
+
+        w("The rate, which is how fast the mechanism runs.\n")
+        table(cols, [row(r, f"{r['rate']:.2f} per day") for r in d["rows"]])
         u, f_, rs = d["units_rel_on"], d["floor_on"], d["residual_on"]
         w(f"Over a tenfold range of the rate the construct keeps {u[0]:.2f} to "
           f"{u[1]:.2f} of its units, against {d['rows'][0]['units_rel']:.2f} "
           f"with the mechanism absent; the share at the mass floor falls from "
           f"{d['rows'][0]['floor_share']:.2f} to between {f_[0]:.2f} and "
           f"{f_[1]:.2f}, and the residual from {d['rows'][0]['residual']:.2f} "
-          f"to between {rs[0]:.2f} and {rs[1]:.2f}. The rate sets how fast, "
-          f"not where it lands.\n")
+          f"to between {rs[0]:.2f} and {rs[1]:.2f}.\n")
+
+        tg = d.get("triggers") or {}
+        if tg:
+            ref = d.get("reference", {})
+            w("What turns it on. The rate is held at "
+              f"{ref.get('rate', '?')} per day throughout these, so each sweep "
+              "crosses the one above at its reference setting. `involution_q` "
+              "is the supply, as a share of the setpoint, below which a unit "
+              "counts as starving; `involution_hold` is the consecutive days "
+              "it must stay there before it begins to lose mass; "
+              "`involution_exit` is the mass, as a share of the mass a unit is "
+              "born with, below which it is removed.\n")
+            for name, rows_ in tg.items():
+                key = name.split("_")[-1]
+                table(cols, [row(r, f"{key} = {r['trig'].get(key, ref.get(key, '?'))}")
+                             for r in rows_])
+            ua, ma = d.get("units_rel_any"), d.get("mass_rel_any")
+            if ua and ma:
+                w(f"Across every setting of the rate and of the three conditions "
+                  f"that turn it on, the construct keeps {ua[0]:.2f} to "
+                  f"{ua[1]:.2f} of its units against "
+                  f"{d['rows'][0]['units_rel']:.2f} with the mechanism absent, "
+                  f"while its mass stays between {ma[0]:.2f} and {ma[1]:.2f} of "
+                  f"pre-injury against {d['rows'][0]['mass_rel']:.2f}. The "
+                  f"settings move when the removals happen, not what the "
+                  f"construct ends as.\n")
 
 if (RES / "injury.json").exists():
     Ij = json.load(open(RES / "injury.json"))

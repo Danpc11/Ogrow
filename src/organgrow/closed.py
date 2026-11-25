@@ -86,6 +86,8 @@ class Trace:
     lost: list = field(default_factory=list)   # progenitors lost, cumulative
     born: list = field(default_factory=list)   # progenitors born, cumulative
     renewed: list = field(default_factory=list)  # progenitors returned, cumulative
+    involuted: list = field(default_factory=list)  # units resorbed, cumulative
+    idle_tips: list = field(default_factory=list)  # tips carrying no unit
     closure: dict = field(default_factory=dict)  # closure_by_trials at the end
     injury: dict = field(default_factory=dict)   # what was destroyed, and when
     perfused: list = field(default_factory=list)  # mass whose supply meets the threshold
@@ -93,12 +95,6 @@ class Trace:
     bound: list = field(default_factory=list)   # closure_state, per day
     final: dict = field(default_factory=dict)   # per-segment state at the end
     fate: dict = field(default_factory=dict)    # where the initial pool went
-
-
-# Below this fraction of the mass a unit is born with, an involuting unit has
-# nothing left to lose and is removed. It sits below 1 so that a unit formed
-# today, which starts at exactly m0, survives its first day.
-_INVOLUTION_EXIT = 0.5
 
 
 def _p(name, value):
@@ -260,6 +256,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
          renewal=0.0, q_floor=0.0, injure_day=None, injury=None, injury_fraction=0.3,
          injury_axis=1, injury_reactivates=0.0, inflow_limited=False,
          inflow_scale=1.0, phi_demand=None, involution=0.0, involution_q=0.1,
+         involution_exit=0.5, involution_hold=1,
          intervene_day=None, intervene=None, intervene_factor=0.8):
     """Grow one organ. `sdf(x, y, z)` is negative inside the domain.
 
@@ -417,6 +414,8 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
     born = 0                          # progenitors born, cumulative
     renewed = 0                       # progenitors returned after making a unit
     culled = 0                        # progenitors destroyed with their niche
+    involuted = 0                     # units resorbed after losing their supply
+    starved_days = np.zeros(0, int)   # consecutive days a unit has been starved
     formed = 0                        # units ever formed, which is not len(U):
     #                                 # injury and involution both remove units,
     #                                 # and a unit that is gone was still made
@@ -512,6 +511,8 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                             P[k] = int(round(was * (1.0 - frac_lost)))
                             culled += was - int(P[k])
                 U = U[~hit_u]; m = m[~hit_u]
+                if len(starved_days) == len(hit_u):
+                    starved_days = starved_days[~hit_u]
             if inflow_limited:
                 # The circulation keeps delivering `inflow_scale` times what
                 # the intact organ was receiving, and the tissue needs
@@ -692,6 +693,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
             U = np.vstack([U, np.asarray(new_pos)])
             m = np.concatenate([m, np.full(len(new_pos), m0)])
             tip_of = np.concatenate([tip_of, np.asarray(new_tip, int)])
+            starved_days = np.concatenate([starved_days, np.zeros(len(new_pos), int)])
             n_at = np.bincount(tip_of, minlength=len(vt))
             formed += len(new_pos)
 
@@ -745,21 +747,32 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                 # the units are above their share at any moment simply because
                 # it is a share; being below the average is not starving.
                 starved = q[tip_of] < involution_q * q_set
-                if starved.any():
-                    m[starved] *= 1.0 - involution
-                # Nothing is left to lose below half the mass a unit is born
-                # with, so the unit is removed. The threshold is below m0 so
-                # that a unit formed today, which starts at exactly m0, is not
-                # removed before it has had a chance to grow.
-                keep = m >= _INVOLUTION_EXIT * m0
+                # A unit may be below the threshold on one day and above it on
+                # the next, and a tissue does not resorb on a day's reading.
+                # `involution_hold` is how many consecutive starved days a unit
+                # must accumulate before it begins to lose mass; the count
+                # resets the moment its supply returns. At the default of one
+                # this is the same as acting on the day's reading.
+                starved_days = np.where(starved, starved_days + 1, 0)
+                acting = starved & (starved_days >= involution_hold)
+                if acting.any():
+                    m[acting] *= 1.0 - involution
+                # Below `involution_exit` times the mass a unit is born with
+                # there is nothing left to lose, so the unit is removed. The
+                # default is below one so that a unit formed today, which
+                # starts at exactly m0, is not removed before it has had a
+                # chance to grow.
+                keep = m >= involution_exit * m0
                 if not keep.all():
                     U, m, tip_of = U[keep], m[keep], tip_of[keep]
                     ceiling = ceiling[keep]
+                    starved_days = starved_days[keep]
                     # tip_of_prev covers the first units only, so it is cut by
                     # the same mask over that prefix. Keeping it a prefix of
                     # the surviving units is what lets the injury block use it.
                     tip_of_prev = tip_of_prev[keep[:len(tip_of_prev)]]
                     n_at = np.bincount(tip_of, minlength=len(vt))
+                    involuted += int((~keep).sum())
                 # The cell that made a removed unit was spent or returned when
                 # the unit formed, and that is already in the books: `formed`
                 # counts formations, so removal does not disturb the identity.
@@ -911,16 +924,25 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
         qbar = float(np.mean(q[live]))
         tr.t.append(day); tr.N.append(len(U)); tr.P.append(Ptot); tr.lost.append(lost); tr.born.append(born); tr.renewed.append(renewed)
         tr.q.append(qbar); tr.C.append(C); tr.mass.append(float(m.sum()))
-        # Hydraulic function, with no parameter the model does not already
-        # have: the mass whose supply meets the threshold, counting a unit
-        # short of supply in proportion to what reaches it. Structural
-        # recovery is tr.N and tr.mass; this is functional recovery.
+        # The mass whose supply meets the threshold, counting a unit short of
+        # supply in proportion to what reaches it. It uses no parameter the
+        # model does not already have. It is a hydraulic weighting of mass and
+        # not a measure of biological function: tr.N and tr.mass are structure,
+        # and this is structure weighted by perfusion. Nothing in the model
+        # relates any of the three to what a liver or a kidney does.
         if len(U) and len(tip_of):
             qu = _q_full(q, np.asarray(vt.parent), len(vt))[tip_of]
             tr.perfused.append(float((np.minimum(qu / max(q_set, 1e-9), 1.0) * m).sum()))
         else:
             tr.perfused.append(0.0)
         tr.vessels.append(len(vt))
+        tr.involuted.append(involuted)
+        # A branch whose tissue has gone keeps conducting until its calibre
+        # adapts, so counting the tips that carry no unit says how much of the
+        # tree is serving nothing at this moment.
+        _tp = vt.tips()
+        tr.idle_tips.append(int(sum(1 for k in _tp if n_at[k] == 0))
+                            if len(n_at) == len(vt) else 0)
         tr.Q.append(float(vt.flow[0]) if len(vt.flow) else 0.0)
         tr.bound.append(closure_state(P, q, q_set, tried, no_room, Ptot0))
 
@@ -950,6 +972,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                    left=float(sum(P.values())) / max(Ptot0, 1e-9),
                    culled=float(culled) / max(Ptot0, 1e-9),
                    units_formed=int(formed), units_left=int(len(U)),
+                   units_involuted=int(involuted),
                    balance=float(Ptot0 + born
                                  - (_cons + sum(P.values()) + lost + culled)))
 
