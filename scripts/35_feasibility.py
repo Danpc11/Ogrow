@@ -57,7 +57,7 @@ from concurrent.futures import ProcessPoolExecutor
 import numpy as np
 
 from organgrow import sdf
-from organgrow.config import ROOT
+from organgrow.config import ROOT, CFG
 from organgrow.closed import grow
 from organgrow.runcache import fingerprint, cached
 
@@ -65,9 +65,29 @@ OUT = ROOT / "results" / "feasibility"
 OUT.mkdir(parents=True, exist_ok=True)
 
 LAM, R0, PACK = 7.4, 190.0, 0.74
+#: the organ's volume, sampled the way the model samples it. It is needed to
+#: state the vascular cost as a fraction of the construct rather than as a
+#: segment count, and the model keeps it internal, so it is recomputed here
+#: from the same signed distance with a fixed draw.
+#: bumped whenever a stored run gains a readout or one changes meaning, so
+#: that records written under the old definition are redone rather than mixed
+SCHEMA = 2
+_VOLS = {}
+
+
+def domain_volume(S):
+    if S not in _VOLS:
+        R = R0 * S
+        g = np.random.default_rng(0).uniform(-R, R, (400000, 3))
+        inside = sdf("liver", g[:, 0] / S, g[:, 1] / S, g[:, 2] / S) < 0
+        _VOLS[S] = (2 * R) ** 3 * float(np.mean(inside))
+    return _VOLS[S]
 ARREST_WINDOW, ARREST_TOL = 40, 0.05
 FIX = dict(R_unit=650.0, units_per_branch=650 / 600.0, max_vessels=30000,
            q_set=0.6)
+#: the model's own junction volume and vascular budget, read from the config
+JUNCTION = float(CFG.get("closed", {})["junction_cost"])
+VASC_BUDGET = float(CFG.get("closed", {})["vascular_fraction"])
 
 #: the target volumes, as the domain scale; volume goes as S^3
 SCALES = (0.4, 0.6, 0.8, 1.0)
@@ -80,9 +100,29 @@ DAYS = (140, 280)
 SOURCE = {"renewing": dict(renewal=1.0, rho=0.10, delta=0.10),
           "spent": dict(renewal=0.0, rho=0.00, delta=0.05)}
 
+#: the auxiliary rules whose variants Section 3.9 is checked against. These
+#: are a subset of scripts/21_robustness.py, chosen for the three things the
+#: review asked about: where the tree starts, how the front is guided, and how
+#: tissue is assigned to it.
+VARIANTS = {"root_random": dict(root_site="random"),
+            "no_mesenchyme": dict(attractor_density=0.0),
+            "territory": dict(assign_mode="segment")}
+
 #: the worked specification. Stated here rather than chosen after the fact;
 #: the sweep at the end reports how the frontier moves as it changes.
 SPEC = dict(fill_min=0.10, vessel_max=2500.0, cv_max=0.15)
+
+#: The same question in quantities an experiment could read. Density counts
+#: only units the circuit still supplies at their setpoint; vascular cost is
+#: the lumen and junction volume as a fraction of the construct, against the
+#: budget the model already carries; and the variation is of the viable count
+#: rather than of every unit placed. A segment is not a cost and a unit the
+#: circulation has left behind is not tissue, so this is the specification a
+#: bioreactor would recognise and the one above is the model's own.
+PHYS_SPEC = dict(viable_min=0.04, vasc_max=VASC_BUDGET, cv_max=0.15)
+VIABLE_GRID = (0.01, 0.02, 0.04, 0.06, 0.10)
+#: the variant sweep is the long part of this script, so it can be skipped
+VARIANT_RUN = os.environ.get("OGROW_VARIANTS", "1") != "0"
 
 NSEARCH = int(os.environ.get("OGROW_SEEDS", 16))
 if NSEARCH < 2:
@@ -108,24 +148,27 @@ LAWS = (None, "binomial")
 CV_GRID = (0.10, 0.15, 0.20, 0.30, 0.50)
 
 
-def key(S, P0, nu, days, src, seed, sub=1, nuc=None):
+def key(S, P0, nu, days, src, seed, sub=1, nuc=None, var=None):
     tail = "" if sub == 1 else f"_x{sub}"
     tail += "" if nuc is None else f"_{nuc}"
+    tail += "" if var is None else f"_{var}"
     return f"S{S}_P{P0:.0f}_nu{nu:g}_d{days}_{src}_s{seed}{tail}"
 
 
-def params(P0, nu, src, sub=1, nuc=None):
+def params(P0, nu, src, sub=1, nuc=None, var=None):
     p = dict(nu=float(nu), P0=float(P0), **FIX, **SOURCE[src])
     if sub != 1:
         p["substeps"] = int(sub)
     if nuc is not None:
         p["nucleation"] = nuc
+    if var is not None:
+        p.update(VARIANTS[var])
     return p
 
 
-def fp_of(S, P0, nu, days, src, seed, sub=1, nuc=None):
+def fp_of(S, P0, nu, days, src, seed, sub=1, nuc=None, var=None):
     return fingerprint(seed=seed, S=S, days=days,
-                       params=params(P0, nu, src, sub, nuc))
+                       params=params(P0, nu, src, sub, nuc, var))
 
 
 def late_growth(N_day):
@@ -140,22 +183,51 @@ def late_growth(N_day):
     return (N_day[-1] - back) / max(back, 1.0)
 
 
-def run(S, P0, nu, days, src, seed, sub=1, nuc=None):
+def stale(*a):
+    """Does this run still need doing?
+
+    `cached` only knows whether the stored run answers the same question. A
+    record written before the viable count and the vascular fraction were
+    readouts answers it and is still of no use, so the staleness test has to
+    be the same one `run` applies, or the parallel warm-up skips the work and
+    leaves it to be done one at a time in the parent.
+    """
+    hit = cached(OUT / f"{key(*a)}.json", fp_of(*a))
+    return hit is None or hit.get("schema") != SCHEMA
+
+
+def run(S, P0, nu, days, src, seed, sub=1, nuc=None, var=None):
     """One construct, grown to `days` at scale `S`, with its readouts."""
-    f = OUT / f"{key(S, P0, nu, days, src, seed, sub, nuc)}.json"
-    fp = fp_of(S, P0, nu, days, src, seed, sub, nuc)
+    f = OUT / f"{key(S, P0, nu, days, src, seed, sub, nuc, var)}.json"
+    fp = fp_of(S, P0, nu, days, src, seed, sub, nuc, var)
     hit = cached(f, fp)
-    if hit is not None:
+    if hit is not None and hit.get("schema") == SCHEMA:
         return hit
     U, m, vt, tr = grow(lambda x, y, z: sdf("liver", x / S, y / S, z / S),
                         R0 * S, days=days, rng=np.random.default_rng(seed),
-                        **params(P0, nu, src, sub, nuc))
+                        **params(P0, nu, src, sub, nuc, var))
     ceiling = (R0 * S / LAM) ** 3 * PACK
     #: the arrest criterion of section 3.3, off the daily trace
     growth = late_growth(list(tr.N))
+    #: Viability is counted the way the model already counts perfused mass,
+    #: as supply relative to the setpoint capped at one, so a unit at half
+    #: its setpoint counts as half a unit. A hard threshold at the setpoint
+    #: would count almost nothing and would count the wrong thing: growth
+    #: stops when supply falls to the setpoint, so the units above it at
+    #: arrest are the ones in regions that have not finished, not the ones
+    #: the circulation serves best. `vessels` counts segments, which is not a
+    #: cost, so the lumen and junction volume is carried as a fraction of the
+    #: construct as well; `vt.volume` is in units of lam cubed.
+    q_u = (np.asarray(tr.final["q"], float)[np.asarray(tr.final["tip_of"], int)]
+           if len(U) else np.zeros(0))
+    viable = float(np.minimum(q_u / FIX["q_set"], 1.0).sum())
+    vfrac = float(vt.volume(JUNCTION) * LAM ** 3 / domain_volume(S))
     r = dict(S=S, P0=P0, nu=nu, days=days, src=src, seed=seed, sub=sub,
-             nucleation=nuc or "poisson_capped", N=len(U),
+             nucleation=nuc or "poisson_capped", variant=var or "reference",
+             N=len(U),
              vessels=len(vt), ceiling=ceiling, fill=len(U) / ceiling,
+             viable=viable, viable_fill=viable / ceiling, vasc_frac=vfrac,
+             schema=SCHEMA,
              mass=float(m.sum()),
              #: clamped so the record stays valid JSON for any reader; a run
              #: shorter than the arrest window is the only way to reach it
@@ -171,8 +243,7 @@ def _warm(a):
 
 def jobs(grid):
     """Run whatever is not already cached, in parallel."""
-    todo = [g for g in grid
-            if cached(OUT / f"{key(*g)}.json", fp_of(*g)) is None]
+    todo = [g for g in grid if stale(*g)]
     if not todo:
         return
     k = max(1, min(int(os.environ.get("OGROW_JOBS", 0)) or (os.cpu_count() or 1),
@@ -198,12 +269,18 @@ def jobs(grid):
                       f"{time.time() - t0:.0f}s", flush=True)
 
 
-def cell(S, P0, nu, days, src, seeds, sub=1, nuc=None):
+def cell(S, P0, nu, days, src, seeds, sub=1, nuc=None, var=None):
     """The three specified quantities for one configuration over one block."""
-    v = [run(S, P0, nu, days, src, s, sub, nuc) for s in seeds]
+    v = [run(S, P0, nu, days, src, s, sub, nuc, var) for s in seeds]
     N = np.array([x["N"] for x in v], float)
+    W = np.array([x["viable"] for x in v], float)
     return dict(S=S, P0=P0, nu=nu, days=days, src=src, sub=sub,
-                nucleation=nuc or "poisson_capped", seeds=len(v),
+                nucleation=nuc or "poisson_capped", variant=var or "reference",
+                viable=float(W.mean()),
+                viable_fill=float(np.mean([x["viable_fill"] for x in v])),
+                viable_cv=float(W.std(ddof=1) / max(W.mean(), 1e-9)),
+                vasc_frac=float(np.mean([x["vasc_frac"] for x in v])),
+                seeds=len(v),
                 N=float(N.mean()),
                 fill=float(np.mean([x["fill"] for x in v])),
                 vessels=float(np.mean([x["vessels"] for x in v])),
@@ -213,7 +290,16 @@ def cell(S, P0, nu, days, src, seeds, sub=1, nuc=None):
 
 
 def slacks(c, spec):
-    """Each requirement's slack, normalised by its own threshold."""
+    """Each requirement's slack, normalised by its own threshold.
+
+    Which three requirements depends on the specification: `fill_min` names
+    the model's own, `viable_min` the one in quantities an experiment reads.
+    """
+    if "viable_min" in spec:
+        return dict(
+            viability=(c["viable_fill"] - spec["viable_min"]) / spec["viable_min"],
+            vascular=(spec["vasc_max"] - c["vasc_frac"]) / spec["vasc_max"],
+            reproducibility=(spec["cv_max"] - c["viable_cv"]) / spec["cv_max"])
     return dict(density=(c["fill"] - spec["fill_min"]) / spec["fill_min"],
                 vascular=(spec["vessel_max"] - c["vessels"]) / spec["vessel_max"],
                 reproducibility=(spec["cv_max"] - c["cv"]) / spec["cv_max"])
@@ -226,8 +312,8 @@ def margin(c, spec):
 
 def binding(cells, spec):
     """Which requirement no configuration could meet, and the best each got."""
-    best = {k: max(slacks(c, spec)[k] for c in cells)
-            for k in ("density", "vascular", "reproducibility")}
+    keys = slacks(cells[0], spec).keys()
+    best = {k: max(slacks(c, spec)[k] for c in cells) for k in keys}
     return min(best, key=best.get), best
 
 
@@ -391,6 +477,86 @@ if __name__ == "__main__":
             row.append(f"{max(good):>9.1f}" if good else f"{'none':>9}")
         print(f"{fmin:>8.2f} " + " ".join(row))
 
+    # ---- the same question in quantities an experiment could read ----
+    print(f"\nThe specification again in physical quantities: viable units, "
+          f"those a tip still\ncounted as supply over setpoint capped at one, at least "
+          f"{PHYS_SPEC['viable_min']:.2f} of close packing; lumen and "
+          f"junction volume\nat most {100 * PHYS_SPEC['vasc_max']:.0f} % of "
+          f"the construct, the budget the model already carries; and\nthe "
+          f"viable count varying by at most {PHYS_SPEC['cv_max']:.2f}.\n")
+    print(f"{'S':>5} {'best viable':>12} {'least vascular':>15} "
+          f"{'lowest CV':>10} {'feasible':>9}  {'binds':>15}")
+    phys = {}
+    for S in SCALES:
+        ok = [c for c in search[S] if c["arrested"]]
+        pool_ = ok or search[S]
+        feas = [c for c in ok if margin(c, PHYS_SPEC) >= 0]
+        best = max(feas, key=lambda c: margin(c, PHYS_SPEC)) if feas else None
+        who, bst = binding(pool_, PHYS_SPEC)
+        phys[str(S)] = dict(
+            S=S, feasible=bool(feas),
+            best_viable=max(c["viable_fill"] for c in pool_),
+            least_vascular=min(c["vasc_frac"] for c in pool_),
+            lowest_cv=min(c["viable_cv"] for c in pool_),
+            binding=who, best_slack=bst[who],
+            chosen=best, margin=margin(best, PHYS_SPEC) if best else None)
+        print(f"{S:>5.1f} {100 * phys[str(S)]['best_viable']:>11.2f}% "
+              f"{100 * phys[str(S)]['least_vascular']:>14.2f}% "
+              f"{phys[str(S)]['lowest_cv']:>10.3f} "
+              f"{'yes' if feas else 'no':>9}  {who:>15}", flush=True)
+    print("\n  Read physically the vascular requirement is not the slack one "
+          "it looks when\n  counted in segments, and viability is lowest "
+          "where the construct is densest.")
+
+    print(f"\nLargest volume that stays feasible as the viable-density "
+          f"requirement changes,\nat the model's own vascular budget and a "
+          f"variation of {PHYS_SPEC['cv_max']:.2f}:\n")
+    print(f"{'viable >=':>10} {'largest S':>10}  binds there")
+    pfront = {}
+    for vmin in VIABLE_GRID:
+        sp = dict(viable_min=vmin, vasc_max=PHYS_SPEC["vasc_max"],
+                  cv_max=PHYS_SPEC["cv_max"])
+        good = [S for S in SCALES
+                if any(margin(c, sp) >= 0 for c in search[S] if c["arrested"])]
+        top = max(good) if good else None
+        pfront[f"v{vmin}"] = top
+        if top is None:
+            ok0 = [c for c in search[SCALES[0]] if c["arrested"]]
+            w0 = binding(ok0 or search[SCALES[0]], sp)[0]
+        else:
+            w0 = "-"
+        print(f"{vmin:>10.2f} {(f'{top:.1f}' if top else 'none'):>10}  {w0}")
+
+    # ---- does the frontier survive the auxiliary rules being changed? ----
+    if VARIANT_RUN:
+        jobs([(S, P0, nu, days, src, sd, 1, None, v)
+              for v in sorted(VARIANTS) for S in SCALES
+              for P0, nu, days, src in CONFIGS for sd in SEARCH])
+        print(f"\nThe whole search again under {len(VARIANTS)} variant{'' if len(VARIANTS) == 1 else 's'} of "
+              f"the auxiliary rules,\non the search seeds. A verdict that "
+              f"holds across them does not depend on the\nrule that was "
+              f"changed:\n")
+        print(f"{'variant':>15} " + " ".join(f"{'S=' + format(S, '.1f'):>9}"
+                                             for S in SCALES))
+        robust = {}
+        for v in ["reference"] + sorted(VARIANTS):
+            row, rec = [], {}
+            for S in SCALES:
+                cs = (search[S] if v == "reference"
+                      else [cell(S, *c, SEARCH, 1, None, v) for c in CONFIGS])
+                ok = [c for c in cs if c["arrested"]]
+                a = any(margin(c, SPEC) >= 0 for c in ok)
+                b = any(margin(c, PHYS_SPEC) >= 0 for c in ok)
+                rec[str(S)] = dict(model_spec=a, physical_spec=b)
+                row.append(f"{('Y' if a else 'n') + '/' + ('Y' if b else 'n'):>9}")
+            robust[v] = rec
+            print(f"{v:>15} " + " ".join(row), flush=True)
+        print("\n  Each cell is the model's specification then the physical "
+              "one: Y where some\n  configuration meets it, n where none "
+              "does.")
+    else:
+        robust = {}
+
     # the margins are quoted in the manuscript, so they are stored rather
     # than left to be recomputed by whatever reads this
     for S, c in chosen.items():
@@ -408,6 +574,8 @@ if __name__ == "__main__":
         held_out={str(S): c for S, c in held.items()},
         infeasible={str(S): v for S, v in infeasible.items()},
         frontier=frontier, convergence=conv if held else {},
+        physical=dict(spec=PHYS_SPEC, reach=phys, frontier=pfront),
+        robustness=robust, variants=sorted(VARIANTS),
         optimism=float(np.mean(optimism)) if held else None,
         arrest=dict(window=ARREST_WINDOW, tol=ARREST_TOL))
     json.dump(res, open(ROOT / "results" / "feasibility.json", "w"), indent=1)

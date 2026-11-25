@@ -283,6 +283,46 @@ if (RES / "feasibility.json").exists():
                                      for v in moved)) + ".\n"
              if moved else ".\n"))
 
+    ph = Fe.get("physical") or {}
+    if ph:
+        sp2 = ph["spec"]
+        w(f"The same question in quantities an experiment reads. A unit counts "
+          f"toward viability by its supply over the setpoint capped at one, "
+          f"the way the model already counts perfused mass; the vascular cost "
+          f"is lumen and junction volume as a fraction of the construct, "
+          f"against the budget the model carries ({100 * sp2['vasc_max']:.0f} "
+          f"%); and the variation is of the viable count. The worked "
+          f"requirement is {sp2['viable_min']:.2f} of close packing in viable "
+          f"units.\n")
+        table(["scale", "best viable", "least vascular", "lowest CV",
+               "feasible", "binding requirement"],
+              [[S, f"{100 * v['best_viable']:.2f}%",
+                f"{100 * v['least_vascular']:.2f}%", f"{v['lowest_cv']:.3f}",
+                "yes" if v["feasible"] else "no", v["binding"]]
+               for S, v in sorted(ph["reach"].items())])
+        pf = ph.get("frontier") or {}
+        if pf:
+            w("The largest volume that stays feasible as the viable-density "
+              "requirement changes, at the model's own vascular budget.\n")
+            table(["viable >=", "largest scale"],
+                  [[f"{float(k[1:]):.2f}", f"{v:.1f}" if v else "none"]
+                   for k, v in sorted(pf.items(),
+                                      key=lambda kv: float(kv[0][1:]))])
+
+    rb = Fe.get("robustness") or {}
+    if rb:
+        w("The whole search again under variants of the auxiliary rules, on "
+          "the search seeds. Each cell is whether some configuration meets "
+          "the model's specification and then whether some configuration "
+          "meets the physical one.\n")
+        scales = sorted({s_ for r in rb.values() for s_ in r},
+                        key=float)
+        table(["variant"] + [f"S = {s_}" for s_ in scales],
+              [[v] + [("yes" if rb[v][s_]["model_spec"] else "no") + " / "
+                      + ("yes" if rb[v][s_]["physical_spec"] else "no")
+                      for s_ in scales]
+               for v in sorted(rb)])
+
     fr = Fe.get("frontier") or {}
     if fr:
         fills = sorted({float(k.split("_")[0][1:]) for k in fr})

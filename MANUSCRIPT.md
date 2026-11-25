@@ -20,7 +20,7 @@ Ciudad Universitaria, Mexico City, Mexico
 Target journal: *Biofabrication* (IOP). Structure follows IOP's Introduction,
 Methods, Results, Discussion. Abstract is under 300 words.
 
-Reference model version 4.59.0 (`src/organgrow/closed.py`). Every model number
+Reference model version 4.60.0 (`src/organgrow/closed.py`). Every model number
 quoted below is taken from `PAPER_NUMBERS.md`, which `make paper` regenerates
 with the version and commit that produced it, and is checked against the
 result files by `scripts/29_check_manuscript.py`. No model number in this file
@@ -1044,6 +1044,21 @@ were located and verified against the publishers' own pages. Reference [1] was
 wrong in four places when checked: the paper appeared in 2025 and not 2023, in
 volume 388 at pages 1198–204 and not volume 382 as an article number, and its
 first author is Sexton Z A. It had been outside the set that was verified.
+
+**An editorial decision is open on Sections 3.8 and 3.9.** The design
+question has been put a second time in quantities an experiment reads, as
+`scripts/35_feasibility.py` now reports: viability counted the way the model
+counts perfused mass, supply over setpoint capped at one, rather than units
+placed; vascular cost as lumen and junction volume against the budget the
+model carries, rather than as a segment count; and the variation taken of the
+viable count. Read that way two of this paper's statements look different.
+Viable density does not fall with volume the way placed density does, and the
+variation of the viable count stays far below the requirement at every
+volume, where the raw count's does not. The vascular requirement never binds
+and viability binds everywhere. Whether Sections 3.8 and 3.9 should be
+rewritten around the physical reading, carry both, or keep the model's own
+with the physical one as a check, is a decision for the authors and is not
+taken here (`PAPER_NUMBERS.md`, Designing to a specification).
 
 **The *et al.* in the reference list.** IOP asks for every author up to ten
 and allows *et al.* only beyond that. Every author count was checked against
