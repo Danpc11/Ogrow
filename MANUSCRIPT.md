@@ -20,7 +20,7 @@ Ciudad Universitaria, Mexico City, Mexico
 Target journal: *Biofabrication* (IOP). Structure follows IOP's Introduction,
 Methods, Results, Discussion. Abstract is under 300 words.
 
-Reference model version 4.56.0 (`src/organgrow/closed.py`). Every model number
+Reference model version 4.57.0 (`src/organgrow/closed.py`). Every model number
 quoted below is taken from `PAPER_NUMBERS.md`, which `make paper` regenerates
 with the version and commit that produced it, and is checked against the
 result files by `scripts/29_check_manuscript.py`. No model number in this file
@@ -936,8 +936,8 @@ contributions.
 
 ## References
 
-[1] Sexton Z I et al. 2023 Rapid model-guided design of organ-scale synthetic
-vasculature for biomanufacturing *Science* **382** eadj6152
+[1] Sexton Z A et al. 2025 Rapid model-guided design of organ-scale synthetic
+vasculature for biomanufacturing *Science* **388** 1198–204
 
 [2] Stanger B Z, Tanaka A J and Melton D A 2007 Organ size is limited by the
 number of embryonic progenitor cells in the pancreas but not the liver
@@ -973,8 +973,7 @@ injury and chronic kidney disease *Kidney Res. Clin. Pract.* advance online
 publication, doi:10.23876/j.krcp.25.405
 
 [11] Ryan D et al. 2018 Development of the human fetal kidney from mid to late
-gestation in male and female infants *EBioMedicine* **27**,
-doi:10.1016/j.ebiom.2017.12.016
+gestation in male and female infants *EBioMedicine* **27** 275–83
 
 [12] Delone G V, Uryvaeva I V, Koretskiĭ V F and Brodskiĭ V Ya 1987 Analysis of
 the postnatal growth of the mouse liver by estimating the hepatocyte count,
@@ -996,12 +995,22 @@ Vázquez-Victorio and before the senior author, which keeps the corresponding
 author last, but the group decides. ORCID identifiers are recommended by IOP
 and are not yet here.
 
-**Every claim that needed a citation now has one.** References [4] to [13]
-were located and verified against the publishers' own pages. The author lists
-are given as *et al.* and must be expanded to the form Biofabrication asks for,
-and DOIs added, at submission. Two fields are still missing: the volume and
-pages of [11], of which only the volume was confirmed, and whether [10] has
-been assigned a volume since it appeared online.
+**Every claim that needed a citation now has one.** References [1] to [13]
+were located and verified against the publishers' own pages. Reference [1] was
+wrong in four places when checked: the paper appeared in 2025 and not 2023, in
+volume 388 at pages 1198–204 and not volume 382 as an article number, and its
+first author is Sexton Z A. It had been outside the set that was verified.
+
+**The *et al.* in the reference list.** IOP asks for every author up to ten and
+allows *et al.* only beyond that, so [1] and [11] are already in the house
+style, at fifteen and eleven authors. The remaining five, [4], [6], [7], [8]
+and [9], still need their author counts checked and the short ones expanded,
+and DOIs should be added at submission.
+
+**The two open fields are closed.** [11] is *EBioMedicine* **27** 275–83,
+read off the article's own running head. [10] is still epub ahead of print,
+published online on 21 May 2026 with no volume, issue or pages assigned, so
+the form it carries here is the correct one until an issue appears.
 
 The three that were open are closed as follows, and two of them changed what
 the manuscript says rather than only adding a reference.
