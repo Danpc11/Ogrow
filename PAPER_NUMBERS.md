@@ -1,6 +1,6 @@
 # Numbers the paper uses
 
-Model version 4.58.0, commit 97a8cdc, generated 2026-11-25 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.59.0, commit 2a9537d, generated 2026-11-25 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b024.
 
@@ -98,14 +98,39 @@ The elasticity of the final unit count to the seeded pool is reported elsewhere 
 
 A joint specification is imposed at each target volume and the knobs an operator sets are searched for a configuration meeting all of it: units occupying at least 10% of the domain's close packing, at most 2500 vessel segments, and a coefficient of variation of the unit count across realisations of at most 0.15. The knobs are the seeded pool, the nucleation propensity, the culture duration and the cell source. The configuration is chosen on 16 seeds by maximin, the largest smallest slack, and re-run on 24 seeds the search never saw. Configurations that had not arrested are excluded (`scripts/35_feasibility.py`).
 
-What any configuration reaches at each volume, one requirement at a time. The three are reached by different configurations, so no single construct has all three at once.
+What any configuration reaches at each volume, one requirement at a time. The three are reached by different configurations, so no single construct has all three at once. Each row also carries what the winning configuration does on the other two requirements, because a column read on its own can be won by a construct that is useless: the lowest variation is easiest to reach by building almost nothing.
 
-| scale | volume | best fill | fewest vessels | lowest CV | arrested |
-|---|---|---|---|---|---|
-| 0.4 | 0.064 | 20.17% | 193 | 0.065 | 37/48 |
-| 0.6 | 0.216 | 10.88% | 364 | 0.051 | 35/48 |
-| 0.8 | 0.512 | 6.62% | 735 | 0.041 | 34/48 |
-| 1.0 | 1.000 | 5.10% | 1468 | 0.057 | 27/48 |
+At scale 0.4, volume 0.064, 37 of 48 configurations had arrested.
+
+| requirement won | configuration | fill | vessels | CV |
+|---|---|---|---|---|
+| most dense | renewing, pool 9000, nu 24, 280 d | 20.17% | 424 | 0.078 |
+| fewest vessels | spent, pool 300, nu 6, 140 d | 8.59% | 193 | 0.084 |
+| least variable | spent, pool 300, nu 12, 140 d | 8.96% | 198 | 0.065 |
+
+At scale 0.6, volume 0.216, 35 of 48 configurations had arrested.
+
+| requirement won | configuration | fill | vessels | CV |
+|---|---|---|---|---|
+| most dense | renewing, pool 9000, nu 24, 280 d | 10.88% | 1114 | 0.156 |
+| fewest vessels | spent, pool 300, nu 6, 140 d | 3.20% | 364 | 0.057 |
+| least variable | spent, pool 300, nu 12, 140 d | 3.35% | 375 | 0.051 |
+
+At scale 0.8, volume 0.512, 34 of 48 configurations had arrested.
+
+| requirement won | configuration | fill | vessels | CV |
+|---|---|---|---|---|
+| most dense | renewing, pool 9000, nu 12, 280 d | 6.62% | 2022 | 0.282 |
+| fewest vessels | spent, pool 300, nu 6, 140 d | 1.45% | 735 | 0.041 |
+| least variable | spent, pool 300, nu 6, 140 d | 1.45% | 735 | 0.041 |
+
+At scale 1.0, volume 1.000, 27 of 48 configurations had arrested.
+
+| requirement won | configuration | fill | vessels | CV |
+|---|---|---|---|---|
+| most dense | renewing, pool 9000, nu 24, 280 d | 5.10% | 3921 | 0.340 |
+| fewest vessels | spent, pool 300, nu 24, 140 d | 0.80% | 1468 | 0.057 |
+| least variable | spent, pool 300, nu 24, 140 d | 0.80% | 1468 | 0.057 |
 
 | scale | feasible | pool | nu | days | source | fill | vessels | CV | fill, held out | CV, held out |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -119,6 +144,25 @@ At scale 0.8 no configuration met the specification. The requirement none could 
 At scale 1.0 no configuration met the specification. The requirement none could meet is density; the best any configuration came to it was a slack of -0.49, where zero would be meeting it exactly.
 
 The margin measured on the search block understates the margin on the held-out block by 0.03 on average, because the configuration is chosen partly for the realisations that happened to favour it. The held-out column is the honest one. Held-out seeds are new realisations of the same model and not new evidence about it, so this measures reproducibility across batches and is not a validation against a construct.
+
+Each chosen configuration again on the held-out seeds, with the cellular step split two and four ways, under the reference capped Poisson law and under the binomial law. Only the binomial one is a step refinement: the capped law applies its per-day cap once per substep, so splitting the day loosens it. A verdict that moves here is a verdict about the step and not about the construct.
+
+| scale | law | substeps | fill | vessels | CV | margin | meets spec |
+|---|---|---|---|---|---|---|---|
+| 0.4 | binomial | 1 | 19.22% | 414 | 0.084 | +0.44 | yes |
+| 0.4 | binomial | 2 | 20.07% | 416 | 0.101 | +0.32 | yes |
+| 0.4 | binomial | 4 | 19.05% | 442 | 0.099 | +0.34 | yes |
+| 0.4 | poisson_capped | 1 | 19.75% | 410 | 0.069 | +0.54 | yes |
+| 0.4 | poisson_capped | 2 | 19.86% | 399 | 0.085 | +0.43 | yes |
+| 0.4 | poisson_capped | 4 | 19.15% | 403 | 0.095 | +0.37 | yes |
+| 0.6 | binomial | 1 | 10.06% | 916 | 0.077 | +0.01 | yes |
+| 0.6 | binomial | 2 | 10.24% | 943 | 0.316 | -1.10 | no |
+| 0.6 | binomial | 4 | 10.22% | 936 | 0.225 | -0.50 | no |
+| 0.6 | poisson_capped | 1 | 10.13% | 918 | 0.053 | +0.01 | yes |
+| 0.6 | poisson_capped | 2 | 10.44% | 929 | 0.109 | +0.04 | yes |
+| 0.6 | poisson_capped | 4 | 11.65% | 1079 | 0.485 | -2.23 | no |
+
+The verdict moves in 3 of 8 refinements: scale 0.6 under the binomial law at 2 substeps, scale 0.6 under the binomial law at 4 substeps, scale 0.6 under the poisson_capped law at 4 substeps.
 
 The largest volume that stays feasible as the density and reproducibility requirements change, at the same vascular budget. An entry is the domain scale; `none` means no volume admits a configuration.
 
