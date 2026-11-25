@@ -292,20 +292,20 @@ check("leaving the demand unset leaves the reference behaviour untouched",
 # The ceilings are reported so the two can be told apart; this checks that they
 # are there, one per unit, and that the total mass can match the budget while
 # the units are individually still far from theirs.
-_Uc, _mc, _vtc, _trc = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z / 0.6), 114,
+_Uk, _mk, _vtk, _trk = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z / 0.6), 114,
                              days=70, rng=np.random.default_rng(7), nu=8.0, q_set=0.6,
                              rho=0.0, delta=0.0, P0=400.0, R_unit=650.0,
                              units_per_branch=650 / 600.0, max_vessels=3000,
                              injure_day=40, injury="parenchyma", injury_fraction=0.3,
                              injury_reactivates=1.0, inflow_limited=True)
-_cl = _trc.final["ceiling"]
+_cl = _trk.final["ceiling"]
 check("the ceiling is reported, one per unit",
-      _cl is not None and len(_cl) == len(_mc), f"units {len(_mc)}, ceilings "
+      _cl is not None and len(_cl) == len(_mk), f"units {len(_mk)}, ceilings "
       f"{'none' if _cl is None else len(_cl)}")
-_eps = float(np.abs(_mc - _cl).sum() / max(_cl.sum(), 1e-12))
+_eps = float(np.abs(_mk - _cl).sum() / max(_cl.sum(), 1e-12))
 check("the total can sit on the budget while the units do not",
-      abs(float(_mc.sum()) / max(float(_cl.sum()), 1e-12) - 1.0) < 0.25 and _eps > 0.02,
-      f"total {float(_mc.sum()) / max(float(_cl.sum()), 1e-12):.3f} of the "
+      abs(float(_mk.sum()) / max(float(_cl.sum()), 1e-12) - 1.0) < 0.25 and _eps > 0.02,
+      f"total {float(_mk.sum()) / max(float(_cl.sum()), 1e-12):.3f} of the "
       f"budget, residual {_eps:.3f}")
 
 # the final per-segment state covers every segment, so tips index into it
@@ -333,10 +333,26 @@ for _lab, _kw in (("renewing", dict(rho=0.10, delta=0.10, renewal=1.0)),
                                  max_vessels=3000, **_kw)
     _f = _tr4.fate
     check(f"the pool balances in a {_lab} organ", abs(_f["balance"]) < 1e-6,
-          f"P0 + born - (consumed + left + lost) = {_f['balance']:.3g}")
+          f"P0 + born - (consumed + left + lost + culled) = {_f['balance']:.3g}")
     check(f"consumed and lost are reported apart in a {_lab} organ",
           _f["consumed"] >= 0 and _f["lost"] >= 0,
           f"consumed {_f['consumed']:.2f}, lost {_f['lost']:.2f}")
+    # The books have to close when units are destroyed too. A unit removed by
+    # an injury was still made from a cell, so consumed counts formations and
+    # not survivors, and pool cells destroyed with their niche are culled, not
+    # lost to attrition.
+    for _ik in ("parenchyma", "vascular"):
+        _U5, _m5, _vt5, _tr5 = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z / 0.6), 114,
+                                     days=70, rng=np.random.default_rng(11), nu=8.0,
+                                     q_set=0.6, P0=300.0, R_unit=650.0,
+                                     units_per_branch=650 / 600.0, max_vessels=3000,
+                                     injure_day=40, injury=_ik, injury_fraction=0.3,
+                                     **_kw)
+        _g5 = _tr5.fate
+        check(f"the pool balances after a {_ik} injury in a {_lab} organ",
+              abs(_g5["balance"]) < 1e-6,
+              f"balance {_g5['balance']:.3g}, formed {_g5['units_formed']}, "
+              f"left {_g5['units_left']}, culled {_g5['culled']:.2f}")
 
 # q_floor defaults to zero, so the reference model is unchanged by its presence
 _Ua, _ma, _vta, _tra = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z / 0.6), 114,
@@ -357,6 +373,46 @@ _Uc, _mc, _vtc, _trc = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z /
 check("a residual drive below threshold spends more of the pool",
       _trc.fate["consumed"] > _tra.fate["consumed"] + 0.05,
       f"consumed {_tra.fate['consumed']:.2f} without it, {_trc.fate['consumed']:.2f} with it")
+
+# involution defaults to zero, so the reference model is unchanged by it
+_Ud, _md, _vtd, _trd = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z / 0.6), 114,
+                             days=40, rng=np.random.default_rng(5), nu=8.0, q_set=0.6,
+                             rho=0.0, delta=0.0, P0=120.0, R_unit=650.0, involution=0.0,
+                             units_per_branch=650 / 600.0, max_vessels=3000)
+check("involution at zero leaves the reference model untouched",
+      len(_Ud) == len(_Ua) and float(_md.sum()) == float(_ma.sum()),
+      f"{len(_Ua)} units and mass {float(_ma.sum()):.6f} against {len(_Ud)} "
+      f"and {float(_md.sum()):.6f}")
+
+
+# A unit that loses its supply is removed rather than left at the mass floor.
+# Checked where the floor population is largest: a renewing construct held at a
+# fixed inflow after injury, which is where the share rule strands units on
+# tips that deliver almost nothing.
+def _inv(rate):
+    U6, m6, vt6, tr6 = _grow(lambda x, y, z: _sdf("liver", x / 0.6, y / 0.6, z / 0.6), 114,
+                             days=70, rng=np.random.default_rng(7), nu=8.0, q_set=0.6,
+                             rho=0.10, delta=0.10, P0=400.0, R_unit=650.0,
+                             units_per_branch=650 / 600.0, max_vessels=3000,
+                             injure_day=40, injury="parenchyma", injury_fraction=0.3,
+                             injury_reactivates=1.0, inflow_limited=True,
+                             involution=rate)
+    q6 = np.asarray(tr6.final["q"], float)[np.asarray(tr6.final["tip_of"], int)]
+    return (float((m6 <= 1.05 * 0.02).mean()), len(m6), tr6.fate,
+            float(q6.min() / 0.6) if len(q6) else float("nan"))
+
+
+_f0, _n0, _fa0, _q0 = _inv(0.0)
+_f1, _n1, _fa1, _q1 = _inv(0.05)
+check("involution clears units stranded at the mass floor", _f1 < _f0 - 0.1,
+      f"{_f0:.2f} of units at the floor without it, {_f1:.2f} with it")
+check("involution removes units rather than renaming the count",
+      _n1 < _n0 and _fa1["units_formed"] > _fa1["units_left"],
+      f"{_n0} units without it, {_n1} with it, of {_fa1['units_formed']} ever formed")
+check("the pool still balances when units are removed",
+      abs(_fa1["balance"]) < 1e-6, f"balance {_fa1['balance']:.3g}")
+check("what involution leaves behind is supplied", _q1 > _q0,
+      f"worst supply {_q0:.3f} of the setpoint without it, {_q1:.3f} with it")
 
 print()
 if FAIL:

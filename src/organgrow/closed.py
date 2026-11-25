@@ -95,6 +95,12 @@ class Trace:
     fate: dict = field(default_factory=dict)    # where the initial pool went
 
 
+# Below this fraction of the mass a unit is born with, an involuting unit has
+# nothing left to lose and is removed. It sits below 1 so that a unit formed
+# today, which starts at exactly m0, survives its first day.
+_INVOLUTION_EXIT = 0.5
+
+
 def _p(name, value):
     """A keyword given explicitly wins; otherwise the config value."""
     return _CL[name] if value is None else value
@@ -253,7 +259,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
          nucleation="poisson_capped", substeps=1, turnover="independent",
          renewal=0.0, q_floor=0.0, injure_day=None, injury=None, injury_fraction=0.3,
          injury_axis=1, injury_reactivates=0.0, inflow_limited=False,
-         inflow_scale=1.0, phi_demand=None,
+         inflow_scale=1.0, phi_demand=None, involution=0.0, involution_q=0.1,
          intervene_day=None, intervene=None, intervene_factor=0.8):
     """Grow one organ. `sdf(x, y, z)` is negative inside the domain.
 
@@ -404,9 +410,15 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
     # every realisation, not only on average (tests/test_smoke.py).
     P = {0: int(round(P0))}           # progenitor count per tip
     Ptot0 = float(P[0])
-    lost = 0                          # progenitors lost, cumulative
+    lost = 0                          # progenitors lost to attrition, cumulative
     born = 0                          # progenitors born, cumulative
     renewed = 0                       # progenitors returned after making a unit
+    culled = 0                        # progenitors destroyed with their niche
+    formed = 0                        # units ever formed, which is not len(U):
+    #                                 # injury and involution both remove units,
+    #                                 # and a unit that is gone was still made
+    #                                 # from a cell, so the pool identity has to
+    #                                 # count formations and not survivors
     tr = Trace()
     leak = m_leak ** xi / R0          # what a tip carries before its first unit
 
@@ -473,15 +485,24 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                 for k in gone:                  # the root is never occluded
                     vt.occluded[k] = True
                     if k in P:
+                        culled += int(P[k])     # destroyed with the niche
                         P[k] = 0
             if injury in ("parenchyma", "combined") and len(U):
-                if renewal > 0 and hit_u.any() and len(tip_of_prev):
-                    # the pool rides with the tissue it is made of
+                # tip_of_prev is the assignment made before the units grew, so
+                # it is only usable here while it still describes the same
+                # units: involution can have removed some since.
+                if (renewal > 0 and hit_u.any()
+                        and len(tip_of_prev) == len(hit_u)):
+                    # the pool rides with the tissue it is made of. What the
+                    # cut takes is destroyed, not lost to attrition, so it is
+                    # counted apart and kept in the pool identity.
                     for k in list(P):
                         served = np.flatnonzero(tip_of_prev == k)
                         if len(served):
                             frac_lost = float(hit_u[served].mean())
-                            P[k] = int(round(P[k] * (1.0 - frac_lost)))
+                            was = int(P[k])
+                            P[k] = int(round(was * (1.0 - frac_lost)))
+                            culled += was - int(P[k])
                 U = U[~hit_u]; m = m[~hit_u]
             if inflow_limited:
                 # The circulation keeps delivering `inflow_scale` times what
@@ -664,6 +685,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
             m = np.concatenate([m, np.full(len(new_pos), m0)])
             tip_of = np.concatenate([tip_of, np.asarray(new_tip, int)])
             n_at = np.bincount(tip_of, minlength=len(vt))
+            formed += len(new_pos)
 
         # ---- unit growth: the ceiling is the supply at the unit's tip ------
         # Sprouting runs after this, so every entry of tip_of still names a
@@ -697,7 +719,42 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
             else:
                 ceiling = np.maximum(kappa * q[tip_of], 1e-6)
             m = m + g * m * (1.0 - m / ceiling)
-            m = np.maximum(m, m0)
+            if involution > 0.0:
+                # A unit that loses its supply does not simply stop growing.
+                # It involutes and is removed, and that has to be its own
+                # process rather than growth run backwards, for two reasons.
+                # The growth rate decays as exp(-t / tau_g), so after
+                # development a unit can no longer move at all and sits at
+                # whatever mass it had; and losing a unit is atrophy followed
+                # by resorption, which is not the reverse of the proliferation
+                # that built it. So involution runs at its own rate, which does
+                # not decay with the developmental clock.
+                #
+                # What triggers it is starvation, the supply at the unit's tip
+                # against the same setpoint the rest of the model uses, and not
+                # the unit's distance from its ceiling. Under a fixed inflow a
+                # unit's ceiling is its share of the delivery, and about half
+                # the units are above their share at any moment simply because
+                # it is a share; being below the average is not starving.
+                starved = q[tip_of] < involution_q * q_set
+                if starved.any():
+                    m[starved] *= 1.0 - involution
+                # Nothing is left to lose below half the mass a unit is born
+                # with, so the unit is removed. The threshold is below m0 so
+                # that a unit formed today, which starts at exactly m0, is not
+                # removed before it has had a chance to grow.
+                keep = m >= _INVOLUTION_EXIT * m0
+                if not keep.all():
+                    U, m, tip_of = U[keep], m[keep], tip_of[keep]
+                    ceiling = ceiling[keep]
+                    if len(tip_of_prev) == len(keep):
+                        tip_of_prev = tip_of_prev[keep]
+                    n_at = np.bincount(tip_of, minlength=len(vt))
+                # The cell that made a removed unit was spent or returned when
+                # the unit formed, and that is already in the books: `formed`
+                # counts formations, so removal does not disturb the identity.
+            else:
+                m = np.maximum(m, m0)
 
         # ---- the tree sprouts where the tissue is short of supply ---------
         # The same signal drives both responses with opposite signs: where
@@ -872,12 +929,19 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
     # and only the first one built anything. `closure_state` reports the two
     # together as `spent`, which is the share no longer held; these separate
     # them. The identity P0 + born = consumed + left + lost holds exactly.
-    _cons = float(len(U) - renewed)
+    # Consumed counts the cells spent on units ever formed, not units still
+    # standing: injury and involution remove units, and the cell that made a
+    # removed unit does not come back. Culled counts pool cells destroyed with
+    # their niche by an injury, which is not the same as attrition.
+    _cons = float(formed - renewed)
     tr.fate = dict(consumed=_cons / max(Ptot0, 1e-9),
                    lost=float(lost) / max(Ptot0, 1e-9),
                    born=float(born) / max(Ptot0, 1e-9),
                    left=float(sum(P.values())) / max(Ptot0, 1e-9),
-                   balance=float(Ptot0 + born - (_cons + sum(P.values()) + lost)))
+                   culled=float(culled) / max(Ptot0, 1e-9),
+                   units_formed=int(formed), units_left=int(len(U)),
+                   balance=float(Ptot0 + born
+                                 - (_cons + sum(P.values()) + lost + culled)))
 
     # The ceiling each unit was growing towards on the last day. A plateau in
     # the total mass does not by itself mean the units reached their ceilings:
@@ -889,6 +953,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                     q=_q_full(q, np.asarray(vt.parent), len(vt)),
                     P=np.array([P.get(k, 0.0) for k in range(len(vt))], float),
                     tips=np.asarray(_tips, int),
+                    tip_of=np.asarray(tip_of, int),
                     ceiling=(np.asarray(ceiling, float)
                              if len(ceiling) == len(m) else None))
     return U, m, vt, tr

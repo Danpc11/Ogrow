@@ -1,4 +1,4 @@
-# The closed model (version 4.43.0)
+# The closed model (version 4.44.0)
 
 `src/organgrow/closed.py` is the model the paper rests on; `make paper`
 builds its results. Its parameters are in `config/params.yaml`, section
@@ -45,8 +45,23 @@ How the model was built, what was corrected and what was withdrawn is in
    are lost with probability δ, independently or as competing fates
    (`turnover="competing"`). `substeps` splits this step within the day.
 4. **Units** grow logistically toward $\kappa q_i$ at a rate that decays with
-   time.
-5. **Sprouting**, by four rules, each gated by the junction test (a split must
+   time. Under a fixed inflow the ceiling is instead the unit's share of the
+   delivery, $Q\,s_j/\phi$ with $s_j \propto m_j^{\xi} q_j$, the same
+   constitutive relation the perfusion solve uses for tissue conductance.
+5. **Involution**, off by default (`involution = 0`). A unit whose supply falls
+   below `involution_q` of the setpoint loses that fraction of its mass per day
+   and is removed once it falls below half the mass a unit is born with. This
+   is a separate process from growth and not growth run backwards: the growth
+   rate decays as $e^{-t/\tau_g}$, so after development a unit cannot shrink
+   back on its own and would otherwise sit at the mass floor indefinitely, and
+   losing a unit is atrophy and resorption, which does not run at the rate that
+   built it. What triggers it is starvation and not the distance to the
+   ceiling, because under a fixed inflow the ceiling is a share and about half
+   the units are above their share at any moment. A removed unit does not
+   return its cell to the pool: the cell was spent or renewed when the unit
+   formed, and `consumed` counts formations rather than survivors, so the pool
+   identity is unaffected.
+6. **Sprouting**, by four rules, each gated by the junction test (a split must
    relieve more tissue than its junction occupies) and each stopped by the
    vascular budget or the vessel cap: a tip whose supply is below the
    threshold calls a vessel (deficit); a tip that feeds more units than one
