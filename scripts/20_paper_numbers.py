@@ -230,22 +230,71 @@ if (RES / "inflow_law.json").exists():
       "measured here is how completely a construct reaches it: `mass / "
       "(Q/phi)` away from 1, and the exponent away from 1. `phi` is "
       "calibrated on a block of seeds disjoint from the one the sweep is "
-      "evaluated on. The last column is the mean daily change of mass over "
-      "the final ten days, which says whether the construct had settled.\n")
+      "evaluated on.\n\n"
+      "A small daily change of mass is necessary for equilibrium with the "
+      "supply and not sufficient. The growth rate decays as exp(-t/tau_g), so "
+      "the growth available after the injury is finite and a unit can stop "
+      "moving while still far from its ceiling. The residual column is "
+      "`sum |m - ceiling| / sum ceiling` over the units, and the column beside "
+      "it is the share of units ending at the mass floor. The two together say "
+      "that the total lands where the budget puts it while the units "
+      "individually do not.\n\n"
+      "In this section the spread after ± is a standard deviation over seeds, "
+      "not the standard error used elsewhere in this file.\n")
     for reg, d in Fl.items():
         c, e = d.get("calibration_seeds", ["?", "?"]), d.get("evaluation_seeds", ["?", "?"])
         ci = d.get("slope_ci", [float("nan")] * 2)
-        w(f"**{reg}**: phi = {d['phi']:.6f} ± {d['phi_sd']:.6f}, calibrated on "
-          f"seeds {c[0]} to {c[1]}, evaluated on seeds {e[0]} to {e[1]}. "
-          f"Exponent of mass against delivered flow, one fit per seed: "
-          f"{d['slope']:.3f} ± {d.get('slope_sd', float('nan')):.3f}, "
-          f"bootstrap 95 % interval [{ci[0]:.3f}, {ci[1]:.3f}].\n")
+        w(f"**{reg}**: phi = {d['phi']:.6f} ± {d['phi_sd']:.6f} (s.d.), "
+          f"calibrated on seeds {c[0]} to {c[1]}, evaluated on seeds "
+          f"{e[0]} to {e[1]}. Exponent of mass against delivered flow, one fit "
+          f"per seed: {d['slope']:.3f} ± {d.get('slope_sd', float('nan')):.3f} "
+          f"(s.d.), bootstrap 95 % interval [{ci[0]:.3f}, {ci[1]:.3f}].\n")
         table(["delivered flow", "mass / pre-injury", "mass / (Q/phi)",
-               "mass still moving, % per day"],
+               "mass still moving, % per day", "residual", "units at the mass floor"],
               [[f"{r['scale']:.1f}", f"{r['mass_rel']:.3f} ± {r['mass_rel_sd']:.3f}",
                 f"{r['mass_over_law']:.3f}",
-                f"{100 * r.get('drift_per_day', float('nan')):.2f}"]
+                f"{100 * r.get('drift_per_day', float('nan')):.2f}",
+                f"{r.get('residual', float('nan')):.3f}",
+                f"{r.get('floor_share', float('nan')):.2f}"]
                for r in d["rows"]])
+        rr = [r.get("residual", float("nan")) for r in d["rows"]]
+        ff = [r.get("floor_share", float("nan")) for r in d["rows"]]
+        w(f"Across the whole range of flows the residual stays between "
+          f"{min(rr):.2f} and {max(rr):.2f}, and between {min(ff):.0%} and "
+          f"{max(ff):.0%} of units end at the mass floor. Neither improves at "
+          f"any flow, so this is the regime and not an edge of the sweep.\n")
+
+if (RES / "involution.json").exists():
+    Iv = json.load(open(RES / "involution.json"))
+    w("## Involution, as a sensitivity\n")
+    w("The units stranded at the mass floor above are there because the "
+      "reference model has no way to remove a unit that loses its supply. "
+      "`involution` is a rate per day at which a unit whose supply has fallen "
+      "below a tenth of the setpoint loses mass, after which it is removed; "
+      "the rate of zero is the reference model, so the first row of each table "
+      "is the published result. The rate is not calibrated against any "
+      "measurement, which is why this is a sensitivity and not the result. "
+      "Everything is at unit flow, with the demand calibrated out of sample as "
+      "above (`scripts/33_involution.py`).\n")
+    for reg, d in Iv.items():
+        c, e = d.get("calibration_seeds", ["?", "?"]), d.get("evaluation_seeds", ["?", "?"])
+        w(f"**{reg}**: phi = {d['phi']:.6f}, calibrated on seeds {c[0]} to "
+          f"{c[1]}, evaluated on seeds {e[0]} to {e[1]}, {d['seeds']} seeds.\n")
+        table(["involution, per day", "mass / pre-injury", "units / pre-injury",
+               "residual", "units at the mass floor"],
+              [[f"{r['rate']:.2f}",
+                f"{r['mass_rel']:.3f} [{r['mass_rel_lo']:.2f}, {r['mass_rel_hi']:.2f}]",
+                f"{r['units_rel']:.2f} [{r['units_rel_lo']:.2f}, {r['units_rel_hi']:.2f}]",
+                f"{r['residual']:.3f}", f"{r['floor_share']:.2f}"]
+               for r in d["rows"]])
+        u, f_, rs = d["units_rel_on"], d["floor_on"], d["residual_on"]
+        w(f"Over a tenfold range of the rate the construct keeps {u[0]:.2f} to "
+          f"{u[1]:.2f} of its units, against {d['rows'][0]['units_rel']:.2f} "
+          f"with the mechanism absent; the share at the mass floor falls from "
+          f"{d['rows'][0]['floor_share']:.2f} to between {f_[0]:.2f} and "
+          f"{f_[1]:.2f}, and the residual from {d['rows'][0]['residual']:.2f} "
+          f"to between {rs[0]:.2f} and {rs[1]:.2f}. The rate sets how fast, "
+          f"not where it lands.\n")
 
 if (RES / "injury.json").exists():
     Ij = json.load(open(RES / "injury.json"))

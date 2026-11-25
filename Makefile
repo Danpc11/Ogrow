@@ -75,6 +75,7 @@ paper:
 	$(PY) scripts/23_scaling.py
 	$(PY) scripts/24_injury.py
 	$(PY) scripts/32_inflow_law.py
+	$(PY) scripts/33_involution.py
 	$(PY) scripts/26_transcriptome.py
 	# figures and tables last: they read every result above
 	$(PY) figures/fig_framework.py

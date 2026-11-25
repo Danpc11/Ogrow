@@ -35,8 +35,6 @@ Usage:  python scripts/32_inflow_law.py [REGIME ...]     default: both
     OGROW_ADOPT_CACHE=1   stamp the cache on disk as current instead of
                   re-simulating it; an assertion, not a check
 """
-import hashlib
-import inspect
 import json
 import os
 import sys
@@ -48,6 +46,7 @@ from organgrow import sdf
 from organgrow import closed as _closed
 from organgrow.config import ROOT
 from organgrow.closed import grow
+from organgrow.runcache import fingerprint, cached
 
 OUT = ROOT / "results" / "inflow_law"
 OUT.mkdir(parents=True, exist_ok=True)
@@ -61,41 +60,19 @@ REG = {"liver": dict(P0=2600.0, rho=0.10, delta=0.10, q_set=0.6, renewal=1.0),
 FIX = dict(R_unit=650.0, units_per_branch=650 / 600.0, max_vessels=6000)
 LOSS = 0.3
 
-# A cached run is only the answer to the question that produced it. The file
-# name carries the regime, the seed and the flow, but not the demand phi, nor
-# the engine, nor the fixed parameters: change the calibration seeds and phi
-# moves, while every evaluation run keeps its old name and is silently reused.
-# Each file therefore also carries a fingerprint of everything that determines
-# its contents, and is re-simulated when that fingerprint does not match.
-# OGROW_ADOPT_CACHE=1 stamps whatever is on disk as current instead. It is an
-# assertion by the person running it that the existing files came from this
-# code and these parameters; nothing checks it.
-CODE = hashlib.sha256(inspect.getsource(_closed).encode()).hexdigest()[:12]
-ADOPT = os.environ.get("OGROW_ADOPT_CACHE") == "1"
-
-
+# The fingerprint and the cache rule live in organgrow.runcache, so that this
+# script and scripts/33_involution.py answer the staleness question the same
+# way. See that module for what OGROW_ADOPT_CACHE asserts.
 def _fingerprint(reg, kw, seed, phi=None):
     """Everything that decides what one simulation returns."""
-    payload = dict(code=CODE, regime=reg, seed=int(seed), S=S, NU=NU,
-                   CLOSE=CLOSE, END=END, LOSS=LOSS,
-                   phi=None if phi is None else f"{float(phi):.12e}",
-                   params={**FIX, **REG[reg], **kw})
-    return hashlib.sha256(
-        json.dumps(payload, sort_keys=True, default=str).encode()).hexdigest()[:16]
+    return fingerprint(regime=reg, seed=int(seed), S=S, NU=NU, CLOSE=CLOSE,
+                       END=END, LOSS=LOSS, phi=phi,
+                       params={**FIX, **REG[reg], **kw})
 
 
 def _cached(f, fp):
     """The stored run if it answers the same question, otherwise None."""
-    if not f.exists():
-        return None
-    r = json.load(open(f))
-    if r.get("fingerprint") == fp:
-        return r
-    if ADOPT:
-        r["fingerprint"] = fp
-        json.dump(r, open(f, "w"))
-        return r
-    return None
+    return cached(f, fp)
 
 
 def run(reg, seed, scale, phi):

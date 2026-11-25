@@ -191,6 +191,26 @@ if L and "liver" in L:
     need("shortfall against the budget at the highest flow",
          f"about {hi['mass_over_law']:.1f} of it")
 
+# The residual and the share at the mass floor are what keep Section 3.4 from
+# calling the plateau an equilibrium, so the sentence that reports them is held
+# to the numbers like any other.
+if L:
+    for _reg, _lab in (("liver", "renewing construct"),
+                       ("kidney", "spent source")):
+        if _reg not in L:
+            continue
+        _rows = L[_reg]["rows"]
+        _res = [x["residual"] for x in _rows if x.get("residual") is not None]
+        _flo = [x["floor_share"] for x in _rows if x.get("floor_share") is not None]
+        # The worst of each, which is the number the sentence turns on. Quoting
+        # both ends of the range would put two roundings in the way of one
+        # claim, and the table in PAPER_NUMBERS carries every flow.
+        if _res:
+            need(f"{_lab}, largest residual", f"as much as {max(_res):.2f}")
+        if _flo:
+            need(f"{_lab}, largest share at the mass floor",
+                 f"up to {round(100 * max(_flo))} %")
+
 
 def main():
     if not DOC.exists():

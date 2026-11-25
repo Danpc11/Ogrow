@@ -48,8 +48,9 @@ can be undone: relieving perfusion or room restarts a renewing construct and
 nothing restarts one whose pool is spent. After a 30 % loss of units, how the
 perfusion circuit is driven decides the outcome; at a fixed inlet pressure the
 construct overshoots to 1.82 times its mass without settling, while one held
-at a fixed root flow tracks a supply budget and settles, its mass rising as
-the delivered flow to an exponent of 0.90. Scaling the domain
+at a fixed root flow tracks a supply budget in the aggregate, its mass rising
+as the delivered flow to an exponent of 0.90 while most of its units stop
+short of their own share of the supply. Scaling the domain
 15-fold raises unit count only as V^0.45, and past an intermediate size the
 unit count also stops being reproducible, its coefficient of variation rising
 from 0.09 to 0.47. The model is not fitted to any construct and its
@@ -367,13 +368,37 @@ flow between 0.6 and 1.4 times its pre-injury value
 on). Mass rises as the delivered flow to an exponent of 0.90, fitted once per
 seed. Against the budget itself the construct overshoots when asked to shrink,
 reaching about 1.8 times $Q/\phi$ at the lowest flow, and falls short when
-asked to grow, reaching about 0.7 of it at the highest. By day 220 the mass is
-changing by well under a tenth of a per cent per day, so these are settled
-states and not a snapshot of something still moving.
+asked to grow, reaching about 0.7 of it at the highest.
 
-A construct fed at constant flow therefore tracks its supply, and does so
-asymmetrically: it grows into a larger budget far more readily than it gives
-up mass to a smaller one. The spent-source construct behaves the same way, at
+By day 220 the mass is changing by well under a tenth of a per cent per day.
+That is necessary for equilibrium with the supply and it is not sufficient,
+and in this model it is not what has happened. The rate at which a unit grows
+decays as $e^{-t/\tau_g}$, so the growth available after the injury is finite,
+$g_0\tau_g$, and a unit can stop moving while still far from its ceiling.
+Summing that distance over the units, $\sum_j |m_j - m_j^*| / \sum_j m_j^*$
+reaches as much as 0.38 for the renewing construct, which ends with up to 74 %
+of its units at the mass floor, and as much as 0.24 for the spent source, with
+up to 49 % at the floor (`PAPER_NUMBERS.md`, The mass a construct lands on).
+Neither improves at any flow in the sweep, so this is the regime and not an
+edge of it. The total lands where the budget puts it, because the shares sum
+to one; the units individually do not reach their ceilings.
+
+What separates the two is a mechanism the model does not have. A unit whose
+share of the delivery collapses has no way to disappear, so it stays at the
+mass floor rather than involuting, and the construct ends as a few large units
+among many vestigial ones. Supplying that mechanism as a rate at which a unit
+below a tenth of the setpoint loses mass and is then removed leaves the mass
+where it was, clears most of the floor population, and leaves the construct
+with a smaller number of larger units; the answer barely moves over a tenfold
+range of the rate, so it rests on the mechanism existing and not on its speed
+(`scripts/33_involution.py`; `PAPER_NUMBERS.md`, Involution, as a
+sensitivity). We report it there rather than here because its rate is
+calibrated against nothing, and the result of this section should not depend
+on a number we chose.
+
+A construct fed at constant flow therefore tracks its supply in the aggregate,
+and does so asymmetrically: it grows into a larger budget far more readily
+than it gives up mass to a smaller one. The spent-source construct behaves the same way, at
 its own $\phi$ and its own exponent, so the asymmetry is a property of the
 rule and not of either cell source. Calibrating the demand out of sample barely moves where the construct lands
 at unit flow and roughly doubles the range the seeds span. That is the
@@ -501,14 +526,20 @@ claim its answer here.
 
 ### 4.1 Four design rules, stated as the model gives them
 
-**Drive the perfusion circuit at constant flow, not constant pressure, when
-the construct should stop at a target size.** At a fixed inlet pressure the
-model's construct overshoots to 1.82 times its mass after injury and does not
-settle; at fixed root flow it tracks a supply budget, its mass rising as the
-delivered flow to an exponent of 0.90 over a range of 0.6 to 1.4. Nothing in the
-tissue measures its own size in either case. The brake is the supply the
-circuit provides, and where a construct stops is therefore a dial on the pump
-rather than a property of the tissue.
+**A constant flow gives a tunable brake on total mass that a constant pressure
+does not.** At a fixed inlet pressure the model's construct overshoots to 1.82
+times its mass after injury and does not settle; at fixed root flow its mass
+rises as the delivered flow to an exponent of 0.90 over a range of 0.6 to 1.4.
+Nothing in the tissue measures its own size in either case, so the brake is the
+supply the circuit provides rather than a property of the tissue. Two
+qualifications travel with it. The brake sets the total mass and not the number
+of units that carry it: in this model the construct reaches its budget in
+aggregate while most of its units stop short of their own ceilings, for the
+reason given in Section 3.4. And the comparison is between two boundary
+conditions in a model, not between two bioreactors: maximum admissible
+pressure, shear damage, and the capacity of the perfusion circuit are
+constraints the model does not carry, and any of them could decide the question
+in practice.
 
 **Decide whether your cell source renews before deciding how many cells to
 seed.** If it renews, seeding more barely changes the final unit count
@@ -598,6 +629,14 @@ paper has been tested against a construct or a tissue.
 
 The spatial constraint is local exclusion between neighbouring units, not the
 packing limit of the container, which never binds.
+
+The model has no involution. A unit that loses its supply stops growing and
+stays at the mass floor, where a tissue would atrophy and resorb it. This is
+why a construct held at a fixed inflow reaches its budget in total while most
+of its units sit far below their own ceilings, and it is the clearest place
+where the model is missing a process rather than a parameter. Section 3.4
+reports what happens when the process is supplied; the rate it runs at is
+calibrated against nothing, which is why that stays a sensitivity.
 
 The model compensates after injury further than a kidney does. After removal of
 one of two kidneys the adult mammalian remnant forms no new nephrons and gains
