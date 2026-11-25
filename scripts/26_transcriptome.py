@@ -69,8 +69,15 @@ HEPATOCYTE = ["Alb", "Ttr", "Apoa1", "Apoa2", "Apob", "Serpina1a", "Serpina1b",
 
 # Where each organ's unit-forming window ends, from the literature, in the same
 # units as its stages. Mouse gestation is taken as 19.5 days, so a postnatal
-# day P is E(19.5 + P). The liver's window is the one that matters: hepatocyte
-# number keeps rising to about P20, long after the hepatoblasts are gone.
+# day P is E(19.5 + P). The liver's window is the one that matters, and P20 is
+# deliberately the short end of what the literature supports: Delone et al.
+# 1987 put the hyperplastic phase of mouse liver between one and two months and
+# growth ending after two months, which would run the window to about P60. The
+# fraction of the window elapsed when the hepatoblast programme is gone is
+# therefore reported as an upper bound; the longer window only strengthens the
+# contrast with the budget organs, so the conservative choice is kept here.
+# The kidney's end varies between individuals: in a series spanning weeks 20 to
+# 41 one infant was still forming nephrons at week 37 (Ryan et al. 2018).
 WINDOW = {"kidney": dict(unit="gestational week", start=5.0, end=35.0),
           "pancreas": dict(unit="embryonic day", start=9.5, end=15.5),
           "liver": dict(unit="embryonic day", start=10.5, end=39.5)}

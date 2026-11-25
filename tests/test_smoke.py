@@ -308,6 +308,20 @@ check("the total can sit on the budget while the units do not",
       f"total {float(_mk.sum()) / max(float(_cl.sum()), 1e-12):.3f} of the "
       f"budget, residual {_eps:.3f}")
 
+# Involution removes a unit on the supply at its tip. That is the delivery per
+# unit mass and not a proxy for it: a unit's share of a fixed inflow is
+# m^xi q / sum(m^xi q), so its delivery per unit mass is Q q / sum(m q) once
+# the mass cancels at xi = 1, which is q times a quantity common to every unit.
+# A threshold on either therefore selects the same units in the same order.
+_qk = np.asarray(_trk.final["q"], float)[np.asarray(_trk.final["tip_of"], int)]
+_sk = (np.maximum(_mk, 1e-9) * np.maximum(_qk, 0.0))
+_sk = _sk / max(_sk.sum(), 1e-12)
+_psi = float(np.asarray(_trk.Q)[-1]) * _sk / np.maximum(_mk, 1e-12)
+_rat = _psi / np.maximum(_qk, 1e-12)
+check("delivery per unit mass is the tip supply times one constant",
+      bool(np.allclose(_rat, _rat[0], rtol=1e-9)),
+      f"spread over {len(_rat)} units {_rat.max() / max(_rat.min(), 1e-300) - 1:.1e}")
+
 # the final per-segment state covers every segment, so tips index into it
 from organgrow.closed import _q_full as _qf
 _fin = tr_.final

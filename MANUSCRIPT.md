@@ -50,7 +50,13 @@ perfusion circuit is driven decides the outcome; at a fixed inlet pressure the
 construct overshoots to 1.82 times its mass without settling, while one held
 at a fixed root flow tracks a supply budget in the aggregate, its mass rising
 as the delivered flow to an exponent of 0.90 while most of its units stop
-short of their own share of the supply. Scaling the domain
+short of their own share of the supply. That gap is the paper's sharpest
+result: a supply constraint fixes how much tissue a construct carries and
+leaves what the tissue is made of undetermined. Giving the model the
+involution it lacks returns the same mass on roughly a third of the units, so
+mass, unit number and function come apart, and a construct optimised to
+recover mass need not recover the architecture it was designed around.
+Scaling the domain
 15-fold raises unit count only as V^0.45, and past an intermediate size the
 unit count also stops being reproducible, its coefficient of variation rising
 from 0.09 to 0.47. The model is not fitted to any construct and its
@@ -401,8 +407,20 @@ units to 0.52 at an unchanged 0.97 of its mass. The share left at the mass
 floor falls from 0.72 to 0.13 in the renewing construct and from 0.40 to 0.04
 in the spent source. Over a tenfold range of the rate, 0.02 to 0.20 per day,
 the renewing construct keeps between 0.35 and 0.40 of its units and the spent
-source between 0.51 and 0.53, so the answer rests on the mechanism existing and
-not on how fast it runs.
+source between 0.51 and 0.53. What that supports is narrow and worth stating
+narrowly: the final unit fraction is insensitive to the rate across that range
+at this horizon, which is 80 days after the injury. The same endpoint can be
+reached along different trajectories, and we have not measured them.
+
+What the unit selected for removal is starving of also needs saying, because
+the criterion and the growth rule could have been reading different
+quantities. They are not. A unit's delivery per unit mass under a fixed inflow
+is $Q s_j / m_j$, and with $s_j \propto m_j^{\xi} q_j$ at $\xi = 1$ the mass
+cancels exactly: $Q s_j / m_j = Q q_j / \sum_k m_k q_k$. The delivery per unit
+mass is therefore the tip supply $q_j$ times a quantity common to every unit
+in the construct, so a threshold on either selects the same units in the same
+order and the two differ only in where the cut falls. The criterion is the
+supply the circulation actually provides, not a proxy for it.
 
 The residual falls with it, to 0.23 in the renewing construct and to 0.18 in
 the spent source, and does not approach zero. Clearing the stranded units
@@ -411,6 +429,14 @@ back the growth it would need to reach its ceiling, so these are two separate
 defects and involution addresses one of them. We keep it out of the result
 above because its rate is calibrated against nothing, and what this section
 reports should not rest on a number we chose.
+
+All of this is structure, and none of it is function. A construct that carries
+0.97 of its pre-injury mass on 0.37 of its units has recovered its mass and
+has not been shown to recover anything a liver does. The model has no measure
+of function at all (Section 5), so what is reported here is structural
+recovery and perfusion-weighted mass, and the distance between those and
+function is the point rather than an aside: mass, unit number and function are
+three quantities, and a supply constraint fixes only the first.
 
 A construct fed at constant flow therefore tracks its supply in the aggregate,
 and does so asymmetrically: it grows into a larger budget far more readily
@@ -470,10 +496,17 @@ pancreas the multipotent pool is at 0.0001 of the lineage at E15.5, the end of
 the window in which that organ specifies its units: 100 % of the window
 elapsed. In human fetal kidney the progenitors are still at 0.1689 of the
 lineage at week 18, 43 % of the way through a window that runs to weeks 34 to
-36 and closes when those progenitors are exhausted [5]. In mouse liver the
-hepatoblast programme is at 0.0000 by E17.5, 24 % of the way through the window
-over which hepatocyte number is still rising, and the liver goes on to gain
-more than fivefold in mass by P20 by dividing cells it has already made.
+36 and closes when those progenitors are exhausted [5]. When nephrogenesis
+stops varies between individuals, and in a series spanning weeks 20 to 41 one
+infant was still forming nephrons at week 37 [11], so the end of the window is
+a typical value and not a constant. In mouse liver the hepatoblast programme
+is at 0.0000 by E17.5, 24 % of the way through the window over which hepatocyte
+number is still rising. That fraction is an upper bound. We take the window to
+end at P20, which is conservative: the one quantification of hepatocyte number
+against postnatal age in mouse puts the hyperplastic phase between one and two
+months and liver growth ending after two months [12], which would make the
+fraction a tenth rather than a quarter. Either way the liver goes on building
+after its named programme is gone, by dividing cells it has already made.
 
 Two tissues are limited by the pool they deplete and one is not. That is what
 the single property predicts, and it is what counting progenitors alone would
@@ -639,9 +672,21 @@ Each of the following would decide one result. None has been done.
 
 ## 5. Limitations
 
-The parameters are chosen, not fitted; the single calibration is the
-contraction of the spread of unit number in mouse liver. No prediction in this
-paper has been tested against a construct or a tissue.
+No parameter in this paper is fitted to data. The values are chosen, the same
+values are used for all three regimes except the four that define a regime,
+and what we report are ratios, orderings and contrasts rather than absolute
+sizes, because those are what a chosen parameter set can support. During the
+development of the model an earlier version was tuned so that its renewing
+organ reproduced a postnatal contraction of the spread of lobule number
+measured in mouse [13]; that tuning is not in the pipeline this paper runs,
+no number reported here depends on it, and we mention it only because the
+repository keeps it. It would in any case be thin evidence: that study counted
+lobules at two ages, in three animals at one week and six at eight weeks, and
+reported the change as roughly twofold without giving a spread in the text.
+
+No prediction in this paper has been tested against a construct or a tissue,
+and the model carries no measure of biological function, so every recovery
+reported here is structural.
 
 The spatial constraint is local exclusion between neighbouring units, not the
 packing limit of the container, which never binds.
@@ -685,6 +730,17 @@ Recovery after injury requires the ability of a unit to enlarge to be restored
 by hand, through a parameter that resets the growth clock. The model does not
 derive that restoration from the injury, and the consequences of restoring it
 only in part are not swept.
+
+The involution of Section 3.4 is swept over its rate and over the supply at
+which a unit counts as starving, and not over the two other choices it
+carries: the mass below which a unit is removed rather than left to shrink,
+and the absence of any requirement that a unit stay unsupplied for a time
+before it goes. A unit that dips below the threshold on one day and recovers
+on the next is treated the same as one that never recovers. Nor does the
+vascular tree lose a branch when the tissue under it goes. Calibres adapt and
+a vessel below its critical radius regresses, so a branch that loses its
+tissue loses its flow and narrows over the following days, but that is slower
+than the loss it answers and the model does not prune.
 
 ## 6. Conclusion
 
@@ -743,6 +799,18 @@ mechanisms, pathophysiology dynamics, and clinical implications in acute kidney
 injury and chronic kidney disease *Kidney Res. Clin. Pract.* advance online
 publication, doi:10.23876/j.krcp.25.405
 
+[11] Ryan D et al. 2018 Development of the human fetal kidney from mid to late
+gestation in male and female infants *EBioMedicine* **27**,
+doi:10.1016/j.ebiom.2017.12.016
+
+[12] Delone G V, Uryvaeva I V, Koretskiĭ V F and Brodskiĭ V Ya 1987 Analysis of
+the postnatal growth of the mouse liver by estimating the hepatocyte count,
+their weight and ploidy *Ontogenez* **18** 304–8 (in Russian, English abstract)
+
+[13] Azizoglu D B, Perez K, Zheng S L, Rahman S, Rim E Y, Anbarchian T, Fish M,
+Loh K M, Red-Horse K and Nusse R 2025 Vascularization of neonatal liver lobules
+presages adult liver size *Nat. Commun.* **16** 9989
+
 ## Notes for the authors, to be removed before submission
 
 **Still to confirm on the title page.** The spelling of Enrique
@@ -755,48 +823,53 @@ Vázquez-Victorio and before the senior author, which keeps the corresponding
 author last, but the group decides. ORCID identifiers are recommended by IOP
 and are not yet here.
 
-**Of the seven claims that needed a citation, four are now cited** and three
-are still open. References [4] to [10] were located and verified against the
-publishers' own pages; the author lists are given as *et al.* and must be
-expanded to the form Biofabrication asks for, and DOIs added, at submission.
+**Every claim that needed a citation now has one.** References [4] to [13]
+were located and verified against the publishers' own pages. The author lists
+are given as *et al.* and must be expanded to the form Biofabrication asks for,
+and DOIs added, at submission. Two fields are still missing: the volume and
+pages of [11], of which only the volume was confirmed, and whether [10] has
+been assigned a volume since it appeared online.
 
-Cited now: mononuclear hepatocytes as their own progenitors [4]; the human
-nephrogenesis window closing with the progenitors exhausted [5]; the four GEO
-accessions [6]–[9]; compensatory renal hypertrophy after nephrectomy [10].
+The three that were open are closed as follows, and two of them changed what
+the manuscript says rather than only adding a reference.
 
-Still open:
-
-1. **The calibration.** The paper is Azizoglu D B, Perez K, Zheng S L,
-   Rahman S, Rim E Y, Anbarchian T, Fish M, Loh K M, Red-Horse K and Nusse R
-   2025 Vascularization of neonatal liver lobules presages adult liver size
-   *Nat. Commun.* **16** 9989, doi:10.1038/s41467-025-64930-w. The two numbers
-   the repository calibrates against, the coefficient of variation of lobule
-   number 0.229 at the start and 0.074 at closure, and the 1.82-fold growth,
-   are **not in that paper's text**. The text reports only a "twofold
-   increase", from n = 3 animals at 1 week to n = 6 at 8 weeks, with mean ± s.d.
-   drawn in Fig. 1g and the values in the Source Data file. Someone must
-   download that Source Data, recompute both coefficients of variation, and
-   either confirm 0.229 and 0.074 or replace them and recalibrate. A
-   coefficient of variation from three animals is a weak estimate and the
-   manuscript should say so wherever the calibration appears.
-2. **The weeks of the human nephrogenesis window.** Reference [5] establishes
-   that nephrogenesis ends with the progenitor population exhausted but gives
-   no gestational weeks. The figures 5 to 34–36 still need their own source.
-3. **The mouse liver window.** The manuscript says hepatocyte number is still
-   rising to P20. The only quantification found says otherwise: Delone G V,
-   Uryvaeva I V, Koretskiĭ V F and Brodskiĭ V Ya 1987 *Ontogenez* **18** 304–8
-   report that in mouse, hepatocyte number rises between one and two months,
-   with growth ending after two months. If that is right the window runs to
-   about P60, not P20, and `WINDOW["liver"]` in `scripts/26_transcriptome.py`
-   is wrong. The correction moves the result in the manuscript's favour: the
-   hepatoblast programme would be gone 10 % of the way through the window
-   instead of 24 %. It changes a checked number, so it needs a decision and a
-   rerun, not an edit.
+1. **The calibration was not a calibration of this paper.** The tuning against
+   mouse lobule number lives in `scripts/12_calibrate_closed.py`, which sits
+   under the `closed` target, is labelled there as exploratory and with
+   parameters from earlier versions, and is not run by `make paper`. Nothing in
+   `PAPER_NUMBERS.md` depends on it: nu = 8 is a chosen value used throughout,
+   and `sigma_param` belongs to the open engine, which this manuscript does not
+   use. Section 5 claimed a single calibration and now says what is true, that
+   no parameter is fitted and that the results are ratios and orderings. The
+   mouse tuning is mentioned once, with [13], and with the reason it would be
+   thin evidence anyway: that study counted lobules at two ages only, three
+   animals at one week and six at eight weeks, and gives no spread in its text.
+   The numbers the repository tuned against, 0.229, 0.074 and 1.82-fold, are
+   read from Fig. 1g and are not in the text; they stay in the repository as
+   the record of what was done and no longer appear as a claim.
+2. **The weeks of the human nephrogenesis window** are now [11], which also
+   supplies something better than a constant: across weeks 20 to 41 the stop
+   varies between individuals and one infant was still forming nephrons at
+   week 37. The manuscript says so.
+3. **The mouse liver window** is now stated as an upper bound rather than a
+   figure. P20 is kept in `WINDOW` as the short end of what the literature
+   supports, and [12] is cited for the hyperplastic phase running between one
+   and two months, which would put the fraction nearer a tenth. Keeping the
+   conservative window means no checked number moves and the claim is the
+   weaker of the two, which is the one worth making.
 
 The mouse pancreatic window E9.5 to E15.5 is covered by [2] for the claim the
 manuscript actually makes about it. If a source for the window itself is
 wanted, Zhou Q et al. 2007 *Dev. Cell* **13** 103–14 is the candidate and has
 not been verified here.
+
+**Open from the fourth review, as work rather than text.** The involution
+sensitivity sweeps its rate and the supply at which a unit counts as starving.
+It does not sweep the mass at which a unit is removed, nor a requirement that
+a unit stay unsupplied for some days before it goes, and it reports an endpoint
+at day 220 rather than a trajectory. Section 5 says so. Adding the two
+thresholds to `scripts/33_involution.py` and recording N(t) and M(t) would
+close it, at the cost of another few hundred simulations.
 
 **Four results from the earlier framing are not in this manuscript** and are
 listed in `FIGURES.md` as supplementary: the 96 human kidneys from 48 donors,
