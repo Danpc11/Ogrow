@@ -1,6 +1,6 @@
 # Numbers the paper uses
 
-Model version 4.48.0, commit 5bc57ba, generated 2026-11-24 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.49.0, commit 5fe3834, generated 2026-11-24 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b024.
 
@@ -170,27 +170,83 @@ The units stranded at the mass floor above are there because the reference model
 
 **liver**: phi = 0.000752, calibrated on seeds 400 to 423, evaluated on seeds 300 to 323, 24 seeds.
 
-| involution, per day | mass / pre-injury | units / pre-injury | residual | units at the mass floor |
-|---|---|---|---|---|
-| 0.00 | 1.020 [0.91, 1.08] | 0.91 [0.72, 1.04] | 0.335 | 0.72 |
-| 0.02 | 0.954 [0.84, 1.01] | 0.35 [0.29, 0.45] | 0.231 | 0.14 |
-| 0.05 | 0.966 [0.89, 1.07] | 0.37 [0.28, 0.50] | 0.233 | 0.13 |
-| 0.10 | 0.965 [0.83, 1.03] | 0.40 [0.25, 0.77] | 0.234 | 0.15 |
-| 0.20 | 0.977 [0.89, 1.05] | 0.39 [0.28, 0.46] | 0.227 | 0.14 |
+The rate, which is how fast the mechanism runs.
 
-Over a tenfold range of the rate the construct keeps 0.35 to 0.40 of its units, against 0.91 with the mechanism absent; the share at the mass floor falls from 0.72 to between 0.13 and 0.15, and the residual from 0.33 to between 0.23 and 0.23. The rate sets how fast, not where it lands.
+| setting | mass / pre-injury | units / pre-injury | residual | units at the mass floor | tips serving nothing | days to 90 % of the removals |
+|---|---|---|---|---|---|---|
+| 0.00 per day | 1.020 [0.91, 1.08] | 0.91 [0.72, 1.04] | 0.335 | 0.72 | 0.17 | - |
+| 0.02 per day | 0.954 [0.84, 1.01] | 0.35 [0.29, 0.45] | 0.231 | 0.14 | 0.35 | 29 [17, 45] |
+| 0.05 per day | 0.966 [0.89, 1.07] | 0.37 [0.28, 0.50] | 0.233 | 0.13 | 0.35 | 30 [12, 57] |
+| 0.10 per day | 0.965 [0.83, 1.03] | 0.40 [0.25, 0.77] | 0.234 | 0.15 | 0.35 | 26 [14, 59] |
+| 0.20 per day | 0.977 [0.89, 1.05] | 0.39 [0.28, 0.46] | 0.227 | 0.14 | 0.36 | 27 [9, 45] |
+
+Over a tenfold range of the rate the construct keeps 0.35 to 0.40 of its units, against 0.91 with the mechanism absent; the share at the mass floor falls from 0.72 to between 0.13 and 0.15, and the residual from 0.33 to between 0.23 and 0.23.
+
+What turns it on. The rate is held at 0.05 per day throughout these, so each sweep crosses the one above at its reference setting. `involution_q` is the supply, as a share of the setpoint, below which a unit counts as starving; `involution_hold` is the consecutive days it must stay there before it begins to lose mass; `involution_exit` is the mass, as a share of the mass a unit is born with, below which it is removed.
+
+| setting | mass / pre-injury | units / pre-injury | residual | units at the mass floor | tips serving nothing | days to 90 % of the removals |
+|---|---|---|---|---|---|---|
+| q = 0.03 | 0.947 [0.85, 1.04] | 0.36 [0.27, 0.46] | 0.231 | 0.16 | 0.34 | 31 [8, 54] |
+| q = 0.05 | 0.951 [0.88, 1.03] | 0.36 [0.26, 0.45] | 0.225 | 0.15 | 0.35 | 27 [9, 47] |
+| q = 0.1 | 0.966 [0.89, 1.07] | 0.37 [0.28, 0.50] | 0.233 | 0.13 | 0.35 | 30 [12, 57] |
+| q = 0.2 | 0.996 [0.88, 1.09] | 0.38 [0.29, 0.63] | 0.223 | 0.12 | 0.37 | 27 [11, 53] |
+| q = 0.3 | 1.073 [1.00, 1.14] | 0.38 [0.30, 0.49] | 0.210 | 0.12 | 0.37 | 21 [7, 34] |
+
+| setting | mass / pre-injury | units / pre-injury | residual | units at the mass floor | tips serving nothing | days to 90 % of the removals |
+|---|---|---|---|---|---|---|
+| hold = 1 | 0.966 [0.89, 1.07] | 0.37 [0.28, 0.50] | 0.233 | 0.13 | 0.35 | 30 [12, 57] |
+| hold = 3 | 0.961 [0.88, 1.03] | 0.36 [0.30, 0.57] | 0.229 | 0.13 | 0.36 | 29 [14, 53] |
+| hold = 5 | 0.970 [0.89, 1.07] | 0.37 [0.29, 0.50] | 0.230 | 0.14 | 0.36 | 31 [16, 55] |
+| hold = 10 | 0.967 [0.89, 1.06] | 0.38 [0.31, 0.50] | 0.229 | 0.15 | 0.35 | 30 [12, 55] |
+
+| setting | mass / pre-injury | units / pre-injury | residual | units at the mass floor | tips serving nothing | days to 90 % of the removals |
+|---|---|---|---|---|---|---|
+| exit = 0.25 | 0.967 [0.87, 1.04] | 0.38 [0.29, 0.49] | 0.232 | 0.18 | 0.35 | 32 [14, 54] |
+| exit = 0.5 | 0.966 [0.89, 1.07] | 0.37 [0.28, 0.50] | 0.233 | 0.13 | 0.35 | 30 [12, 57] |
+| exit = 0.75 | 0.965 [0.87, 1.05] | 0.36 [0.29, 0.45] | 0.231 | 0.09 | 0.36 | 25 [7, 53] |
+| exit = 0.9 | 0.971 [0.88, 1.07] | 0.35 [0.28, 0.41] | 0.230 | 0.04 | 0.36 | 19 [5, 40] |
+
+Across every setting of the rate and of the three conditions that turn it on, the construct keeps 0.35 to 0.40 of its units against 0.91 with the mechanism absent, while its mass stays between 0.95 and 1.07 of pre-injury against 1.02. The settings move when the removals happen, not what the construct ends as.
 
 **kidney**: phi = 0.000905, calibrated on seeds 400 to 423, evaluated on seeds 300 to 323, 24 seeds.
 
-| involution, per day | mass / pre-injury | units / pre-injury | residual | units at the mass floor |
-|---|---|---|---|---|
-| 0.00 | 0.970 [0.87, 1.05] | 0.70 [0.69, 0.70] | 0.206 | 0.40 |
-| 0.02 | 0.966 [0.86, 1.05] | 0.51 [0.30, 0.63] | 0.177 | 0.04 |
-| 0.05 | 0.969 [0.86, 1.05] | 0.52 [0.33, 0.63] | 0.178 | 0.04 |
-| 0.10 | 0.971 [0.86, 1.06] | 0.52 [0.30, 0.63] | 0.176 | 0.03 |
-| 0.20 | 0.973 [0.86, 1.06] | 0.53 [0.38, 0.64] | 0.177 | 0.03 |
+The rate, which is how fast the mechanism runs.
 
-Over a tenfold range of the rate the construct keeps 0.51 to 0.53 of its units, against 0.70 with the mechanism absent; the share at the mass floor falls from 0.40 to between 0.03 and 0.04, and the residual from 0.21 to between 0.18 and 0.18. The rate sets how fast, not where it lands.
+| setting | mass / pre-injury | units / pre-injury | residual | units at the mass floor | tips serving nothing | days to 90 % of the removals |
+|---|---|---|---|---|---|---|
+| 0.00 per day | 0.970 [0.87, 1.05] | 0.70 [0.69, 0.70] | 0.206 | 0.40 | 0.19 | - |
+| 0.02 per day | 0.966 [0.86, 1.05] | 0.51 [0.30, 0.63] | 0.177 | 0.04 | 0.26 | 34 [10, 57] |
+| 0.05 per day | 0.969 [0.86, 1.05] | 0.52 [0.33, 0.63] | 0.178 | 0.04 | 0.26 | 36 [15, 53] |
+| 0.10 per day | 0.971 [0.86, 1.06] | 0.52 [0.30, 0.63] | 0.176 | 0.03 | 0.26 | 38 [14, 56] |
+| 0.20 per day | 0.973 [0.86, 1.06] | 0.53 [0.38, 0.64] | 0.177 | 0.03 | 0.26 | 36 [0, 65] |
+
+Over a tenfold range of the rate the construct keeps 0.51 to 0.53 of its units, against 0.70 with the mechanism absent; the share at the mass floor falls from 0.40 to between 0.03 and 0.04, and the residual from 0.21 to between 0.18 and 0.18.
+
+What turns it on. The rate is held at 0.05 per day throughout these, so each sweep crosses the one above at its reference setting. `involution_q` is the supply, as a share of the setpoint, below which a unit counts as starving; `involution_hold` is the consecutive days it must stay there before it begins to lose mass; `involution_exit` is the mass, as a share of the mass a unit is born with, below which it is removed.
+
+| setting | mass / pre-injury | units / pre-injury | residual | units at the mass floor | tips serving nothing | days to 90 % of the removals |
+|---|---|---|---|---|---|---|
+| q = 0.03 | 0.962 [0.85, 1.04] | 0.51 [0.30, 0.63] | 0.177 | 0.05 | 0.26 | 33 [12, 56] |
+| q = 0.05 | 0.963 [0.85, 1.05] | 0.51 [0.30, 0.63] | 0.177 | 0.04 | 0.26 | 34 [16, 57] |
+| q = 0.1 | 0.969 [0.86, 1.05] | 0.52 [0.33, 0.63] | 0.178 | 0.04 | 0.26 | 36 [15, 53] |
+| q = 0.2 | 0.988 [0.88, 1.06] | 0.52 [0.38, 0.61] | 0.174 | 0.04 | 0.26 | 38 [14, 68] |
+| q = 0.3 | 1.013 [0.89, 1.09] | 0.52 [0.41, 0.64] | 0.171 | 0.05 | 0.27 | 34 [0, 58] |
+
+| setting | mass / pre-injury | units / pre-injury | residual | units at the mass floor | tips serving nothing | days to 90 % of the removals |
+|---|---|---|---|---|---|---|
+| hold = 1 | 0.969 [0.86, 1.05] | 0.52 [0.33, 0.63] | 0.178 | 0.04 | 0.26 | 36 [15, 53] |
+| hold = 3 | 0.967 [0.86, 1.05] | 0.52 [0.30, 0.63] | 0.178 | 0.04 | 0.26 | 35 [15, 53] |
+| hold = 5 | 0.968 [0.85, 1.05] | 0.52 [0.30, 0.63] | 0.177 | 0.04 | 0.26 | 34 [15, 55] |
+| hold = 10 | 0.968 [0.86, 1.05] | 0.52 [0.30, 0.63] | 0.178 | 0.04 | 0.26 | 34 [16, 55] |
+
+| setting | mass / pre-injury | units / pre-injury | residual | units at the mass floor | tips serving nothing | days to 90 % of the removals |
+|---|---|---|---|---|---|---|
+| exit = 0.25 | 0.969 [0.86, 1.06] | 0.53 [0.35, 0.69] | 0.178 | 0.07 | 0.26 | 37 [0, 61] |
+| exit = 0.5 | 0.969 [0.86, 1.05] | 0.52 [0.33, 0.63] | 0.178 | 0.04 | 0.26 | 36 [15, 53] |
+| exit = 0.75 | 0.967 [0.86, 1.05] | 0.51 [0.32, 0.63] | 0.177 | 0.02 | 0.26 | 32 [13, 51] |
+| exit = 0.9 | 0.966 [0.85, 1.06] | 0.51 [0.37, 0.63] | 0.177 | 0.01 | 0.26 | 32 [11, 55] |
+
+Across every setting of the rate and of the three conditions that turn it on, the construct keeps 0.51 to 0.53 of its units against 0.70 with the mechanism absent, while its mass stays between 0.96 and 1.01 of pre-injury against 0.97. The settings move when the removals happen, not what the construct ends as.
 
 ## Injury after closure (day 140, 30 % of the units removed by a plane cut, read on day 220; the first four entries are day 220 over the day before the injury, the last two the share of what the cut took that is back, each the mean over 24 seeds with the range they span)
 

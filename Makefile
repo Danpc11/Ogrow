@@ -1,11 +1,32 @@
-.PHONY: all clean distclean figures analyses audit source_data test closed paper check
+.PHONY: all clean distclean figures analyses audit source_data test closed paper check python-ok
 PY ?= $(shell command -v python3 2>/dev/null || command -v python)
 # the package is importable from src without installing anything
 export PYTHONPATH := $(CURDIR)/src:$(PYTHONPATH)
 
+# PY is whatever python3 is on PATH, so running these targets outside the
+# environment picks up a system Python that cannot import what the model
+# needs. Every script then fails the same way, one after another, and the
+# `make` error that follows is easy to scroll past: a release was once
+# committed and pushed from a run where nothing had executed at all. Fail
+# once, at the start, and say what to do about it.
+python-ok:
+	@$(PY) -c "import yaml, numpy, scipy, matplotlib, organgrow" >/dev/null 2>&1 \
+	  || { echo ""; \
+	       echo "  This Python cannot import what the model needs:"; \
+	       echo "    $(PY)"; \
+	       echo ""; \
+	       echo "  Activate the environment first, for example"; \
+	       echo "    source ~/venvs/organgrow/bin/activate"; \
+	       echo "  or point make at one"; \
+	       echo "    make PY=/path/to/python3 $(MAKECMDGOALS)"; \
+	       echo ""; \
+	       echo "  The import error follows."; \
+	       echo ""; \
+	       $(PY) -c "import yaml, numpy, scipy, matplotlib, organgrow"; }
+
 all: figures
 
-analyses:
+analyses: python-ok
 	$(PY) scripts/00_cost.py
 	$(PY) scripts/01_ensembles.py
 	$(PY) scripts/02_closure.py
@@ -24,25 +45,25 @@ audit: analyses
 source_data: audit
 	$(PY) scripts/10_source_data.py
 
-figures: source_data
+figures: source_data python-ok
 	mkdir -p figures/out
 	@for f in figures/fig[1-6].py; do \
 	  $(PY) $$f || exit 1; \
 	done
 
-test:
+test: python-ok
 	$(PY) tests/test_smoke.py
 
 # what CI runs besides the tests: static analysis, and that the version and
 # the stamped numbers of the paper agree
-check:
+check: python-ok
 	$(PY) -m pyflakes src scripts figures tests
 	$(PY) scripts/check_consistency.py
 	$(PY) scripts/29_check_manuscript.py
 
 # Exploratory runs from the development of the closed model, with parameters
 # from earlier versions. The paper does not use them; see `make paper`.
-closed:
+closed: python-ok
 	$(PY) scripts/12_calibrate_closed.py
 	$(PY) scripts/13_phase_diagram.py
 	$(PY) scripts/14_size_sweep.py
@@ -61,7 +82,7 @@ distclean: clean
 # The paper: closed model and human cohort. The regime replicates and the
 # transmission are the long parts, tens of minutes on one core each and a few
 # on a multicore machine; every run is cached, so an interrupted build resumes.
-paper:
+paper: python-ok
 	for r in liver kidney pancreas; do for c in baseline pool setpoint; do \
 	  OGROW_SEEDS=24 $(PY) scripts/15_transmission.py $$r $$c 0 24; done; done
 	OGROW_SEEDS=24 $(PY) scripts/15_transmission.py
