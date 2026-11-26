@@ -1,6 +1,6 @@
 # Numbers the paper uses
 
-Model version 4.64.0, commit d2958f8, generated 2026-11-25 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.65.0, commit 2cc1d83, generated 2026-11-25 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b024.
 
@@ -468,4 +468,22 @@ Variation across 24 seeds grown from identical parameters, which is what two org
 | liver | 0.086 | 0.057 | 0.058 |
 
 The two kidneys of one person, CT volume, 48 pairs (TRUSTED): left-right standard deviation of log volume, per kidney, 0.098 with the mean difference between sides (-7.4 %) removed and 0.111 with it left in; between people 0.322. The left-right difference against kidney size gives Spearman rho = +0.25, P = 0.09, over 109 to 553 cm3. The volumes carry segmentation error, which is not separated here.
+
+
+## An extension: progenitors that make their tip branch
+
+Not the reference model, and no number above depends on it. A source of one cap of 60 progenitors that divides at 0.05 a day, is spent in making a unit, and lets a segment branch only while it holds two caps, grown for 120 days. On day 45 each progenitor dies with probability 0.4. Ablated over control, 24 paired seeds, 95 % bootstrap intervals. The response is the fractional rise of the division rate in a cap below its size. The rules were written after the measurements below were known.
+
+| nucleation | q_set | nu | response | units, control | pool | cap, next day | cap back to 0.95 | sites | units | units since the ablation |
+|---|---|---|---|---|---|---|---|---|---|---|
+| reference | 0.6 | 8.0 | 0 | 429 | 0.54 [0.49, 0.58] | 0.65 | 50 d | 0.55 [0.50, 0.60] | 0.81 [0.72, 0.94] | 0.77 [0.68, 0.92] |
+| reference | 0.6 | 8.0 | 1 | 462 | 0.68 [0.66, 0.70] | 0.67 | 9 d | 0.71 [0.68, 0.75] | 0.85 [0.75, 0.95] | 0.84 [0.72, 0.94] |
+| threshold halved | 0.3 | 8.0 | 0 | 384 | 0.53 [0.48, 0.59] | 0.61 | 10 d | 0.52 [0.44, 0.60] | 0.73 [0.64, 0.86] | 0.65 [0.52, 0.82] |
+| threshold halved | 0.3 | 8.0 | 1 | 764 | 0.65 [0.62, 0.68] | 0.68 | 11 d | 0.67 [0.65, 0.70] | 0.88 [0.85, 0.90] | 0.86 [0.84, 0.89] |
+| threshold halved, law slowed | 0.3 | 2.0 | 0 | 421 | 0.54 [0.49, 0.60] | 0.69 | 3 d | 0.60 [0.54, 0.66] | 0.79 [0.71, 0.91] | 0.74 [0.63, 0.88] |
+| threshold halved, law slowed | 0.3 | 2.0 | 1 | 786 | 0.67 [0.65, 0.70] | 0.68 | 25 d | 0.72 [0.69, 0.75] | 0.88 [0.84, 0.91] | 0.87 [0.83, 0.91] |
+| threshold quartered, law slowed | 0.15 | 2.0 | 0 | 384 | 0.57 [0.53, 0.62] | 0.90 | 7 d | 0.58 [0.51, 0.66] | 0.64 [0.57, 0.70] | 0.52 [0.41, 0.61] |
+| threshold quartered, law slowed | 0.15 | 2.0 | 1 | 886 | 0.66 [0.63, 0.68] | 0.67 | 14 d | 0.71 [0.68, 0.73] | 0.86 [0.83, 0.89] | 0.85 [0.81, 0.88] |
+
+Measured, ablated over control. Without a proliferative response (Cebrian et al. 2014): cells per tip 0.60, 0.95 and 1.04 one, two and three days after tamoxifen; tips 1.06, 0.71 and 0.59; total progenitors growing as fast as in control; glomeruli 0.48 at birth and 0.58 in the adult. With one (Muthukrishnan et al. 2018): progenitors 0.60 after a day and 0.85 after two; glomeruli 0.88 and 0.79 three and ten days after birth. Model days are not embryonic days.
 
