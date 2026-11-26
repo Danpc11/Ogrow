@@ -1,6 +1,6 @@
 # Numbers the paper uses
 
-Model version 4.70.0, commit 0e57e69, generated 2026-11-26 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.70.0, commit 8fc2108, generated 2026-11-26 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b024.
 
@@ -492,9 +492,9 @@ Measured, ablated over control. Without a proliferative response (Cebrian et al.
 
 ## Nearness to capacity against size
 
-Capacity is the units reached, at a given perfusion threshold and in a given domain, by a source whose pool cannot run out (the renewing source at ten times its pool). It is measured independently of the source it is set against, and it is operational: it belongs to a domain, a threshold and the branching rules, not to a tissue. Elasticities are to the seeded pool, paired over 24 seeds.
+Capacity is the units reached, at a given perfusion threshold and in a given domain, by a reference source with a very large pool (the renewing source at twenty times its pool, 52,000). It is measured independently of the source it is set against, and it is operational: it belongs to a domain, a threshold and the branching rules, not to a tissue. Elasticities are to the seeded pool, paired over 24 seeds.
 
-Whether it is a capacity. Units of the saturating source at the reference threshold with its pool at 26,000, 52,000, 104,000: 267, 308, 371. Its gain over the last 40 days is 3.9%. At 280 days instead of 140: domain scale 0.4, 155 to 162 (+5%); domain scale 0.8, 565 to 612 (+8%).
+Whether it is a capacity. Units of the saturating source at the reference threshold with its pool at 26,000, 52,000, 104,000: 267, 308, 371. The count is still rising at the last doubling, so the capacity is a reference size at a stated pool and not a ceiling. Its gain over the last 40 days is 3.9%. At 280 days instead of 140: domain scale 0.4, 155 to 162 (+5%); domain scale 0.8, 565 to 612 (+8%).
 
 The perfusion threshold changed inside each source. Size and capacity fall together, so their ratio hardly moves.
 

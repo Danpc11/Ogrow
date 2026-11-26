@@ -6,7 +6,7 @@ Hugo Tovar, Genaro Vázquez-Victorio, Miguel Ángel Peña-Rico, Angélica S. Mar
 
 This file contains Figure S1 (provided as a separate file), Notes S1 and S2, and Tables S1 to S8. Every table is a section of `PAPER_NUMBERS.md` as stamped, and is rebuilt by `make paper`.
 
-Model version 4.70.0, commit 0e57e69, generated 2026-11-26 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.70.0, commit 8fc2108, generated 2026-11-26 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b024.
 
