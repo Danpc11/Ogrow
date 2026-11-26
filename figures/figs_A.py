@@ -890,7 +890,7 @@ def abstract():
         a.add_patch(Circle((x + 0.075, 0.215), 0.048 * np.sqrt(size), fc=gc, ec="none", alpha=0.9))
         note(a, x, 0.115, txt, "small")
     note(a, 0.5, 0.275, "after removing most of the progenitors", "small", K["grey"])
-    note(a, 0.5, 0.035, "How an organ's size answers a loss of progenitors\nnames the resource that limits it",
+    note(a, 0.5, 0.035, "Coupled local constraints set where growth arrests\nand how size answers a loss of progenitors",
          "label", fontweight="bold")
     fig.savefig(str(OUT / "FigA0_graphical_abstract.pdf"))
     fig.savefig(str(OUT / "FigA0_graphical_abstract.png"), dpi=300)

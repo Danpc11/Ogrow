@@ -9,8 +9,7 @@ them against the manuscript before sending.
 
 Dear Editor,
 
-We submit "Local resource limitation determines how organ size depends on
-progenitor number" for consideration as an Article in *Cell Systems*.
+We submit "Coupled local constraints modulate organ size and growth arrest" for consideration as an Article in *Cell Systems*.
 
 **What was known.** Whether the size of an organ depends on the number of its
 progenitors differs between organs. Ablating progenitors in the mouse embryo
@@ -22,8 +21,8 @@ et al., 2018). These results are read as properties of organs, intrinsic or
 extrinsic control of size, and no quantitative account derives them from a
 common mechanism or explains an organ that behaves both ways.
 
-**The conceptual advance.** We show that one local growth rule produces all of
-these outcomes. Functional units form at the tips of a perfused branching tree
+**The conceptual advance.** We show that one local growth rule, in which perfusion,
+progenitors, and space act as coupled constraints, produces all of these outcomes. Functional units form at the tips of a perfused branching tree
 at a rate set by the progenitors present and by perfusion above a threshold,
 and growth stops at a tip when perfusion, progenitors, or space runs out.
 Nothing in the model represents the size of the organ. How strongly size depends on progenitor number is set by how near the tissue comes to the size perfusion can support. With parameters that were not optimized against these measurements, the model gives 0.44 of the reference mass for the
