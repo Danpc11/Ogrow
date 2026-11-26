@@ -1,6 +1,6 @@
 # Numbers the paper uses
 
-Model version 4.67.0, commit 4e1e83a, generated 2026-11-26 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.68.0, commit d67f5bd, generated 2026-11-26 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b024.
 
@@ -59,26 +59,28 @@ Two different things are reported here and they do not add up to each other. `po
 
 The three regimes differ in several parameters at once, so the binary property cannot be credited with the separation until the others are held fixed. This varies each independently and reports where the pool stands at arrest. Division and loss are one axis rather than two, swept over the pairings the three sources use, because a pool that divides without being lost grows without bound and because the kidney and the pancreas do not divide at all. The last column names the largest of the four shares, which is the bound that ended the growth (`scripts/34_regimes.py`).
 
-| renewal | pool | turnover | division | loss | units | spent | supply | room | active | what holds growth | named regime |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| 0 | 60 | static | 0.00 | 0.00 | 45.0 ± 4.6 | 0.75 | 0.25 | 0.00 | 0.00 | spent | pancreas-like |
-| 0 | 60 | decaying | 0.00 | 0.05 | 39.5 ± 3.0 | 1.00 | 0.00 | 0.00 | 0.00 | spent |  |
-| 0 | 60 | balanced | 0.10 | 0.10 | 43.3 ± 6.1 | 0.74 | 0.28 | 0.00 | 0.00 | spent |  |
-| 0 | 300 | static | 0.00 | 0.00 | 121.9 ± 8.7 | 0.41 | 0.49 | 0.10 | 0.00 | supply |  |
-| 0 | 300 | decaying | 0.00 | 0.05 | 89.0 ± 7.8 | 1.00 | 0.00 | 0.00 | 0.00 | spent | kidney-like |
-| 0 | 300 | balanced | 0.10 | 0.10 | 116.0 ± 11.9 | 0.41 | 0.51 | 0.08 | 0.00 | supply |  |
-| 0 | 2600 | static | 0.00 | 0.00 | 212.6 ± 15.1 | 0.08 | 0.74 | 0.18 | 0.00 | supply |  |
-| 0 | 2600 | decaying | 0.00 | 0.05 | 154.8 ± 13.1 | 1.00 | 0.00 | 0.00 | 0.00 | spent |  |
-| 0 | 2600 | balanced | 0.10 | 0.10 | 211.0 ± 16.8 | 0.12 | 0.70 | 0.19 | 0.00 | supply |  |
-| 1 | 60 | static | 0.00 | 0.00 | 87.8 ± 18.8 | 0.00 | 0.75 | 0.25 | 0.01 | supply |  |
-| 1 | 60 | decaying | 0.00 | 0.05 | 51.5 ± 7.7 | 1.00 | 0.00 | 0.00 | 0.00 | spent |  |
-| 1 | 60 | balanced | 0.10 | 0.10 | 77.4 ± 21.0 | 0.21 | 1.03 | 0.18 | 0.00 | supply |  |
-| 1 | 300 | static | 0.00 | 0.00 | 143.7 ± 21.0 | 0.00 | 0.78 | 0.22 | 0.00 | supply |  |
-| 1 | 300 | decaying | 0.00 | 0.05 | 98.4 ± 8.4 | 1.00 | 0.00 | 0.00 | 0.00 | spent |  |
-| 1 | 300 | balanced | 0.10 | 0.10 | 140.3 ± 12.9 | 0.06 | 0.78 | 0.32 | 0.01 | supply |  |
-| 1 | 2600 | static | 0.00 | 0.00 | 223.7 ± 22.9 | 0.00 | 0.80 | 0.20 | 0.00 | supply |  |
-| 1 | 2600 | decaying | 0.00 | 0.05 | 152.0 ± 14.8 | 1.00 | 0.00 | 0.00 | 0.00 | spent |  |
-| 1 | 2600 | balanced | 0.10 | 0.10 | 208.1 ± 17.9 | 0.06 | 0.78 | 0.19 | 0.00 | supply | liver-like |
+| renewal | pool | turnover | division | loss | units | spent | supply | room | active | what holds growth | elasticity of units to the pool | named regime |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 0 | 60 | static | 0.00 | 0.00 | 45.0 ± 4.6 | 0.75 | 0.25 | 0.00 | 0.00 | spent | +0.71 ± 0.05 | pancreas-like |
+| 0 | 60 | decaying | 0.00 | 0.05 | 39.5 ± 3.0 | 1.00 | 0.00 | 0.00 | 0.00 | spent | +0.62 ± 0.03 |  |
+| 0 | 60 | balanced | 0.10 | 0.10 | 43.3 ± 6.1 | 0.74 | 0.28 | 0.00 | 0.00 | spent | +0.73 ± 0.08 |  |
+| 0 | 300 | static | 0.00 | 0.00 | 121.9 ± 8.7 | 0.41 | 0.49 | 0.10 | 0.00 | supply | +0.42 ± 0.05 |  |
+| 0 | 300 | decaying | 0.00 | 0.05 | 89.0 ± 7.8 | 1.00 | 0.00 | 0.00 | 0.00 | spent | +0.37 ± 0.03 | kidney-like |
+| 0 | 300 | balanced | 0.10 | 0.10 | 116.0 ± 11.9 | 0.41 | 0.51 | 0.08 | 0.00 | supply | +0.48 ± 0.06 |  |
+| 0 | 2600 | static | 0.00 | 0.00 | 212.6 ± 15.1 | 0.08 | 0.74 | 0.18 | 0.00 | supply | +0.14 ± 0.04 |  |
+| 0 | 2600 | decaying | 0.00 | 0.05 | 154.8 ± 13.1 | 1.00 | 0.00 | 0.00 | 0.00 | spent | +0.24 ± 0.03 |  |
+| 0 | 2600 | balanced | 0.10 | 0.10 | 211.0 ± 16.8 | 0.12 | 0.70 | 0.19 | 0.00 | supply | +0.24 ± 0.04 |  |
+| 1 | 60 | static | 0.00 | 0.00 | 87.8 ± 18.8 | 0.00 | 0.75 | 0.25 | 0.01 | supply | +0.44 ± 0.12 |  |
+| 1 | 60 | decaying | 0.00 | 0.05 | 51.5 ± 7.7 | 1.00 | 0.00 | 0.00 | 0.00 | spent | +0.51 ± 0.07 |  |
+| 1 | 60 | balanced | 0.10 | 0.10 | 77.4 ± 21.0 | 0.21 | 1.03 | 0.18 | 0.00 | supply | +0.62 ± 0.11 |  |
+| 1 | 300 | static | 0.00 | 0.00 | 143.7 ± 21.0 | 0.00 | 0.78 | 0.22 | 0.00 | supply | +0.18 ± 0.06 |  |
+| 1 | 300 | decaying | 0.00 | 0.05 | 98.4 ± 8.4 | 1.00 | 0.00 | 0.00 | 0.00 | spent | +0.34 ± 0.05 |  |
+| 1 | 300 | balanced | 0.10 | 0.10 | 140.3 ± 12.9 | 0.06 | 0.78 | 0.32 | 0.01 | supply | +0.23 ± 0.07 |  |
+| 1 | 2600 | static | 0.00 | 0.00 | 223.7 ± 22.9 | 0.00 | 0.80 | 0.20 | 0.00 | supply | +0.13 ± 0.04 |  |
+| 1 | 2600 | decaying | 0.00 | 0.05 | 152.0 ± 14.8 | 1.00 | 0.00 | 0.00 | 0.00 | spent | +0.22 ± 0.04 |  |
+| 1 | 2600 | balanced | 0.10 | 0.10 | 208.1 ± 17.9 | 0.06 | 0.78 | 0.19 | 0.00 | supply | +0.07 ± 0.06 | liver-like |
+
+Does the bound that holds the pool predict the elasticity? Across the 18 sources it sorts them coarsely: spent, 8 sources, +0.22 to +0.73; supply, 10 sources, +0.07 to +0.62. The Spearman correlation of the elasticity with the share of the pool spent is +0.52 (P = 0.028), and with the units reached -0.92 (P = 8.4e-08). The size a source reaches orders the elasticity; the label of its bound does not.
 
 Each axis is asked the same question: holding the other two fixed, in how many of those settings does moving along this axis change which bound ends the growth?
 
