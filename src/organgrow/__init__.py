@@ -6,7 +6,7 @@ The model the paper runs is `organgrow.closed.grow`, which has a different
 signature and is imported explicitly everywhere it is used. The export is kept
 because the legacy scripts rely on it; `README.md` separates the two.
 """
-__version__ = "4.67.0"
+__version__ = "4.68.0"
 from .engine import grow, sdf, IDENTITY
 from .sim_invariants import invariants as sim_invariants
 from .metrics import epsilon, floor, effective_axes

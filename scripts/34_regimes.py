@@ -50,6 +50,7 @@ import numpy as np
 from organgrow import sdf
 from organgrow.config import ROOT
 from organgrow.closed import grow
+from organgrow.autotext import write
 from organgrow.runcache import fingerprint, cached, save_json
 
 OUT = ROOT / "results" / "regimes"
@@ -275,4 +276,64 @@ if __name__ == "__main__":
                         pool_flips=pool_flips, cells=ncell, other_cells=nother,
                         H=H)
     res["_elasticity_matched"] = els
+
+    # ---- does the bound that holds the pool predict the elasticity? ---------
+    # The three named sources are three points. The claim that what limits a
+    # construct sets how its size answers the pool has to hold across the
+    # factorial, so the elasticity is measured in every cell and set against
+    # two descriptions of the cell: which bound holds the largest share of the
+    # pool at arrest, and how many units the construct reached.
+    from scipy.stats import spearmanr
+    jobs([(w, P0 * np.exp(sg * H), t, s) for w in RENEWAL for P0 in POOL
+          for t, _, _ in TURNOVER for sg in (-1, 1) for s in SEEDS])
+    print(f"\nElasticity of the unit count to the seeded pool in every cell, "
+          f"{len(SEEDS)} paired seeds:\n")
+    print(f"{'renewal':>8} {'P0':>6} {'turnover':>9} {'N':>7} {'holds':>8} {'eps_pool':>14}")
+    for w in RENEWAL:
+        for P0 in POOL:
+            for t, _, _ in TURNOVER:
+                c = res[f"w{w}_P{P0:.0f}_{t}"]
+                c["eps_pool"], c["eps_pool_se"] = elasticity(w, P0, t)
+                c["holds"] = holds(c)
+                print(f"{w:>8.0f} {P0:>6.0f} {t:>9} {c['N']:>7.1f} {c['holds']:>8} "
+                      f"{c['eps_pool']:>+8.2f} ± {c['eps_pool_se']:.2f}")
+    cs = [res[f"w{w}_P{P0:.0f}_{t}"] for w in RENEWAL for P0 in POOL for t, _, _ in TURNOVER]
+    eps = np.array([c["eps_pool"] for c in cs])
+    by = {}
+    for c in cs:
+        by.setdefault(c["holds"], []).append(c["eps_pool"])
+    rN, pN = spearmanr(eps, [c["N"] for c in cs])
+    rS, pS = spearmanr(eps, [c["spent"] for c in cs])
+    res["_elasticity_map"] = dict(
+        cells=len(cs), rho_units=float(rN), p_units=float(pN),
+        rho_spent=float(rS), p_spent=float(pS),
+        by_bound={k: dict(n=len(v), lo=float(min(v)), hi=float(max(v)),
+                          mean=float(np.mean(v))) for k, v in by.items()})
+    print("\n  by the bound that holds the pool: "
+          + "; ".join(f"{k}, {len(v)} cells, {min(v):+.2f} to {max(v):+.2f}"
+                      for k, v in by.items()))
+    print(f"  against the share of the pool spent: Spearman {rS:+.2f} (P = {pS:.2g})")
+    print(f"  against the units reached:           Spearman {rN:+.2f} (P = {pN:.2g})")
+    print("  The label sorts the cells coarsely and its ranges overlap; the size "
+          "reached orders\n  them. A construct far below what perfusion supports "
+          "in its domain answers to its\n  pool, and one near it does not.")
+
+    m = res["_elasticity_map"]
+    res["values"] = {
+        "f.cells": f"{m['cells']}",
+        "f.rho.units": f"{m['rho_units']:+.2f}",
+        "f.rho.spent": f"{m['rho_spent']:+.2f}",
+        "f.p.spent": f"{m['p_spent']:.2f}",
+        "f.range.spent": (f"{m['by_bound']['spent']['lo']:+.2f} to "
+                          f"{m['by_bound']['spent']['hi']:+.2f}") if "spent" in m["by_bound"] else "none",
+        "f.range.supply": (f"{m['by_bound']['supply']['lo']:+.2f} to "
+                           f"{m['by_bound']['supply']['hi']:+.2f}") if "supply" in m["by_bound"] else "none",
+        "f.n.spent": f"{m['by_bound'].get('spent', dict(n=0))['n']}",
+        "f.n.supply": f"{m['by_bound'].get('supply', dict(n=0))['n']}",
+    }
     json.dump(res, open(ROOT / "results" / "regimes.json", "w"), indent=1)
+    _doc = ROOT / "manuscript" / "MANUSCRIPT_A.md"
+    if write(_doc, res["values"]):
+        print(f"\nupdated the values of {_doc.relative_to(ROOT)} that this script "
+              "writes.\nCommit that file before `make paper`, or the stamp will "
+              "record an uncommitted change.")

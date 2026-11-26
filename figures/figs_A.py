@@ -8,7 +8,10 @@ pancreas-like sources, and purple, orange and black are perfusion,
 progenitors and room.
 
 Usage:  python figures/figs_A.py            every figure whose results exist
-        python figures/figs_A.py 3 4        only those
+        python figures/figs_A.py 3 4 S1     only those
+
+B1 is not a figure of this manuscript: it is the panel set on recovery after
+injury, kept here until the engineering manuscript has its own script.
 """
 import csv
 import json
@@ -182,7 +185,7 @@ def fig1():
     pad = 0.06 * (hi - lo).max()
     b.set_xlim(lo[0] - pad, hi[0] + pad); b.set_ylim(lo[1] - pad, hi[1] + pad)
     b.set_aspect("equal", adjustable="box"); b.axis("off")
-    b.set_title(f"A liver-like construct at arrest:\n{len(U)} units on {len(st)} vessel segments",
+    b.set_title(f"One liver-like construct at arrest:\n{len(U)} units on {len(st)} vessel segments",
                 fontsize=F.SZ["label"])
 
     # C, D: the three sources in time
@@ -201,7 +204,7 @@ def fig1():
         rows += [[reg, "pool over seeded pool", int(x), float(y)] for x, y in zip(t, (P / P[:, :1]).mean(0))]
     c.set_xlabel("Day"); c.set_ylabel("Units"); c.set_ylim(0, None)
     c.legend(loc="upper left", bbox_to_anchor=(0.0, 1.0))
-    c.set_title("Growth stops without a size signal", fontsize=F.SZ["label"])
+    c.set_title("Arrest without a global size variable", fontsize=F.SZ["label"])
     d.set_xlabel("Day"); d.set_ylabel("Progenitors / seeded"); d.set_yscale("symlog", linthresh=0.05)
     d.set_ylim(0, 3); d.set_yticks([0, 0.1, 1]); d.set_yticklabels(["0", "0.1", "1"])
     d.set_title("The source renews, decays, or is spent", fontsize=F.SZ["label"])
@@ -239,12 +242,14 @@ def fig1():
 # ------------------------------------------------------------------ Figure 2
 def fig2():
     """Which property of the cell source decides the bound, and what follows."""
-    R, El = load("regimes.json"), load("elasticity.json")
-    if R is None or El is None:
-        return print("Figure 2 needs results/regimes.json and results/elasticity.json")
+    R, El, Iv = load("regimes.json"), load("elasticity.json"), load("interventions.json")
+    if R is None or El is None or Iv is None or "_elasticity_map" not in R:
+        return print("Figure 2 needs results/regimes.json (with the elasticity map), "
+                     "elasticity.json and interventions.json")
     meta = R["_meta"]
-    fig = plt.figure(figsize=(W, 78 * MM))
-    gs = GridSpec(1, 24, figure=fig, left=0.10, right=0.99, top=0.84, bottom=0.20, wspace=1.0)
+    fig = plt.figure(figsize=(W, 150 * MM))
+    gs = GridSpec(2, 24, figure=fig, left=0.10, right=0.99, top=0.93, bottom=0.08,
+                  wspace=1.0, hspace=0.62, height_ratios=[1.0, 0.85])
     rows = []
 
     # A: the factorial, as a map of which bound ends growth
@@ -317,11 +322,52 @@ def fig2():
     for lab_, reg in zip(c.get_yticklabels(), REG):
         lab_.set_color(K[reg])
     c.set_xlim(0, 2.3); c.set_xlabel(r"Elasticity of unit count, $|\varepsilon|$")
-    c.legend(loc="upper center", bbox_to_anchor=(0.45, -0.24), ncol=1)
-    c.set_title("Size follows the bound", fontsize=F.SZ["label"], pad=10)
-    for ax_ in (b, c):
+    c.legend(loc="upper center", bbox_to_anchor=(0.30, -0.22), ncol=1)
+    c.set_title("Three sources,\nthree sensitivities", fontsize=F.SZ["label"], pad=6)
+    # D: across the factorial, the elasticity follows the size reached
+    d = fig.add_subplot(gs[1, 1:11])
+    em = R["_elasticity_map"]
+    col = {"spent": K["grey"], "supply": K["supply"], "room": K["room"], "still active": K["pale"]}
+    for w in meta["renewal"]:
+        for P0 in pools:
+            for tn in turn:
+                c_ = R[f"w{w:.1f}_P{P0:.0f}_{tn}"]
+                reg = named.get((w, P0, tn))
+                d.errorbar([c_["N"]], [c_["eps_pool"]], yerr=[c_["eps_pool_se"]], fmt="o",
+                           ms=5.2 if reg else 4.2, mfc=col[c_["holds"]], mec=K[reg] if reg else col[c_["holds"]],
+                           mew=1.6 if reg else 0.6, ecolor=K["grey"], elinewidth=0.6, capsize=0, zorder=3)
+                rows.append(["d", w, P0, tn, c_["eps_pool"], c_["N"]])
+    for lab_, k_ in (("progenitors gone at arrest", "spent"), ("held by perfusion", "supply")):
+        d.plot([], [], "o", ms=4.2, color=col[k_], label=lab_)
+    d.set_xlabel("Units at arrest"); d.set_ylabel(r"Elasticity of unit count to the pool, $\varepsilon_P$")
+    d.set_ylim(0, 1.0); d.set_xlim(0, None)
+    d.text(0.97, 0.95, f"Spearman {em['rho_units']:+.2f}, {em['cells']} sources", transform=d.transAxes,
+           ha="right", va="top", fontsize=F.SZ["small"])
+    d.legend(loc="lower left")
+    d.set_title("Size answers the pool less as the tissue nears\nwhat perfusion supports", fontsize=F.SZ["label"])
+
+    # E: what can restart an arrested construct
+    e2 = fig.add_subplot(gs[1, 14:24])
+    for i_, reg in enumerate(REG):
+        for j_, (kind, colr) in enumerate((("none", K["pale"]), ("supply", K["supply"]), ("room", K["room"]))):
+            r_ = Iv[f"{reg}_{kind}"]
+            if r_["defined"]:
+                e2.bar(i_ + (j_ - 1) * 0.26, 100 * r_["units_added"], yerr=100 * r_["units_added_se"],
+                       width=0.24, color=colr, error_kw=dict(lw=0.7, ecolor=K["grey"]),
+                       label={"none": "left alone", "supply": "perfusion threshold lowered",
+                              "room": "spacing lowered"}[kind] if i_ == 0 else None)
+            rows.append(["e", reg, kind, "", r_["units_added"] if r_["defined"] else "", ""])
+    e2.text(1, 1.5, "no progenitors left:\nnothing to restart", ha="center", va="bottom",
+            fontsize=F.SZ["small"], color=K["kidney"])
+    e2.set_xticks(range(3)); e2.set_xticklabels([NAME[r_] for r_ in REG])
+    for lab_, reg in zip(e2.get_xticklabels(), REG):
+        lab_.set_color(K[reg])
+    e2.set_ylabel("Units gained in 40 days (%)")
+    e2.set_title("Growth restarts only where\nprogenitors remain", fontsize=F.SZ["label"])
+    e2.legend(loc="upper right")
+    for ax_ in (b, c, d, e2):
         F.tidy(ax_)
-    for ax_, s_ in ((a, "A"), (b, "B"), (c, "C")):
+    for ax_, s_ in ((a, "A"), (b, "B"), (c, "C"), (d, "D"), (e2, "E")):
         letter(fig, ax_, s_)
     save(fig, "FigA2_axes", rows, ["panel", "a", "b", "c", "value", "extra"])
 
@@ -366,7 +412,7 @@ def fig3():
     a.plot([2.80, 2.80], [0.08, 0.92], lw=0.6, color=K["pale"])
     note(a, 2.88, 0.93, "Model", "label", ha="left", fontweight="bold")
     note(a, 3.22, 0.56, "seed the same\nshare of the pool,\nchange nothing else,\nread the size", "small")
-    note(a, 3.22, 0.16, "nothing fitted", "small", K["grey"])
+    note(a, 3.22, 0.16, "parameters not optimized\nto these data", "small", K["grey"])
 
     def model(ax_, reg, key, col, label):
         pts = sorted((float(k), v[key]) for k, v in V["ablation"][reg].items())
@@ -391,7 +437,7 @@ def fig3():
         ax_.set_xlabel("Share of progenitors left"); ax_.set_ylabel(ylab)
         ax_.set_title(title, fontsize=F.SZ["label"])
 
-    b = fig.add_subplot(gs[1, 0:7])
+    b = fig.add_subplot(gs[1, 1:11])
     model(b, "pancreas", "mass", K["pancreas"], "pancreas-like, model")
     model(b, "liver", "mass", K["liver"], "liver-like, model")
     measured(b, "pancreas", K["pancreas"], "s", "Stanger 2007", "mouse pancreas")
@@ -402,14 +448,29 @@ def fig3():
     b.legend(loc="upper center", bbox_to_anchor=(0.5, -0.25), ncol=2, columnspacing=0.8,
              handletextpad=0.3)
 
-    c = fig.add_subplot(gs[1, 9:16])
+    c = fig.add_subplot(gs[1, 14:24])
     model(c, "kidney", "N", K["kidney"], "kidney-like, model")
     measured(c, "kidney", K["kidney"], "o", "Muthukrishnan 2018", "mouse, survivors divide faster", dx=-0.03)
     measured(c, "kidney", K["ink"], "D", "Cebrian 2014", "mouse, they do not", dx=0.03)
     frame(c, "Kidney: one model, two experiments", "Share of the nephrons that results")
     c.legend(loc="upper center", bbox_to_anchor=(0.5, -0.25), ncol=1)
 
-    d = fig.add_subplot(gs[1, 18:24])
+    for ax_ in (b, c):
+        F.tidy(ax_)
+    for ax_, s_ in ((a, "A"), (b, "B"), (c, "C")):
+        letter(fig, ax_, s_)
+    save(fig, "FigA3_measurements", rows, ["regime", "series", "quantity", "x", "y", "lo", "hi"])
+
+
+# --------------------------------------------------------------- Figure S1
+def figS1():
+    """Two organs grown alike: the model's seeds beside a person's two kidneys."""
+    V = load("validation.json")
+    if V is None:
+        return print("Figure S1 needs results/validation.json")
+    fig = plt.figure(figsize=(88 * MM, 62 * MM))
+    d = fig.add_axes([0.26, 0.20, 0.70, 0.64])
+    rows, rng = [], np.random.default_rng(7)
     seeds = np.asarray(V["seedwise"]["kidney"]["mass"], float)
     groups = [("constructs\ngrown alike", 100 * (np.log(seeds) - np.log(seeds).mean()), K["kidney"], True)]
     if V.get("pairs"):
@@ -427,11 +488,8 @@ def fig3():
     d.set_xticks(range(len(groups))); d.set_xticklabels([g[0] for g in groups])
     d.set_xlim(-0.5, len(groups) - 0.25); d.set_ylabel("Deviation of one organ\nfrom its pair (%)")
     d.set_title("Two organs grown alike", fontsize=F.SZ["label"], pad=14)
-    for ax_ in (b, c, d):
-        F.tidy(ax_)
-    for ax_, s_ in ((a, "A"), (b, "B"), (c, "C"), (d, "D")):
-        letter(fig, ax_, s_)
-    save(fig, "FigA3_measurements", rows, ["regime", "series", "quantity", "x", "y", "lo", "hi"])
+    F.tidy(d)
+    save(fig, "FigAS1_pairs", rows, ["regime", "series", "quantity", "x", "y", "lo", "hi"])
 
 
 # ------------------------------------------------------------------ Figure 4
@@ -479,7 +537,7 @@ def fig4():
     stage(3.14, 9, 2, "fewer tips, for good", "the delay is\nnever made up")
 
     # B: pool, cap and sites after the ablation
-    b = fig.add_subplot(gs[1, 0:7])
+    b = fig.add_subplot(gs[1, 0:6])
     c0 = V["conditions"][low]["0"]
     for key, lab, col in (("pool_by_day", "progenitors, total", K["cells"]),
                           ("cap_by_day", "progenitors per tip", K["ink"]),
@@ -494,13 +552,15 @@ def fig4():
            clip_on=False, label="tips, mouse")
     b.axhline(1, lw=0.6, color=K["grey"], zorder=0)
     b.set_xlim(0, xr + 10); b.set_ylim(0.3, 1.5)
-    b.set_xlabel("Days since the ablation"); b.set_ylabel("Ablated / control")
+    b.set_xlabel("Model days since the ablation"); b.set_ylabel("Ablated / control")
+    b.text(xr + 3, 1.19, "mouse,\ndays 1 to 3", ha="center", va="bottom", fontsize=F.SZ["small"],
+           color=K["grey"])
     b.set_title("The cap recovers; the tree does not", fontsize=F.SZ["label"])
     b.legend(loc="upper center", bbox_to_anchor=(0.5, -0.25), ncol=2, columnspacing=0.8,
              handletextpad=0.4)
 
     # C: units, with and without a proliferative response
-    c = fig.add_subplot(gs[1, 9:16])
+    c = fig.add_subplot(gs[1, 8:14])
     for resp, lab, ls in (("0", "survivors divide as before", "-"),
                           ("1", "survivors divide twice as fast", (0, (3, 1.5)))):
         y = np.asarray(V["conditions"][low][resp]["units_by_day"])[sl]
@@ -512,12 +572,12 @@ def fig4():
                fontsize=F.SZ["small"], color=K["grey"])
     c.axhline(1, lw=0.6, color=K["grey"], zorder=0)
     c.set_xlim(0, t[-1]); c.set_ylim(0.3, 1.25)
-    c.set_xlabel("Days since the ablation"); c.set_ylabel("Nephron-like units, ablated / control")
+    c.set_xlabel("Model days since the ablation"); c.set_ylabel("Nephron-like units, ablated / control")
     c.set_title("One switch separates the experiments", fontsize=F.SZ["label"])
     c.legend(loc="upper center", bbox_to_anchor=(0.5, -0.25), ncol=1)
 
     # D: the deficit against how far perfusion limits nucleation
-    d = fig.add_subplot(gs[1, 18:24])
+    d = fig.add_subplot(gs[1, 16:24])
     for j, n in enumerate(names):
         for resp, dx, filled in (("0", -0.13, True), ("1", 0.13, False)):
             bar(d, j + dx, V["conditions"][n][resp]["units"], K["kidney"], filled=filled, ms=3.8)
@@ -527,11 +587,12 @@ def fig4():
         d.axhspan(min(m_["units"]), max(m_["units"]), color=K["pale"], lw=0, zorder=0)
     d.axhline(1, lw=0.6, color=K["grey"], zorder=0)
     d.set_xticks(range(len(names)))
-    d.set_xticklabels([f"{V['nucleation'][n]['q_set']:g}\n{V['nucleation'][n]['nu']:g}" for n in names])
-    d.set_xlabel(r"Threshold $q^{*}$ (top), rate $\nu$ (bottom)" + "\n" + r"perfusion limits less $\rightarrow$")
+    d.set_xticklabels([f"$q^{{*}}$ {V['nucleation'][n]['q_set']:g}\n$\\nu$ {V['nucleation'][n]['nu']:g}"
+                       for n in names])
+    d.set_xlabel("Setting of the nucleation law\n" + r"perfusion limits less $\rightarrow$")
     d.set_xlim(-0.5, len(names) - 0.5); d.set_ylim(0.3, 1.25)
     d.set_ylabel("Units at the end, ablated / control")
-    d.set_title("Proportional only if\nperfusion does not limit", fontsize=F.SZ["label"])
+    d.set_title("The deficit deepens where\nperfusion limits less", fontsize=F.SZ["label"])
     d.plot([], [], "o", ms=3.8, color=K["kidney"], label="as before")
     d.plot([], [], "o", ms=3.8, mfc="white", mec=K["kidney"], mew=0.9, label="twice as fast")
     d.legend(loc="upper center", bbox_to_anchor=(0.5, -0.32), ncol=2, columnspacing=0.8,
@@ -544,8 +605,8 @@ def fig4():
 
 
 # ------------------------------------------------------------------ Figure 5
-def fig5():
-    """Past arrest: what restarts growth, and what sets the size regained."""
+def figB1():
+    """For the engineering manuscript: restart, and what sets the size regained."""
     Iv, Ij, Fl = load("interventions.json"), load("injury.json"), load("inflow_law.json")
     if Iv is None or Ij is None or Fl is None:
         return print("Figure 5 needs results/interventions.json, injury.json and inflow_law.json")
@@ -670,15 +731,15 @@ def fig5():
         F.tidy(ax_)
     for ax_, s_ in ((a, "A"), (b, "B"), (c, "C"), (d, "D"), (e, "E"), (f, "F")):
         letter(fig, ax_, s_)
-    save(fig, "FigA5_after_arrest", rows, ["panel", "a", "b", "c", "d"])
+    save(fig, "FigB1_after_arrest", rows, ["panel", "a", "b", "c", "d"])
 
 
 # ------------------------------------------------------------------ Figure 6
-def fig6():
+def fig5():
     """Predictions for ablations not yet done, and the reading the paper proposes."""
     V, Pr, Kc = load("validation.json"), load("predictions.json"), load("kidney_coupling.json")
     if V is None or Pr is None or Kc is None:
-        return print("Figure 6 needs validation.json, predictions.json and kidney_coupling.json")
+        return print("Figure 5 needs validation.json, predictions.json and kidney_coupling.json")
     fig = plt.figure(figsize=(W, 128 * MM))
     gs = GridSpec(2, 24, figure=fig, left=0.07, right=0.99, top=0.95, bottom=0.07,
                   hspace=0.62, wspace=1.0, height_ratios=[1.0, 0.62])
@@ -695,6 +756,10 @@ def fig6():
             bar(a, x, r, col, ms=2.8)
             rows.append(["a", reg, "model, compared", x, r["value"], r["lo"], r["hi"]])
         for x, r in new:
+            alt = Pr.get("dose_alt", {}).get(reg, {}).get(f"{x:g}")
+            if alt:      # the same dose under four other settings of the law
+                a.plot([x + 0.022] * 2, [min(alt.values()), max(alt.values())], "-", lw=2.4,
+                       color=K["pale"], solid_capstyle="butt", zorder=1)
             bar(a, x, r, col, marker="*", ms=8)
             rows.append(["a", reg, "model, predicted", x, r["value"], r["lo"], r["hi"]])
         for r in V["published"][reg]:
@@ -783,7 +848,7 @@ def fig6():
     d.set_xlim(-0.08, 1.55); d.set_ylim(-1.0, 1.5)
     d.set_yticks([]); d.spines["left"].set_visible(False)
     d.set_xticks([0, 0.5, 1.0, 1.5])
-    d.set_xlabel("Elasticity of organ size to progenitor number:  "
+    d.set_xlabel("Effective elasticity of organ size to progenitor number over one finite ablation:  "
                  r"$\log$(share of organ) / $\log$(share of progenitors left)")
     d.set_title("How size answers a loss of progenitors names what limits the organ",
                 fontsize=F.SZ["label"])
@@ -791,7 +856,7 @@ def fig6():
         F.tidy(ax_)
     for ax_, s_ in ((a, "A"), (b, "B"), (c, "C"), (d, "D")):
         letter(fig, ax_, s_)
-    save(fig, "FigA6_predictions", rows, ["panel", "series", "kind", "x", "y", "lo", "hi"])
+    save(fig, "FigA5_predictions", rows, ["panel", "series", "kind", "x", "y", "lo", "hi"])
 
 
 # -------------------------------------------------------- graphical abstract
@@ -833,7 +898,7 @@ def abstract():
     print("wrote FigA0_graphical_abstract")
 
 
-FIGS = {"0": abstract, "1": fig1, "2": fig2, "3": fig3, "4": fig4, "5": fig5, "6": fig6}
+FIGS = {"0": abstract, "1": fig1, "2": fig2, "3": fig3, "4": fig4, "5": fig5, "S1": figS1, "B1": figB1}
 
 if __name__ == "__main__":
     for k in (sys.argv[1:] or sorted(FIGS)):

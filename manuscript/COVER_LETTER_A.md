@@ -2,7 +2,7 @@
 
 Draft. The journal's page asks that the letter state what was known, the
 conceptual advance, and the significance, and allows it to name reviewers and
-related work. Numbers are those of `PAPER_NUMBERS.md` at version 4.67.0; check
+related work. Numbers are those of `PAPER_NUMBERS.md` at version 4.67.0, to be refreshed; check
 them against the manuscript before sending.
 
 ---
@@ -26,14 +26,9 @@ common mechanism or explains an organ that behaves both ways.
 these outcomes. Functional units form at the tips of a perfused branching tree
 at a rate set by the progenitors present and by perfusion above a threshold,
 and growth stops at a tip when perfusion, progenitors, or space runs out.
-Nothing in the model represents the size of the organ. The resource that is
-exhausted first sets the elasticity of organ size to progenitor number. With
-no fitted parameter, the model gives 0.44 of the reference mass for the
+Nothing in the model represents the size of the organ. How strongly size depends on progenitor number is set by how near the tissue comes to the size perfusion can support. With parameters that were not optimized against these measurements, the model gives 0.44 of the reference mass for the
 pancreas-like source after the ablation that left 0.36 in the mouse, and 0.86
-for the liver-like source where the liver recovered to about 0.96. The kidney
-is the informative failure: the rule reproduces the measured progenitor pool,
-cap size, and number of tips only when progenitors also drive branching, and a
-proportional nephron deficit only when nucleation is not limited by perfusion.
+for the liver-like source where the liver recovered to about 0.96. The kidney is the informative failure: the contrasting nephron deficits of the two experiments are reconciled only when progenitors also drive branching, and the manuscript states which measured features of the progenitor pool that extension reproduces and which it does not.
 We then commit the model to the outcome of ablations that have not been done,
 each with the result that would refute it.
 
@@ -44,9 +39,7 @@ from progenitors must be supplied with: cells, perfusion, or room. We expect
 it to interest readers working on organ size control, kidney and liver
 development, regeneration, and organoid engineering.
 
-**What the paper is not.** It contains no new experiment. Every comparison is
-with published measurements, the kidney extension was written after those
-measurements were known, and the manuscript says so. All code, and a single
+**What the paper is not.** It contains no new experiment. Every comparison is with published measurements and is retrospective, the kidney extension was written after those measurements were known, and the manuscript says so. All code, and a single
 command that regenerates every number and figure, are public.
 
 **Related work.** A second manuscript from the same model, on how unit density

@@ -56,6 +56,9 @@ NOT_IN_A = (
     "renewal changes the bound, abstract", "turnover changes the bound, abstract",
     # detail of the injury and involution results that it leaves to a supplement
     "kidney pool on day 140", "liver as grown", "liver mass,", "kidney mass,",
+    "liver reactivated", "kidney reactivated", "liver at fixed inflow",
+    "kidney at fixed inflow", "kidney after a", "full compensation after",
+    "kidney units kept", "mass against delivered flow",
     "overshoot of the budget", "shortfall against the budget", "renewing construct",
     "spent source", "share at the mass floor", "residual under involution",
     "units kept across the rates",
@@ -386,7 +389,7 @@ def values_held(doc):
     """
     from organgrow.autotext import found
     want = {}
-    for res in (Va, Kc, Pr):
+    for res in (Va, Kc, Pr, Rg):
         want.update((res or {}).get("values", {}))
         want.update({k: None for k in ("validation", "validation-abstract", "validation-brief",
                                        "kidney-coupling", "predictions")})
@@ -401,7 +404,7 @@ def values_held(doc):
             bad += not ok
     quoted = sum(1 for n in got if want.get(n) is not None)
     print(f"\n{quoted} values written by scripts, "
-          + ("all in step\n" if not bad else f"{bad} out of step: run scripts 36 to 38 and "
+          + ("all in step\n" if not bad else f"{bad} out of step: run scripts 34 and 36 to 38 and "
              f"commit the manuscript\n"))
     return bad
 

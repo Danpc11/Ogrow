@@ -56,6 +56,12 @@ REG = {"liver": dict(P0=2600.0, rho=0.10, delta=0.10, q_set=0.6, renewal=1.0),
        "pancreas": dict(P0=60.0, rho=0.00, delta=0.00, q_set=0.6, renewal=0.0)}
 #: shares of the pool not used in any published ablation
 DOSE = {"pancreas": (0.75, 0.60), "liver": (0.75, 0.15)}
+#: the same doses with the rate of the law halved and doubled and the
+#: perfusion threshold lowered and raised, as in scripts/19_elasticity.py. A
+#: prediction that moves outside its own interval here depends on a number
+#: nobody has measured.
+ALTERNATIVE = {"nu_lo": dict(nu=4.0), "nu_hi": dict(nu=16.0),
+               "q_lo": dict(q_set=0.5), "q_hi": dict(q_set=0.7)}
 
 # ---- depth and timing: the coupled source, as in scripts/37 ----------------
 CAP, RHO, WINDOW = 60.0, 0.05, 120
@@ -67,20 +73,22 @@ RESPONSE = (0.0, 1.0)
 ABLATIONS = ((45, 0.2), (45, 0.4), (45, 0.6), (20, 0.4), (80, 0.4))
 
 
-def dose_spec(reg, kept, seed):
-    p = dict(REG[reg]); p["P0"] = p["P0"] * float(kept)
-    f = OUT / f"dose_{reg}_kept{kept:g}_s{seed}.json"
-    return f, p, fingerprint(seed=seed, S=S, days=DAYS, params={**FIX, "nu": NU, **p})
+def dose_spec(reg, kept, seed, alt="ref"):
+    p = dict(REG[reg], nu=NU); p["P0"] = p["P0"] * float(kept)
+    p.update(ALTERNATIVE.get(alt, {}))
+    tag = "" if alt == "ref" else f"_{alt}"
+    f = OUT / f"dose_{reg}_kept{kept:g}{tag}_s{seed}.json"
+    return f, p, fingerprint(seed=seed, S=S, days=DAYS, params={**FIX, **p})
 
 
-def dose_run(reg, kept, seed):
-    f, p, fp = dose_spec(reg, kept, seed)
+def dose_run(reg, kept, seed, alt="ref"):
+    f, p, fp = dose_spec(reg, kept, seed, alt)
     hit = cached(f, fp)
     if hit is not None:
         return hit
     U, m, vt, tr = grow(lambda x, y, z: sdf("liver", x / S, y / S, z / S),
                         190 * S, days=DAYS, rng=np.random.default_rng(seed),
-                        nu=NU, **FIX, **p)
+                        **FIX, **p)
     return save_json(f, dict(N=len(U), mass=float(m.sum())), fp)
 
 
@@ -183,13 +191,19 @@ def values(res):
             "p.liv75": ci(d["liver"]["0.75"]), "p.liv15": ci(d["liver"]["0.15"]),
             "p.kid20": ci(k["0"]["45|0.2"]), "p.kid60": ci(k["0"]["45|0.6"]),
             "p.kid20r": ci(k["1"]["45|0.2"]), "p.kid60r": ci(k["1"]["45|0.6"]),
-            "p.early": ci(k["0"]["20|0.4"]), "p.late": ci(k["0"]["80|0.4"])}
+            "p.early": ci(k["0"]["20|0.4"]), "p.late": ci(k["0"]["80|0.4"]),
+            **{f"p.{short}.alt": f"{min(res['dose_alt'][reg][kept].values()):.2f} to "
+                                 f"{max(res['dose_alt'][reg][kept].values()):.2f}"
+               for short, reg, kept in (("panc75", "pancreas", "0.75"), ("panc60", "pancreas", "0.6"),
+                                        ("liv75", "liver", "0.75"), ("liv15", "liver", "0.15"))}}
 
 
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
     grid = [("dose", reg, kept, s) for reg in DOSE for kept in (1.0,) + DOSE[reg]
             for s in SEEDS]
+    grid += [("dose", reg, kept, s, alt) for alt in ALTERNATIVE for reg in DOSE
+             for kept in (1.0,) + DOSE[reg] for s in SEEDS]
     grid += [("kid", r, 0, 0.0, s) for r in RESPONSE for s in SEEDS]
     grid += [("kid", r, d, f, s) for r in RESPONSE for d, f in ABLATIONS for s in SEEDS]
     todo = [g for g in grid if _needs(g)]
@@ -200,7 +214,7 @@ if __name__ == "__main__":
         with ProcessPoolExecutor(n) as ex:
             list(ex.map(_warm, todo, chunksize=4))
 
-    res = dict(seeds=list(SEEDS), dose={}, kidney={}, nucleation=NUCLEATION,
+    res = dict(seeds=list(SEEDS), dose={}, dose_alt={}, kidney={}, nucleation=NUCLEATION,
                ablations=[list(a) for a in ABLATIONS])
     print("\nPredictions for ablations that have not been reported. Ratio to the "
           "unablated control,\n24 paired seeds, 95 % bootstrap interval.\n")
@@ -211,7 +225,12 @@ if __name__ == "__main__":
         for kept in DOSE[reg]:
             r = ratio(ref, [dose_run(reg, kept, s)["mass"] for s in SEEDS])
             res["dose"][reg][f"{kept:g}"] = r
-            print(f"  {reg + '-like':>14}  pool left {kept:.2f}   {ci(r)}")
+            alt = {a: float(np.mean([dose_run(reg, kept, s, a)["mass"] for s in SEEDS])
+                            / np.mean([dose_run(reg, 1.0, s, a)["mass"] for s in SEEDS]))
+                   for a in ALTERNATIVE}
+            res["dose_alt"].setdefault(reg, {})[f"{kept:g}"] = alt
+            print(f"  {reg + '-like':>14}  pool left {kept:.2f}   {ci(r)}   under four other "
+                  f"settings of the law {min(alt.values()):.2f} to {max(alt.values()):.2f}")
     print("\nDepth and timing: units of the coupled source, perfusion limiting least")
     for resp in RESPONSE:
         ctl = [kid_run(resp, 0, 0.0, s)["N"] for s in SEEDS]

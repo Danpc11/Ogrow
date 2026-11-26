@@ -19,20 +19,20 @@ Ciudad Universitaria, Mexico City, Mexico
 
 Target journal: *Cell Systems*, Article. Order of sections as Cell Press sets it: Summary, Introduction, Results, Discussion with Limitations of the study, Resource availability, Figure legends, STAR Methods. Highlights, the eTOC paragraph and the graphical abstract are given first because the journal asks for them as separate files.
 
-Reference model version 4.67.0 (`src/organgrow/closed.py`). Every model number below is either held to the result files by `scripts/29_check_manuscript.py` or written between `auto:` markers by the script that computes it, so that no model number in this file is written by hand.
+Reference model version 4.68.0 (`src/organgrow/closed.py`). Every model number below is either held to the result files by `scripts/29_check_manuscript.py` or written between `auto:` markers by the script that computes it, so that no model number in this file is written by hand.
 
 ---
 
 ## HIGHLIGHTS
 
-- A local growth rule on a perfused tree stops without sensing organ size
-- The first resource to run out sets how size scales with progenitor number
-- Pancreas and liver sizes after progenitor ablation are reproduced without fitting
-- Nephron deficits require progenitor-driven branching; new ablations are predicted
+- A local growth rule on a perfused tree arrests without a global size variable
+- Size follows progenitor number less as a tissue nears its perfusion-set size
+- Published pancreas and liver ablation outcomes are recapitulated without optimization
+- Progenitor-driven branching reconciles contrasting nephron deficits in the kidney
 
 ## IN BRIEF
 
-How the size of an organ depends on its progenitors differs between pancreas, liver, and kidney. Using a model in which functional units form at the tips of a perfused branching tree under one local rule, we show that the resource exhausted first determines this dependence, reproduce published progenitor-ablation experiments, and predict the outcome of ablations not yet performed.
+How the size of an organ depends on its progenitors differs between pancreas, liver, and kidney. Using a model in which functional units form at the tips of a perfused branching tree under one local rule, we show that this dependence weakens as a tissue nears the size perfusion can support, recapitulate published progenitor-ablation experiments, and predict the outcome of ablations not yet performed.
 
 ## GRAPHICAL ABSTRACT
 
@@ -40,7 +40,7 @@ How the size of an organ depends on its progenitors differs between pancreas, li
 
 ## SUMMARY
 
-How the size of an organ depends on the progenitors it is built from differs between organs: ablating pancreatic progenitors yields a proportionally smaller pancreas, whereas the liver recovers its size. We show that a single local growth rule accounts for this difference. On a perfused branching tree, functional units form at tips at a rate set by local progenitors and by perfusion above a threshold, until perfusion, progenitors, or space runs out. Which resource runs out first determines the response to progenitor loss. Without fitting, the model reproduces the sizes of mouse pancreas and liver after progenitor ablation. Nephron number is reproduced only when progenitors also drive branching, and then only if nucleation is not perfusion limited. The model predicts the outcome of ablations not yet performed and identifies the measurement that reveals which resource limits a growing tissue.
+How the size of an organ depends on the progenitors it is built from differs between organs: ablating pancreatic progenitors yields a proportionally smaller pancreas, whereas the liver recovers its size. We show that a single local growth rule accounts for this difference. On a perfused branching tree, functional units form at tips at a rate set by local progenitors and by perfusion above a threshold, until perfusion, progenitors, or space runs out. The closer a tissue comes to the size perfusion can support, the less its size depends on progenitor number. With parameters not optimized against the measurements, the model recapitulates the sizes of mouse pancreas and liver after progenitor ablation. Contrasting nephron deficits in two kidney experiments are reconciled when progenitors also drive branching, although not all progenitor dynamics are reproduced. The model predicts the outcome of ablations not yet performed.
 
 ## KEYWORDS
 
@@ -56,17 +56,17 @@ These results are usually read as properties of organs: some count their progeni
 
 Quantitative models have addressed parts of this problem. For the liver, the mass regained after resection has been modeled as the response to a metabolic load shared among the remaining cells [11] or to the portal flow that the remnant receives [12]; both take as given a signal that scales with the size of the organ. For branched organs, the form of the tree and where it stops follow from rules applied locally at growing tips [13], and in the kidney a simple change in the branching rule confines the tips to the surface of the organ [14]. What these models leave open is how the number of progenitors enters the final size, and why it does so differently in different organs.
 
-Here we take a different starting point. Instead of asking whether an organ measures its size, we ask which locally available resource is exhausted first where the tissue is being built. We study a model in which functional units form at the tips of a perfused branching tree under one local rule, and growth ends at a tip when perfusion, progenitors, or space runs out there. The model contains no variable that represents the size of the organ. We show that the resource that runs out determines how the final size responds to the number of progenitors; that this accounts quantitatively, with no fitted parameter, for the pancreas and liver experiments; that the kidney experiments expose a coupling the minimal rule lacks, between progenitors and branching, and indicate that nephron formation in the embryonic kidney is not limited by perfusion; and that the same rule states when arrested growth can be restarted and what sets the size regained after injury. Finally, we commit the model to the outcome of ablations that have not been performed.
+Here we take a different starting point. Instead of asking whether an organ measures its size, we ask which locally available resource is exhausted first where the tissue is being built. We study a model in which functional units form at the tips of a perfused branching tree under one local rule, and growth ends at a tip when perfusion, progenitors, or space runs out there. The model contains no variable that represents the size of the organ. We show that how strongly the final size depends on the number of progenitors is set by how near the tissue comes to the size that perfusion can support; that the model recapitulates the pancreas and liver experiments quantitatively, with parameters that were not optimized against them; that the kidney experiments expose a coupling the minimal rule lacks, between progenitors and branching, which reconciles their contrasting nephron deficits but not every measured feature of the progenitor pool; and that the progenitors left at arrest decide whether growth can be restarted. Finally, we commit the model to the outcome of ablations that have not been performed.
 
 ## RESULTS
 
-### A local nucleation law stops growth without a size signal
+### A local nucleation law arrests growth without a global size variable
 
-We represent a growing tissue as functional units, such as lobules, nephrons, or acini, that form at the tips of a perfused branching tree inside a fixed domain (Figure 1A; STAR Methods). Each tip holds a pool of progenitors, $P$, and receives a perfusion per unit, $q$, computed from pressure-driven flow through the whole tree. Units form at a tip at the rate $\nu P (q - q^{*})_{+}$, where $q^{*}$ is the perfusion a unit requires. Every new unit draws on the supply of its tip, so nucleation lowers $q$, and the tree sprouts toward tissue that is short of supply. Growth ends at a tip when one of three local resources is exhausted: perfusion per unit has fallen to the threshold, the progenitors are gone, or no free site remains within reach.
+We represent a growing tissue as functional units, such as lobules, nephrons, or acini, that form at the tips of a perfused branching tree inside a fixed domain (Figure 1A; STAR Methods). Each tip holds a pool of progenitors, $P$. Flow through the tree is solved for a fixed inlet pressure, with every unit a hydraulic load at its tip, and $q$ is the pressure that reaches a tip as a fraction of the inlet pressure. Because the flow through a unit is its conductance times that pressure, $q$ is equally the perfusion each unit at the tip receives, relative to what it would receive at the inlet. It is a hydraulic quantity: the model does not represent oxygen or any transported solute, and the threshold stands for whatever a unit requires of its perfusion. Units form at a tip at the rate $\nu P (q - q^{*})_{+}$, where $q^{*}$ is the perfusion a unit requires. Every new unit draws on the supply of its tip, so nucleation lowers $q$, and the tree sprouts toward tissue that is short of supply. Growth ends at a tip when one of three local resources is exhausted: perfusion per unit has fallen to the threshold, the progenitors are gone, or no free site remains within reach.
 
 Four parameters describe how the progenitor pool is maintained: whether the cell that forms a unit is spent in forming it, the size of the pool seeded, and the rates at which progenitors divide and are lost. We examine three settings, which we name for the tissues whose cell source they resemble (Figure 1; Table 1). In the liver-like source the cell is not spent, as hepatocytes are their own progenitors [15] and are renewed throughout life [16], and division balances loss. In the kidney-like source the cell is spent and the pool decays. In the pancreas-like source a small pool is spent and neither divides nor decays. The domain and every other parameter are the same for all three.
 
-All three constructs stop growing (Figure 1B and 1C), at 208 ± 4, 89 ± 2 and 45 ± 1 units (mean ± SEM, 24 seeds), and each stops against a different bound (Figure 1D and 1E). The liver-like construct keeps its pool: at arrest 0.78 ± 0.03 of it sits at tips where perfusion has fallen to the threshold, and 0.19 ± 0.02 at tips with no free site. The kidney-like construct has no pool left: 0.30 ± 0.01 was consumed into units and 0.70 ± 0.01 lost to attrition. The pancreas-like construct spent 0.75 ± 0.02 of its budget on units and holds the remaining 0.25 ± 0.02 at tips that perfusion no longer reaches. Size is thus the outcome of local exhaustion, and three sources arrive at it by three routes. The ordering of the three holds under 13 variations of the auxiliary rules of the model (STAR Methods).
+All three constructs stop growing (Figure 1B, a single realization, and Figure 1C), at 208 ± 4, 89 ± 2 and 45 ± 1 units (mean ± SEM, 24 seeds), and each stops against a different bound (Figure 1D and 1E). The liver-like construct keeps its pool: at arrest 0.78 ± 0.03 of it sits at tips where perfusion has fallen to the threshold, and 0.19 ± 0.02 at tips with no free site. The kidney-like construct has no pool left: 0.30 ± 0.01 was consumed into units and 0.70 ± 0.01 lost to attrition. The pancreas-like construct spent 0.75 ± 0.02 of its budget on units and holds the remaining 0.25 ± 0.02 at tips that perfusion no longer reaches. Size is thus the outcome of local exhaustion, and three sources arrive at it by three routes. The ordering of the three holds under 13 variations of the auxiliary rules of the model (STAR Methods).
 
 **Table 1. The three cell sources.** All other parameters are shared.
 
@@ -82,19 +82,25 @@ The three sources differ in several parameters at once, so we asked which of the
 
 The intuitive distinction, between tissues that keep a self-renewing compartment and tissues that do not, is therefore the weakest of the three axes. What decides whether progenitors or perfusion ends growth is chiefly whether the pool is lost with time.
 
-### The binding resource sets how size responds to progenitor number
+### The dependence of size on progenitor number weakens as a tissue nears its perfusion-set size
 
-If a construct stops because perfusion ran out, adding progenitors should change little; if it stops because progenitors ran out, its size should follow their number. We measured the elasticity of the final unit count to the seeded pool, $\varepsilon_P = \partial \ln N / \partial \ln P_0$, by paired perturbation (Figure 2C). It is +0.07 ± 0.06 in the liver-like construct, +0.37 ± 0.03 in the kidney-like, and +0.71 ± 0.05 in the pancreas-like. The elasticity to the perfusion threshold has the opposite sign and is larger in each case: −1.83 ± 0.22, −1.65 ± 0.06, and −0.77 ± 0.07. A tissue held by perfusion is nearly indifferent to its progenitors and sensitive to what each unit demands. A tissue held by its progenitors is the reverse, though never completely, because progenitors stranded at poorly perfused tips are not converted into units.
+If a construct stops because perfusion ran out, adding progenitors should change little; if it stops because progenitors ran out, its size should follow their number. We measured the elasticity of the final unit count to the seeded pool, $\varepsilon_P = \partial \ln N / \partial \ln P_0$, by paired perturbation (Figure 2C). It is +0.07 ± 0.06 in the liver-like construct, +0.37 ± 0.03 in the kidney-like, and +0.71 ± 0.05 in the pancreas-like. The elasticity to the perfusion threshold has the opposite sign and is substantial in every source: −1.83 ± 0.22, −1.65 ± 0.06, and −0.77 ± 0.07. The constraints are therefore coupled. No source is limited by one resource alone, and even the pancreas-like construct, which spends most of its pool, remains sensitive to what each unit demands, because progenitors stranded at poorly perfused tips are not converted into units.
+
+Three sources are three points, so we measured $\varepsilon_P$ in all <!-- auto:f.cells -->18<!-- /auto:f.cells --> sources of the factorial (Figure 2D). The label of the bound sorts them only coarsely. $\varepsilon_P$ ranges from <!-- auto:f.range.spent -->+0.22 to +0.73<!-- /auto:f.range.spent --> in the <!-- auto:f.n.spent -->8<!-- /auto:f.n.spent --> sources whose pool is gone at arrest and from <!-- auto:f.range.supply -->+0.07 to +0.62<!-- /auto:f.range.supply --> in the <!-- auto:f.n.supply -->10<!-- /auto:f.n.supply --> whose pool is held by perfusion; the ranges overlap, and the correlation of $\varepsilon_P$ with the share of the pool spent is weak (Spearman <!-- auto:f.rho.spent -->+0.52<!-- /auto:f.rho.spent -->). What orders the sources is the size they reach: $\varepsilon_P$ falls steadily with the number of units at arrest (Spearman <!-- auto:f.rho.units -->-0.92<!-- /auto:f.rho.units -->). A source that stops far below the size reached by the largest pools in this domain answers to its pool, whatever stopped it, and one that approaches that size does not. The dependence of size on progenitor number is thus graded. It is set by how near the tissue comes to the size perfusion can support, and the bound that holds the pool at arrest is a coarse summary of that distance.
 
 When pool and turnover are matched between a spent and a renewing source, the difference in $\varepsilon_P$ that remains is +0.17 at the liver-like setting, +0.04 at the kidney-like, and +0.28 at the pancreas-like. Renewal contributes, but less than half of the range across the three sources.
 
 The elasticity $\varepsilon_P$ is what a progenitor-ablation experiment measures. We therefore compared the model with such experiments.
 
-### The model reproduces the sizes of pancreas and liver after progenitor ablation
+### Progenitors remaining at arrest predict whether growth can restart
+
+The bound that ends growth also determines what can restart it (Figure 2E). We relieved each constraint in arrested constructs, by lowering the perfusion threshold or the minimum spacing between units by one-fifth, and followed them for 40 days. Left alone, the liver-like construct gained 2.8 ± 0.3 % in units; with perfusion relieved it gained 22.6 ± 2.7 %, and with room relieved 32.3 ± 1.7 %. The pancreas-like construct, which still holds a quarter of its budget, gained 6.2 ± 1.4 % from the perfusion relief and 0.3 ± 0.2 % from the room relief. The kidney-like construct did not respond to either, because nothing remained to respond. Regenerative capacity is therefore not a separate property of a tissue in this model. It is what the progenitor pool has left when growth stops, which is set mostly by its turnover.
+
+### The model recapitulates the sizes of pancreas and liver after progenitor ablation
 
 Stanger and colleagues ablated Pdx1-expressing pancreatic progenitors in the mouse embryo by tetracycline-regulated expression of diphtheria toxin and weighed the organ at birth [4]. Ablation through E9.5 removed 8% of the progenitor pool and left a pancreas at 77% of control weight (95% CI, 53%–102%); ablation through E10.5 removed 61% and left 36% (19%–53%). The small pancreas grew in parallel with controls for 11 weeks and did not catch up. With the same strategy in the liver, removal of at least 65% of hepatic progenitors left a liver at about one-third of control weight when the ablation ended and at normal weight 4 days later.
 
-We seeded each construct with the share of its pool that these ablations left and changed nothing else (Figure 3A). The pancreas-like construct ended with <!-- auto:v.panc39 -->0.44 [0.37, 0.52]<!-- /auto:v.panc39 --> of its reference mass on 39% of the pool and with <!-- auto:v.panc92 -->0.81 [0.72, 0.90]<!-- /auto:v.panc92 --> on 92% (ratio of means over 24 paired seeds, 95% bootstrap interval), against 0.36 and 0.77 measured (Figure 3B). The liver-like construct seeded with 35% of its pool ended with <!-- auto:v.liv35 -->0.86 [0.84, 0.89]<!-- /auto:v.liv35 -->, against approximately 0.96. The model thus reproduces a pancreas whose size follows its progenitors and a liver whose size largely does not, with parameters that were set before the comparison was made.
+We seeded each construct with the share of its pool that these ablations left and changed nothing else (Figure 3A). The pancreas-like construct ended with <!-- auto:v.panc39 -->0.44 [0.37, 0.52]<!-- /auto:v.panc39 --> of its reference mass on 39% of the pool and with <!-- auto:v.panc92 -->0.81 [0.72, 0.90]<!-- /auto:v.panc92 --> on 92% (ratio of means over 24 paired seeds, 95% bootstrap interval), against 0.36 and 0.77 measured (Figure 3B). The liver-like construct seeded with 35% of its pool ended with <!-- auto:v.liv35 -->0.86 [0.84, 0.89]<!-- /auto:v.liv35 -->, against approximately 0.96. The model thus recapitulates a pancreas whose size follows its progenitors and a liver whose size largely does not, with parameters that were set before the comparison was made.
 
 Two qualifications apply. The liver-like construct recovers less completely than the liver, and its shortfall grows with deeper cuts: it ends with <!-- auto:v.liv50 -->0.92<!-- /auto:v.liv50 --> of its mass on half the pool and <!-- auto:v.liv25 -->0.77<!-- /auto:v.liv25 --> on a quarter. And in the embryo the liver was already built when its progenitors were removed, so that experiment is closer to an injury than to a smaller seeding; we compare only the outcome.
 
@@ -104,51 +110,52 @@ The kidney is the harder test, because two experiments that removed the same sha
 
 The kidney-like construct with 40% of its pool removed retained <!-- auto:v.kid60 -->0.80 [0.77, 0.83]<!-- /auto:v.kid60 --> of its units (Figure 3C). This agrees with the first experiment and is less than half the deficit of the second. More importantly, the model contains the mechanism of neither. Its kidney-like progenitors do not divide, so they cannot repopulate a niche, and its tree does not depend on them, so branching cannot slow. We return to this below.
 
-One comparison needs no perturbation. Two constructs grown from identical parameters differ only by chance, as do the two kidneys of one person. Across seeds, the standard deviation of the log mass of the kidney-like construct is <!-- auto:v.sd.model -->0.104<!-- /auto:v.sd.model -->. In CT volumes of <!-- auto:v.pairs.n -->48<!-- /auto:v.pairs.n --> pairs of human kidneys [17], the within-pair standard deviation of log volume, after removal of the mean difference between sides, is <!-- auto:v.sd.pairs -->0.098<!-- /auto:v.sd.pairs --> (Figure 3D). Nothing in the model was set by the cohort. The agreement is nonetheless limited: part of the measured variation is segmentation error; a mass in model units is compared with a volume; and the variation in the model grows with the size of its domain, whereas within-pair variation in the cohort does not rise detectably with kidney volume (Spearman <!-- auto:v.pairs.size -->$\rho = +0.25$, $P = 0.09$<!-- /auto:v.pairs.size -->).
+### Progenitor-dependent branching reconciles contrasting nephron deficits but not all progenitor dynamics
 
-### Progenitor-driven branching accounts for both kidney experiments where perfusion is not limiting
-
-The disagreement between the two kidney experiments points to what the minimal rule lacks. In the embryonic kidney, nephron progenitors renew themselves until a timed cessation [18, 7], and the cap of progenitors around each ureteric tip supplies the signals that make the tip branch [19, 5]. We added these features as an extension that leaves the reference model unchanged (Figure 4A; STAR Methods). Progenitors divide and are not lost to attrition. A tip may branch only while it holds two caps' worth of progenitors, and it passes half to the new branch. Growth ends at a fixed time. On one day, every progenitor is killed with probability 0.4. A single further switch lets a depleted cap divide faster. Because these rules were written with the experiments in hand, the final deficit cannot count as a prediction. The test is whether one coupling yields several observations that were made separately.
+The disagreement between the two kidney experiments points to what the minimal rule lacks. In the embryonic kidney, nephron progenitors renew themselves until a timed cessation [17, 7], and the cap of progenitors around each ureteric tip supplies the signals that make the tip branch [18, 5]. We added these features as an extension that leaves the reference model unchanged (Figure 4A; STAR Methods). Progenitors divide and are not lost to attrition. A tip may branch only while it holds two caps' worth of progenitors, and it passes half to the new branch. Growth ends at a fixed time. On one day, every progenitor is killed with probability 0.4. A single further switch lets a depleted cap divide faster. Because these rules were written with the experiments in hand, the final deficit cannot count as a prediction. The test is whether one coupling yields several observations that were made separately.
 
 It does for the branching side of the experiment of Cebrian and colleagues, in every setting of the nucleation law that we examined (Figure 4B). In the embryo, the total cap mesenchyme of ablated kidneys grew as fast as in controls, so the deficit in cells persisted; the number of progenitors per tip, 0.60 of control one day after tamoxifen, returned to 0.95 and 1.04 on the following two days; and the number of tips fell to 0.71 and then 0.59 of control [5]. In the model, the pool stayed at <!-- auto:k.pool -->0.53 to 0.57<!-- /auto:k.pool --> of control to the end of the window, the cap returned to 0.95 of control <!-- auto:k.capback -->within 3 to 50 days in all 4 settings<!-- /auto:k.capback -->, and the number of branching sites settled at <!-- auto:k.sites -->0.52 to 0.60<!-- /auto:k.sites -->. The explanation is the one those authors proposed. A tip that has lost part of its cap does not branch until the cap is restored, so the size of the cap is corrected at the expense of the tree.
 
-Whether fewer tips produce proportionally fewer nephrons depended on perfusion (Figure 4C and 4D). With the nucleation law set as in the reference model, the units of the ablated construct recovered to <!-- auto:k.units.ref -->0.81 [0.72, 0.94]<!-- /auto:k.units.ref --> of control, because each remaining site is better perfused and forms more units. This compensation is the central mechanism of the model, and the embryonic kidney does not show it. When we lowered the perfusion threshold fourfold and slowed the law, so that perfusion seldom limits nucleation, units ended at <!-- auto:k.units.low -->0.64 [0.57, 0.70]<!-- /auto:k.units.low --> of control, and those formed after the ablation at <!-- auto:k.since.low -->0.52<!-- /auto:k.since.low -->. The measured 0.48–0.58 lies at the lower end of that interval. Read through the model, a nephron deficit in proportion to the progenitors removed implies that nephron formation in that kidney was limited by progenitors and branching and not by perfusion.
+Whether fewer tips produce proportionally fewer nephrons depended on perfusion (Figure 4C and 4D). With the nucleation law set as in the reference model, the units of the ablated construct recovered to <!-- auto:k.units.ref -->0.81 [0.72, 0.94]<!-- /auto:k.units.ref --> of control, because each remaining site is better perfused and forms more units. This compensation is the central mechanism of the model, and the embryonic kidney does not show it. When we lowered the perfusion threshold fourfold and slowed the law, so that perfusion seldom limits nucleation, units ended at <!-- auto:k.units.low -->0.64 [0.57, 0.70]<!-- /auto:k.units.low --> of control, and those formed after the ablation at <!-- auto:k.since.low -->0.52<!-- /auto:k.since.low -->. The measured 0.48–0.58 touches only the lower end of that interval, so the agreement is marginal. In the model, a nephron deficit that approaches proportion requires that perfusion limit nucleation weakly. This suggests, and does not show, that nephron formation in the embryonic kidney at that stage is paced by progenitors and branching more than by perfusion; the direct test is to vary perfusion in the embryo or in culture.
 
-Finally, the one known difference between the two experiments is sufficient to separate their outcomes. Doubling the division rate in a depleted cap, which is the response Muthukrishnan and colleagues measured, raised the units of the ablated construct to <!-- auto:k.resp.units.low -->0.86 [0.83, 0.89]<!-- /auto:k.resp.units.low --> of control in the same setting, within the measured 0.79–0.88. The agreement is incomplete: the pool in the model recovered only to <!-- auto:k.resp.pool -->0.65 to 0.68<!-- /auto:k.resp.pool --> of control, whereas the measured pool reached 0.85 within 2 days [6].
+Finally, the one known difference between the two experiments is sufficient to separate their outcomes. Doubling the division rate in a depleted cap, which is the response Muthukrishnan and colleagues measured, raised the units of the ablated construct to <!-- auto:k.resp.units.low -->0.86 [0.83, 0.89]<!-- /auto:k.resp.units.low --> of control in the same setting, within the measured 0.79–0.88. The agreement is incomplete (Table 2): the pool in the model recovered only to <!-- auto:k.resp.pool -->0.65 to 0.68<!-- /auto:k.resp.pool --> of control, whereas the measured pool reached 0.85 within 2 days [6].
 
-### The pool left at arrest decides whether growth can restart, and delivered flow sets the size regained
+**Table 2. What the extension reproduces of the two kidney experiments.** Values are ablated over control. Model days are not embryonic days, so timings are not compared.
 
-The bound that ends growth also determines what can restart it (Figure 5A). We relieved each constraint in arrested constructs, by lowering the perfusion threshold or the minimum spacing between units by one-fifth, and followed them for 40 days. Left alone, the liver-like construct gained 2.8 ± 0.3 % in units; with perfusion relieved it gained 22.6 ± 2.7 %, and with room relieved 32.3 ± 1.7 %. The pancreas-like construct, which still holds a quarter of its budget, gained 6.2 ± 1.4 % from the perfusion relief and 0.3 ± 0.2 % from the room relief. The kidney-like construct did not respond to either, because nothing remained to respond. Regenerative capacity is therefore not a separate property of a tissue in this model. It is what the progenitor pool has left when growth stops, which is set mostly by its turnover.
-
-The same logic governs recovery from injury. We removed 30% of an arrested construct and restored the capacity of its units to enlarge. What followed depended on how the circuit was driven (Figure 5B and 5C). With inlet pressure held, each unit added draws more flow, and the liver-like construct overshot to 1.82 [1.54, 2.07] times its mass before the loss and the kidney-like construct to 1.85 [1.53, 2.21]. With the delivered flow held at its value before the injury, as for an organ fed by a circulation that does not rise on demand, the liver-like construct returned to 1.00 [0.95, 1.03] of its mass and the kidney-like construct to 0.97 [0.93, 0.99]. Across a 2.3-fold range of delivered flow, the mass regained rose with flow to an exponent of 0.90 (Figure 5D). No element of the tissue senses its size: the size regained is the flow delivered divided by what a unit of mass requires.
-
-Mass and architecture recover separately (Figure 5E and 5F). The kidney-like construct, which cannot form new units, kept 0.70 [0.69, 0.70] of its units after a 30% loss and regained its mass by enlarging them to 1.39 [1.34, 1.43] times their mass, against 1.43 for full compensation; after a 50% loss the corresponding values are 1.88 [1.78, 1.94] and 2.00. This is compensatory hypertrophy, and the model overstates it: the remnant human kidney gains 30%–50% in mass and recovers 70%–80% of filtration rather than all of it [20]. Nothing in the model limits how large a unit may become.
+| Observable | Measured | Model | Outcome |
+| --- | --- | --- | --- |
+| Total progenitors, no proliferative response [5] | grow as fast as in control, so the deficit persists | <!-- auto:k.pool -->0.53 to 0.57<!-- /auto:k.pool --> to the end of the window | reproduced |
+| Tips [5] | 0.71, then 0.59 | <!-- auto:k.sites -->0.52 to 0.60<!-- /auto:k.sites --> | reproduced |
+| Progenitors per tip [5] | 0.60, then 0.95 and 1.04 | back to 0.95 <!-- auto:k.capback -->within 3 to 50 days in all 4 settings<!-- /auto:k.capback -->, after an overshoot | approximated |
+| Nephrons, no proliferative response [5] | 0.48–0.58 | <!-- auto:k.units.low -->0.64 [0.57, 0.70]<!-- /auto:k.units.low --> | approximated: intervals touch |
+| Nephrons, with a proliferative response [6] | 0.79–0.88 | <!-- auto:k.resp.units.low -->0.86 [0.83, 0.89]<!-- /auto:k.resp.units.low --> | reproduced |
+| Progenitor pool, with a proliferative response [6] | 0.85 after 2 days | <!-- auto:k.resp.pool -->0.65 to 0.68<!-- /auto:k.resp.pool --> | not reproduced |
 
 ### The model predicts the outcome of ablations that have not been performed
 
-A model compared only with known results cannot fail. We therefore committed it to the outcome of ablations that have not been reported, in the same systems and by the same method (Figure 6A–6C; STAR Methods).
+A model compared only with known results cannot fail. We therefore committed it to the outcome of ablations that have not been reported, in the same systems and by the same method (Figure 5A–5C; STAR Methods).
 
-For the pancreas, removing 25% and 40% of the progenitors should leave an organ at <!-- auto:p.panc75 -->0.70 [0.58, 0.81]<!-- /auto:p.panc75 --> and <!-- auto:p.panc60 -->0.61 [0.51, 0.70]<!-- /auto:p.panc60 --> of control weight. A pancreas of normal weight at either dose would refute the model. For the liver, removing 25% should have no detectable effect (<!-- auto:p.liv75 -->0.97 [0.94, 1.00]<!-- /auto:p.liv75 -->), whereas removing 85% should leave a liver at <!-- auto:p.liv15 -->0.70 [0.68, 0.72]<!-- /auto:p.liv15 -->. In the model the liver is not indifferent to its progenitors; it has a wide margin. A liver of normal weight after an 85% ablation would refute this.
+For the pancreas, removing 25% and 40% of the progenitors should leave an organ at <!-- auto:p.panc75 -->0.70 [0.58, 0.81]<!-- /auto:p.panc75 --> and <!-- auto:p.panc60 -->0.61 [0.51, 0.70]<!-- /auto:p.panc60 --> of control weight. A pancreas of normal weight at either dose would refute the model. For the liver, removing 25% should have no detectable effect (<!-- auto:p.liv75 -->0.97 [0.94, 1.00]<!-- /auto:p.liv75 -->), whereas removing 85% should leave a liver at <!-- auto:p.liv15 -->0.70 [0.68, 0.72]<!-- /auto:p.liv15 -->. In the model the liver is not indifferent to its progenitors; it has a wide margin. A liver of normal weight after an 85% ablation would refute this. These dose predictions move little when the rate of the law is halved or doubled and when the perfusion threshold is lowered or raised: across those four settings the pancreas-like construct ends at <!-- auto:p.panc75.alt -->0.68 to 0.74<!-- /auto:p.panc75.alt --> and <!-- auto:p.panc60.alt -->0.61 to 0.66<!-- /auto:p.panc60.alt --> of its reference, and the liver-like construct at <!-- auto:p.liv75.alt -->0.93 to 0.95<!-- /auto:p.liv75.alt --> and <!-- auto:p.liv15.alt -->0.69 to 0.73<!-- /auto:p.liv15.alt --> (Figure 5A).
 
 For the kidney, the extended model without a proliferative response predicts <!-- auto:p.kid20 -->0.82 [0.75, 0.89]<!-- /auto:p.kid20 --> of control nephron number after a 20% ablation and <!-- auto:p.kid60 -->0.56 [0.50, 0.63]<!-- /auto:p.kid60 --> after 60%. The second value is well above the 0.40 that proportionality would give, because the sites that remain are each better supplied as the tree thins. With a proliferative response the predictions are <!-- auto:p.kid20r -->0.93 [0.90, 0.97]<!-- /auto:p.kid20r --> and <!-- auto:p.kid60r -->0.79 [0.77, 0.82]<!-- /auto:p.kid60r -->. The model also suggests that the same 40% ablation costs somewhat fewer nephrons late in the window than early when the survivors do not compensate (<!-- auto:p.late -->0.75 [0.71, 0.79]<!-- /auto:p.late --> against <!-- auto:p.early -->0.67 [0.56, 0.79]<!-- /auto:p.early --> of control), although these two intervals overlap.
 
-Taken together, the comparisons place each organ on a single axis, the elasticity of its size to progenitor number (Figure 6D). The liver and the kidney with compensatory proliferation lie near zero, where perfusion or renewed progenitors make up the loss. The pancreas and the kidney without compensation lie near one, where progenitors are limiting. The model places its liver-like and pancreas-like sources close to their organs, and its extended kidney-like source on the correct side in each case.
+Taken together, the comparisons place each organ on a single axis (Figure 5D). The axis is an effective elasticity, $\log$(share of organ)/$\log$(share of progenitors left), computed over one finite ablation; it is what an ablation yields, and it is not the differential elasticity of Figure 2. The liver and the kidney with compensatory proliferation lie near zero, where perfusion or renewed progenitors make up the loss. The pancreas and the kidney without compensation lie near one, where progenitors are limiting. The model places its liver-like and pancreas-like sources close to their organs, and its extended kidney-like source on the correct side in each case.
 
 ## DISCUSSION
 
-We have asked what determines whether the size of an organ depends on the number of its progenitors, and found that one local rule is enough to produce both answers. The distinction between organs of intrinsically and extrinsically determined size [1, 2, 4] then becomes a statement about which resource is exhausted first where the tissue is built. Where perfusion runs out, size is nearly independent of progenitor number; where progenitors run out, size follows them. This recasts a classification as a measurable quantity, the elasticity of organ size to progenitor number, and it removes the need for a mechanism that counts cells or senses size.
+We have asked what determines whether the size of an organ depends on the number of its progenitors, and found that one local rule is enough to produce both answers. The distinction between organs of intrinsically and extrinsically determined size [1, 2, 4] then becomes a matter of degree: how near a tissue comes, where it is built, to the size that perfusion can support. Far from that size, the tissue follows its progenitors; near it, size is almost independent of them. The constraints are coupled, and every source we examined remains sensitive to the perfusion threshold, so no organ is of one kind only. This recasts a classification as a measurable quantity, the elasticity of organ size to progenitor number, and it removes the need for a mechanism that counts cells or senses size.
 
 Two consequences run against the usual reading. First, the liver-like tissue is not indifferent to its progenitors. It has a margin, and the model says where the margin ends. Second, the axis that matters most is not whether a tissue keeps a self-renewing compartment but whether its pool is lost with time. This is consistent with the view that in liver and pancreas no dedicated stem-cell niche carries out repair [10], and it shifts attention from the identity of a progenitor to its turnover.
 
-The kidney was the informative failure. The minimal rule matched one experiment by a route the tissue does not use and missed the other by a factor of two. Adding the coupling that kidney development is known to have, progenitors that drive the branching that makes room for them [19, 5], reproduced the persistence of the cell deficit, the recovery of the cap, and the loss of tips, and it showed that the nephron deficit becomes proportional only when perfusion does not limit nucleation. We read this as a statement about the embryonic kidney: at the stage examined, nephron formation is paced by progenitors and branching. The direction of the coupling, from progenitors to branching and not from nephrons to branching, agrees with the finding that ureteric branching is unaffected when nephron formation is perturbed [21]. It also explains how two ablations of the same size can differ twofold in outcome. The difference is whether the survivors compensate by dividing, which the model needs only as a switch. Nephron endowment, which varies widely among people and is fixed before birth [8, 7], would on this account be sensitive to any insult that reduces progenitors without eliciting that response.
+The kidney was the informative failure. The minimal rule matched one experiment by a route the tissue does not use and missed the other by a factor of two. Adding the coupling that kidney development is known to have, progenitors that drive the branching that makes room for them [18, 5], reproduced the persistence of the cell deficit, the recovery of the cap, and the loss of tips, and it brought the nephron deficit toward proportion only where perfusion limits nucleation weakly. It does not reproduce how far the pool recovers when the survivors divide faster, and its agreement with the proportional deficit is marginal (Table 2). We therefore take the requirement for weak perfusion limitation as a hypothesis about the embryonic kidney, to be tested, and not as a result. The direction of the coupling, from progenitors to branching and not from nephrons to branching, agrees with the finding that ureteric branching is unaffected when nephron formation is perturbed [19]. It also explains how two ablations of the same size can differ twofold in outcome. The difference is whether the survivors compensate by dividing, which the model needs only as a switch. Nephron endowment, which varies widely among people and is fixed before birth [8, 7], would on this account be sensitive to any insult that reduces progenitors without eliciting that response.
 
-The same rule bears on regeneration. A tissue can resume growth only if it stopped with progenitors in hand, and the size it regains after a loss is set by the flow it is given, not by a memory of its former size. The first statement gives regenerative capacity a mechanistic definition. In models of liver regeneration, a load or a flow shared among the remaining cells plays this role by assumption [11, 12]. Here it follows from the local rule and the boundary condition on the circuit, which offers one reading of how a liver can restore its mass after resection [3] without a signal that reports its size.
+The same rule bears on regeneration. A tissue can resume growth only if it stopped with progenitors in hand, which gives regenerative capacity a mechanistic definition: it is what the pool has left at arrest, and that is set mostly by its turnover. How an arrested tissue regains mass after injury depends in addition on how its circulation is driven, a question that models of liver regeneration address through a load or a flow shared among the remaining cells [11, 12] and that we leave to a separate study.
 
-For efforts to grow replacement tissue, these results suggest an order of questions. The first is which resource stopped the construct, which the two reliefs of Figure 5A distinguish. A tissue of the kidney kind must be given progenitors in proportion to the units wanted, because better perfusion makes up a shortfall only where perfusion was the limit. In human kidney organoids, the number of nephron progenitors seeded correlates with the size of the organoid [22], as expected of a tissue limited by its progenitors. Lowering what each unit requires does more than seeding more cells in every source we examined. And recovery should be judged by units as well as by mass, since the two return separately.
+For efforts to grow replacement tissue, these results suggest an order of questions. The first is which resource stopped the construct, which the two reliefs of Figure 2E distinguish. A tissue of the kidney kind must be given progenitors in proportion to the units wanted, because better perfusion makes up a shortfall only where perfusion was the limit. In human kidney organoids, the number of nephron progenitors seeded correlates with the size of the organoid [20], as expected of a tissue limited by its progenitors. Lowering what each unit requires does more than seeding more cells in every source we examined.
 
 ### Limitations of the study
 
-No parameter of the model is fitted, and none is measured in a tissue; we report ratios, orderings, and contrasts, which is what a chosen parameter set can support. All three sources are grown in one fixed domain, whereas an embryonic organ makes its own, and model time is not calibrated to embryonic days, so that sequences and endpoints are compared and timings are not. The pancreas and liver experiment was known when the three sources were described, although their parameters were not adjusted to it. The liver comparison sets a reduced seeding beside an ablation performed on an organ already formed. The kidney extension was written after the measurements it is compared with, carries six parameters of which none is measured and two were swept, reaches the measured deficit only at the edge of its interval, and recovers the progenitor pool less completely than the embryo does when proliferation responds. In the extension the tree still sprouts toward units that are short of supply, a dependence of branching on nephrons that the embryonic kidney does not show [21]. The model has no readout of function, so every recovery reported is structural, and it places no limit on the size of a unit, so it overstates renal compensation. The human cohort gives CT volumes with segmentation error that we do not separate. Exact values hold on the platform on which they were computed; another platform reproduces them within sampling error (STAR Methods). No prediction has yet been tested.
+No parameter of the model was optimized against the measurements it is compared with, and none is measured in a tissue; we report ratios, orderings, and contrasts, which is what a chosen parameter set can support. All three sources are grown in one fixed domain, whereas an embryonic organ makes its own, and model time is not calibrated to embryonic days, so that sequences and endpoints are compared and timings are not. The pancreas and liver experiment was known when the three sources were defined, so those comparisons are retrospective: they show that the model recapitulates the experiment, and they are not blind predictions. The liver comparison sets a reduced seeding beside an ablation performed on an organ already formed. The kidney extension was written after the measurements it is compared with, carries six parameters of which none is measured and two were swept, reaches the measured deficit only at the edge of its interval, and recovers the progenitor pool less completely than the embryo does when proliferation responds. In the extension the tree still sprouts toward units that are short of supply, a dependence of branching on nephrons that the embryonic kidney does not show [19]. The model has no readout of function, so every recovery reported is structural. The variable $q$ is hydraulic; whether a threshold in it stands for oxygen, nutrients, or a flow-dependent signal is not resolved by the model. Exact values hold on the platform on which they were computed; another platform reproduces them within sampling error (STAR Methods). No prediction has yet been tested.
 
 ## RESOURCE AVAILABILITY
 
@@ -162,7 +169,7 @@ This study did not generate new materials.
 
 ### Data and code availability
 
-- This paper analyzes existing, publicly available data. The human kidney volumes are from the TRUSTED dataset [17]; the derived table used here is in the repository under `source_data/`. The values of the mouse experiments are read from the cited publications and listed in `scripts/36_validation.py` and `scripts/37_kidney_coupling.py` with the figure each is taken from.
+- This paper analyzes existing, publicly available data. The human kidney volumes are from the TRUSTED dataset [21]; the derived table used here is in the repository under `source_data/`. The values of the mouse experiments are read from the cited publications and listed in `scripts/36_validation.py` and `scripts/37_kidney_coupling.py` with the figure each is taken from.
 - All original code is available at https://github.com/Danpc11/Ogrow and will be archived with a DOI at publication. `make paper` regenerates every number, table, and figure, and `PAPER_NUMBERS.md` records them with the version, commit, and platform that produced them.
 - Any additional information required to reanalyze the data reported in this paper is available from the lead contact upon request.
 
@@ -180,50 +187,54 @@ The authors declare no competing interests.
 
 ## FIGURE LEGENDS
 
-**Figure 1. A local nucleation law stops growth without a size signal**
+**Figure 1. A local nucleation law arrests growth without a global size variable**
 
 (A) The model. Functional units (open circles) form at the tips of a perfused branching tree (purple) that grows in a fixed domain. Each tip holds a pool of progenitors (orange). Units form at the rate shown and stop when perfusion per unit, progenitors, or free sites run out at that tip.
-(B) A liver-like construct at arrest, projected onto a plane. Line width follows vessel radius.
+(B) One liver-like construct at arrest, projected onto a plane; a single realization, whereas the text gives the mean of 24. Line width follows vessel radius.
 (C) Units over time for the three cell sources. Lines, mean of 24 seeds; bands, 10th to 90th percentile.
 (D) Progenitors relative to the pool seeded, as in (C).
 (E) Where the progenitor pool stands at arrest: spent or lost, held at tips where perfusion has fallen to the threshold, or held at tips with no free site. Mean of 24 seeds.
 See also Table 1.
 
-**Figure 2. The turnover of the cell source decides which resource runs out**
+**Figure 2. The dependence of size on progenitor number weakens as a tissue nears its perfusion-set size**
 
 (A) Factorial of renewal, seeded pool, and turnover. Each tile is colored by the bound that holds the largest share of the pool at arrest; numbers are units at arrest. Outlines mark the three sources of Figure 1.
 (B) Fraction of the settings of the other two factors in which changing one factor changes the bound.
-(C) Elasticity of the final unit count to the seeded pool (filled circles) and to the perfusion threshold (open squares; magnitude), by paired perturbation. Error bars, SEM over 24 seeds.
+(C) Elasticity of the final unit count to the seeded pool (filled circles) and to the perfusion threshold (open squares; magnitude) in the three sources, by paired perturbation. Error bars, SEM over 24 seeds.
+(D) Elasticity to the seeded pool in all 18 sources of (A), against units at arrest. Fill, the bound that holds the pool at arrest; outlines, the three sources of Figure 1. Error bars, SEM over 24 paired seeds.
+(E) Units gained in 40 days by arrested constructs left alone, with the perfusion threshold lowered by one-fifth, or with the minimum spacing between units lowered by one-fifth. Error bars, SEM.
 
-**Figure 3. The model beside progenitor ablations in mouse and paired kidneys in humans**
+**Figure 3. The model beside published progenitor ablations in the mouse**
 
 (A) The experiments and their counterpart in the model.
-(B) Share of the organ that results against the share of progenitors left. Filled circles and lines, mass of the pancreas-like and liver-like constructs at day 140 relative to the reference (ratio of means, 24 paired seeds; bars, 95% bootstrap interval). Open squares, weight of the mouse pancreas at birth after ablation of 8% and 61% of its progenitors (bars, 95% CI) and of the liver 4 days after ablation of at least 65% (Stanger et al.). Dashed line, an organ in proportion to its pool.
-(C) As in (B) for units of the kidney-like construct, against glomerular number after ablation of about 40% of nephron progenitors: through a CITED1 driver, at P3 and P10 (circles; Muthukrishnan et al.), and through a Gdnf driver, at E19.5 and P50 (diamonds; Cebrian et al.). Measurements are offset horizontally for clarity.
-(D) Deviation of one organ from another grown like it: log mass of the kidney-like construct across 24 seeds, and log volume of each kidney relative to its pair in 48 people, with the mean difference between sides removed. Bars span one standard deviation on either side of zero.
+(B) Share of the organ that results against the share of progenitors left. Filled circles and lines, mass of the pancreas-like and liver-like constructs at day 140 relative to the reference (ratio of means, 24 paired seeds; bars, 95% bootstrap interval). Open squares, weight of the mouse pancreas at birth after ablation of 8% and 61% of its progenitors (bars, 95% CI) and of the liver 4 days after ablation of at least 65% [4]. Dashed line, an organ in proportion to its pool.
+(C) As in (B) for units of the kidney-like construct, against glomerular number after ablation of about 40% of nephron progenitors: through a CITED1 driver, at P3 and P10 (circles) [6], and through a Gdnf driver, at E19.5 and P50 (diamonds) [5]. Measurements are offset horizontally for clarity.
+See also Figure S1.
 
-**Figure 4. Progenitor-driven branching accounts for both kidney experiments where perfusion is not limiting**
+**Figure 4. Progenitor-dependent branching reconciles contrasting nephron deficits but not all progenitor dynamics**
 
 (A) The extension. A tip branches only when its cap of progenitors has doubled, and each branch keeps one cap. After an ablation the tip waits for the cap to be restored, and the delay in branching is not made up.
-(B) Total progenitors, progenitors per tip, and number of tips after ablation of 40% of progenitors, relative to the unablated control, with no proliferative response and where perfusion limits nucleation least. Open symbols at right, progenitors per tip and tips per kidney 1, 2, and 3 days after ablation in the mouse (Cebrian et al.); model days are not embryonic days.
-(C) Units, ablated over control, in the same setting, with survivors dividing as before (solid) or twice as fast in a depleted cap (dashed). Gray bands, glomerular number in the study without a proliferative response (Cebrian et al.) and in the study with one (Muthukrishnan et al.).
+(B) Total progenitors, progenitors per tip, and number of tips after ablation of 40% of progenitors, relative to the unablated control, with no proliferative response and where perfusion limits nucleation least. The horizontal axis is in model days. Open symbols at right, progenitors per tip and tips per kidney 1, 2, and 3 days after ablation in the mouse [5], drawn beside the axis and not on it because the two time scales are not calibrated to each other.
+(C) Units, ablated over control, in the same setting, with survivors dividing as before (solid) or twice as fast in a depleted cap (dashed). Gray bands, glomerular number in the study without a proliferative response [5] and in the study with one [6].
 (D) Units at the end of the window in four settings of the nucleation law, from that of the reference model (left) to the least perfusion limited (right). Bars, 95% bootstrap interval over 24 paired seeds.
+See also Table 2.
 
-**Figure 5. The pool left at arrest decides whether growth can restart, and delivered flow sets the size regained**
+**Figure 5. Predictions for ablations that have not been performed**
 
-(A) Units gained in 40 days by arrested constructs left alone, with the perfusion threshold lowered by one-fifth, or with the spacing between units lowered by one-fifth. Error bars, SEM.
-(B) Two ways to drive the circuit: inlet pressure held, or delivered flow held.
-(C) Mass 80 days after loss of 30% of an arrested construct, relative to mass before the loss. Points, seeds; bars, means.
-(D) Mass regained against flow delivered, both relative to their values before the loss, with flow held. Lines, fitted power laws; dashed line, proportionality.
-(E) Units and mass after the loss, with flow held, relative to before.
-(F) Mass per unit against units kept in the kidney-like construct after losses of 30% and 50%. Line, full compensation.
-
-**Figure 6. Predictions for ablations that have not been performed**
-
-(A) As Figure 3B, with the model at doses not yet tested (stars).
+(A) As Figure 3B, with the model at doses not yet tested (stars). Pale bars beside the stars, the range of the same prediction across four other settings of the nucleation law.
 (B) Share of nephron-like units that results against the share of progenitors left, in the extended kidney-like source, with survivors dividing as before (filled, solid) or twice as fast (open, dashed). Squares, the four published measurements of Figure 3C.
-(C) The same 40% ablation early, at the time already compared, and late in the window.
-(D) Elasticity of organ size to progenitor number, $\log$(share of organ)/$\log$(share of progenitors left), for the published experiments (open squares) and for the model at the same doses (filled circles).
+(C) The same 40% ablation early, at the time already compared, and late in the window. The intervals for early and late overlap.
+(D) Effective elasticity of organ size to progenitor number over one finite ablation, $\log$(share of organ)/$\log$(share of progenitors left), for the published experiments (open squares) and for the model at the same doses (filled circles). This is not the differential elasticity of Figure 2.
+
+## SUPPLEMENTAL INFORMATION
+
+**Figure S1. Two organs grown alike, related to Figure 3**
+
+Deviation of one organ from another grown like it: log mass of the kidney-like construct across 24 seeds, and log volume of each kidney relative to its pair in 48 people [21], with the mean difference between sides removed. The standard deviation of each group is given above it.
+
+**Note S1. Variation between two organs grown alike**
+
+Two constructs grown from identical parameters differ only by chance, as do the two kidneys of one person. Across seeds, the standard deviation of the log mass of the kidney-like construct is <!-- auto:v.sd.model -->0.104<!-- /auto:v.sd.model -->. In CT volumes of <!-- auto:v.pairs.n -->48<!-- /auto:v.pairs.n --> pairs of human kidneys [21], the within-pair standard deviation of log volume, after removal of the mean difference between sides, is <!-- auto:v.sd.pairs -->0.098<!-- /auto:v.sd.pairs --> (Figure S1). Nothing in the model was set by the cohort. The agreement is nonetheless limited: part of the measured variation is segmentation error; a mass in model units is compared with a volume; and the variation in the model grows with the size of its domain, whereas within-pair variation in the cohort does not rise detectably with kidney volume (Spearman <!-- auto:v.pairs.size -->$\rho = +0.25$, $P = 0.09$<!-- /auto:v.pairs.size -->). We report the comparison for completeness and draw no conclusion from it: the two kidneys of one person share a body, and no hypothesis here connects the variation of the model across seeds to bilateral variation in people.
 
 ## STAR METHODS
 
@@ -232,7 +243,7 @@ See also Table 1.
 | REAGENT or RESOURCE | SOURCE | IDENTIFIER |
 | --- | --- | --- |
 | **Deposited data** | | |
-| Paired human kidney CT segmentations (TRUSTED) | Ndzimbong et al. [17] | https://doi.org/10.6084/m9.figshare.27981050 |
+| Paired human kidney CT segmentations (TRUSTED) | Ndzimbong et al. [21] | https://doi.org/10.6084/m9.figshare.27981050 |
 | Pancreas and liver weight after progenitor ablation | Stanger et al. [4] | Figures 2, 3, and 6 of that study |
 | Glomerular number, tips, and cap size after nephron progenitor ablation | Cebrian et al. [5] | Figures 4 and 6 of that study |
 | Glomerular number and progenitor number after nephron progenitor ablation | Muthukrishnan et al. [6] | Figures 1 and 2 of that study |
@@ -251,8 +262,7 @@ A functional unit is nucleated at a vascular tip $i$ at rate
 
 $$\lambda_i = \nu\, P_i\, (q_i - q_{\mathrm{set}})_+$$
 
-where $P_i$ is the number of competent cells held at that tip, $q_i$ is the
-local perfusion per unit of tissue served by the tip, $q_{\mathrm{set}}$ is a
+where $P_i$ is the number of competent cells held at that tip, $q_i$ is the pressure delivered at tip $i$ as a fraction of the inlet pressure, which is also the flow through each unit at that tip relative to the flow the same unit would draw at the inlet (defined below), $q_{\mathrm{set}}$ is a
 threshold below which no unit forms, $\nu$ is a rate constant, and
 $(\cdot)_+$ denotes the positive part. The law is local: no term in it refers
 to the state of the construct as a whole.
@@ -290,42 +300,30 @@ settings.
 
 The tree grows by sprouting at tips and adapts its calibres under a wall-cost
 objective $\mathcal{C} = Q^2/r^4 + k\,(p\,r^2)^b$ minimised per unit length,
-in the sense of Murray [23], with wall cross-section proportional to $p\,r^2$
+in the sense of Murray [22], with wall cross-section proportional to $p\,r^2$
 by Laplace's law. This gives the branching relation
 $r_p^{\,b+2} = \sum r_c^{\,b+2}$ and wall shear
 proportional to $p^{b/2} r^{\,b-1}$. Shear on a segment in series with its
 tissue peaks at $r_c = (\ell / 3R_t)^{1/4}$, the radius below which a vessel
 regresses.
 
-The network is linear in the driving pressure, so two boundary conditions are
-available and we use both. Under a **fixed inlet pressure**, the standard
-condition, the tree grows its conductance as the tissue demands more, and
-perfusion per unit need not fall as the construct grows. Under a **fixed root
-flow**, the whole solve is rescaled so that the flow entering the root equals a
-chosen value; each unit's share is then its own conductance times the pressure
-its tip delivers,
+Flow is solved for a fixed inlet pressure $\Delta P$. Each segment has a
+Poiseuille conductance proportional to $r^4/\ell$, each unit is a terminal load
+of resistance $R_u$ at its tip, and a tip that serves no unit is a dead end.
+Conductances are reduced from the leaves to the root, the root draws the flow
+its total conductance allows, and that flow divides among daughters in
+proportion to their conductances. The pressure at the distal end of tip $i$,
+$p_i$, is the pressure across the units it serves, and
 
-$$w_j \propto m_j^{\,\xi}\, q_{\mathrm{tip}(j)},$$
+$$q_i = p_i / \Delta P .$$
 
-normalised over units, so delivery per unit mass falls as the construct grows.
-The second condition is what a circulation imposes on a tissue that is part of
-a body, and it is what a perfusion bioreactor imposes when it is run at
-constant flow rather than constant pressure.
-
-Under it a unit's ceiling is $m_j^{*} = (Q/\phi)\,w_j/\sum_k w_k$, where $Q$
-is the delivered flow and $\phi$ the delivery per unit mass the tissue
-requires. The shares sum to one, so if every unit sits at its ceiling then
-
-$$\sum_j m_j^{*} = Q/\phi .$$
-
-A ceiling on the whole construct therefore follows from a rule that refers
-only to a tip. This is a consequence of the rule and not a measurement, and we
-report it as one: setting $\phi$ to a construct's own pre-injury delivery per
-unit mass forces that construct back to its pre-injury mass by arithmetic, for
-every seed, which is why Results sets $\phi$ once on an intact ensemble
-and then varies $Q$. With $\xi = 1$ a unit's ceiling moves with its own mass,
-so the identity above is approached rather than reached, and how closely is
-measured in Results.
+The flow through one unit at that tip is $p_i/R_u$, so $q_i$ is also that flow
+in units of $\Delta P/R_u$, the flow a unit would draw if it were connected
+directly to the inlet. The variable lies between 0 and 1 and is purely
+hydraulic: no solute is transported, and the threshold $q_{\mathrm{set}}$
+stands for whatever a unit requires of its perfusion. The tree can also be
+driven with a fixed flow; results that depend on that choice are not part of
+this paper.
 
 #### Readouts, replicates, and robustness
 
@@ -361,7 +359,7 @@ for pancreas and liver and with glomerular number for kidney, each as a share
 of littermate controls, read from the figures and text of those papers. The
 variation across seeds grown from identical parameters is compared with the
 left-right variation of kidney volume in 48 people, 96 kidneys segmented from
-clinical CT [17]: the standard deviation of the log ratio of the two sides,
+clinical CT [21]: the standard deviation of the log ratio of the two sides,
 divided by $\sqrt{2}$, after the mean difference between sides is removed.
 
 The reference model has no path from the progenitor pool to the tree, and
@@ -385,7 +383,7 @@ the commit that produced them (`PAPER_NUMBERS.md`, Predictions).
 
 ### QUANTIFICATION AND STATISTICAL ANALYSIS
 
-Every reported quantity is computed over 24 independent seeds of the stochastic model. Unit counts and shares of the pool are given as mean ± SEM. Elasticities are central differences in log space for a perturbation of ±0.3 in the logarithm of the parameter, computed seed by seed and reported as mean ± SEM. Comparisons between a perturbed construct and its reference use the same seeds for both and are reported as the ratio of the two means with a 95% interval from 4,000 paired bootstrap resamples of the seeds; for the injury experiments, brackets give the range across seeds around the mean. The within-pair variation of human kidney volume is the standard deviation of the log ratio of left to right volume divided by $\sqrt{2}$, after subtraction of its mean; its association with kidney size is tested by Spearman correlation between the absolute deviation and the mean volume of the pair. No data were excluded. The published values with which the model is compared were read from the text and figures of the cited studies and are listed with their source in the code. Numbers in the text are regenerated from the result files by the pipeline and are exact on the platform recorded in `PAPER_NUMBERS.md` (macOS, arm64); with the same package versions, Linux gives different single realizations and the same means within sampling error, which the test suite checks against a reference ensemble.
+Every reported quantity is computed over 24 independent seeds of the stochastic model. Unit counts and shares of the pool are given as mean ± SEM. Elasticities are central differences in log space for a perturbation of ±0.3 in the logarithm of the parameter, computed seed by seed and reported as mean ± SEM. Comparisons between a perturbed construct and its reference use the same seeds for both and are reported as the ratio of the two means with a 95% interval from paired bootstrap resamples of the seeds. Associations between the elasticity and properties of a source across the 18 sources of the factorial are Spearman rank correlations. The within-pair variation of human kidney volume is the standard deviation of the log ratio of left to right volume divided by $\sqrt{2}$, after subtraction of its mean; its association with kidney size is tested by Spearman correlation between the absolute deviation and the mean volume of the pair. No data were excluded. The published values with which the model is compared were read from the text and figures of the cited studies and are listed with their source in the code. Numbers in the text are regenerated from the result files by the pipeline and are exact on the platform recorded in `PAPER_NUMBERS.md` (macOS, arm64); with the same package versions, Linux gives different single realizations and the same means within sampling error, which the test suite checks against a reference ensemble.
 
 ## REFERENCES
 
@@ -421,23 +419,25 @@ Every reported quantity is computed over 24 independent seeds of the stochastic 
 
 [16] Heinke, P., Rost, F., Rode, J., Trus, P., Simonova, I., et al. (2022). Diploid hepatocytes drive physiological liver renewal in adult humans. Cell Syst. *13*, 499–507.
 
-[17] Ndzimbong, W., Fourniol, C., Themyr, L., Thome, N., Keeza, Y., Sauer, B., Piéchaud, P.-T., Méjean, A., Marescaux, J., George, D., et al. (2025). TRUSTED: the paired 3D transabdominal ultrasound and CT human data for kidney segmentation and registration research. Sci. Data *12*, 615.
+[17] Kobayashi, A., Valerius, M.T., Mugford, J.W., Carroll, T.J., Self, M., Oliver, G., and McMahon, A.P. (2008). Six2 defines and regulates a multipotent self-renewing nephron progenitor population throughout mammalian kidney development. Cell Stem Cell *3*, 169–181.
 
-[18] Kobayashi, A., Valerius, M.T., Mugford, J.W., Carroll, T.J., Self, M., Oliver, G., and McMahon, A.P. (2008). Six2 defines and regulates a multipotent self-renewing nephron progenitor population throughout mammalian kidney development. Cell Stem Cell *3*, 169–181.
+[18] Costantini, F., and Kopan, R. (2010). Patterning a complex organ: branching morphogenesis and nephron segmentation in kidney development. Dev. Cell *18*, 698–712.
 
-[19] Costantini, F., and Kopan, R. (2010). Patterning a complex organ: branching morphogenesis and nephron segmentation in kidney development. Dev. Cell *18*, 698–712.
+[19] Short, K.M., Combes, A.N., Lisnyak, V., Lefevre, J.G., Jones, L.K., Little, M.H., Hamilton, N.A., and Smyth, I.M. (2018). Branching morphogenesis in the developing kidney is not impacted by nephron formation or integration. eLife *7*, e38992.
 
-[20] Qu X, Shi Y, Li L and Liu T 2026 Compensatory nephron hypertrophy: mechanisms, pathophysiology dynamics, and clinical implications in acute kidney injury and chronic kidney disease *Kidney Res. Clin. Pract.* advance online publication, doi:10.23876/j.krcp.25.405
+[20] Porter, C.M., Qian, G.C., Grindel, S.H., and Hughes, A.J. (2024). Highly parallel production of designer organoids by mosaic patterning of progenitors. Cell Syst. *15*, 649–661.
 
-[21] Short, K.M., Combes, A.N., Lisnyak, V., Lefevre, J.G., Jones, L.K., Little, M.H., Hamilton, N.A., and Smyth, I.M. (2018). Branching morphogenesis in the developing kidney is not impacted by nephron formation or integration. eLife *7*, e38992.
+[21] Ndzimbong, W., Fourniol, C., Themyr, L., Thome, N., Keeza, Y., Sauer, B., Piéchaud, P.-T., Méjean, A., Marescaux, J., George, D., et al. (2025). TRUSTED: the paired 3D transabdominal ultrasound and CT human data for kidney segmentation and registration research. Sci. Data *12*, 615.
 
-[22] Porter, C.M., Qian, G.C., Grindel, S.H., and Hughes, A.J. (2024). Highly parallel production of designer organoids by mosaic patterning of progenitors. Cell Syst. *15*, 649–661.
-
-[23] Murray C D 1926 The physiological principle of minimum work. I. The vascular system and the cost of blood volume *Proc. Natl Acad. Sci. USA* **12** 207–14
+[22] Murray C D 1926 The physiological principle of minimum work. I. The vascular system and the cost of blood volume *Proc. Natl Acad. Sci. USA* **12** 207–14
 
 ## Notes for the authors, to be removed before submission
 
 **What was checked against the journal, and how.** The journal's page for authors says that an initial submission needs no particular format beyond a title, the authors, a summary, and enough methods to judge the results; that an Article has up to seven figures or tables; that the journal is figure driven, so the argument has to be made through the figures and their legends; that the text should be short enough to read in one sitting; and that STAR Methods and references do not count toward its length. Five research papers from the journal were then read for form (Wang et al. 2022, Kreten et al. 2024, Porter et al. 2024, Heinke et al. 2022, Beck et al. 2022). What they share, and this draft follows: a summary of 130 to 170 words; three or four highlights; result headings written as statements; an introduction of 400 to 1,100 words that ends by saying what the paper shows; and, in the 2024 papers, numbered references with DOIs and the order Discussion, Resource availability, Acknowledgments, Author contributions, Declaration of interests, STAR Methods. None of the five has a section headed "Limitations of the study"; they state limits inside the Discussion. The heading is kept here because a paper with no experiment of its own gains from stating its limits in one place, and it can be folded into the Discussion if an editor prefers. The "In brief" paragraph is written in the first person, as in those papers. Still to check on the journal's page: DOIs in the reference list, and the size of the graphical abstract.
+
+**Changes made in answer to the internal review (version 4.68).** (1) "Without fitting" is replaced throughout by "parameters not optimized against the measurements", and the Limitations say the pancreas and liver comparisons are retrospective. (2) The elasticity was measured in all 18 sources of the factorial. The label of the dominant bound predicts it poorly; the size reached predicts it well. The central claim is restated accordingly as a graded one, in the Summary, the third Results section, Figure 2D and the Discussion. (3) The variable q is defined: tip pressure over inlet pressure, equal to flow per unit in units of the flow at the inlet, and hydraulic only. (4) The kidney section no longer says the extension "accounts for both experiments"; Table 2 lists what is reproduced, approximated and not reproduced, and the statement about perfusion in the embryonic kidney is a hypothesis. (5) The comparison with paired human kidneys is moved to Figure S1 and Note S1. (6) The section on injury, delivered flow and compensatory enlargement is removed, with its figure; it belongs to the engineering manuscript, and the identity M* = Q/phi is no longer presented here. The restart result stays, as Figure 2E. (7) The dose predictions are given with their range across four other settings of the law. (8) Figure 5D is labelled as an effective elasticity over a finite ablation.
+
+**The title.** The reviewer's condition for keeping "determines" was that the dominant bound predict the elasticity robustly. It does not; a graded quantity does. The title still describes the graded claim, but "Local growth constraints explain organ-specific responses to progenitor loss" promises less and matches the paper as it now stands. Decide before submission.
 
 **What an editor will look for.** Whether the biological conclusion needs the model. Here it does: the claim is that one rule yields both answers to the ablation experiments, and no experiment in the paper stands without it. The cover letter should say that in its first two sentences. A presubmission inquiry with the Summary and the six figures is available and worth sending first.
 
