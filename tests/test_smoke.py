@@ -684,18 +684,41 @@ from organgrow import reference                                       # noqa: E4
 
 _got, _n, _v = reference.digest()
 _pn = Path(__file__).resolve().parents[1] / "PAPER_NUMBERS.md"
-_want = None
-if _pn.exists():
-    _m = re.search(r"Reference run digest `([0-9a-f]+)`", _pn.read_text())
-    _want = _m.group(1) if _m else None
+_txt = _pn.read_text() if _pn.exists() else ""
+_m = re.search(r"Reference run digest `([0-9a-f]+)` \([^)]*\)(?: on `([^`]+)`)?", _txt)
+_want, _where = (_m.group(1), _m.group(2)) if _m else (None, None)
+_e = re.search(r"Reference ensemble: ([0-9.]+) ± ([0-9.]+) units over (\d+) seeds", _txt)
+_here = reference.environment()
 if _want is None:
     print(f"  note the reference run gives {_got} ({_n} units, {_v} vessels) here; "
           f"PAPER_NUMBERS.md carries no digest to compare it with yet")
-else:
+elif _where == _here:
+    # the same kind of machine: a different digest is a change in the code or
+    # in a library, and that is an error
     check("this environment reproduces the stamped reference run", _got == _want,
-          f"{_got} here against {_want} stamped -- if these differ the stamped "
-          f"numbers are not portable to this machine, which is a result and "
-          f"not a broken test")
+          f"{_got} here against {_want} stamped on {_where}")
+else:
+    # Another kind of machine. Single realisations are known to differ between
+    # macOS and Linux, so the digest is reported and not held to.
+    print(f"  note the reference run gives {_got} on {_here}, {_want} was stamped "
+          f"on {_where or 'an unrecorded machine'}: single realisations are not "
+          f"portable between them, the ensemble below is what is compared")
+if _e:
+    _m0, _s0, _n0 = float(_e.group(1)), float(_e.group(2)), int(_e.group(3))
+    _m1, _s1, _n1 = reference.ensemble()
+    # The two means are of different realisations of one model, so they may
+    # differ by sampling error and by no more. 3.5 standard errors is a bound a
+    # correct build crosses about once in two thousand platforms; the outcome
+    # on any one platform is fixed, so this cannot flicker from run to run.
+    _se = (_s0 ** 2 / _n0 + _s1 ** 2 / _n1) ** 0.5
+    _z = abs(_m1 - _m0) / max(_se, 1e-9)
+    check("the reference ensemble agrees with the stamped one within sampling error",
+          _n1 == _n0 and _z < 3.5,
+          f"{_m1:.2f} ± {_s1:.2f} here against {_m0:.2f} ± {_s0:.2f} stamped, "
+          f"{_z:.1f} standard errors apart over {_n1} seeds")
+else:
+    print("  note PAPER_NUMBERS.md carries no reference ensemble yet; "
+          "`make paper` writes one")
 
 print()
 if FAIL:

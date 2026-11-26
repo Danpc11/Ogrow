@@ -14,8 +14,18 @@ that CI on Linux checks the numbers stamped on macOS.
 
 A mismatch is a result, not a broken test: it says the stamped numbers are not
 portable to that environment, and the paper has to say so.
+
+That result is in. The digest stamped on macOS (arm64) is not the one Linux
+(x86_64) gives with the same Python packages: single realisations differ, in
+unit count and not in rounding. So the digest is compared only in the kind of
+environment that stamped it, which `environment` names, where it still catches
+a change in the code or in a library. Everywhere else the claim that can hold
+is the statistical one, and `ensemble` is what tests it: the same short run
+over a block of seeds, whose mean unit count must agree with the stamped mean
+within the sampling error of the two.
 """
 import hashlib
+import platform
 
 import numpy as np
 
@@ -42,3 +52,22 @@ def digest():
         h.update(np.round(a, 9).tobytes())
     h.update(f"N={len(U)} vessels={len(vt)}".encode())
     return h.hexdigest()[:16], len(U), len(vt)
+
+
+#: the seeds of the ensemble; enough that the standard error is a few units
+ENSEMBLE_SEEDS = tuple(range(100, 124))
+
+
+def environment():
+    """The kind of machine a digest belongs to: operating system and CPU."""
+    return f"{platform.system()} {platform.machine()}"
+
+
+def ensemble():
+    """Mean and standard deviation of the unit count over the ensemble seeds."""
+    p = dict(SPEC)
+    S = p.pop("S"); p.pop("seed")
+    N = np.array([len(grow(lambda x, y, z: sdf("liver", x / S, y / S, z / S),
+                           190 * S, rng=np.random.default_rng(s), **p)[0])
+                  for s in ENSEMBLE_SEEDS], float)
+    return float(N.mean()), float(N.std(ddof=1)), len(N)

@@ -54,7 +54,12 @@ No install step is needed: `make` puts `src` on `PYTHONPATH` and picks up
 
 Python 3.9 or later, Linux or macOS, as `pyproject.toml` requires and as CI
 tests on 3.9 and 3.12. The stamped numbers in `PAPER_NUMBERS.md` were produced
-on Python 3.9.6 on macOS. A full run takes a few hours on one core and
+on Python 3.9.6 on macOS (arm64), and they are exact only there: with the same
+package versions Linux gives different single realisations, in unit count and
+not in rounding, and the same means within sampling error. `make test`
+therefore holds another platform to a reference ensemble rather than to a
+digest, and `scripts/29_check_manuscript.py`, which requires the manuscript's
+numbers digit for digit, is a check for the stamping machine. A full run takes a few hours on one core and
 well under that on several; the vascular sweep in
 `scripts/11_vascular_disorder.py` is the longest step that does not
 parallelise.

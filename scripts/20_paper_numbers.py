@@ -48,9 +48,15 @@ w(f"Python {platform.python_version()}, numpy {np.__version__}, scipy {scipy.__v
 # The reference run of organgrow.reference, so that another environment can
 # check that it reproduces this one before trusting the numbers below.
 # `make test` reads this line.
-from organgrow.reference import digest as _refdigest           # noqa: E402
-_rd, _rn, _rv = _refdigest()
-w(f"Reference run digest `{_rd}` ({_rn} units, {_rv} vessels).\n")
+from organgrow import reference as _ref                        # noqa: E402
+_rd, _rn, _rv = _ref.digest()
+_em, _es, _en = _ref.ensemble()
+# The digest holds only on the kind of machine named here; single realisations
+# differ between macOS and Linux. The ensemble is what another platform is
+# held to, within sampling error.
+w(f"Reference run digest `{_rd}` ({_rn} units, {_rv} vessels) on "
+  f"`{_ref.environment()}`. Reference ensemble: {_em:.2f} ± {_es:.2f} units "
+  f"over {_en} seeds (mean ± s.d.).\n")
 
 def table(header, rows):
     w("| " + " | ".join(header) + " |")
