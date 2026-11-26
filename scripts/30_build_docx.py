@@ -34,7 +34,7 @@ OUT = ROOT / "manuscript"
 
 def strip_repo_header(text):
     """Drop the two paragraphs that are about the repository, not the paper."""
-    for pat in (r"\nTarget journal: \*Biofabrication\*.*?\n\n",
+    for pat in (r"\nTarget journal: .*?\n\n",
                 r"\nReference model version .*?is written by hand\.\n\n"):
         text = re.sub(pat, "\n", text, flags=re.S)
     return text
@@ -51,8 +51,11 @@ def strip_notes(text):
 
 def main():
     keep = "--keep-notes" in sys.argv[1:]
-    if not SRC.exists():
-        raise SystemExit(f"no manuscript at {SRC}")
+    # the second manuscript: python scripts/30_build_docx.py --paper A
+    paper = sys.argv[sys.argv.index("--paper") + 1] if "--paper" in sys.argv else ""
+    src = SRC.with_name(f"MANUSCRIPT_{paper}.md") if paper else SRC
+    if not src.exists():
+        raise SystemExit(f"no manuscript at {src}")
     if not shutil.which("pandoc"):
         raise SystemExit(
             "pandoc is not installed, so the Word file cannot be built.\n"
@@ -60,11 +63,11 @@ def main():
             "  Debian: sudo apt install pandoc\n"
             "MANUSCRIPT.md is the manuscript either way; this only converts it.")
 
-    text = strip_repo_header(SRC.read_text(encoding="utf-8"))
+    text = strip_repo_header(src.read_text(encoding="utf-8"))
     if not keep:
         text = strip_notes(text)
     OUT.mkdir(parents=True, exist_ok=True)
-    name = "manuscript_with_notes" if keep else "manuscript"
+    name = ("manuscript_with_notes" if keep else "manuscript") + (f"_{paper}" if paper else "")
     dest = OUT / f"{name}.docx"
 
     with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False,

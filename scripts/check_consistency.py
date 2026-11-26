@@ -49,6 +49,8 @@ found = {
     # drifted seven versions behind the code before it was checked here.
     "manuscript/MANUSCRIPT.md": find(r"Reference model version ([0-9.]+)",
                                      "manuscript/MANUSCRIPT.md"),
+    "manuscript/MANUSCRIPT_A.md": find(r"Reference model version ([0-9.]+)",
+                                       "manuscript/MANUSCRIPT_A.md"),
     "CITATION.cff": find(r"(?m)^version: ([0-9.]+)", "CITATION.cff"),
 }
 # No figure may name a colour of its own: one palette lives in

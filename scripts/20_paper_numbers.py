@@ -706,5 +706,34 @@ if (RES / "kidney_coupling.json").exists():
       f"{_m1['units'][0]:.2f} and {_m1['units'][1]:.2f} three and ten days after "
       f"birth. Model days are not embryonic days.\n")
 
+if (RES / "predictions.json").exists():
+    Pr = json.load(open(RES / "predictions.json"))
+    w("\n## Predictions for ablations that have not been done\n")
+    w("Numbers for experiments nobody has reported, stamped with the commit above. "
+      "Once one is done, the number that stood here before it is the prediction, "
+      "whatever a later version gives. Ratio to the unablated control, 24 paired "
+      "seeds, 95 % bootstrap intervals.\n")
+
+    def _cp(r):
+        return f"{r['value']:.2f} [{r['lo']:.2f}, {r['hi']:.2f}]"
+
+    w("Dose, reference model: mass of the construct against the share of its pool "
+      "left.\n")
+    table(["regime", "pool left", "mass", "what refutes it"],
+          [[reg, k, _cp(v), {"pancreas": "a pancreas of normal weight",
+                              "liver": "a deficit after a shallow ablation, or "
+                                       "none after a deep one"}[reg]]
+           for reg in ("pancreas", "liver")
+           for k, v in sorted(Pr["dose"][reg].items(), key=lambda kv: -float(kv[0]))])
+    w("Depth and timing, the extension, perfusion limiting nucleation least: "
+      "units of the coupled source.\n")
+    table(["response", "day of the ablation", "share killed", "units", "status"],
+          [[r, k.split("|")[0], k.split("|")[1], _cp(v),
+            "compared with a measurement" if k == "45|0.4" else "prediction"]
+           for r in sorted(Pr["kidney"]) for k, v in Pr["kidney"][r].items()])
+    w("What refutes the kidney predictions: a deficit in proportion after a 60 % "
+      "ablation without a proliferative response, and the same deficit whenever "
+      "the ablation is done.\n")
+
 open(ROOT / "PAPER_NUMBERS.md", "w").write("\n".join(out) + "\n")
 print("wrote PAPER_NUMBERS.md")

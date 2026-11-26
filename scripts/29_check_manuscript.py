@@ -32,6 +32,31 @@ RES = ROOT / "results"
 DOC = ROOT / "manuscript" / "MANUSCRIPT.md"
 checks = []       # (label, the string the manuscript must contain)
 
+# The work is written up as two manuscripts that draw on the same results.
+# MANUSCRIPT.md carries everything and is the base of the engineering paper;
+# MANUSCRIPT_A.md is the paper on what limits an organ's size, and leaves out
+# the developmental series, the scaling and the design specification. A label
+# that starts with one of these is therefore not required of it. Everything
+# else is, so a number cannot be right in one manuscript and stale in the other.
+DOC_A = ROOT / "manuscript" / "MANUSCRIPT_A.md"
+NOT_IN_A = (
+    # the developmental series
+    "kidney progenitor share against stage", "induced per progenitor against stage",
+    "independent week-14 kidney", "kidney, progenitor share", "kidney, fraction of",
+    "pancreas, progenitor share", "pancreas, fraction of", "liver, progenitor share",
+    "liver, fraction of",
+    # scaling
+    "geometry exponent", "allometric exponent", "smallest domain", "largest domain",
+    "CV at the two smallest", "CV, third domain", "CV, largest domain",
+    "span at the largest domain",
+    # the design specification
+    "largest volume,", "slack of the binding requirement", "margin of the chosen",
+    "held-out margin", "optimism of the search block", "random root, the specification",
+    # the abstract of the full manuscript, which this one does not share
+    "renewal changes the bound, abstract", "turnover changes the bound, abstract",
+)
+ONLY_IN_A = ("prediction,",)
+
 
 def need(label, text):
     checks.append((label, str(text)))
@@ -338,6 +363,29 @@ if Kc:
         need(_label, _text)
 
 
+Pr = load("predictions.json")
+if Pr:
+    # Built by scripts/38_predictions.py; quoted in MANUSCRIPT_A.md only.
+    for _label, _text in Pr.get("strings", {}).items():
+        need(_label, _text)
+
+
+def held(doc, name, wanted):
+    """Print and count the strings one manuscript must contain and does not."""
+    text = " ".join(doc.read_text(encoding="utf-8").replace("\u2212", "-").split())
+    bad = [(lb, w) for lb, w in wanted if w not in text]
+    for lb, w in wanted:
+        print(f"  {'ok  ' if w in text else 'FAIL'} {lb}: {w}")
+    print()
+    if bad:
+        print(f"{len(bad)} of {len(wanted)} numbers in {name} no longer match the "
+              f"results. The results are right and the prose is stale: edit the "
+              f"sentence to the value printed above.\n")
+    else:
+        print(f"all {len(wanted)} model numbers in {name} match the results\n")
+    return len(bad)
+
+
 def main():
     # The manuscript sets a minus as U+2212; compare against a plain hyphen.
     # It is also hard-wrapped, so a quoted phrase can fall across two lines
@@ -348,22 +396,17 @@ def main():
         print(f"no manuscript at {DOC.relative_to(ROOT)}: nothing to hold to the "
               f"results. The numbers themselves are in PAPER_NUMBERS.md.")
         return 0
-    text = " ".join(DOC.read_text(encoding="utf-8").replace("\u2212", "-").split())
     if not checks:
         print("no results to check against; run `make paper` first")
         return 0
     checks[:] = [(lb, " ".join(w.split())) for lb, w in checks]
-    bad = [(label, want) for label, want in checks if want not in text]
-    for label, want in checks:
-        print(f"  {'ok  ' if want in text else 'FAIL'} {label}: {want}")
-    print()
-    if bad:
-        print(f"{len(bad)} of {len(checks)} numbers in MANUSCRIPT.md no longer "
-              f"match the results. The results are right and the prose is "
-              f"stale: edit the sentence to the value printed above.")
-        return 1
-    print(f"all {len(checks)} model numbers in MANUSCRIPT.md match the results")
-    return 0
+    bad = held(DOC, "MANUSCRIPT.md",
+               [c for c in checks if not c[0].startswith(ONLY_IN_A)])
+    if DOC_A.exists():
+        print("MANUSCRIPT_A.md")
+        bad += held(DOC_A, "MANUSCRIPT_A.md",
+                    [c for c in checks if not c[0].startswith(NOT_IN_A)])
+    return 1 if bad else 0
 
 
 if __name__ == "__main__":

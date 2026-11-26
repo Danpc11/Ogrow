@@ -51,6 +51,8 @@ from organgrow.runcache import fingerprint, cached, save_json, stale
 
 OUT = ROOT / "results" / "validation"
 DOC = ROOT / "manuscript" / "MANUSCRIPT.md"
+#: every manuscript that quotes these numbers; a block a file lacks is skipped
+DOCS = (DOC, ROOT / "manuscript" / "MANUSCRIPT_A.md")
 PAIRS = ROOT / "source_data" / "Fig6_kidney_invariants.csv"
 
 S, DAYS, NU, SEEDS = 0.6, 140, 8.0, tuple(range(300, 324))
@@ -297,12 +299,20 @@ def blocks(res):
             f"{res['contingent']['kidney']['log_mass']:.3f} in log mass, against "
             f"{p['cv']:.3f} in log volume between a person's two kidneys")
     short += "."
-    return {"validation": body, "validation-abstract": short}
+    # for a summary of 150 words: the two numbers and what they stand beside
+    brief = (
+        f"a spent source keeps {a['pancreas']['0.39']['mass']['value']:.2f} of its "
+        f"mass, against {lo['left']:.2f} measured in pancreas, and a renewing one "
+        f"{a['liver']['0.35']['mass']['value']:.2f}, against about {lv['left']:.2f} "
+        "in liver")
+    return {"validation": body, "validation-abstract": short,
+            "validation-brief": brief}
 
 
-def write_blocks(res, doc=DOC):
-    """Bring the manuscript's two passages in step. True if the file changed."""
-    return write(doc, blocks(res))
+def write_blocks(res, docs=DOCS):
+    """Bring the passages in step in each manuscript. The files that changed."""
+    b = blocks(res)
+    return [d for d in docs if write(d, b)]
 
 
 if __name__ == "__main__":
@@ -379,7 +389,7 @@ if __name__ == "__main__":
 
     res["strings"] = sentences(res)
     json.dump(res, open(ROOT / "results" / "validation.json", "w"), indent=1)
-    if write_blocks(res):
-        print(f"\nupdated the passages of {DOC.relative_to(ROOT)} that quote these "
+    for _d in write_blocks(res):
+        print(f"\nupdated the passages of {_d.relative_to(ROOT)} that quote these "
               "numbers.\nCommit that file before `make paper`, or the stamp will "
               "record an uncommitted change.")

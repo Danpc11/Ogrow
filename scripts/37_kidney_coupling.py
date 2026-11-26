@@ -55,7 +55,7 @@ from organgrow.autotext import write
 from organgrow.runcache import fingerprint, cached, save_json, stale
 
 OUT = ROOT / "results" / "kidney_coupling"
-DOC = ROOT / "manuscript" / "MANUSCRIPT.md"
+DOCS = (ROOT / "manuscript" / "MANUSCRIPT.md", ROOT / "manuscript" / "MANUSCRIPT_A.md")
 #: the two settings the manuscript quotes: where perfusion limits nucleation
 #: as in the reference model, and where it limits it least
 QUOTED = ("reference", "threshold quartered, law slowed")
@@ -329,7 +329,7 @@ if __name__ == "__main__":
           "numbers were known.")
     res["strings"] = sentences(res)
     json.dump(res, open(ROOT / "results" / "kidney_coupling.json", "w"), indent=1)
-    if write(DOC, blocks(res)):
-        print(f"\nupdated the passage of {DOC.relative_to(ROOT)} that quotes these "
+    for _d in [d for d in DOCS if write(d, blocks(res))]:
+        print(f"\nupdated the passage of {_d.relative_to(ROOT)} that quotes these "
               "numbers.\nCommit that file before `make paper`, or the stamp will "
               "record an uncommitted change.")

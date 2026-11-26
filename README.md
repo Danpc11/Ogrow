@@ -29,8 +29,11 @@ human tables, the paper's figures and `PAPER_NUMBERS.md`. `make all` builds
 the earlier figures from the open engine (`src/organgrow/engine.py`); they are
 kept for the record, are not the paper's, and should not be used to check it.
 
-The manuscript's own text is under `manuscript/`: the draft, the ledger of
-claims and evidence it is written from, and the figure legends. It is
+The text is under `manuscript/`, and there are two manuscripts drawn from the
+same results: `MANUSCRIPT.md`, which carries everything and is the base of the
+engineering paper, and `MANUSCRIPT_A.md`, on what limits the size of an organ
+and how it answers a loss of progenitors. Beside them are the ledger of claims
+and evidence and the figure legends (`FIGURES.md`, `FIGURES_A.md`). It is
 versioned here because `make check` holds its numbers to the results, and it
 is left out of release archives (`.gitattributes`), so a release is the code,
 the results and how to reproduce them. Without that folder `make check` says
@@ -56,9 +59,10 @@ File names are historical and do not follow the manuscript's numbering.
     make check     # static analysis; version and stamped numbers agree
 
 `scripts/36_validation.py` sets three of the model's numbers beside published
-measurements, and `scripts/37_kidney_coupling.py` runs an extension in which
-progenitors make their tip branch. Both write the sentences of
-`manuscript/MANUSCRIPT.md` that quote their numbers, between `auto:` markers. When a change moves those numbers, run them
+measurements, `scripts/37_kidney_coupling.py` runs an extension in which
+progenitors make their tip branch, and `scripts/38_predictions.py` commits the
+model to the outcome of ablations not yet done. All three write the sentences
+of the manuscripts that quote their numbers, between `auto:` markers. When a change moves those numbers, run them
 once and commit the manuscript before `make paper`, so that the run finds the
 manuscript already in step and the stamp stays clean.
 

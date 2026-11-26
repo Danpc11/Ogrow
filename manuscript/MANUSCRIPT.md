@@ -22,7 +22,7 @@ structure here is Introduction, Methods, Results, Discussion; the Cell Press
 form (a summary of 150 words, highlights, STAR Methods after the Discussion)
 is applied at submission and is listed in the notes at the end.
 
-Reference model version 4.65.0 (`src/organgrow/closed.py`). Every model number
+Reference model version 4.66.0 (`src/organgrow/closed.py`). Every model number
 quoted below is taken from `PAPER_NUMBERS.md`, which `make paper` regenerates
 with the version and commit that produced it, and is checked against the
 result files by `scripts/29_check_manuscript.py`. No model number in this file
@@ -1308,6 +1308,15 @@ limits least, the second and third paragraphs have to be rewritten and not
 adjusted. Still to do if this stays in the paper: a domain that grows with the
 tree, a time axis tied to tip doublings so that the sequence of [14] can be
 compared day for day, and the two fixed numbers swept.
+
+**Two manuscripts.** `MANUSCRIPT_A.md` is the paper for *Cell Systems*: the
+regimes, the comparison with measurements, the extension, restart and injury,
+and predictions for ablations not yet done. This file stays whole as the base
+of the engineering paper for *Biofabrication*, which keeps the scaling, the
+joint specification, the design rules and the developmental series, and
+should cite the other for the model and drop Sections 3.10 and 3.11 once it
+is public. Until then this file is also the only place every result is
+written up together. The check holds both files to the same results.
 
 **Format for *Cell Systems*.** A summary of at most 150 words, three or four
 highlights of at most 85 characters each, an eTOC paragraph, and the Methods

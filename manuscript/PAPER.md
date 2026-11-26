@@ -4,7 +4,7 @@ Target: *Biofabrication* (IOP), with the engineering framing. The manuscript
 itself is `MANUSCRIPT.md`; this file is the ledger of claims and evidence it
 is written from, and `scripts/29_check_manuscript.py` holds the manuscript to
 the regenerated tables.
-Reference model: version 4.65.0 (`src/organgrow/closed.py`). Every number from
+Reference model: version 4.66.0 (`src/organgrow/closed.py`). Every number from
 the model that the paper uses is in `PAPER_NUMBERS.md`, written by
 `make paper` with the version and commit that produced it; this file does not
 copy model numbers by hand. Numbers given here are either data (the human
@@ -237,6 +237,13 @@ a doubled division rate in a depleted cap, which Muthukrishnan and colleagues
 measured, brings them most of the way back. Written after the measurements
 were known. `scripts/37_kidney_coupling.py`; `PAPER_NUMBERS.md`, An extension;
 manuscript Section 3.11 and Figure 7.
+
+**Predictions for ablations not yet done.** The pancreas-like construct at
+0.75 and 0.60 of its pool, the liver-like at 0.75 and 0.15, and the coupled
+kidney-like source with 20 % and 60 % of its progenitors killed and with 40 %
+killed early and late, each with what would refute it. Stamped, so that the
+number standing before an experiment is the prediction. `scripts/38_predictions.py`;
+`PAPER_NUMBERS.md`, Predictions; `MANUSCRIPT_A.md`, Section 2.9 and Figure 6.
 
 ## What this is for
 
