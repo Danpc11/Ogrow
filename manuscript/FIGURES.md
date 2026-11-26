@@ -12,6 +12,7 @@ manuscript number in their heading.
 | Figure 4 | `Fig9_transcriptome.pdf` | `figures/fig_transcriptome.py` | when three developing tissues lose the pool they are named for |
 | Figure 5 | `Fig6_scaling.pdf` | `figures/fig_design.py` | what domain size costs in density and in reproducibility |
 | Figure 6 | `Fig10_validation.pdf` | `figures/fig_validation.py` | three numbers of the model beside published measurements |
+| Figure 7 | `Fig11_coupling.pdf` | `figures/fig_coupling.py` | the extension in which progenitors make their tip branch |
 
 The repository also builds these, which the current manuscript does not use.
 They belong to the earlier framing kept in `PAPER.md` and are available as
@@ -118,6 +119,22 @@ seeds, as the deviation of log mass from the mean, and the two kidneys of each
 of 48 people, as the deviation of log volume from the pair with the mean
 difference between sides removed [16]. Bars span one standard deviation
 either side of zero.
+
+**Figure 7. An extension in which progenitors make their tip branch.** A
+dividing source in which a segment branches only while it holds two caps of
+progenitors; on one day each progenitor dies with probability 0.4. All values
+are the ablated construct over its control, means of 24 paired seeds. Model
+days are not embryonic days, so measurements are drawn at the right-hand edge
+and as bands, not along the time axis. (A) With no proliferative response and
+the least perfusion-limited setting of the nucleation law: total progenitors,
+progenitors per site, and branching sites after the ablation. Open symbols:
+cells per tip and tips per kidney one, two and three days after ablation in
+the mouse [14]. (B) Units in the same setting, without a response and with the
+division rate doubled in a depleted cap. Bands: glomerular number in the study
+that found no proliferative response [14] and in the one that found it [15].
+(C) Units at the end of the window in the four settings of the nucleation law,
+from the reference model's on the left to the least perfusion-limited on the
+right; bars are 95 % bootstrap intervals, bands as in B.
 
 **Supplementary. Three regimes from one law.** (A) Units, (B) supply per unit
 relative to the threshold and (C) progenitor pool relative to its initial

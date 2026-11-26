@@ -4,7 +4,7 @@ Target: *Biofabrication* (IOP), with the engineering framing. The manuscript
 itself is `MANUSCRIPT.md`; this file is the ledger of claims and evidence it
 is written from, and `scripts/29_check_manuscript.py` holds the manuscript to
 the regenerated tables.
-Reference model: version 4.64.0 (`src/organgrow/closed.py`). Every number from
+Reference model: version 4.65.0 (`src/organgrow/closed.py`). Every number from
 the model that the paper uses is in `PAPER_NUMBERS.md`, written by
 `make paper` with the version and commit that produced it; this file does not
 copy model numbers by hand. Numbers given here are either data (the human
@@ -226,6 +226,17 @@ as much as the two kidneys of one person do in volume. The parameters were
 fixed before any of this was computed. `scripts/36_validation.py`;
 `PAPER_NUMBERS.md`, Against published perturbations and paired human kidneys;
 manuscript Section 3.10 and Figure 6.
+
+**An extension: progenitors that make their tip branch.** Not the reference
+model. A dividing source whose segments branch only from two caps of
+progenitors, with 40 % of the progenitors killed on one day. The pool stays
+reduced, the cap recovers on its own and the sites settle near the share of
+the pool left, in every setting tried, as Cebrian and colleagues measured.
+Units fall in proportion only where perfusion does not limit nucleation, and
+a doubled division rate in a depleted cap, which Muthukrishnan and colleagues
+measured, brings them most of the way back. Written after the measurements
+were known. `scripts/37_kidney_coupling.py`; `PAPER_NUMBERS.md`, An extension;
+manuscript Section 3.11 and Figure 7.
 
 ## What this is for
 

@@ -669,5 +669,42 @@ if (RES / "validation.json").exists():
           f"{_p['smallest']:.0f} to {_p['largest']:.0f} cm3. The volumes carry "
           f"segmentation error, which is not separated here.\n")
 
+if (RES / "kidney_coupling.json").exists():
+    Kc = json.load(open(RES / "kidney_coupling.json"))
+    w("\n## An extension: progenitors that make their tip branch\n")
+    w(f"Not the reference model, and no number above depends on it. A source of one "
+      f"cap of {Kc['cap']:.0f} progenitors that divides at {Kc['rho']} a day, is "
+      f"spent in making a unit, and lets a segment branch only while it holds two "
+      f"caps, grown for {Kc['window']} days. On day {Kc['ablate_day']} each "
+      f"progenitor dies with probability {Kc['ablate_fraction']}. Ablated over "
+      f"control, {len(Kc['seeds'])} paired seeds, 95 % bootstrap intervals. The "
+      f"response is the fractional rise of the division rate in a cap below its "
+      f"size. The rules were written after the measurements below were known.\n")
+
+    def _ck(r):
+        return f"{r['value']:.2f} [{r['lo']:.2f}, {r['hi']:.2f}]"
+
+    table(["nucleation", "q_set", "nu", "response", "units, control", "pool",
+           "cap, next day", "cap back to 0.95", "sites", "units",
+           "units since the ablation"],
+          [[n, Kc["nucleation"][n]["q_set"], Kc["nucleation"][n]["nu"], r,
+            f"{v['control_units']:.0f}", _ck(v["pool"]),
+            f"{v['cap_next_day']['value']:.2f}",
+            f"{v['cap_back_days']} d" if v["cap_back_days"] is not None else "not within the window",
+            _ck(v["sites"]), _ck(v["units"]), _ck(v["units_since"])]
+           for n in Kc["nucleation"] for r, v in sorted(Kc["conditions"][n].items())])
+    _m0 = Kc["measured"]["no response (Cebrian 2014)"]
+    _m1 = Kc["measured"]["response (Muthukrishnan 2018)"]
+    w(f"Measured, ablated over control. Without a proliferative response (Cebrian "
+      f"et al. 2014): cells per tip {_m0['cap'][0]:.2f}, {_m0['cap'][1]:.2f} and "
+      f"{_m0['cap'][2]:.2f} one, two and three days after tamoxifen; tips "
+      f"{_m0['tips'][0]:.2f}, {_m0['tips'][1]:.2f} and {_m0['tips'][2]:.2f}; total "
+      f"progenitors growing as fast as in control; glomeruli "
+      f"{_m0['units'][0]:.2f} at birth and {_m0['units'][1]:.2f} in the adult. "
+      f"With one (Muthukrishnan et al. 2018): progenitors {_m1['pool'][0]:.2f} "
+      f"after a day and {_m1['pool'][1]:.2f} after two; glomeruli "
+      f"{_m1['units'][0]:.2f} and {_m1['units'][1]:.2f} three and ten days after "
+      f"birth. Model days are not embryonic days.\n")
+
 open(ROOT / "PAPER_NUMBERS.md", "w").write("\n".join(out) + "\n")
 print("wrote PAPER_NUMBERS.md")

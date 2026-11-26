@@ -22,7 +22,7 @@ structure here is Introduction, Methods, Results, Discussion; the Cell Press
 form (a summary of 150 words, highlights, STAR Methods after the Discussion)
 is applied at submission and is listed in the notes at the end.
 
-Reference model version 4.64.0 (`src/organgrow/closed.py`). Every model number
+Reference model version 4.65.0 (`src/organgrow/closed.py`). Every model number
 quoted below is taken from `PAPER_NUMBERS.md`, which `make paper` regenerates
 with the version and commit that produced it, and is checked against the
 result files by `scripts/29_check_manuscript.py`. No model number in this file
@@ -269,6 +269,16 @@ variation across seeds grown from identical parameters is compared with the
 left-right variation of kidney volume in 48 people, 96 kidneys segmented from
 clinical CT [16]: the standard deviation of the log ratio of the two sides,
 divided by $\sqrt{2}$, after the mean difference between sides is removed.
+
+The reference model has no path from the progenitor pool to the tree, and
+Section 3.11 reports an extension that adds one. In it a source divides and is
+not lost to attrition, a segment of the tree branches only while it holds two
+caps' worth of progenitors and hands one to the new branch, a cap below its
+size may divide faster by a set factor, and the run ends on a fixed day. On
+one day each progenitor dies with probability 0.4, and the same seed grown
+without that is the control. The extension is switched off in every other
+result of this paper, and its settings are in `PAPER_NUMBERS.md`, An
+extension.
 
 ### 2.6 Code and data availability
 
@@ -861,6 +871,59 @@ clear rise with kidney size; people of different size are not one construct in
 a larger domain, so this does not refute the model, but it does not support
 that part of it.
 
+### 3.11 An extension: progenitors that make their tip branch
+
+The kidney comparison of Section 3.10 fails for a reason that can be named. In
+the embryonic kidney the progenitors around a tip are what makes the tip
+branch [14], and the reference model has no path from the pool to the tree.
+We asked what the model needs for both ablation experiments by adding that
+path and nothing else (Section 2.5). The rules were written after the
+measurements were known, so the endpoint is not a prediction. What can be
+asked is whether one path gives several things at once that were measured
+separately, and whether the single difference between the two experiments,
+whether the surviving progenitors divide faster, is enough to separate their
+outcomes (Figure 7; `PAPER_NUMBERS.md`, An extension).
+
+<!-- auto:kidney-coupling -->
+With no proliferative response, and in all four settings of the nucleation law, the ablated construct ends the window with between 0.53 and 0.57 of the control's progenitors and between 0.52 and 0.60 of its branching sites. The day after the ablation its cap stands at 0.61 to 0.90 of control, and it is back to 0.95 of control within 3 to 50 days in 4 of the 4 settings. Its units end at 0.81 [0.72, 0.94] of control where nucleation is set as in the reference model, and at 0.64 [0.57, 0.70] where the perfusion threshold is a quarter of the reference and the law four times slower; counting only units formed after the ablation, 0.77 and 0.52 of control. The measured 0.48 to 0.58 lies outside the first interval and inside the second. With division doubled in a depleted cap, the pool ends at 0.65 to 0.68 of control and the units at 0.85 [0.75, 0.95] and 0.86 [0.83, 0.89] in the same two settings; the measured 0.79 to 0.88 lies inside the first interval and inside the second. Ratios of means, ablated over control, 24 paired seeds, 95 % bootstrap intervals.
+<!-- /auto:kidney-coupling -->
+
+*The branching side comes out of the coupling alone.* After ablation without a
+proliferative response, the progenitors of the mouse kidney went on dividing
+as fast as in control, so the deficit in cells persisted; the cells around
+each tip stood at 0.60 of control a day after tamoxifen and at 0.95 and 1.04
+on the next two days; and the tips, unchanged at first, fell to 0.71 and then
+0.59 of control [14]. The model gives the same three things in every setting
+of the nucleation law: the pool stays reduced, the cap returns on its own, and
+the sites settle near the share of the pool that was left. The reason is the
+one the experiment proposed. A tip that has lost part of its cap waits to
+branch until the cap has regrown, so the cap is restored at the cost of the
+tree. The model's cap recovers less cleanly than the measured one,
+overshooting before it settles, on a tree of only a few sites.
+
+*Fewer sites become proportionally fewer units only where perfusion does not
+limit nucleation.* With the nucleation law set as in the reference model, the
+units of the ablated construct recover much of the way: each remaining site is
+better supplied and makes more units. That is the central mechanism of this
+paper acting as a compensation, and the embryonic kidney does not show it.
+Read through the model, a nephron deficit in proportion to the progenitors
+removed says that nephron formation in that kidney was limited by its
+progenitors and its branching, and not by perfusion.
+
+*One difference between the experiments is enough to separate them.* Doubling
+the division rate in a depleted cap, which is what the second study measured
+[15], brings the units of the ablated construct most of the way to control. It
+does so with a pool that recovers less than the measured one, which stood at
+0.85 of control two days after the ablation [15], so the route is right in
+kind and not in detail.
+
+The extension carries numbers that are not measured: the size of a cap, the
+division rate, the length of the window and the day of the ablation, which
+were fixed, and the two that set how far perfusion limits nucleation, which
+were swept and decided the second result. It states what a kidney-like tissue
+needs that the reference model lacks. It is not a calibrated model of
+nephrogenesis, and every other result in this paper is the reference model's.
+
 ## 4. Discussion
 
 ### 4.1 Six criteria and one hypothesis, as the model gives them
@@ -880,7 +943,12 @@ separate property in this model. It is what the pool has left at arrest, which
 the turnover of the source decides more often than whether its cells are spent
 (Section 3.7). For kidney-like and pancreas-like tissue the criterion
 therefore applies when the tissue is built: competent cells have to be kept or
-supplied, because nothing done to perfusion afterwards makes a new unit.
+supplied, because nothing done to perfusion afterwards makes a new unit. The
+extension of Section 3.11 adds a requirement for kidney-like tissue that the
+reference model cannot state: where progenitors also make the tree branch,
+the number of sites follows the number of progenitors, so they have to be
+supplied in proportion to the units wanted, and better perfusion makes up a
+shortfall only where perfusion was the limit.
 
 
 **Hold the delivered flow, not the pressure, to set the size regained after
@@ -1033,6 +1101,12 @@ published deficits and is less than half the larger, the model has the
 mechanism of neither kidney experiment, and the paired kidneys are CT volumes
 that carry segmentation error. The model carries no measure of
 biological function, so every recovery reported here is structural.
+
+The extension of Section 3.11 was written after the measurements it is set
+against were known, carries six numbers of which none is measured, and was
+swept in two. It is run in a domain of fixed size, where an embryonic kidney
+makes its own, and its time is not calibrated to embryonic days, so sequences
+and endpoints are compared and timings are not.
 
 All three regimes are grown in one domain shape and at one set of geometric
 settings. They are liver-like, kidney-like and pancreas-like in their cell
@@ -1225,6 +1299,15 @@ report; check them against the article, and check that the licence of the
 figshare record of [16] allows the derived table in `source_data/` to be
 redistributed. (5) Reference [18] supports one sentence of the Introduction;
 drop it if a primary source is preferred.
+
+**The kidney extension (Section 3.11).** Read the paragraph the script writes
+before trusting the three paragraphs after it: they are written for the
+pattern the first run gave, on Linux, and the stamped run decides. If the
+measured range without a response falls outside the interval where perfusion
+limits least, the second and third paragraphs have to be rewritten and not
+adjusted. Still to do if this stays in the paper: a domain that grows with the
+tree, a time axis tied to tip doublings so that the sequence of [14] can be
+compared day for day, and the two fixed numbers swept.
 
 **Format for *Cell Systems*.** A summary of at most 150 words, three or four
 highlights of at most 85 characters each, an eTOC paragraph, and the Methods

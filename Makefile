@@ -124,6 +124,7 @@ paper: python-ok
 	$(PY) scripts/34_regimes.py
 	$(PY) scripts/35_feasibility.py
 	$(PY) scripts/36_validation.py
+	$(PY) scripts/37_kidney_coupling.py
 	$(PY) scripts/26_transcriptome.py
 	# figures and tables last: they read every result above
 	$(PY) figures/fig_framework.py
@@ -131,6 +132,7 @@ paper: python-ok
 	$(PY) figures/fig_transcriptome.py
 	$(PY) figures/fig_design.py
 	$(PY) figures/fig_validation.py
+	$(PY) figures/fig_coupling.py
 	$(PY) figures/fig_paper.py
 	$(PY) figures/fig_closed_paper.py
 	$(PY) figures/fig3_closed.py

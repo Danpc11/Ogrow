@@ -330,6 +330,13 @@ if Va:
     for _label, _text in Va.get("strings", {}).items():
         need(_label, _text)
 
+Kc = load("kidney_coupling.json")
+if Kc:
+    # Built by scripts/37_kidney_coupling.py, and the same strings that script
+    # writes into the manuscript.
+    for _label, _text in Kc.get("strings", {}).items():
+        need(_label, _text)
+
 
 def main():
     # The manuscript sets a minus as U+2212; compare against a plain hyphen.

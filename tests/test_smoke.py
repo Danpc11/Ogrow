@@ -639,14 +639,15 @@ _s36.loader.exec_module(valid36)
 
 print("\nagainst measurements")
 _doc = "before <!-- auto:x -->old<!-- /auto:x --> between <!-- auto:y -->keep<!-- /auto:y --> after"
-_once = valid36.fill(_doc, "x", "NEW")
+from organgrow import autotext                                        # noqa: E402
+_once = autotext.fill(_doc, "x", "NEW")
 check("a block is rewritten between its own markers and nowhere else",
       _once == "before <!-- auto:x -->NEW<!-- /auto:x --> between "
                "<!-- auto:y -->keep<!-- /auto:y --> after")
 check("rewriting a block twice changes nothing the second time",
-      valid36.fill(_once, "x", "NEW") == _once)
+      autotext.fill(_once, "x", "NEW") == _once)
 check("a block that is not in the text leaves the text alone",
-      valid36.fill(_doc, "z", "NEW") == _doc)
+      autotext.fill(_doc, "z", "NEW") == _doc)
 
 _rng = np.random.default_rng(5)
 _base = np.exp(_rng.normal(5.0, 0.3, 400))                 # people differ by 30 %
@@ -663,6 +664,36 @@ check("the variation between people is kept apart from it",
 _rt = valid36.ratio([10, 12, 11, 9], [5, 6, 5.5, 4.5])
 check("a pool that halves every seed gives a ratio of one half and no interval",
       abs(_rt["value"] - 0.5) < 1e-12 and abs(_rt["hi"] - _rt["lo"]) < 1e-12)
+
+# ------------------------------------------------- reciprocal induction
+# The extension of scripts/37_kidney_coupling.py: a segment branches only
+# while it holds two caps, a depleted cap may divide faster, and a share of
+# the progenitors can be killed on one day. Off by default, and the reference
+# digest below is what shows that leaving it off changes nothing.
+print("\nreciprocal induction")
+_kid = dict(nu=8.0, q_set=0.6, rho=0.05, delta=0.0, P0=60.0, renewal=0.0,
+            R_unit=650.0, units_per_branch=650 / 600.0, max_vessels=6000)
+_dom = lambda x, y, z: sdf("liver", x / 0.6, y / 0.6, z / 0.6)
+_U, _m, _vt, _tr = closed.grow(_dom, 190 * 0.6, days=60, rng=np.random.default_rng(7),
+                               cap_size=1e9, **_kid)
+check("a cap that is never reached leaves the tree at its root",
+      len(_vt) == 1, f"{len(_vt)} segment(s) with the cap out of reach")
+_U, _m, _vt, _tr = closed.grow(_dom, 190 * 0.6, days=90, rng=np.random.default_rng(7),
+                               cap_size=60.0, **_kid)
+check("with a cap in reach the tree branches and sites are counted",
+      len(_vt) > 1 and len(_tr.caps) == 90 and _tr.caps[-1] > 1,
+      f"{len(_vt)} segments, {_tr.caps[-1]} sites holding progenitors")
+_Ua, _ma, _vta, _tra = closed.grow(_dom, 190 * 0.6, days=90, rng=np.random.default_rng(7),
+                                   cap_size=60.0, ablate_day=45, ablate_fraction=0.4,
+                                   **_kid)
+check("the two runs are the same run until the day of the ablation",
+      _tra.P[:43] == _tr.P[:43] and _tra.N[:43] == _tr.N[:43])
+check("the ablation removes about the share asked for",
+      0.45 < _tra.P[44] / max(_tr.P[44], 1e-9) < 0.75,
+      f"pool at {_tra.P[44] / max(_tr.P[44], 1e-9):.2f} of the unablated run that day")
+check("what the ablation kills is counted, and the pool still balances",
+      _tra.fate["culled"] > 0 and abs(_tra.fate["balance"]) < 1e-9,
+      f"culled {_tra.fate['culled']:.2f} of the seeded pool, balance {_tra.fate['balance']:.0f}")
 
 # ---------------------------------------------------------------- run cache
 # The cache decides whether a stored run is reused, so a fault in it does not

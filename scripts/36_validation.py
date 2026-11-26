@@ -39,7 +39,6 @@ Usage:  python scripts/36_validation.py
 import csv
 import json
 import os
-import re
 from concurrent.futures import ProcessPoolExecutor
 
 import numpy as np
@@ -47,6 +46,7 @@ import numpy as np
 from organgrow import sdf
 from organgrow.config import ROOT
 from organgrow.closed import grow
+from organgrow.autotext import write
 from organgrow.runcache import fingerprint, cached, save_json, stale
 
 OUT = ROOT / "results" / "validation"
@@ -190,15 +190,6 @@ def read_pairs(path=PAIRS):
     return ([v["L"] for v in both], [v["R"] for v in both]) if both else None
 
 
-def fill(text, name, body):
-    """Replace what stands between the two markers of one named block."""
-    pat = re.compile(rf"(<!-- auto:{re.escape(name)} -->)(.*?)(<!-- /auto:{re.escape(name)} -->)",
-                     re.S)
-    if not pat.search(text):
-        return text
-    return pat.sub(lambda m: m.group(1) + body + m.group(3), text)
-
-
 def ci(r, nd=2):
     return f"{r['value']:.{nd}f} [{r['lo']:.{nd}f}, {r['hi']:.{nd}f}]"
 
@@ -311,16 +302,7 @@ def blocks(res):
 
 def write_blocks(res, doc=DOC):
     """Bring the manuscript's two passages in step. True if the file changed."""
-    if not doc.exists():
-        return False
-    old = doc.read_text(encoding="utf-8")
-    new = old
-    for name, body in blocks(res).items():
-        new = fill(new, name, body)
-    if new == old:
-        return False
-    doc.write_text(new, encoding="utf-8")
-    return True
+    return write(doc, blocks(res))
 
 
 if __name__ == "__main__":

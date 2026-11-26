@@ -44,6 +44,7 @@ so and checks the rest.
 | Figure 4 | `Fig9_transcriptome.pdf` | `figures/fig_transcriptome.py` |
 | Figure 5 | `Fig6_scaling.pdf` | `figures/fig_design.py` |
 | Figure 6 | `Fig10_validation.pdf` | `figures/fig_validation.py` |
+| Figure 7 | `Fig11_coupling.pdf` | `figures/fig_coupling.py` |
 
 File names are historical and do not follow the manuscript's numbering.
 
@@ -55,8 +56,9 @@ File names are historical and do not follow the manuscript's numbering.
     make check     # static analysis; version and stamped numbers agree
 
 `scripts/36_validation.py` sets three of the model's numbers beside published
-measurements, and writes the sentences of `manuscript/MANUSCRIPT.md` that
-quote them, between `auto:` markers. When a change moves those numbers, run it
+measurements, and `scripts/37_kidney_coupling.py` runs an extension in which
+progenitors make their tip branch. Both write the sentences of
+`manuscript/MANUSCRIPT.md` that quote their numbers, between `auto:` markers. When a change moves those numbers, run them
 once and commit the manuscript before `make paper`, so that the run finds the
 manuscript already in step and the stamp stays clean.
 

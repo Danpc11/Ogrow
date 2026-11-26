@@ -1,4 +1,4 @@
-# The closed model (version 4.64.0)
+# The closed model (version 4.65.0)
 
 `src/organgrow/closed.py` is the model the paper rests on; `make paper`
 builds its results. Its parameters are in `config/params.yaml`, section
@@ -108,6 +108,24 @@ proportion to what reaches it.
 All with ν = 8, $q_{\text{set}}$ = 0.6, domain scale 0.6, 140 days, a vessel
 cap of 6000 that no run reaches, $R_{\text{unit}}$ = 650 and 650/600 units per
 terminal branch (`scripts/15`, `17`, `19`, `21`, `22`).
+
+## An extension: reciprocal induction
+
+Off unless `cap_size` is given, and the reference run's digest is what shows
+that leaving it off changes nothing. With `cap_size = c`:
+
+- a segment branches, by any rule, only while it holds `2c` progenitors, and a
+  tip advances into unserved tissue only while it holds `c`;
+- a segment holding `2c` bifurcates whether or not a unit calls for a vessel,
+  toward unserved tissue if any is in reach, and gives half its progenitors to
+  the new branch;
+- with `cap_response = g`, a segment holding fewer than `c` divides at
+  `rho (1 + g)`.
+
+`ablate_day` and `ablate_fraction` kill each progenitor with one probability
+on one day, wherever it sits; what dies is counted with `culled`, so the pool
+identity closes. `Trace.caps` is the number of segments holding progenitors,
+per day. `scripts/37_kidney_coupling.py` is the only user.
 
 ## Tests
 

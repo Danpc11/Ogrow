@@ -98,6 +98,7 @@ class Trace:
     renewed: list = field(default_factory=list)  # progenitors returned, cumulative
     involuted: list = field(default_factory=list)  # units resorbed, cumulative
     idle_tips: list = field(default_factory=list)  # tips carrying no unit
+    caps: list = field(default_factory=list)       # segments holding progenitors
     closure: dict = field(default_factory=dict)  # closure_by_trials at the end
     injury: dict = field(default_factory=dict)   # what was destroyed, and when
     perfused: list = field(default_factory=list)  # mass whose supply meets the threshold
@@ -267,7 +268,8 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
          injury_axis=1, injury_reactivates=0.0, inflow_limited=False,
          inflow_scale=1.0, phi_demand=None, involution=0.0, involution_q=0.1,
          involution_exit=0.5, involution_hold=1,
-         intervene_day=None, intervene=None, intervene_factor=0.8):
+         intervene_day=None, intervene=None, intervene_factor=0.8,
+         cap_size=None, cap_response=0.0, ablate_day=None, ablate_fraction=0.0):
     """Grow one organ. `sdf(x, y, z)` is negative inside the domain.
 
     The identity parameters (nu, q_set, rho, delta, P0) are required; every
@@ -457,6 +459,16 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
     phi_set = None                    # delivery per unit mass the tissue needs
     tip_of_prev = np.zeros(0, int)    # the assignment of the previous day
     for day in range(1, days + 1):
+        # Progenitor ablation, as the diphtheria-toxin experiments do it: on
+        # one day every progenitor dies with the same probability, wherever
+        # it sits, and nothing else is touched. What dies is destroyed, not
+        # lost to attrition, and is counted with the niches an injury takes
+        # so that the pool identity still closes.
+        if ablate_day is not None and day == ablate_day and ablate_fraction > 0:
+            for k in list(P):
+                dead = int(rng.binomial(int(P[k]), min(float(ablate_fraction), 1.0)))
+                P[k] = int(P[k]) - dead
+                culled += dead
         # A causal test of closure: on intervene_day the state is changed and
         # growth continues. "supply" lowers the threshold by intervene_factor,
         # which raises the hydraulic availability of every tip relative to it
@@ -763,16 +775,23 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                 returned = int(rng.binomial(placed, min(renewal, 1.0))) if renewal > 0 and placed else 0
                 renewed += returned
                 left = int(Pi) - placed + returned
+                # Reciprocal induction, second half: a cap below its size
+                # may divide faster. cap_response is the fractional rise, 0
+                # for none, which is the reference and what one ablation
+                # study found; 1 doubles the rate, which is what another did.
+                rho_i = rho
+                if cap_size is not None and cap_response and left < cap_size:
+                    rho_i = rho * (1.0 + cap_response)
                 if turnover == "independent":
-                    born_i = int(rng.binomial(left, min(rho * dt, 1.0))) if rho > 0 and left else 0
+                    born_i = int(rng.binomial(left, min(rho_i * dt, 1.0))) if rho_i > 0 and left else 0
                     died = int(rng.binomial(left, min(delta * dt, 1.0))) if delta > 0 and left else 0
                 elif turnover == "competing":
                     # one fate per progenitor per step: divide, be lost, or
                     # neither, with hazards rho and delta competing
-                    if left and rho + delta > 0:
-                        pe = 1.0 - np.exp(-(rho + delta) * dt)
+                    if left and rho_i + delta > 0:
+                        pe = 1.0 - np.exp(-(rho_i + delta) * dt)
                         born_i, died, _ = rng.multinomial(
-                            left, [pe * rho / (rho + delta), pe * delta / (rho + delta),
+                            left, [pe * rho_i / (rho_i + delta), pe * delta / (rho_i + delta),
                                    1.0 - pe])
                         born_i, died = int(born_i), int(died)
                     else:
@@ -882,6 +901,12 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
         if len(vt) < max_vessels and len(U):
             utree = cKDTree(U)
             for i in active:
+                # Reciprocal induction, first half: with cap_size set, a
+                # segment branches only while it holds two caps' worth of
+                # progenitors, one to keep and one to give. Every rule below
+                # is a reason to branch; this is the permission.
+                if cap_size is not None and P.get(i, 0) < 2.0 * cap_size:
+                    continue
                 # a second, geometric reason to branch: the tissue at this
                 # segment had supply to make units but no room to put them, so
                 # the tree must reach into space that is still empty. The
@@ -973,6 +998,43 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                         break
             n_at = np.bincount(tip_of, minlength=len(vt))
 
+        # ---- a cap that has doubled divides its tip (reciprocal induction) --
+        # In the kidney the progenitors around a tip are what makes the tip
+        # branch, and each branching splits them between the daughters
+        # (Cebrian and colleagues 2014). With cap_size set, a segment holding
+        # two caps' worth bifurcates whether or not any unit calls for a
+        # vessel: the new branch leaves toward unserved tissue if any is in
+        # reach and away from the local units otherwise, and takes half the
+        # progenitors. Nothing here reads the size of the organ.
+        if cap_size is not None:
+            for i in [k for k in list(P) if P[k] >= 2.0 * cap_size]:
+                if len(vt) >= max_vessels or vt.volume(junction_cost) >= vol_budget:
+                    break
+                b = vt.end[i]
+                step = None
+                if len(A):
+                    v = A - b * scale
+                    dist = np.linalg.norm(v, axis=1)
+                    near_a = dist < attractor_reach * lam
+                    if near_a.any():
+                        step = (v[near_a] / np.maximum(dist[near_a, None], 1e-9)).mean(0)
+                if step is None and len(U):
+                    step = b * scale - U[np.argsort(((U - b * scale) ** 2).sum(-1))[:8]].mean(0)
+                if step is None:
+                    step = rng.normal(size=3)
+                step = step + 0.5 * rng.normal(size=3) * max(np.linalg.norm(step), 1e-9)
+                step = step / max(np.linalg.norm(step), 1e-9)
+                end = b + step * l_sprout
+                if sdf(end[0] * scale / s, end[1] * scale / s, end[2] * scale / s) >= 0:
+                    continue
+                _rc = np.atleast_1d(vt.r_crit)
+                rc_i = _rc[i] if i < len(_rc) else _rc[min(vt.parent[i], len(_rc) - 1)]
+                nk = vt.add(i, b.copy(), end,
+                            max(vt.radius[i] * daughter_ratio, rc_i * sprout_floor))
+                P[nk] = int(rng.binomial(int(P[i]), 0.5))
+                P[i] = int(P[i]) - P[nk]
+            n_at = np.bincount(tip_of, minlength=len(vt)) if len(tip_of) else np.zeros(len(vt), int)
+
         # ---- tips extend into unserved tissue (mesenchymal signal) --------
         if len(A):
             tips_now = vt.tips()
@@ -985,6 +1047,9 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
                             vt.volume(junction_cost) >= vol_budget):
                         break
                     i = tips_now[int(t_idx)]
+                    # a tip advances only with a whole cap around it
+                    if cap_size is not None and P.get(i, 0) < cap_size:
+                        continue
                     pts = A[pulled & (near == t_idx)]
                     v = pts - ends[t_idx]
                     v /= np.maximum(np.linalg.norm(v, axis=1, keepdims=True), 1e-9)
@@ -1029,6 +1094,7 @@ def grow(sdf, R, *, days, rng, nu, q_set, rho, delta, P0, dP=1.0,
         else:
             tr.perfused.append(0.0)
         tr.vessels.append(len(vt))
+        tr.caps.append(int(sum(1 for v_ in P.values() if v_ > 0)))
         tr.involuted.append(involuted)
         # A branch whose tissue has gone keeps conducting until its calibre
         # adapts, so counting the tips that carry no unit says how much of the
