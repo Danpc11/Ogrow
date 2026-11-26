@@ -1,6 +1,6 @@
 # Numbers the paper uses
 
-Model version 4.65.0, commit 2cc1d83, generated 2026-11-25 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.66.0, commit 2eeac83, generated 2026-11-26 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b024.
 
@@ -486,4 +486,35 @@ Not the reference model, and no number above depends on it. A source of one cap 
 | threshold quartered, law slowed | 0.15 | 2.0 | 1 | 886 | 0.66 [0.63, 0.68] | 0.67 | 14 d | 0.71 [0.68, 0.73] | 0.86 [0.83, 0.89] | 0.85 [0.81, 0.88] |
 
 Measured, ablated over control. Without a proliferative response (Cebrian et al. 2014): cells per tip 0.60, 0.95 and 1.04 one, two and three days after tamoxifen; tips 1.06, 0.71 and 0.59; total progenitors growing as fast as in control; glomeruli 0.48 at birth and 0.58 in the adult. With one (Muthukrishnan et al. 2018): progenitors 0.60 after a day and 0.85 after two; glomeruli 0.88 and 0.79 three and ten days after birth. Model days are not embryonic days.
+
+
+## Predictions for ablations that have not been done
+
+Numbers for experiments nobody has reported, stamped with the commit above. Once one is done, the number that stood here before it is the prediction, whatever a later version gives. Ratio to the unablated control, 24 paired seeds, 95 % bootstrap intervals.
+
+Dose, reference model: mass of the construct against the share of its pool left.
+
+| regime | pool left | mass | what refutes it |
+|---|---|---|---|
+| pancreas | 0.75 | 0.70 [0.58, 0.81] | a pancreas of normal weight |
+| pancreas | 0.6 | 0.61 [0.51, 0.70] | a pancreas of normal weight |
+| liver | 0.75 | 0.97 [0.94, 1.00] | a deficit after a shallow ablation, or none after a deep one |
+| liver | 0.15 | 0.70 [0.68, 0.72] | a deficit after a shallow ablation, or none after a deep one |
+
+Depth and timing, the extension, perfusion limiting nucleation least: units of the coupled source.
+
+| response | day of the ablation | share killed | units | status |
+|---|---|---|---|---|
+| 0 | 45 | 0.2 | 0.82 [0.75, 0.89] | prediction |
+| 0 | 45 | 0.4 | 0.64 [0.57, 0.70] | compared with a measurement |
+| 0 | 45 | 0.6 | 0.56 [0.50, 0.63] | prediction |
+| 0 | 20 | 0.4 | 0.67 [0.56, 0.79] | prediction |
+| 0 | 80 | 0.4 | 0.75 [0.71, 0.79] | prediction |
+| 1 | 45 | 0.2 | 0.93 [0.90, 0.97] | prediction |
+| 1 | 45 | 0.4 | 0.86 [0.83, 0.89] | compared with a measurement |
+| 1 | 45 | 0.6 | 0.79 [0.77, 0.82] | prediction |
+| 1 | 20 | 0.4 | 0.93 [0.86, 1.05] | prediction |
+| 1 | 80 | 0.4 | 0.87 [0.84, 0.90] | prediction |
+
+What refutes the kidney predictions: a deficit in proportion after a 60 % ablation without a proliferative response, and the same deficit whenever the ablation is done.
 
