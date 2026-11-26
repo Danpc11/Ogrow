@@ -1,6 +1,6 @@
 # Numbers the paper uses
 
-Model version 4.68.0, commit d67f5bd, generated 2026-11-26 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.69.0, commit ee2507b, generated 2026-11-26 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b024.
 
@@ -488,6 +488,56 @@ Not the reference model, and no number above depends on it. A source of one cap 
 | threshold quartered, law slowed | 0.15 | 2.0 | 1 | 886 | 0.66 [0.63, 0.68] | 0.67 | 14 d | 0.71 [0.68, 0.73] | 0.86 [0.83, 0.89] | 0.85 [0.81, 0.88] |
 
 Measured, ablated over control. Without a proliferative response (Cebrian et al. 2014): cells per tip 0.60, 0.95 and 1.04 one, two and three days after tamoxifen; tips 1.06, 0.71 and 0.59; total progenitors growing as fast as in control; glomeruli 0.48 at birth and 0.58 in the adult. With one (Muthukrishnan et al. 2018): progenitors 0.60 after a day and 0.85 after two; glomeruli 0.88 and 0.79 three and ten days after birth. Model days are not embryonic days.
+
+
+## Nearness to capacity against size
+
+Capacity is the units reached, at a given perfusion threshold and in a given domain, by a source whose pool cannot run out (the renewing source at ten times its pool). It is measured independently of the source it is set against, and it is operational: it belongs to a domain, a threshold and the branching rules, not to a tissue. Elasticities are to the seeded pool, paired over 24 seeds.
+
+The perfusion threshold changed inside each source. Size and capacity fall together, so their ratio hardly moves.
+
+| source | threshold | units | capacity | units / capacity | elasticity |
+|---|---|---|---|---|---|
+| liver | 0.3 | 352.2 | 476.9 | 0.74 | +0.14 ± 0.05 |
+| liver | 0.4 | 314.7 | 417.4 | 0.75 | +0.06 ± 0.06 |
+| liver | 0.5 | 269.7 | 363.1 | 0.74 | +0.09 ± 0.04 |
+| liver | 0.6 | 208.1 | 266.9 | 0.78 | +0.07 ± 0.06 |
+| liver | 0.7 | 191.0 | 239.6 | 0.80 | +0.37 ± 0.14 |
+| kidney | 0.3 | 121.0 | 476.9 | 0.25 | +0.43 ± 0.04 |
+| kidney | 0.4 | 110.1 | 417.4 | 0.26 | +0.37 ± 0.04 |
+| kidney | 0.5 | 98.0 | 363.1 | 0.27 | +0.40 ± 0.03 |
+| kidney | 0.6 | 89.0 | 266.9 | 0.33 | +0.37 ± 0.03 |
+| kidney | 0.7 | 73.3 | 239.6 | 0.31 | +0.38 ± 0.04 |
+| pancreas | 0.3 | 54.9 | 476.9 | 0.12 | +0.87 ± 0.04 |
+| pancreas | 0.4 | 51.8 | 417.4 | 0.12 | +0.79 ± 0.04 |
+| pancreas | 0.5 | 48.2 | 363.1 | 0.13 | +0.80 ± 0.04 |
+| pancreas | 0.6 | 45.0 | 266.9 | 0.17 | +0.71 ± 0.05 |
+| pancreas | 0.7 | 40.0 | 239.6 | 0.17 | +0.70 ± 0.06 |
+
+The domain changed, with the same pool and threshold. A source held far below capacity by its pool keeps its size while its ratio to capacity moves.
+
+| source | domain scale | units | capacity | units / capacity | elasticity |
+|---|---|---|---|---|---|
+| kidney | 0.4 | 68.7 | 156.6 | 0.44 | +0.25 ± 0.03 |
+| kidney | 0.6 | 89.0 | 266.9 | 0.33 | +0.37 ± 0.03 |
+| kidney | 0.8 | 95.1 | 492.9 | 0.19 | +0.41 ± 0.04 |
+| pancreas | 0.4 | 44.4 | 156.6 | 0.28 | +0.67 ± 0.05 |
+| pancreas | 0.6 | 45.0 | 266.9 | 0.17 | +0.71 ± 0.05 |
+| pancreas | 0.8 | 45.9 | 492.9 | 0.09 | +0.78 ± 0.04 |
+
+Elasticity in the largest domain minus the smallest, with a 95 % bootstrap interval: kidney-like +0.17 [+0.07, +0.26]; pancreas-like +0.11 [-0.01, +0.22]. Over all 19 points of both interventions, the Spearman correlation of the elasticity with units over capacity is -0.92, and with units alone -0.80.
+
+
+## The kidney-like dividing source with and without the coupling
+
+The extension of the section above with branching coupled to the cap, and the same source with the tree left free. 40 % of the progenitors killed on day 45, no proliferative response. Ablated over control, 95 % bootstrap intervals. Tips of the tree are all terminal segments; sites with a cap are the segments that hold progenitors.
+
+| nucleation | branching | pool | tips of the tree | sites with a cap | units |
+|---|---|---|---|---|---|
+| reference | coupled | 0.54 [0.49, 0.58] | 0.66 [0.58, 0.75] | 0.55 [0.50, 0.60] | 0.81 [0.72, 0.94] |
+| reference | free | 0.60 [0.56, 0.64] | 0.92 [0.88, 0.96] | 0.79 [0.69, 0.93] | 0.91 [0.87, 0.96] |
+| threshold quartered, law slowed | coupled | 0.57 [0.53, 0.62] | 0.74 [0.63, 0.86] | 0.58 [0.51, 0.66] | 0.64 [0.57, 0.70] |
+| threshold quartered, law slowed | free | 0.61 [0.55, 0.68] | 0.88 [0.83, 0.92] | 0.80 [0.65, 0.95] | 0.87 [0.81, 0.92] |
 
 
 ## Predictions for ablations that have not been done
