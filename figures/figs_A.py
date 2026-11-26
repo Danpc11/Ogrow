@@ -420,12 +420,13 @@ def fig3():
         d.plot(x, dv, "o", ms=3, mew=0.7, mec=col, mfc=col if filled else "white", alpha=0.9, zorder=2)
         sd = dv.std(ddof=1)
         d.plot([i + 0.30, i + 0.30], [-sd, sd], "-", lw=1.5, color=K["ink"], zorder=3)
-        d.text(i + 0.30, sd + 2, f"s.d. {sd:.1f} %", ha="center", va="bottom", fontsize=F.SZ["small"])
+        d.text(i, 1.01, f"s.d. {sd:.1f} %", ha="center", va="bottom", fontsize=F.SZ["small"],
+               transform=d.get_xaxis_transform())
         rows += [["pairs", lab.replace("\n", " "), "deviation, %", j, float(v_), "", ""] for j, v_ in enumerate(dv)]
     d.axhline(0, lw=0.6, color=K["grey"], zorder=1)
     d.set_xticks(range(len(groups))); d.set_xticklabels([g[0] for g in groups])
     d.set_xlim(-0.5, len(groups) - 0.25); d.set_ylabel("Deviation of one organ\nfrom its pair (%)")
-    d.set_title("Two organs grown alike", fontsize=F.SZ["label"])
+    d.set_title("Two organs grown alike", fontsize=F.SZ["label"], pad=14)
     for ax_ in (b, c, d):
         F.tidy(ax_)
     for ax_, s_ in ((a, "A"), (b, "B"), (c, "C"), (d, "D")):
@@ -572,7 +573,7 @@ def fig5():
         lab_.set_color(K[reg])
     a.set_ylabel("Units gained in 40 days (%)")
     a.set_title("Growth restarts only where cells remain", fontsize=F.SZ["label"])
-    a.legend(loc="upper left")
+    a.legend(loc="upper right")
 
     # B: the two ways to drive the circuit
     b = fig.add_subplot(gs[0, 9:15]); blank(b, (0, 1.5), (0, 1))
