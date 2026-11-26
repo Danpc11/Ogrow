@@ -4,7 +4,7 @@ Target: *Biofabrication* (IOP), with the engineering framing. The manuscript
 itself is `MANUSCRIPT.md`; this file is the ledger of claims and evidence it
 is written from, and `scripts/29_check_manuscript.py` holds the manuscript to
 the regenerated tables.
-Reference model: version 4.62.0 (`src/organgrow/closed.py`). Every number from
+Reference model: version 4.63.0 (`src/organgrow/closed.py`). Every number from
 the model that the paper uses is in `PAPER_NUMBERS.md`, written by
 `make paper` with the version and commit that produced it; this file does not
 copy model numbers by hand. Numbers given here are either data (the human
@@ -213,6 +213,17 @@ Fig. 1g of Azizoglu et al. 2025. That study counted lobules at two ages only,
 three animals at one week and six at eight weeks, and gives no spread in its
 text, so the comparison is thin evidence and is not a fit: nothing in the model
 is set by it. `PAPER_NUMBERS.md`, Contraction; Figure 8.
+
+**Three numbers set beside measurements.** With half its pool the
+pancreas-like construct loses about half its mass and the liver-like one loses
+little, the contrast Stanger, Tanaka and Melton report for progenitor ablation
+in mouse; with 40 % of its pool removed the kidney-like construct loses a
+share of its units at the upper edge of the 10 to 20 % of nephrons measured
+after a like ablation; and two kidney-like constructs grown alike differ about
+as much as the two kidneys of one person do in volume. The first was known
+when the regimes were set up and is a check of consistency; the other two were
+not. `scripts/36_validation.py`; `PAPER_NUMBERS.md`, Against published
+perturbations and paired human kidneys; manuscript Section 3.10.
 
 ## What this is for
 

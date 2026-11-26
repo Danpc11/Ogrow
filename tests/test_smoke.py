@@ -626,6 +626,44 @@ check("a run that hits the unit cap still agrees with one at a time",
       _cap_batched == _cap_scalar and _cap_batched[-1] <= 25,
       f"{_cap_batched[-1]} units against {_cap_scalar[-1]}, cap 25")
 
+# ------------------------------------------------- against measurements
+# scripts/36_validation.py writes sentences into the manuscript and reads a
+# cohort. Both can go wrong quietly: a rewrite that touches text outside its
+# markers, or a statistic that reads the offset between sides as chance.
+import importlib.util as _ilu                                         # noqa: E402
+
+_s36 = _ilu.spec_from_file_location(
+    "valid36", Path(__file__).resolve().parents[1] / "scripts" / "36_validation.py")
+valid36 = _ilu.module_from_spec(_s36)
+_s36.loader.exec_module(valid36)
+
+print("\nagainst measurements")
+_doc = "before <!-- auto:x -->old<!-- /auto:x --> between <!-- auto:y -->keep<!-- /auto:y --> after"
+_once = valid36.fill(_doc, "x", "NEW")
+check("a block is rewritten between its own markers and nowhere else",
+      _once == "before <!-- auto:x -->NEW<!-- /auto:x --> between "
+               "<!-- auto:y -->keep<!-- /auto:y --> after")
+check("rewriting a block twice changes nothing the second time",
+      valid36.fill(_once, "x", "NEW") == _once)
+check("a block that is not in the text leaves the text alone",
+      valid36.fill(_doc, "z", "NEW") == _doc)
+
+_rng = np.random.default_rng(5)
+_base = np.exp(_rng.normal(5.0, 0.3, 400))                 # people differ by 30 %
+_L = _base * np.exp(_rng.normal(0.0, 0.08, 400)) * 0.9     # each side by 8 %, left 10 % smaller
+_R = _base * np.exp(_rng.normal(0.0, 0.08, 400))
+_pv = valid36.paired_variation(_L, _R)
+check("the left-right variation recovers the spread of one organ",
+      abs(_pv["cv"] - 0.08) < 0.01, f"{_pv['cv']:.3f} against 0.080")
+check("a constant difference between sides is not counted as variation",
+      abs(_pv["side_offset"] + 0.10) < 0.02 and _pv["cv_with_offset"] > _pv["cv"],
+      f"offset {_pv['side_offset']:+.3f}, {_pv['cv_with_offset']:.3f} with it left in")
+check("the variation between people is kept apart from it",
+      abs(_pv["cv_between"] - 0.3) < 0.04, f"{_pv['cv_between']:.3f} against 0.30")
+_rt = valid36.ratio([10, 12, 11, 9], [5, 6, 5.5, 4.5])
+check("a pool that halves every seed gives a ratio of one half and no interval",
+      abs(_rt["value"] - 0.5) < 1e-12 and abs(_rt["hi"] - _rt["lo"]) < 1e-12)
+
 # ---------------------------------------------------------------- run cache
 # The cache decides whether a stored run is reused, so a fault in it does not
 # fail loudly: it puts an answer to an old question into the paper. These

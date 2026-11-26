@@ -53,6 +53,12 @@ File names are historical and do not follow the manuscript's numbering.
     make test      # under a minute: derivations, conservation, closed model
     make check     # static analysis; version and stamped numbers agree
 
+`scripts/36_validation.py` sets three of the model's numbers beside published
+measurements, and writes the sentences of `manuscript/MANUSCRIPT.md` that
+quote them, between `auto:` markers. When a change moves those numbers, run it
+once and commit the manuscript before `make paper`, so that the run finds the
+manuscript already in step and the stamp stays clean.
+
 When the model's version changes, run `make paper` before committing: the
 regenerated `PAPER_NUMBERS.md` belongs in the same commit as the change, so
 that no commit carries numbers from two versions and the check stays green.

@@ -310,6 +310,26 @@ if Fe:
         need("optimism of the search block",
              f"by {abs(Fe['optimism']):.2f} on average")
 
+    # Section 3.9 says what happens to the specification when the tree's root
+    # is placed at random. It is a statement about every volume at once, so it
+    # is held to the table rather than to a number.
+    _rr = (Fe.get("robustness") or {}).get("root_random")
+    if _rr:
+        if not any(v["model_spec"] for v in _rr.values()):
+            need("random root, the specification",
+                 f"no configuration meets it at any of the {len(_rr)} volumes")
+        else:
+            need("random root, the specification",
+                 "some configuration still meets it at "
+                 + ", ".join(k for k, v in sorted(_rr.items()) if v["model_spec"]))
+
+Va = load("validation.json")
+if Va:
+    # Built by scripts/36_validation.py from the results, and the same strings
+    # that script writes into the manuscript.
+    for _label, _text in Va.get("strings", {}).items():
+        need(_label, _text)
+
 
 def main():
     # The manuscript sets a minus as U+2212; compare against a plain hyphen.

@@ -621,5 +621,42 @@ if (RES / "injury.json").exists():
         table(["regime", "lost", "units kept", "mass per unit",
                "full compensation would need", "mass"], rows)
 
+if (RES / "validation.json").exists():
+    Va = json.load(open(RES / "validation.json"))
+    w("\n## Against published perturbations and paired human kidneys\n")
+    w("The only numbers here that are set beside a measurement. A share of the "
+      "reference pool is seeded and what is left of the construct is read, as a "
+      "ratio of means over 24 paired seeds with a 95 % bootstrap interval. The "
+      "elasticity is log(mass ratio) / log(pool kept).\n")
+
+    def _ci(r):
+        return f"{r['value']:.2f} [{r['lo']:.2f}, {r['hi']:.2f}]"
+
+    table(["regime", "pool kept", "units", "mass", "elasticity of mass"],
+          [[reg, k, _ci(v["N"]), _ci(v["mass"]),
+            f"{np.log(v['mass']['value']) / np.log(float(k)):+.2f}"]
+           for reg in ("pancreas", "kidney", "liver")
+           for k, v in sorted(Va["ablation"][reg].items(), key=lambda kv: -float(kv[0]))])
+    w("Published, in mouse: the pancreas ends smaller in proportion to the "
+      "progenitors removed and the liver is not limited by them (Stanger, Tanaka "
+      "and Melton 2007); about 40 % of nephron progenitors removed leaves 10 to "
+      "20 % fewer nephrons. The three regimes were named with the first of these "
+      "in view, so agreement with it is consistency and not a prediction.\n")
+    w("Variation across 24 seeds grown from identical parameters, which is what "
+      "two organs of one individual share.\n")
+    table(["regime", "CV of units", "CV of mass"],
+          [[reg, f"{Va['contingent'][reg]['N']:.3f}", f"{Va['contingent'][reg]['mass']:.3f}"]
+           for reg in ("pancreas", "kidney", "liver")])
+    _p = Va.get("pairs")
+    if _p:
+        w(f"The two kidneys of one person, CT volume, {_p['pairs']} pairs (TRUSTED): "
+          f"left-right coefficient of variation {_p['cv']:.3f} with the mean "
+          f"difference between sides ({100 * _p['side_offset']:+.1f} %) removed and "
+          f"{_p['cv_with_offset']:.3f} with it left in; between people "
+          f"{_p['cv_between']:.3f}. The left-right difference against kidney size "
+          f"gives Spearman rho = {_p['size_rho']:+.2f}, P = {_p['size_p']:.2f}, over "
+          f"{_p['smallest']:.0f} to {_p['largest']:.0f} cm3. The volumes carry "
+          f"segmentation error, which is not separated here.\n")
+
 open(ROOT / "PAPER_NUMBERS.md", "w").write("\n".join(out) + "\n")
 print("wrote PAPER_NUMBERS.md")

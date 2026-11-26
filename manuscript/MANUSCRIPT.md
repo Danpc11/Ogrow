@@ -1,4 +1,4 @@
-# Perfusion-limited growth sets the size a vascularised tissue reaches, whether it can be restarted, and how poorly it scales
+# One local nucleation law gives criteria for the growth, arrest and regeneration of liver-like, kidney-like and pancreas-like tissue
 
 Hugo Tovar^1^, Genaro Vázquez-Victorio^2^, Miguel Ángel Peña-Rico^3^,
 Angélica S. Martínez-Ramírez^3^, Itzel Escobedo-Avila^4^,
@@ -17,10 +17,12 @@ Ciudad Universitaria, Mexico City, Mexico
 
 \* Corresponding author: Daniel Pérez-Calixto, dperez@inmegen.gob.mx
 
-Target journal: *Biofabrication* (IOP). Structure follows IOP's Introduction,
-Methods, Results, Discussion. Abstract is under 300 words.
+Target journal: *Cell Systems* first, *Biofabrication* (IOP) second. The
+structure here is Introduction, Methods, Results, Discussion; the Cell Press
+form (a summary of 150 words, highlights, STAR Methods after the Discussion)
+is applied at submission and is listed in the notes at the end.
 
-Reference model version 4.62.0 (`src/organgrow/closed.py`). Every model number
+Reference model version 4.63.0 (`src/organgrow/closed.py`). Every model number
 quoted below is taken from `PAPER_NUMBERS.md`, which `make paper` regenerates
 with the version and commit that produced it, and is checked against the
 result files by `scripts/29_check_manuscript.py`. No model number in this file
@@ -35,57 +37,43 @@ since the numbers were stamped.
 
 ## Abstract
 
-Engineered tissues stop growing before they reach a useful size, and making a
-construct larger yields functional units more slowly than it yields volume.
-Which resource runs out, and whether anything can restart growth once it has
-stopped, are not addressed by current design tools, which generate a vascular
-geometry and then treat growth as a separate problem. We study a single
-nucleation law on a perfused vascular tree: a functional unit forms at a tip
-at a rate proportional to the competent cells held there and to the excess of
-local perfusion over a setpoint, bounded locally by perfusion per unit, by
-competent cells, and by room. Three tissue-like regimes follow from how the cell
-source is maintained: whether the cell that forms a unit is spent in forming
-it, and how fast the pool divides and is lost. A factorial over those axes
-finds the second the larger: the binary property changes which bound ends
-growth in 2 of 9 settings of the other two, and the turnover in 5 of 6. The
-regimes differ in what seeding buys: doubling the seeded pool changes the
-final unit count by an elasticity of +0.07 ± 0.06 in the renewing regime and
-+0.71 ± 0.05 in the spent one, of which under half survives holding the pool
-and its turnover fixed, while lowering the perfusion setpoint is the stronger
-lever in every regime. They differ in whether arrest
-can be undone: relieving perfusion or room restarts a renewing construct and
-nothing restarts one whose pool is spent. After a 30 % loss of units, how the
-perfusion circuit is driven decides the outcome; at a fixed inlet pressure the
-construct overshoots to 1.82 times its mass without settling, while one held
-at a fixed root flow tracks a supply budget in the aggregate, its mass rising
-as the delivered flow to an exponent of 0.90 while most of its units stop
-short of their own share of the supply. That gap is the paper's sharpest
-result: a supply constraint fixes how much tissue a construct carries and
-leaves what the tissue is made of undetermined. Giving the model the
-involution it lacks returns the same mass on roughly a third of the units, so
-mass, unit number and function come apart, and a construct optimised to
-recover mass need not recover the architecture it was designed around.
-Scaling the domain
-15-fold raises unit count only as V^0.45, and past an intermediate size the
-unit count also stops being reproducible, its coefficient of variation rising
-from 0.09 to 0.47. Posed as a design problem over 48 settings of the knobs an
-operator controls, a joint requirement on unit density, vascular cost and
-reproducibility is met at the smallest volume and by nothing in that search at
-the two largest, while the volume between them sits on the boundary and
-changes verdict when the cellular step is refined; what fails at size is
-density, and the configuration that varies least at the largest volume does so
-because it builds almost nothing. The model is not
-fitted to any construct and its predictions are untested; we state the
-measurements that would decide each.
+Kidney, liver and pancreas are among the organs for which replacement tissue
+is most needed, and they answer a loss in opposite ways: one regains its mass
+and two do not. We study one growth rule on a perfused vascular tree: a
+functional unit forms at a tip at a rate proportional to the competent cells
+held there and to the excess of local perfusion over a setpoint, bounded
+locally by perfusion per unit, by competent cells, and by room. Three regimes,
+liver-like, kidney-like and pancreas-like, follow from how the cell source is
+maintained, and a factorial finds its turnover the larger axis: whether the
+cell that forms a unit is spent changes which bound ends growth in 2 of 9
+settings of the other two, and the turnover in 5 of 6. The model gives six
+criteria: find the bound that ended growth before intervening; a tissue can
+resume only if it stopped with competent cells left; lower the perfusion a
+unit requires before seeding more cells; hold the delivered flow, not the
+pressure, to set the size regained after injury; judge recovery by units and
+not only by mass; and check that a specification is jointly reachable at the
+volume intended, which here holds only at small volume and for a tree rooted
+at depth. Three numbers are set beside existing measurements.
+<!-- auto:validation-abstract -->Halving the seeded pool leaves 0.53 of the mass in the pancreas-like regime and 0.92 in the liver-like one, as progenitor ablation does in mouse; removing 40 % of the kidney-like pool costs 20 % of the units, against 10 to 20 % of nephrons measured; and two constructs grown alike differ by 0.096 in mass, against 0.098 between a person's two kidneys.<!-- /auto:validation-abstract -->
+Parameters are chosen and not fitted, renal compensation is overstated, and no
+criterion has been tested in a construct; we state the measurement that would
+decide each.
 
-**Keywords:** tissue engineering, vascularisation, perfusion, computational
-model, scale-up, organ growth, design rules
+**Keywords:** organ growth, regeneration, progenitor pool, vascularisation,
+perfusion, tissue engineering, computational model, scale-up
 
 ---
 
 ## 1. Introduction
 
-Two problems limit the size of an engineered tissue. The first is that
+Kidney, liver and pancreas are among the organs for which replacement tissue
+is most needed, and they answer a loss in opposite ways. A liver regains its
+mass after most of it is removed. A kidney forms no nephron once nephrogenesis
+has ended, and a pancreas recovers little. Why they differ, and what would
+have to be supplied to a tissue of each kind for it to grow or to grow back,
+are the questions this paper puts to a model.
+
+Building any of the three meets the same two problems. The first is that
 constructs stop growing. The second is that making them larger does not make
 them proportionally more functional: unit density falls with size, and the
 reason is usually attributed to transport without being resolved into which
@@ -121,7 +109,9 @@ the size of the pool each starts with and the rates at which that pool divides
 and is lost. Section 3.7 separates the three contributions and finds the
 turnover the largest of them.
 
-We report six results and their reading for biofabrication. First, the three
+We report six results, restate them in the Discussion as criteria for growth,
+arrest and regeneration, and set three of the model's numbers beside
+measurements that already exist. First, the three
 regimes and what distinguishes them at arrest. Second, that what seeding more
 cells buys depends on which bound is active, and that the perfusion setpoint
 is the stronger lever in all three. Third, that arrest is stable, and whether
@@ -135,8 +125,12 @@ is met up to an intermediate volume and not beyond it, and that what fails is
 density, while reproducibility at size is recovered by the choice of cell
 source.
 
-None of these predictions has been tested against a construct. We state in the
-Discussion the measurements that would decide each of them.
+Three of the model's numbers can be set beside published measurements with
+nothing fitted, and Section 3.10 does so: what is left of each tissue when
+progenitors are removed, in mouse pancreas, liver and kidney, and how much two
+organs grown alike differ, in the paired kidneys of 48 people. No criterion
+has been tested in a construct, and the Discussion states the measurement that
+would decide each.
 
 ## 2. Methods
 
@@ -254,6 +248,18 @@ score, z-scored within each sample, with a two-component Gaussian mixture used
 to separate states. Only presence and absence are read across studies, for
 reasons given in Section 3.6.
 
+Three numbers of the model are set beside published measurements (Section
+3.10). The seeded pool of each regime was reduced to a half and a quarter of
+its reference value (pancreas-like and liver-like) or to 0.6 and a half
+(kidney-like), over the same 24 seeds as the reference, and mass and unit
+count at day 140 are reported as ratios of means with a paired bootstrap
+interval. They are compared with progenitor ablation in mouse pancreas and
+liver [2] and in mouse kidney [14, 15]. The variation across seeds grown from
+identical parameters is compared with the left-right variation of kidney
+volume in 48 people, 96 kidneys segmented from clinical CT [16]: the standard
+deviation of the log ratio of the two sides, divided by $\sqrt{2}$, after the
+mean difference between sides is removed.
+
 ### 2.6 Code and data availability
 
 All code, parameters and generated tables are at
@@ -262,6 +268,12 @@ All code, parameters and generated tables are at
 that produced it. `make test` runs the conservation and consistency tests,
 including exact progenitor balance in every realisation. The developmental
 series are public under the accessions above.
+
+The numbers in `PAPER_NUMBERS.md` are exact on the platform recorded there
+(macOS, arm64). With the same package versions Linux gives different single
+realisations and the same means within sampling error, which `make test`
+checks against a reference ensemble. Every claim in this paper is about a mean
+or a contrast over seeds, not about a single realisation.
 
 ## 3. Results
 
@@ -339,7 +351,8 @@ contrast and its precision.
 This ordering is also the pattern reported in mice by Stanger, Tanaka and
 Melton [2], who found that halving the pancreatic progenitor pool halved the
 pancreas, which never compensated, while the liver compensated fully. The
-model was not fitted to that experiment.
+model was not fitted to that experiment; Section 3.10 puts the same
+perturbation to the model and reads the sizes.
 
 ### 3.3 Arrest is stable, and whether it can be undone follows from what the pool has left
 
@@ -754,6 +767,16 @@ specification is met at the smallest volume and robustly so, that it is met by
 nothing we searched at the two largest, and that the volume between them sits
 on the boundary and is not settled by this model at this resolution.
 
+The verdict at the smallest volume does not survive every auxiliary rule
+either. The whole search was repeated under three of the variants of Section
+2.4. With the mesenchymal term removed, and with territory-based assignment,
+the verdict at each of the four volumes is unchanged. With the root of the
+tree placed at random in the domain instead of at its deepest point, no
+configuration meets it at any of the 4 volumes (`PAPER_NUMBERS.md`, Designing
+to a specification). Where perfusion enters the domain is therefore part of
+the specification and not an auxiliary detail, and the feasible region
+reported here is that of a tree rooted at depth.
+
 This is a limit of the numerical work and we report it as one. The coupled
 system is not shown to have converged: the vascular solve, the calibre
 relaxation and the sprouting rules are taken once a day whatever the cellular
@@ -765,12 +788,74 @@ holds on another, which is reproducibility across batches. It is not a
 validation of the model against a construct, and the boundary it draws is a
 boundary of the model.
 
+### 3.10 Three numbers set beside measurements
+
+Everything above is the model read against itself. Three of its numbers can be
+set beside measurements that already exist, with nothing fitted
+(`PAPER_NUMBERS.md`, Against published perturbations and paired human
+kidneys).
+
+<!-- auto:validation -->
+Seeded with half its reference pool, the pancreas-like construct ends with 0.53 [0.42, 0.64] of its mass and 0.58 of its units, and the liver-like construct with 0.92 [0.90, 0.95] of its mass (ratio of means over 24 paired seeds, 95 % bootstrap interval). The pancreas-like construct keeps 0.17 of its mass on a quarter of the pool, and the liver-like one 0.77. With 40 % of the kidney-like pool removed the construct ends with 0.80 [0.77, 0.83] of the units, a deficit of 20 % [17, 23]. Grown 24 times from identical parameters, the kidney-like construct has a coefficient of variation of 0.096 in mass and of 0.088 in unit count. In the human cohort the volumes of a person's two kidneys differ with a coefficient of variation of 0.098 over 48 pairs, once the mean difference between sides is removed (the left smaller by 7.4 % on average); that difference does not rise detectably with kidney size ($\rho = +0.25$, $P = 0.09$, Spearman, over volumes from 109 to 553 cm$^3$).
+<!-- /auto:validation -->
+
+*Removing progenitors from pancreas and liver.* In mouse, a pancreas built
+from fewer progenitors ends smaller in proportion and does not catch up, while
+a liver deprived of progenitors is not limited by them [2]. The model gives
+the same contrast: the pancreas-like construct loses about as much mass as it
+loses pool, and the liver-like one loses little. Two qualifications travel
+with it. The regimes were set up knowing that result, so the agreement is a
+check of consistency and not a blind prediction. And the liver-like construct
+does not recover in full: its shortfall grows as the pool is cut further,
+where the experiment reports a liver of normal size.
+
+*Removing nephron progenitors.* Removing about 40 % of the nephron progenitors
+of a mouse embryo leaves 10 to 20 % fewer nephrons [15], and a 40 % ablation
+by another route leaves a permanent deficit [14]. The kidney-like regime was
+not built with either experiment in view, and its deficit sits at the upper
+edge of the measured range. It arrives there by a different route. In the
+embryo the surviving progenitors divide faster and refill the niche [15], or
+the tree branches more slowly until the cells at each tip recover [14]; the
+kidney-like source in the model does not divide at all. The model gives the
+size of the deficit and not the mechanism that limits it.
+
+*Two organs grown alike.* Two constructs grown from identical parameters
+differ only in their realisation, which is the situation of the two kidneys of
+one person. The variation of the kidney-like construct across seeds and the
+left-right variation of kidney volume are close, and nothing in the model was
+set by the cohort. Three things limit what that carries. A mass in model units
+is compared with a CT volume, which includes a segmentation error we do not
+separate. The agreement is at the one domain scale all regimes are reported
+at. And the model's spread rises with the domain (Section 3.8), while the
+pairs show no clear rise with kidney size; people of different size are not
+one construct in a larger domain, so this does not refute the model, but it
+does not support that part of it.
+
 ## 4. Discussion
 
-### 4.1 Five design rules, stated as the model gives them
+### 4.1 Six criteria and one hypothesis, as the model gives them
 
-**A constant flow gives a tunable brake on total mass that a constant pressure
-does not.** At a fixed inlet pressure the model's construct overshoots to 1.82
+**Find the bound that ended growth before intervening.** Growth stops when one
+of three local resources runs out, and each leaves its own signature at
+arrest: a pool still held at tips short of supply in the liver-like regime, a
+pool that is gone in the kidney-like regime, a budget part spent and part
+stranded in the pancreas-like one (Section 3.1). What helps is different in
+each case, and Section 4.4 gives the two reliefs that tell them apart in a
+construct.
+
+**A tissue can resume only if it stopped with competent cells left.**
+Relieving perfusion or room restarts the liver-like construct, and nothing
+restarts one whose pool is spent (Section 3.3). Regenerative capacity is not a
+separate property in this model. It is what the pool has left at arrest, which
+the turnover of the source decides more often than whether its cells are spent
+(Section 3.7). For kidney-like and pancreas-like tissue the criterion
+therefore applies when the tissue is built: competent cells have to be kept or
+supplied, because nothing done to perfusion afterwards makes a new unit.
+
+
+**Hold the delivered flow, not the pressure, to set the size regained after
+injury.** A constant flow gives a tunable brake on total mass that a constant
+pressure does not. At a fixed inlet pressure the model's construct overshoots to 1.82
 times its mass after injury and does not settle; at fixed root flow its mass
 rises as the delivered flow to an exponent of 0.90 over a range of 0.6 to 1.4.
 Nothing in the tissue measures its own size in either case, so the brake is the
@@ -784,8 +869,16 @@ pressure, shear damage, and the capacity of the perfusion circuit are
 constraints the model does not carry, and any of them could decide the question
 in practice.
 
-**What seeding more cells buys depends on the source and on the pool you
-are already at, and more on the second than on the first.** Across the three
+**Judge recovery by units, not only by mass.** A construct held at a fixed
+flow regains its mass on roughly a third of its units once involution is
+allowed (Section 3.4), and a kidney-like construct regains mass by enlarging
+the units it kept (Section 3.5). Mass, unit number and perfused tissue recover
+apart, so a criterion of success written in mass alone can be met by a tissue
+that has lost the architecture it was built for.
+
+**Lower the perfusion a unit requires before seeding more cells.** What
+seeding more cells buys depends on the source and on the pool you are already
+at, and more on the second than on the first. Across the three
 regimes as published the elasticity of the final unit count to the seeded pool
 runs from +0.07 ± 0.06 to +0.71 ± 0.05, and it is tempting to read the range as
 the difference between a renewing source and a spent one. Matched for pool and
@@ -794,7 +887,7 @@ rule is the narrower one: a small pool repays seeding and a large one does not,
 whichever source it is, and a source that is spent in forming units offers no
 second chance once the pool is gone.
 
-**Lower the perfusion a unit requires before seeding more cells.** The
+The threshold is the stronger lever. The
 setpoint elasticity is between −0.77 and −1.83 across the three regimes,
 against a pool elasticity between +0.07 and +0.71. In every regime the
 threshold is the stronger lever, and in the renewing regime it is the only one
@@ -814,11 +907,14 @@ coefficient of variation of 0.057 where the reference gives 0.47, and it fills
 under one per cent of close packing: it is steady because it is nearly empty.
 Read one requirement at a time and a design study will award itself a prize
 for building nothing. The boundary is a boundary of this model, over the
-configurations searched, and not a measured limit of any construct.
+configurations searched, and not a measured limit of any construct. It is also
+the boundary of a tree rooted at depth: with the root placed at random the
+requirement is met at no volume (Section 3.9), so where perfusion enters
+belongs in the specification.
 
-**Match the seeding rate to the speed of the vascular front, rather than
-maximising it.** This one is a hypothesis the model raises and does not yet
-answer. Its basis is that what strands a progenitor is sitting at a tip the
+**A hypothesis: match the seeding rate to the speed of the vascular front,
+rather than maximising it.** The model raises this and does not yet answer
+it. Its basis is that what strands a progenitor is sitting at a tip the
 tree has not reached, that 0.70 of the pool is lost that way in the
 spent-with-loss regime, and that scaling up is limited by the spread of the
 front rather than by room in the container. If that reading is right, the
@@ -898,9 +994,24 @@ repository keeps it. It would in any case be thin evidence: that study counted
 lobules at two ages, in three animals at one week and six at eight weeks, and
 reported the change as roughly twofold without giving a spread in the text.
 
-No prediction in this paper has been tested against a construct or a tissue,
-and the model carries no measure of biological function, so every recovery
-reported here is structural.
+No criterion in this paper has been tested in a construct. Three numbers are
+set beside existing measurements in Section 3.10, and that comparison has the
+limits stated there: the regimes were set up knowing the pancreas and liver
+experiment, the kidney-like deficit is reached without the compensatory
+proliferation an embryo shows, the liver-like construct recovers less
+completely than a liver does, the published sizes for pancreas and liver are
+read as a contrast and not digit for digit, and the paired kidneys are CT
+volumes that carry segmentation error. The model carries no measure of
+biological function, so every recovery reported here is structural.
+
+All three regimes are grown in one domain shape and at one set of geometric
+settings. They are liver-like, kidney-like and pancreas-like in their cell
+source and in nothing else, and no statement here is about the anatomy of an
+organ.
+
+The feasible region of Section 3.9 is that of a tree rooted at the deepest
+point of the domain. With the root placed at random the specification is met
+at no volume.
 
 The spatial constraint is local exclusion between neighbouring units, not the
 packing limit of the container, which never binds.
@@ -977,9 +1088,13 @@ flow over what the tissue requires per unit mass, which is a consequence of
 the local rule rather than a separate assumption. Neither is a
 property of the scaffold, and neither requires anything in the tissue to
 measure its own size. Scaling the construct up costs unit density and, past an
-intermediate size, costs reproducibility as well. These are predictions from a
-model that has not been fitted to a construct, and each has a measurement that
-would decide it.
+intermediate size, costs reproducibility as well. Set beside measurements that
+already exist, the model gives the contrast between pancreas and liver when
+progenitors are removed, the size of the nephron deficit after a partial loss
+of progenitors, and the difference between the two kidneys of one person; it
+overstates renal compensation, and it does not reproduce how an embryo limits
+a deficit. The criteria are those of a model whose parameters are chosen and
+not fitted, and each has a measurement that would decide it.
 
 ## Acknowledgements
 
@@ -1037,7 +1152,48 @@ their weight and ploidy *Ontogenez* **18** 304–8 (in Russian, English abstract
 Loh K M, Red-Horse K and Nusse R 2025 Vascularization of neonatal liver lobules
 presages adult liver size *Nat. Commun.* **16** 9989
 
+[14] Cebrian C, Asai N, D'Agati V and Costantini F 2014 The number of fetal
+nephron progenitor cells limits ureteric branching and adult nephron endowment
+*Cell Rep.* **7** 127–37
+
+[15] Muthukrishnan S D, Ryzhov S, Karolak M and Oxburgh L 2018 Nephron
+progenitor cell death elicits a limited compensatory response associated with
+interstitial expansion in the neonatal kidney *Dis. Model. Mech.* **11**
+dmm030544
+
+[16] TRUSTED: kidney segmentations from clinical CT, 96 kidneys of 48 patients,
+dataset, https://doi.org/10.6084/m9.figshare.27981050 (authors, title and year
+to be completed from the record; see the notes)
+
 ## Notes for the authors, to be removed before submission
+
+**New in this version, and what it still needs.** The paper is reframed around
+criteria for growth, arrest and regeneration, and Section 3.10 sets three
+numbers beside existing measurements. Five things are open. (1) The published
+sizes for pancreas and liver [2] are quoted here as a contrast; the values
+have to be read from that paper's figures before any is quoted as a number.
+(2) Whether the three regimes were chosen knowing the result of [2] is stated
+in Section 3.10 as "set up knowing that result"; if they were not, that
+sentence and the one in Limitations should say so, and the comparison becomes
+stronger. (3) Reference [16] needs its authors, title and year from the
+figshare record, and the cohort's licence has to allow the derived table in
+`source_data/` to be redistributed. (4) The first sentence of the abstract and
+of the Introduction, on the need for replacement kidney, liver and pancreas,
+needs a citation. (5) Section 3.10 has no figure yet; one panel per comparison
+would carry it.
+
+**Format for *Cell Systems*.** A summary of at most 150 words, three or four
+highlights of at most 85 characters each, an eTOC paragraph, and the Methods
+moved after the Discussion as STAR Methods with a key resources table. None of
+that is done here; the abstract above is about 310 words, to be cut to 300 for *Biofabrication*. *Biofabrication*
+takes the manuscript in its present order with an abstract under 300 words.
+Whether *Cell Systems* publishes without charge on its subscription route
+should be confirmed on its author pages before submission.
+
+**The passages a script writes.** The sentence of the abstract and the
+paragraph of Section 3.10 between `auto:` markers are written by
+`scripts/36_validation.py` from the results. Do not edit them by hand; run
+that script and commit the manuscript.
 
 **Still to confirm on the title page.** The spelling of Enrique
 Hernández-Lemus, and whether he should also carry a Centro de Ciencias de la
@@ -1062,10 +1218,11 @@ counts perfused mass, supply over setpoint capped at one, rather than units
 placed; vascular cost as lumen and junction volume against the budget the
 model carries, rather than as a segment count; and the variation taken of the
 viable count. Read that way two of this paper's statements look different.
-Viable density does not fall with volume the way placed density does, and the
+Viable density falls with volume less steeply than placed density does, and the
 variation of the viable count stays far below the requirement at every
-volume, where the raw count's does not. The vascular requirement never binds
-and viability binds everywhere. Whether Sections 3.8 and 3.9 should be
+volume, where the raw count's does not. The vascular requirement cannot bind,
+because its budget is the one the model stops sprouting at, and viability
+binds everywhere. Whether Sections 3.8 and 3.9 should be
 rewritten around the physical reading, carry both, or keep the model's own
 with the physical one as a check, is a decision for the authors and is not
 taken here (`PAPER_NUMBERS.md`, Designing to a specification).
