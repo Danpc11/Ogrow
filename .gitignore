@@ -7,5 +7,5 @@ results/*
 figures/out/*
 !figures/out/.gitkeep
 .pytest_cache/
-manuscript/*
-!manuscript/.gitkeep
+# the Word files are built from manuscript/MANUSCRIPT.md and are not kept
+manuscript/*.docx

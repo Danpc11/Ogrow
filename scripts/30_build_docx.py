@@ -28,7 +28,7 @@ from pathlib import Path
 
 from organgrow.config import ROOT
 
-SRC = ROOT / "MANUSCRIPT.md"
+SRC = ROOT / "manuscript" / "MANUSCRIPT.md"
 OUT = ROOT / "manuscript"
 
 

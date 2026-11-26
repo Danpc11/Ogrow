@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "organgrow"
-version = "4.61.0"
-description = "Generative growth of exchange organs and the invariant-space metric"
+version = "4.62.0"
+description = "Perfusion-limited growth of vascularised tissue from one nucleation law"
 requires-python = ">=3.9"
 dependencies = ["numpy", "scipy", "matplotlib", "Pillow", "PyYAML", "nibabel"]
 

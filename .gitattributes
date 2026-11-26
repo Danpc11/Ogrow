@@ -1,0 +1,4 @@
+# The manuscript is versioned here beside the code that checks it, but it is
+# not part of a release: the archive a tag produces, which is what Zenodo
+# stores, carries the code, the results and how to reproduce them.
+manuscript export-ignore

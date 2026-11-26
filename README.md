@@ -1,8 +1,8 @@
-# Growth of exchange organs, and the limit of what can be specified
+# Ogrow: perfusion-limited growth of vascularised tissue from one nucleation law
 
 [![tests](https://github.com/Danpc11/Ogrow/actions/workflows/tests.yml/badge.svg)](https://github.com/Danpc11/Ogrow/actions/workflows/tests.yml)
 
-Code, data tables and figures for the manuscript.
+Code, results and the recipe that reproduces them.
 
 A generative model of how a perfused tissue construct stops growing. A
 vascular tree whose tips hold supply, progenitors and room, and one nucleation
@@ -19,16 +19,32 @@ this grew out of, on liver, kidney and pancreas as organs and on paired human
 kidneys; those tables and figures are kept for the record, and the manuscript
 does not rest on them.
 
-`PAPER.md` lists each claim with its evidence, `PAPER_NUMBERS.md` holds every
-model number, stamped with the version and commit that produced it, and
-`FIGURES.md` gives the figures in manuscript order with their legends.
-`THEORY.md` states the model formally; its section 13 records how the closed
+`PAPER_NUMBERS.md` holds every model number, stamped with the version, the
+commit and the platform that produced it; `source_data/` holds the numbers
+behind every panel. `THEORY.md` states the model formally; its section 13 records how the closed
 model (`src/organgrow/closed.py`) was built and corrected.
 
 **Two pipelines, not one.** `make paper` is the manuscript: closed model,
 human tables, the paper's figures and `PAPER_NUMBERS.md`. `make all` builds
 the earlier figures from the open engine (`src/organgrow/engine.py`); they are
 kept for the record, are not the paper's, and should not be used to check it.
+
+The manuscript's own text is under `manuscript/`: the draft, the ledger of
+claims and evidence it is written from, and the figure legends. It is
+versioned here because `make check` holds its numbers to the results, and it
+is left out of release archives (`.gitattributes`), so a release is the code,
+the results and how to reproduce them. Without that folder `make check` says
+so and checks the rest.
+
+| Manuscript figure | File in `figures/out/` | Script |
+| --- | --- | --- |
+| Figure 1 | `Fig1_model.pdf` | `figures/fig_paper.py` |
+| Figure 2 | `Fig2_bounds.pdf` | `figures/fig_paper.py` |
+| Figure 3 | `Fig8_injury.pdf` | `figures/fig_injury.py` |
+| Figure 4 | `Fig9_transcriptome.pdf` | `figures/fig_transcriptome.py` |
+| Figure 5 | `Fig6_scaling.pdf` | `figures/fig_design.py` |
+
+File names are historical and do not follow the manuscript's numbering.
 
 ## Install and reproduce
 
@@ -82,6 +98,8 @@ a message when the cohort is absent, and the build continues.
     results/             generated intermediates
     MANIFEST.md          figure -> command -> seed -> input
     KNOWN_LIMITATIONS.md what the work does not establish
+    PAPER_NUMBERS.md     every model number, with the stamp of what produced it
+    manuscript/          the draft, its ledger and legends; not in a release
 
 ## Source data
 

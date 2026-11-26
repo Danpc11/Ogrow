@@ -504,9 +504,11 @@ if __name__ == "__main__":
               f"{100 * phys[str(S)]['least_vascular']:>14.2f}% "
               f"{phys[str(S)]['lowest_cv']:>10.3f} "
               f"{'yes' if feas else 'no':>9}  {who:>15}", flush=True)
-    print("\n  Read physically the vascular requirement is not the slack one "
-          "it looks when\n  counted in segments, and viability is lowest "
-          "where the construct is densest.")
+    print("\n  The vascular fraction is far inside its budget at every volume, "
+          "and it has to be:\n  the budget is the one the model stops sprouting "
+          "at, so this requirement cannot\n  bind and the physical "
+          "specification has two live requirements, not three.\n  Viable "
+          "density falls with volume, less steeply than placed density does.")
 
     print(f"\nLargest volume that stays feasible as the viable-density "
           f"requirement changes,\nat the model's own vascular budget and a "

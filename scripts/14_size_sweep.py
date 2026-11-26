@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """Exploratory, from the development of the closed model; its parameters are
-from earlier versions and the paper does not use it (see PAPER.md).
+from earlier versions and the paper does not use it (see manuscript/PAPER.md).
 
 Does unit number self-average? A size sweep that checks its own controls.
 

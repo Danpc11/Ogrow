@@ -29,7 +29,7 @@ import numpy as np
 from organgrow.config import ROOT
 
 RES = ROOT / "results"
-DOC = ROOT / "MANUSCRIPT.md"
+DOC = ROOT / "manuscript" / "MANUSCRIPT.md"
 checks = []       # (label, the string the manuscript must contain)
 
 
@@ -312,12 +312,15 @@ if Fe:
 
 
 def main():
-    if not DOC.exists():
-        raise SystemExit(f"no manuscript at {DOC}")
     # The manuscript sets a minus as U+2212; compare against a plain hyphen.
     # It is also hard-wrapped, so a quoted phrase can fall across two lines
     # and a literal search would miss it. Runs of whitespace collapse to one
     # space on both sides, which only ever makes a match easier to find.
+    if not DOC.exists():
+        # a release archive carries the code and the results, not the manuscript
+        print(f"no manuscript at {DOC.relative_to(ROOT)}: nothing to hold to the "
+              f"results. The numbers themselves are in PAPER_NUMBERS.md.")
+        return 0
     text = " ".join(DOC.read_text(encoding="utf-8").replace("\u2212", "-").split())
     if not checks:
         print("no results to check against; run `make paper` first")

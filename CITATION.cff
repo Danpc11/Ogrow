@@ -11,11 +11,13 @@ abstract: >-
   constructs grow from the same local rules on a perfused vascular tree: a
   functional unit forms at a tip at a rate set by the competent cells held
   there and by the excess of local perfusion over a setpoint, bounded by
-  perfusion per unit, by competent cells and by room. Three growth regimes
-  follow from one binary property of the cell source, whether the cell that
-  forms a unit is spent in forming it. The repository regenerates every number
-  and figure of the accompanying manuscript with `make paper`, and checks the
-  manuscript against the results it quotes.
+  perfusion per unit, by competent cells and by room. The three regimes
+  differ in four parameters of the cell source: whether the cell that forms a
+  unit is spent in forming it, the size of the seeded pool, and the rates at
+  which the pool divides and is lost. The repository regenerates every number,
+  table and figure of the accompanying manuscript with `make paper`. Exact
+  values hold on the platform recorded in `PAPER_NUMBERS.md`; other platforms
+  reproduce them within sampling error.
 authors:
   - family-names: Tovar
     given-names: Hugo
@@ -51,7 +53,7 @@ authors:
       Ciencias, Universidad Nacional Autónoma de México, Mexico City, Mexico
 repository-code: https://github.com/Danpc11/Ogrow
 license: MIT
-version: 4.61.0
+version: 4.62.0
 date-released: '2026-11-24'
 keywords:
   - tissue engineering

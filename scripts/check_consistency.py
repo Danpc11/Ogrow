@@ -4,7 +4,7 @@
 Every model number the paper uses is in PAPER_NUMBERS.md, written by
 `make paper` with the model version and the commit that produced it. This
 checks that the version is the same in pyproject.toml, the package,
-PAPER.md, CLOSED_MODEL.md and PAPER_NUMBERS.md; that the stamp names a
+manuscript/PAPER.md, CLOSED_MODEL.md and PAPER_NUMBERS.md; that the stamp names a
 commit rather than "unknown" and carries no uncommitted changes; that
 the stamped commit is in the history of the current one; and that nothing
 under src, config or scripts has changed since it, which ancestry alone does
@@ -24,7 +24,15 @@ def read(name):
     return (ROOT / name).read_text(encoding="utf-8")
 
 
+#: stands for a file this checkout does not carry
+ABSENT = object()
+
+
 def find(pattern, name):
+    # The manuscript is kept under manuscript/ and left out of a release
+    # archive, so its two files may be missing; that is not a disagreement.
+    if not (ROOT / name).exists():
+        return ABSENT
     m = re.search(pattern, read(name))
     return m.group(1) if m else None
 
@@ -32,13 +40,15 @@ def find(pattern, name):
 version = re.search(r'^version = "([^"]+)"', read("pyproject.toml"), re.M).group(1)
 found = {
     "src/organgrow/__init__.py": find(r'__version__ = "([^"]+)"', "src/organgrow/__init__.py"),
-    "PAPER.md": find(r"Reference model: version ([0-9.]+)", "PAPER.md"),
+    "manuscript/PAPER.md": find(r"Reference model: version ([0-9.]+)",
+                                "manuscript/PAPER.md"),
     "CLOSED_MODEL.md": find(r"# The closed model \(version ([0-9.]+)\)", "CLOSED_MODEL.md"),
     "PAPER_NUMBERS.md": find(r"Model version ([0-9.]+)", "PAPER_NUMBERS.md"),
     # The manuscript names the version of the model its numbers came from, and
     # CITATION.cff names the version a release is tagged as. The first had
     # drifted seven versions behind the code before it was checked here.
-    "MANUSCRIPT.md": find(r"Reference model version ([0-9.]+)", "MANUSCRIPT.md"),
+    "manuscript/MANUSCRIPT.md": find(r"Reference model version ([0-9.]+)",
+                                     "manuscript/MANUSCRIPT.md"),
     "CITATION.cff": find(r"(?m)^version: ([0-9.]+)", "CITATION.cff"),
 }
 # No figure may name a colour of its own: one palette lives in
@@ -53,6 +63,9 @@ for _f in sorted((ROOT / "figures").glob("fig_*.py")):
 
 print(f"pyproject.toml version {version}")
 for name, v in found.items():
+    if v is ABSENT:
+        print(f"  note {name} is not in this checkout, as in a release archive")
+        continue
     ok = v == version
     print(f"  {'ok  ' if ok else 'FAIL'} {name}: {v}")
     if not ok:
@@ -109,6 +122,12 @@ commit = stamp.group(1).strip() if stamp else "missing"
 if commit in ("missing", "unknown") or "uncommitted" in commit:
     print(f"  FAIL stamp commit: {commit}")
     fail.append(f"PAPER_NUMBERS.md stamp is '{commit}'; run `make paper` on a clean commit")
+elif subprocess.run(["git", "rev-parse", "--git-dir"], cwd=ROOT,
+                    capture_output=True).returncode != 0:
+    # A release archive is a snapshot without history, so there is nothing to
+    # test the stamp against. The stamp still says which commit it was.
+    print(f"  note not a git checkout: the stamp names commit {commit.split()[0]}, "
+          f"which cannot be checked against a history here")
 else:
     sha = commit.split()[0]
     known = subprocess.run(["git", "merge-base", "--is-ancestor", sha, "HEAD"],

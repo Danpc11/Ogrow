@@ -135,7 +135,7 @@ paper: python-ok
 	$(PY) figures/fig6.py
 	$(PY) scripts/18_paper_tables.py
 	$(PY) scripts/20_paper_numbers.py
-	# The leading - is deliberate. The Word file is derived from MANUSCRIPT.md
+	# The leading - is deliberate. The Word file is derived from manuscript/MANUSCRIPT.md
 	# and needs pandoc, which is not a dependency of the model: a machine
 	# without it still produces every number, figure and table above, and the
 	# script says what is missing rather than writing a half-converted file.
