@@ -731,6 +731,16 @@ if (RES / "capacity.json").exists():
       "against, and it is operational: it belongs to a domain, a threshold and "
       "the branching rules, not to a tissue. Elasticities are to the seeded pool, "
       f"paired over {len(Cp['seeds'])} seeds.\n")
+    if "checks" in Cp:
+        _k = Cp["checks"]
+        w("Whether it is a capacity. Units of the saturating source at the reference "
+          "threshold with its pool at "
+          + ", ".join(f"{x:,.0f}" for x in _k["pools"]) + ": "
+          + ", ".join(f"{v:.0f}" for v in _k["pool"].values())
+          + f". Its gain over the last 40 days is {_k['late_gain']:.1%}. At "
+            f"{_k['long_days']} days instead of 140: "
+          + "; ".join(f"domain scale {s_}, {v['short']:.0f} to {v['long']:.0f} "
+                      f"({v['ratio'] - 1:+.0%})" for s_, v in _k["horizon"].items()) + ".\n")
     w("The perfusion threshold changed inside each source. Size and capacity fall "
       "together, so their ratio hardly moves.\n")
     table(["source", "threshold", "units", "capacity", "units / capacity", "elasticity"],
@@ -760,7 +770,13 @@ if (RES / "capacity.json").exists():
 
     table(["nucleation", "branching", "pool", "tips of the tree", "sites with a cap", "units"],
           [[n, b, _cc(v["P"]), _cc(v["tips"]), _cc(v["caps"]), _cc(v["N"])]
-           for n, d in Cp["kidney"].items() for b, v in d.items()])
+           for n, d in Cp["kidney"].items() for b, v in d.items() if b != "difference"])
+    w("Coupled minus free, paired over seeds, with a 95 % bootstrap interval: "
+      + "; ".join(f"{n}: tips {d['difference']['tips']['value']:+.2f} "
+                  f"[{d['difference']['tips']['lo']:+.2f}, {d['difference']['tips']['hi']:+.2f}], "
+                  f"units {d['difference']['N']['value']:+.2f} "
+                  f"[{d['difference']['N']['lo']:+.2f}, {d['difference']['N']['hi']:+.2f}]"
+                  for n, d in Cp["kidney"].items() if "difference" in d) + ".\n")
 
 if (RES / "predictions.json").exists():
     Pr = json.load(open(RES / "predictions.json"))

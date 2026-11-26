@@ -120,13 +120,18 @@ def build():
            "kidney-like, and pancreas-like for the tissues whose cell source they resemble; no "
            "parameter was optimized against the measurements with which the model is "
            "compared.\n", SHARES + "\n"]
-    missing = []
-    for num, ttl, head, stop in TABLES:
+    # numbered in sequence over the tables that exist, so that a section not yet
+    # in PAPER_NUMBERS.md leaves no gap and the count announced above is true
+    missing, present = [], []
+    for _, ttl, head, stop in TABLES:
         body = section(pn, head, stop)
         if body is None:
             missing.append(head)
-            continue
-        out += [f"## Table {num}. {ttl}\n", body + "\n"]
+        else:
+            present.append((ttl, body))
+    for i, (ttl, body) in enumerate(present, 1):
+        out += [f"## Table S{i}. {ttl}\n", body + "\n"]
+    out[3] = out[3].replace(f"Tables S1 to S{len(TABLES)}", f"Tables S1 to S{len(present)}")
     if reflist:
         out += ["## Supplemental references\n", "\n\n".join(reflist) + "\n"]
     OUT.write_text("\n".join(out), encoding="utf-8")

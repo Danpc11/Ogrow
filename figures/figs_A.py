@@ -962,6 +962,10 @@ def manifest():
 
 
 if __name__ == "__main__":
+    # files an earlier version of this script wrote under names it no longer uses
+    for stale_ in ("FigA5_after_arrest", "FigA6_predictions"):
+        for ext in (".pdf", ".png"):
+            (OUT / (stale_ + ext)).unlink(missing_ok=True)
     for k in (sys.argv[1:] or sorted(FIGS)):
         FIGS[k]()
     manifest()

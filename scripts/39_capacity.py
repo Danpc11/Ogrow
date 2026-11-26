@@ -22,9 +22,14 @@
 
    The limit is measured independently of the source, as the units reached at
    each threshold by a source whose pool cannot run out: a renewing source
-   with ten times the largest pool of the factorial. It is an operational
-   capacity of this domain under these rules, and it moves with the threshold,
-   the tree and the domain. It is not a constant of the tissue.
+   with twenty times the largest pool of the factorial. Whether that is
+   enough is checked and not assumed: the same count is taken at half and at
+   twice that pool, and a capacity is a capacity only if it has stopped rising
+   with the pool. It is also taken at twice the horizon in the smallest and
+   the largest domain, because a larger domain takes longer to fill and a
+   fixed horizon could favour the small one. It is an operational capacity of
+   this domain under these rules, and it moves with the threshold, the tree
+   and the domain. It is not a constant of the tissue.
 
 2. Is the coupling of branching to the progenitors needed for the kidney?
 
@@ -61,8 +66,13 @@ FIX = dict(R_unit=650.0, units_per_branch=650 / 600.0, max_vessels=6000)
 REG = {"liver": dict(P0=2600.0, rho=0.10, delta=0.10, renewal=1.0),
        "kidney": dict(P0=300.0, rho=0.00, delta=0.05, renewal=0.0),
        "pancreas": dict(P0=60.0, rho=0.00, delta=0.00, renewal=0.0)}
-#: a pool that cannot run out: the renewing source at ten times its pool
-SATURATING = dict(P0=26000.0, rho=0.10, delta=0.10, renewal=1.0)
+#: a pool that cannot run out: the renewing source at twenty times its pool.
+#: At ten times the count was still rising with the pool; see POOL_CHECK.
+SATURATING = dict(P0=52000.0, rho=0.10, delta=0.10, renewal=1.0)
+#: the same source at half and at twice that pool, at the reference threshold
+POOL_CHECK = (0.5, 1.0, 2.0)
+#: and at twice the horizon, in the smallest and the largest domain
+LONG_DAYS = 280
 THRESHOLDS = (0.3, 0.4, 0.5, 0.6, 0.7)
 #: the domain, as a linear scale; 0.6 is the reference. The liver-like source
 #: is left out: it sits near its capacity at every scale and its elasticity is
@@ -81,11 +91,12 @@ def spec(kind, *a):
     if kind == "size":
         reg, q, factor, seed = a[:4]
         scale = a[4] if len(a) > 4 else S
+        days = a[5] if len(a) > 5 else DAYS
         p = dict(SATURATING if reg == "saturating" else REG[reg], nu=NU, q_set=q)
         p["P0"] = p["P0"] * float(factor)
-        tag = "" if scale == S else f"_S{scale:g}"
+        tag = ("" if scale == S else f"_S{scale:g}") + ("" if days == DAYS else f"_d{days}")
         f = OUT / f"size_{reg}_q{q:g}_f{factor:.4f}{tag}_s{seed}.json"
-        return f, dict(FIX, **p), DAYS, fingerprint(seed=seed, S=scale, days=DAYS, params=dict(FIX, **p))
+        return f, dict(FIX, **p), days, fingerprint(seed=seed, S=scale, days=days, params=dict(FIX, **p))
     name, coupled, ablated, seed = a
     p = dict(FIX, **SOURCE, **NUCLEATION[name])
     if coupled:
@@ -106,8 +117,11 @@ def run(kind, *a):
     seed = a[3]
     U, m, vt, tr = grow(lambda x, y, z: sdf("liver", x / sc, y / sc, z / sc),
                         190 * sc, days=days, rng=np.random.default_rng(seed), **p)
+    n_day = list(tr.N)
+    late = float((n_day[-1] - n_day[-41]) / max(n_day[-41], 1)) if len(n_day) > 40 else float("nan")
     return save_json(f, dict(N=len(U), P=float(tr.P[-1]), tips=int(len(vt.tips())),
-                             caps=int(tr.caps[-1]), vessels=int(tr.vessels[-1])), fp)
+                             caps=int(tr.caps[-1]), vessels=int(tr.vessels[-1]),
+                             late=late), fp)
 
 
 def _warm(a):
@@ -144,6 +158,9 @@ if __name__ == "__main__":
     grid += [("size", reg, q, f, s) for reg in REG for q in THRESHOLDS
              for f in (1.0, up, dn) for s in SEEDS]
     grid += [("size", "saturating", 0.6, 1.0, s, sc) for sc in SCALES if sc != S for s in SEEDS]
+    grid += [("size", "saturating", 0.6, pf, s) for pf in POOL_CHECK if pf != 1.0 for s in SEEDS]
+    grid += [("size", "saturating", 0.6, 1.0, s, sc, LONG_DAYS) for sc in (SCALES[0], SCALES[-1])
+             for s in SEEDS]
     grid += [("size", reg, 0.6, f, s, sc) for reg in DOMAIN_SOURCES for sc in SCALES if sc != S
              for f in (1.0, up, dn) for s in SEEDS]
     grid += [("kidney", n, c, a, s) for n in NUCLEATION for c in (True, False)
@@ -172,6 +189,26 @@ if __name__ == "__main__":
           f"{'elasticity to the pool':>24}")
     for q in THRESHOLDS:
         res["capacity"][f"{q:g}"] = float(N("saturating", q, 1.0).mean())
+
+    # ---- is it a capacity? the pool doubled and halved, and the horizon doubled
+    chk = {f"{pf:g}": float(N("saturating", 0.6, pf).mean()) for pf in POOL_CHECK}
+    late = float(np.mean([run("size", "saturating", 0.6, 1.0, s)["late"] for s in SEEDS]))
+    hor = {}
+    for sc in (SCALES[0], SCALES[-1]):
+        short = np.array([run("size", "saturating", 0.6, 1.0, s, sc)["N"] if sc != S
+                          else run("size", "saturating", 0.6, 1.0, s)["N"] for s in SEEDS], float)
+        long_ = np.array([run("size", "saturating", 0.6, 1.0, s, sc, LONG_DAYS)["N"] for s in SEEDS], float)
+        hor[f"{sc:g}"] = dict(short=float(short.mean()), long=float(long_.mean()),
+                              ratio=float(long_.mean() / short.mean()))
+    res["checks"] = dict(pool=chk, pools=[SATURATING["P0"] * pf for pf in POOL_CHECK],
+                         late_gain=late, horizon=hor, long_days=LONG_DAYS)
+    print("   is it a capacity? units of the saturating source at the reference threshold, "
+          "with its pool\n   at " + ", ".join(f"{SATURATING['P0'] * pf:,.0f}" for pf in POOL_CHECK)
+          + ": " + ", ".join(f"{chk[f'{pf:g}']:.0f}" for pf in POOL_CHECK)
+          + f". Gain over its last 40 days: {late:.1%}.")
+    print(f"   at {LONG_DAYS} days instead of {DAYS}: "
+          + "; ".join(f"scale {k_}, {v_['short']:.0f} to {v_['long']:.0f} "
+                      f"({v_['ratio'] - 1:+.0%})" for k_, v_ in hor.items()) + ".\n")
     for reg in REG:
         for q in THRESHOLDS:
             n0, nu_, nd_ = N(reg, q, 1.0), N(reg, q, up), N(reg, q, dn)
@@ -268,7 +305,18 @@ if __name__ == "__main__":
             res["kidney"][name]["coupled" if coupled else "free"] = row
             print(f"{name:>32} {'coupled' if coupled else 'free':>10} {ci(row['P']):>18} "
                   f"{ci(row['tips']):>18} {ci(row['caps']):>18} {ci(row['N']):>18}")
-        print()
+        # the same seeds grow both trees, so the difference is paired
+        R4 = {(cpl, abl): [run("kidney", name, cpl, abl, s) for s in SEEDS]
+              for cpl in (True, False) for abl in (False, True)}
+
+        def delta(ix, k):
+            r = lambda cpl: (np.mean([R4[(cpl, True)][i][k] for i in ix])        # noqa: E731
+                             / max(np.mean([R4[(cpl, False)][i][k] for i in ix]), 1e-9))
+            return float(r(True) - r(False))
+        res["kidney"][name]["difference"] = {k: boot(lambda ix, k=k: delta(ix, k), len(SEEDS), B=2000)
+                                             for k in ("tips", "N")}
+        dd = res["kidney"][name]["difference"]
+        print(f"{'':>32} coupled minus free: tips {sci(dd['tips'])}, units {sci(dd['N'])}\n")
     print("   Measured without a proliferative response (Cebrian et al. 2014): progenitors "
           "stay reduced,\n   tips 0.59, glomeruli 0.48 to 0.58.")
 
@@ -289,6 +337,12 @@ if __name__ == "__main__":
         **{f"c.dom.{r}.fill": f"{dm[r][lo_s]['fill']:.2f} and {dm[r][hi_s]['fill']:.2f}" for r in DOMAIN_SOURCES},
         **{f"c.dom.{r}.eps": f"{dm[r][lo_s]['eps']:+.2f} and {dm[r][hi_s]['eps']:+.2f}" for r in DOMAIN_SOURCES},
         **{f"c.dom.{r}.change": sci(dm[r]["change"]) for r in DOMAIN_SOURCES},
+        "c.kid.units.delta": sci(k[low]["difference"]["N"]),
+        "c.kid.tips.delta": sci(k[low]["difference"]["tips"]),
+        "c.sat.pools": ", ".join(f"{x:,.0f}" for x in res["checks"]["pools"]),
+        "c.sat.units": ", ".join(f"{res['checks']['pool'][f'{pf:g}']:.0f}" for pf in POOL_CHECK),
+        "c.hor.small": f"{res['checks']['horizon'][lo_s]['ratio'] - 1:+.0%}".replace("%", " %"),
+        "c.hor.large": f"{res['checks']['horizon'][hi_s]['ratio'] - 1:+.0%}".replace("%", " %"),
         "c.kid.tips.coupled": ci(k[low]["coupled"]["tips"]),
         "c.kid.sites.coupled": ci(k[low]["coupled"]["caps"]),
         "c.kid.tips.free": ci(k[low]["free"]["tips"]),
