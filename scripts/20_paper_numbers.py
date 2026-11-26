@@ -722,6 +722,46 @@ if (RES / "kidney_coupling.json").exists():
       f"{_m1['units'][0]:.2f} and {_m1['units'][1]:.2f} three and ten days after "
       f"birth. Model days are not embryonic days.\n")
 
+if (RES / "capacity.json").exists():
+    Cp = json.load(open(RES / "capacity.json"))
+    w("\n## Nearness to capacity against size\n")
+    w("Capacity is the units reached, at a given perfusion threshold and in a given "
+      "domain, by a source whose pool cannot run out (the renewing source at ten "
+      "times its pool). It is measured independently of the source it is set "
+      "against, and it is operational: it belongs to a domain, a threshold and "
+      "the branching rules, not to a tissue. Elasticities are to the seeded pool, "
+      f"paired over {len(Cp['seeds'])} seeds.\n")
+    w("The perfusion threshold changed inside each source. Size and capacity fall "
+      "together, so their ratio hardly moves.\n")
+    table(["source", "threshold", "units", "capacity", "units / capacity", "elasticity"],
+          [[p["source"], p["q_set"], f"{p['units']:.1f}", f"{p['capacity']:.1f}",
+            f"{p['fill']:.2f}", f"{p['eps']:+.2f} ± {p['eps_se']:.2f}"] for p in Cp["points"]])
+    w("The domain changed, with the same pool and threshold. A source held far below "
+      "capacity by its pool keeps its size while its ratio to capacity moves.\n")
+    table(["source", "domain scale", "units", "capacity", "units / capacity", "elasticity"],
+          [[r, k, f"{p['units']:.1f}", f"{p['capacity']:.1f}", f"{p['fill']:.2f}",
+            f"{p['eps']:+.2f} ± {p['eps_se']:.2f}"]
+           for r, d in Cp["domain"].items() for k, p in d.items() if k != "change"])
+    w("Elasticity in the largest domain minus the smallest, with a 95 % bootstrap interval: "
+      + "; ".join(f"{r}-like {d['change']['value']:+.2f} [{d['change']['lo']:+.2f}, "
+                  f"{d['change']['hi']:+.2f}]" for r, d in Cp["domain"].items())
+      + f". Over all {Cp['all']['n']} points of both interventions, the Spearman "
+        f"correlation of the elasticity with units over capacity is "
+        f"{Cp['all']['rho_fill']:+.2f}, and with units alone {Cp['all']['rho_units']:+.2f}.\n")
+    w("\n## The kidney-like dividing source with and without the coupling\n")
+    w("The extension of the section above with branching coupled to the cap, and the "
+      "same source with the tree left free. 40 % of the progenitors killed on day 45, "
+      "no proliferative response. Ablated over control, 95 % bootstrap intervals. "
+      "Tips of the tree are all terminal segments; sites with a cap are the segments "
+      "that hold progenitors.\n")
+
+    def _cc(r):
+        return f"{r['value']:.2f} [{r['lo']:.2f}, {r['hi']:.2f}]"
+
+    table(["nucleation", "branching", "pool", "tips of the tree", "sites with a cap", "units"],
+          [[n, b, _cc(v["P"]), _cc(v["tips"]), _cc(v["caps"]), _cc(v["N"])]
+           for n, d in Cp["kidney"].items() for b, v in d.items()])
+
 if (RES / "predictions.json").exists():
     Pr = json.load(open(RES / "predictions.json"))
     w("\n## Predictions for ablations that have not been done\n")

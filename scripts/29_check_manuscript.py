@@ -374,6 +374,7 @@ if Kc:
         need(_label, _text)
 
 
+Cp = load("capacity.json")
 Pr = load("predictions.json")
 if Pr:
     # Built by scripts/38_predictions.py; quoted in MANUSCRIPT_A.md only.
@@ -389,7 +390,7 @@ def values_held(doc):
     """
     from organgrow.autotext import found
     want = {}
-    for res in (Va, Kc, Pr, Rg):
+    for res in (Va, Kc, Pr, Rg, Cp):
         want.update((res or {}).get("values", {}))
         want.update({k: None for k in ("validation", "validation-abstract", "validation-brief",
                                        "kidney-coupling", "predictions")})
@@ -404,7 +405,7 @@ def values_held(doc):
             bad += not ok
     quoted = sum(1 for n in got if want.get(n) is not None)
     print(f"\n{quoted} values written by scripts, "
-          + ("all in step\n" if not bad else f"{bad} out of step: run scripts 34 and 36 to 38 and "
+          + ("all in step\n" if not bad else f"{bad} out of step: run scripts 34 and 36 to 39 and "
              f"commit the manuscript\n"))
     return bad
 

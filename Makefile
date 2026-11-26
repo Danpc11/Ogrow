@@ -126,6 +126,7 @@ paper: python-ok
 	$(PY) scripts/36_validation.py
 	$(PY) scripts/37_kidney_coupling.py
 	$(PY) scripts/38_predictions.py
+	$(PY) scripts/39_capacity.py
 	$(PY) scripts/26_transcriptome.py
 	# figures and tables last: they read every result above
 	$(PY) figures/fig_framework.py
@@ -148,3 +149,4 @@ paper: python-ok
 	# script says what is missing rather than writing a half-converted file.
 	-$(PY) scripts/30_build_docx.py --keep-notes
 	-$(PY) scripts/30_build_docx.py --keep-notes --paper A
+	-$(PY) scripts/31_build_supplement.py

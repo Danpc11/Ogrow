@@ -321,30 +321,50 @@ def fig2():
     c.set_yticks(range(3)); c.set_yticklabels([NAME[r] for r in REG]); c.invert_yaxis()
     for lab_, reg in zip(c.get_yticklabels(), REG):
         lab_.set_color(K[reg])
-    c.set_xlim(0, 2.3); c.set_xlabel(r"Elasticity of unit count, $|\varepsilon|$")
+    c.set_xlim(0, 2.3); c.set_xlabel(r"Elasticity, $|\varepsilon|$")
     c.legend(loc="upper center", bbox_to_anchor=(0.30, -0.22), ncol=1)
     c.set_title("Three sources,\nthree sensitivities", fontsize=F.SZ["label"], pad=6)
-    # D: across the factorial, the elasticity follows the size reached
+    # D: the elasticity against nearness to capacity; the domain moves one and not the other
     d = fig.add_subplot(gs[1, 1:11])
-    em = R["_elasticity_map"]
-    col = {"spent": K["grey"], "supply": K["supply"], "room": K["room"], "still active": K["pale"]}
+    Cp = load("capacity.json")
+    col = {"spent": K["pale"], "supply": K["supply"], "room": K["room"], "still active": "white"}
+    cap0 = Cp["capacity"]["0.6"] if Cp else None
+    xof = (lambda n_: n_ / cap0) if Cp else (lambda n_: n_)
     for w in meta["renewal"]:
         for P0 in pools:
             for tn in turn:
                 c_ = R[f"w{w:.1f}_P{P0:.0f}_{tn}"]
                 reg = named.get((w, P0, tn))
-                d.errorbar([c_["N"]], [c_["eps_pool"]], yerr=[c_["eps_pool_se"]], fmt="o",
-                           ms=5.2 if reg else 4.2, mfc=col[c_["holds"]], mec=K[reg] if reg else col[c_["holds"]],
+                d.errorbar([xof(c_["N"])], [c_["eps_pool"]], yerr=[c_["eps_pool_se"]], fmt="o",
+                           ms=5.6 if reg else 4.6, mfc=col[c_["holds"]], mec=K[reg] if reg else K["grey"],
                            mew=1.6 if reg else 0.6, ecolor=K["grey"], elinewidth=0.6, capsize=0, zorder=3)
-                rows.append(["d", w, P0, tn, c_["eps_pool"], c_["N"]])
+                rows.append(["d", w, P0, tn, c_["eps_pool"], xof(c_["N"])])
     for lab_, k_ in (("progenitors gone at arrest", "spent"), ("held by perfusion", "supply")):
-        d.plot([], [], "o", ms=4.2, color=col[k_], label=lab_)
-    d.set_xlabel("Units at arrest"); d.set_ylabel(r"Elasticity of unit count to the pool, $\varepsilon_P$")
+        d.plot([], [], "o", ms=4.6, mfc=col[k_], mec=K["grey"], mew=0.6, label=lab_)
+    if Cp:
+        for reg, dm in Cp["domain"].items():
+            pts = sorted((float(k_), v) for k_, v in dm.items() if k_ != "change")
+            xs, ys = [v["fill"] for _, v in pts], [v["eps"] for _, v in pts]
+            d.plot(xs, ys, "-", lw=1.1, color=K[reg], zorder=4)
+            d.plot(xs, ys, "D", ms=4.4, mfc="white", mec=K[reg], mew=1.2, zorder=5,
+                   label="same pool, domain changed" if reg == list(Cp["domain"])[0] else None)
+            arrow(d, (xs[0], ys[0]), (xs[0] + 0.55 * (xs[1] - xs[0]), ys[0] + 0.55 * (ys[1] - ys[0])),
+                  K[reg], lw=1.1, scale=7, z=6)
+            for (sc_, v_) in pts:
+                rows.append(["d", f"{reg}, domain {sc_:g}", v_["units"], "", v_["eps"], v_["fill"]])
+        d.text(0.97, 0.95, f"Spearman {Cp['all']['rho_fill']:+.2f} with units/capacity,\n"
+               f"{Cp['all']['rho_units']:+.2f} with units alone", transform=d.transAxes,
+               ha="right", va="top", fontsize=F.SZ["small"])
+        d.set_xlabel("Units at arrest / capacity of the domain")
+        d.set_title("Nearness to capacity, not size, weakens\nthe dependence on progenitors",
+                    fontsize=F.SZ["label"])
+    else:
+        d.set_xlabel("Units at arrest")
+        d.set_title("Size answers the pool less as the tissue nears\nwhat perfusion supports",
+                    fontsize=F.SZ["label"])
+    d.set_ylabel(r"Elasticity of unit count to the pool, $\varepsilon_P$")
     d.set_ylim(0, 1.0); d.set_xlim(0, None)
-    d.text(0.97, 0.95, f"Spearman {em['rho_units']:+.2f}, {em['cells']} sources", transform=d.transAxes,
-           ha="right", va="top", fontsize=F.SZ["small"])
     d.legend(loc="lower left")
-    d.set_title("Size answers the pool less as the tissue nears\nwhat perfusion supports", fontsize=F.SZ["label"])
 
     # E: what can restart an arrested construct
     e2 = fig.add_subplot(gs[1, 14:24])
@@ -411,8 +431,8 @@ def fig3():
     organ(2.50, 0.19, K["liver"], "liver:\nnormal in days")
     a.plot([2.80, 2.80], [0.08, 0.92], lw=0.6, color=K["pale"])
     note(a, 2.88, 0.93, "Model", "label", ha="left", fontweight="bold")
-    note(a, 3.22, 0.56, "seed the same\nshare of the pool,\nchange nothing else,\nread the size", "small")
-    note(a, 3.22, 0.16, "parameters not optimized\nto these data", "small", K["grey"])
+    note(a, 3.22, 0.62, "seed the same\nshare of the pool,\nchange nothing else,\nread the size", "small")
+    note(a, 3.22, 0.14, "parameters\nnot optimized\nto these data", "small", K["grey"])
 
     def model(ax_, reg, key, col, label):
         pts = sorted((float(k), v[key]) for k, v in V["ablation"][reg].items())
@@ -830,9 +850,9 @@ def fig5():
     d.axhline(0, lw=0.8, color=K["ink"], zorder=1)
     d.axvspan(-0.08, 0.5, color=K["supply"], alpha=0.10, lw=0, zorder=0)
     d.axvspan(0.5, 1.55, color=K["cells"], alpha=0.12, lw=0, zorder=0)
-    d.text(0.21, 1.42, "perfusion limits: size hardly answers", ha="center", va="top",
+    d.text(0.21, 1.42, "near perfusion-set size:\nsize hardly follows", ha="center", va="top",
            fontsize=F.SZ["small"], color=K["supply"], fontweight="bold")
-    d.text(1.02, 1.42, "progenitors limit: size follows them", ha="center", va="top",
+    d.text(1.02, 1.42, "far from it:\nsize follows progenitor number", ha="center", va="top",
            fontsize=F.SZ["small"], color=K["ink"], fontweight="bold")
     for (lab, x, col), up in zip(meas, (1, 1, 1, 1)):
         d.plot([x], [0.28], "s", ms=5.5, mfc="white", mec=col, mew=1.2, zorder=4, clip_on=False)
@@ -850,7 +870,7 @@ def fig5():
     d.set_xticks([0, 0.5, 1.0, 1.5])
     d.set_xlabel("Effective elasticity of organ size to progenitor number over one finite ablation:  "
                  r"$\log$(share of organ) / $\log$(share of progenitors left)")
-    d.set_title("How size answers a loss of progenitors names what limits the organ",
+    d.set_title("The organs on one axis: how strongly size follows progenitor number",
                 fontsize=F.SZ["label"])
     for ax_ in (a, b, c):
         F.tidy(ax_)
@@ -872,18 +892,20 @@ def abstract():
     for t_ in tips:
         cap(a, t_, 6, r=0.018, dot=0.005, rng=rng)
         units(a, (t_[0], t_[1] + 0.012), 2, r=0.032, size=0.008, rng=rng)
-    note(a, 0.5, 0.585, r"units form at a rate  $\nu\,P\,(q-q^{*})_{+}$  until a resource runs out",
+    note(a, 0.5, 0.585, r"units form at a rate  $\nu\,P\,(q-q^{*})_{+}$  under constraints that act together",
          "small")
     cols = ((0.18, "perfusion", K["supply"], "liver-like", K["liver"], 0.92, "barely shrinks"),
             (0.50, "progenitors", K["cells"], "pancreas-like", K["pancreas"], 0.44, "shrinks in proportion"),
             (0.82, "progenitors that\ndrive branching", K["cells"], "kidney-like", K["kidney"], 0.62,
              "fewer tips,\nfewer nephrons"))
+    for x0_, x1_ in ((0.325, 0.355), (0.645, 0.675)):      # the three act on one another
+        arrow(a, (x0_, 0.445), (x1_, 0.445), K["ink"], lw=0.9, style="<|-|>", scale=6)
     for x, res, rc, reg, gc, size, txt in cols:
         arrow(a, (0.5 + (x - 0.5) * 0.25, 0.555), (x, 0.50), K["grey"], lw=0.7)
         a.add_patch(FancyBboxPatch((x - 0.135, 0.405), 0.27, 0.08, boxstyle="round,pad=0,rounding_size=0.02",
                                    fc="white", ec=rc, lw=1.1))
         note(a, x, 0.445, res, "small", rc, fontweight="bold")
-        note(a, x, 0.375, "runs out", "small", K["grey"])
+        note(a, x, 0.375, "limits most", "small", K["grey"])
         note(a, x, 0.325, reg, "small", gc, fontweight="bold")
         a.add_patch(Circle((x - 0.055, 0.215), 0.048, fc=gc, ec="none", alpha=0.9))
         arrow(a, (x - 0.002, 0.215), (x + 0.03, 0.215), K["ink"], lw=0.7, scale=5)
@@ -900,6 +922,46 @@ def abstract():
 
 FIGS = {"0": abstract, "1": fig1, "2": fig2, "3": fig3, "4": fig4, "5": fig5, "S1": figS1, "B1": figB1}
 
+def manifest():
+    """Record what the figures were drawn from: version, commit, platform, result files.
+
+    A figure and the text can part company when one is drawn on another machine
+    or from older results. The manifest says which results stood behind the
+    files in `figures/out/`, so that a mismatch can be traced without redrawing.
+    """
+    import hashlib
+    import platform
+    import subprocess
+    import organgrow
+    try:
+        commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT,
+                                capture_output=True, text=True).stdout.strip()
+        dirty = bool(subprocess.run(["git", "status", "--porcelain", "--", "src", "scripts", "config"],
+                                    cwd=ROOT, capture_output=True, text=True).stdout.strip())
+    except OSError:
+        commit, dirty = "unknown", False
+    src = {}
+    for name in ("paper/regime_reps.json", "regimes.json", "elasticity.json", "interventions.json",
+                 "validation.json", "kidney_coupling.json", "predictions.json", "capacity.json"):
+        f = RES / name
+        if f.exists():
+            src[name] = hashlib.sha256(f.read_bytes()).hexdigest()[:16]
+    key = {}
+    for name, path, pick in (("elasticity against units reached, factorial", "regimes.json",
+                              lambda r: r.get("_elasticity_map", {}).get("rho_units")),
+                             ("elasticity against units over capacity", "capacity.json",
+                              lambda r: r.get("all", {}).get("rho_fill"))):
+        r = load(path)
+        if r:
+            key[name] = pick(r)
+    m = dict(version=organgrow.__version__, commit=commit + ("+uncommitted" if dirty else ""),
+             platform=f"{platform.system()} {platform.machine()}", python=platform.python_version(),
+             numpy=np.__version__, results=src, numbers_drawn=key)
+    json.dump(m, open(OUT / "FigA_manifest.json", "w"), indent=1)
+    print(f"wrote FigA_manifest.json: version {m['version']}, commit {m['commit']}, {m['platform']}")
+
+
 if __name__ == "__main__":
     for k in (sys.argv[1:] or sorted(FIGS)):
         FIGS[k]()
+    manifest()
