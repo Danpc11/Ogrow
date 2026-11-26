@@ -1,6 +1,6 @@
 # Numbers the paper uses
 
-Model version 4.62.0, commit 12f8e06, generated 2026-11-25 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.63.0, commit 304e411, generated 2026-11-25 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b024.
 
@@ -427,4 +427,30 @@ Across every setting of the rate and of the three conditions that turn it on, th
 |---|---|---|---|---|---|
 | kidney | 30 % | 0.70 [0.69, 0.70] | 1.39 [1.34, 1.43] | 1.43 | 0.97 [0.93, 0.99] |
 | kidney | 50 % | 0.50 [0.50, 0.52] | 1.88 [1.78, 1.94] | 2.00 | 0.95 [0.92, 0.98] |
+
+
+## Against published perturbations and paired human kidneys
+
+The only numbers here that are set beside a measurement. A share of the reference pool is seeded and what is left of the construct is read, as a ratio of means over 24 paired seeds with a 95 % bootstrap interval. The elasticity is log(mass ratio) / log(pool kept).
+
+| regime | pool kept | units | mass | elasticity of mass |
+|---|---|---|---|---|
+| pancreas | 0.5 | 0.58 [0.56, 0.61] | 0.53 [0.42, 0.64] | +0.91 |
+| pancreas | 0.25 | 0.32 [0.30, 0.33] | 0.17 [0.12, 0.23] | +1.27 |
+| kidney | 0.6 | 0.80 [0.77, 0.83] | 0.84 [0.79, 0.88] | +0.35 |
+| kidney | 0.5 | 0.74 [0.71, 0.77] | 0.76 [0.73, 0.80] | +0.39 |
+| liver | 0.5 | 0.92 [0.88, 0.97] | 0.92 [0.90, 0.95] | +0.11 |
+| liver | 0.25 | 0.80 [0.76, 0.84] | 0.77 [0.75, 0.79] | +0.19 |
+
+Published, in mouse: the pancreas ends smaller in proportion to the progenitors removed and the liver is not limited by them (Stanger, Tanaka and Melton 2007); about 40 % of nephron progenitors removed leaves 10 to 20 % fewer nephrons. The three regimes were named with the first of these in view, so agreement with it is consistency and not a prediction.
+
+Variation across 24 seeds grown from identical parameters, which is what two organs of one individual share.
+
+| regime | CV of units | CV of mass |
+|---|---|---|
+| pancreas | 0.103 | 0.168 |
+| kidney | 0.088 | 0.096 |
+| liver | 0.086 | 0.057 |
+
+The two kidneys of one person, CT volume, 48 pairs (TRUSTED): left-right coefficient of variation 0.098 with the mean difference between sides (-7.4 %) removed and 0.111 with it left in; between people 0.322. The left-right difference against kidney size gives Spearman rho = +0.25, P = 0.09, over 109 to 553 cm3. The volumes carry segmentation error, which is not separated here.
 
