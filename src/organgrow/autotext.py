@@ -34,3 +34,9 @@ def write(doc, blocks):
         return False
     doc.write_text(new, encoding="utf-8")
     return True
+
+
+def found(text):
+    """Every named passage in a text, as {name: what stands between its markers}."""
+    return {m.group(1): m.group(2)
+            for m in re.finditer(r"<!-- auto:([\w.\-]+) -->(.*?)<!-- /auto:\1 -->", text, re.S)}

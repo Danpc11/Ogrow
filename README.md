@@ -33,7 +33,8 @@ The text is under `manuscript/`, and there are two manuscripts drawn from the
 same results: `MANUSCRIPT.md`, which carries everything and is the base of the
 engineering paper, and `MANUSCRIPT_A.md`, on what limits the size of an organ
 and how it answers a loss of progenitors. Beside them are the ledger of claims
-and evidence and the figure legends (`FIGURES.md`, `FIGURES_A.md`). It is
+and evidence and the figure legends (`FIGURES.md`; `FIGURES_A.md` lists the
+figures of the second manuscript, which `figures/figs_A.py` draws). It is
 versioned here because `make check` holds its numbers to the results, and it
 is left out of release archives (`.gitattributes`), so a release is the code,
 the results and how to reproduce them. Without that folder `make check` says

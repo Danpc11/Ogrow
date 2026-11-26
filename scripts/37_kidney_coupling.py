@@ -256,6 +256,29 @@ def blocks(res):
     return {"kidney-coupling": body}
 
 
+def values(res):
+    """Single numbers for MANUSCRIPT_A.md, each quoted between its own markers."""
+    c = res["conditions"]
+    off = [c[n]["0"] for n in NUCLEATION]
+    on = [c[n]["1"] for n in NUCLEATION]
+    ref, low = QUOTED
+    back = [r["cap_back_days"] for r in off]
+    came = [b for b in back if b is not None]
+    if not came:
+        capback = "in none of the settings within the window"
+    elif len(came) == len(back):
+        capback = f"within {min(came)} to {max(came)} days in all {len(back)} settings"
+    else:
+        capback = (f"within {min(came)} to {max(came)} days in {len(came)} of "
+                   f"{len(back)} settings")
+    return {"k.pool": _span(off, "pool", "to"), "k.sites": _span(off, "sites", "to"),
+            "k.capback": capback,
+            "k.units.ref": ci(c[ref]["0"]["units"]), "k.units.low": ci(c[low]["0"]["units"]),
+            "k.since.low": f"{c[low]['0']['units_since']['value']:.2f}",
+            "k.resp.pool": _span(on, "pool", "to"),
+            "k.resp.units.low": ci(c[low]["1"]["units"])}
+
+
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
     grid = [(n, r, a, s) for n in NUCLEATION for r in RESPONSE
@@ -328,8 +351,9 @@ if __name__ == "__main__":
           "the endpoints,\n  not the timing. The extension was written after these "
           "numbers were known.")
     res["strings"] = sentences(res)
+    res["values"] = values(res)
     json.dump(res, open(ROOT / "results" / "kidney_coupling.json", "w"), indent=1)
-    for _d in [d for d in DOCS if write(d, blocks(res))]:
+    for _d in [d for d in DOCS if write(d, {**blocks(res), **values(res)})]:
         print(f"\nupdated the passage of {_d.relative_to(ROOT)} that quotes these "
               "numbers.\nCommit that file before `make paper`, or the stamp will "
               "record an uncommitted change.")

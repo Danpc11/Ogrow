@@ -176,6 +176,16 @@ def blocks(res):
     return {"predictions": body}
 
 
+def values(res):
+    """Single numbers for MANUSCRIPT_A.md, each quoted between its own markers."""
+    d, k = res["dose"], res["kidney"]
+    return {"p.panc75": ci(d["pancreas"]["0.75"]), "p.panc60": ci(d["pancreas"]["0.6"]),
+            "p.liv75": ci(d["liver"]["0.75"]), "p.liv15": ci(d["liver"]["0.15"]),
+            "p.kid20": ci(k["0"]["45|0.2"]), "p.kid60": ci(k["0"]["45|0.6"]),
+            "p.kid20r": ci(k["1"]["45|0.2"]), "p.kid60r": ci(k["1"]["45|0.6"]),
+            "p.early": ci(k["0"]["20|0.4"]), "p.late": ci(k["0"]["80|0.4"])}
+
+
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
     grid = [("dose", reg, kept, s) for reg in DOSE for kept in (1.0,) + DOSE[reg]
@@ -217,8 +227,9 @@ if __name__ == "__main__":
           "deficit in proportion after a\n  60 % ablation without a proliferative "
           "response; the same deficit whenever the\n  ablation is done.")
     res["strings"] = sentences(res)
+    res["values"] = values(res)
     json.dump(res, open(ROOT / "results" / "predictions.json", "w"), indent=1)
-    changed = [d for d in DOCS if write(d, blocks(res))]
+    changed = [d for d in DOCS if write(d, {**blocks(res), **values(res)})]
     for d in changed:
         print(f"\nupdated the passage of {d.relative_to(ROOT)} that quotes these "
               "numbers.\nCommit that file before `make paper`, or the stamp will "

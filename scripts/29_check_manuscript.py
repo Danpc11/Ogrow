@@ -54,6 +54,14 @@ NOT_IN_A = (
     "held-out margin", "optimism of the search block", "random root, the specification",
     # the abstract of the full manuscript, which this one does not share
     "renewal changes the bound, abstract", "turnover changes the bound, abstract",
+    # detail of the injury and involution results that it leaves to a supplement
+    "kidney pool on day 140", "liver as grown", "liver mass,", "kidney mass,",
+    "overshoot of the budget", "shortfall against the budget", "renewing construct",
+    "spent source", "share at the mass floor", "residual under involution",
+    "units kept across the rates",
+    # numbers it quotes singly, between markers, and that are held as values below
+    "pancreas-like,", "liver-like,", "kidney-like,", "paired kidneys,", "coupled source",
+    "prediction,",
 )
 ONLY_IN_A = ("prediction,",)
 
@@ -370,6 +378,34 @@ if Pr:
         need(_label, _text)
 
 
+def values_held(doc):
+    """The single values a script writes into a manuscript, each between markers.
+
+    A passage must say what the results say now, and a marker no script
+    answers to is a number nobody is checking.
+    """
+    from organgrow.autotext import found
+    want = {}
+    for res in (Va, Kc, Pr):
+        want.update((res or {}).get("values", {}))
+        want.update({k: None for k in ("validation", "validation-abstract", "validation-brief",
+                                       "kidney-coupling", "predictions")})
+    bad = 0
+    got = found(doc.read_text(encoding="utf-8"))
+    for name, text in sorted(got.items()):
+        if name not in want:
+            print(f"  FAIL {name}: no script writes this passage"); bad += 1
+        elif want[name] is not None:
+            ok = " ".join(text.split()) == " ".join(want[name].split())
+            print(f"  {'ok  ' if ok else 'FAIL'} {name}: {want[name]}")
+            bad += not ok
+    quoted = sum(1 for n in got if want.get(n) is not None)
+    print(f"\n{quoted} values written by scripts, "
+          + ("all in step\n" if not bad else f"{bad} out of step: run scripts 36 to 38 and "
+             f"commit the manuscript\n"))
+    return bad
+
+
 def held(doc, name, wanted):
     """Print and count the strings one manuscript must contain and does not."""
     text = " ".join(doc.read_text(encoding="utf-8").replace("\u2212", "-").split())
@@ -406,6 +442,7 @@ def main():
         print("MANUSCRIPT_A.md")
         bad += held(DOC_A, "MANUSCRIPT_A.md",
                     [c for c in checks if not c[0].startswith(NOT_IN_A)])
+        bad += values_held(DOC_A)
     return 1 if bad else 0
 
 

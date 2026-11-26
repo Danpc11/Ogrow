@@ -309,9 +309,29 @@ def blocks(res):
             "validation-brief": brief}
 
 
+def values(res):
+    """Single numbers, for a manuscript whose sentences are written by hand.
+
+    MANUSCRIPT_A.md quotes each of these between its own pair of markers, so
+    the prose around a number is free and the number itself is not typed.
+    """
+    a, c, p = res["ablation"], res["contingent"]["kidney"], res.get("pairs")
+    v = {"v.panc39": ci(a["pancreas"]["0.39"]["mass"]),
+         "v.panc92": ci(a["pancreas"]["0.92"]["mass"]),
+         "v.liv35": ci(a["liver"]["0.35"]["mass"]),
+         "v.liv50": f"{a['liver']['0.5']['mass']['value']:.2f}",
+         "v.liv25": f"{a['liver']['0.25']['mass']['value']:.2f}",
+         "v.kid60": ci(a["kidney"]["0.6"]["N"]),
+         "v.sd.model": f"{c['log_mass']:.3f}"}
+    if p:
+        v.update({"v.sd.pairs": f"{p['cv']:.3f}", "v.pairs.n": f"{p['pairs']}",
+                  "v.pairs.size": f"$\\rho = {p['size_rho']:+.2f}$, $P = {p['size_p']:.2f}$"})
+    return v
+
+
 def write_blocks(res, docs=DOCS):
     """Bring the passages in step in each manuscript. The files that changed."""
-    b = blocks(res)
+    b = {**blocks(res), **values(res)}
     return [d for d in docs if write(d, b)]
 
 
@@ -388,6 +408,7 @@ if __name__ == "__main__":
               "volumes also carry segmentation error, which this does not separate.")
 
     res["strings"] = sentences(res)
+    res["values"] = values(res)
     json.dump(res, open(ROOT / "results" / "validation.json", "w"), indent=1)
     for _d in write_blocks(res):
         print(f"\nupdated the passages of {_d.relative_to(ROOT)} that quote these "

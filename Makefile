@@ -135,6 +135,7 @@ paper: python-ok
 	$(PY) figures/fig_validation.py
 	$(PY) figures/fig_coupling.py
 	$(PY) figures/fig_predictions.py
+	$(PY) figures/figs_A.py
 	$(PY) figures/fig_paper.py
 	$(PY) figures/fig_closed_paper.py
 	$(PY) figures/fig3_closed.py

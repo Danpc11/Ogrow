@@ -22,7 +22,7 @@ structure here is Introduction, Methods, Results, Discussion; the Cell Press
 form (a summary of 150 words, highlights, STAR Methods after the Discussion)
 is applied at submission and is listed in the notes at the end.
 
-Reference model version 4.66.0 (`src/organgrow/closed.py`). Every model number
+Reference model version 4.67.0 (`src/organgrow/closed.py`). Every model number
 quoted below is taken from `PAPER_NUMBERS.md`, which `make paper` regenerates
 with the version and commit that produced it, and is checked against the
 result files by `scripts/29_check_manuscript.py`. No model number in this file
