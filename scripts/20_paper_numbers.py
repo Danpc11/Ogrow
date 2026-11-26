@@ -162,17 +162,33 @@ if (RES / "regimes.json").exists():
 
     rows = []
     for k, c in Rg.items():
-        if k.startswith("_"):
+        # the file also carries summaries beside its cells; a cell is the
+        # entry that says which source it is
+        if k.startswith("_") or not isinstance(c, dict) or "renewal" not in c:
             continue
         key = (f"{c['renewal']}", f"{c['P0']:.0f}", c["turnover"])
         rows.append([f"{c['renewal']:.0f}", f"{c['P0']:.0f}", c["turnover"],
                      f"{c['rho']:.2f}", f"{c['delta']:.2f}",
                      f"{c['N']:.1f} ± {c['N_sd']:.1f}", f"{c['spent']:.2f}",
                      f"{c['supply_held']:.2f}", f"{c['space_held']:.2f}",
-                     f"{c['active']:.2f}", _holds(c), named.get(key, "")])
+                     f"{c['active']:.2f}", _holds(c),
+                     (f"{c['eps_pool']:+.2f} ± {c['eps_pool_se']:.2f}"
+                      if "eps_pool" in c else "not run"), named.get(key, "")])
     table(["renewal", "pool", "turnover", "division", "loss", "units", "spent",
-           "supply", "room", "active", "what holds growth", "named regime"],
+           "supply", "room", "active", "what holds growth",
+           "elasticity of units to the pool", "named regime"],
           rows)
+    if "_elasticity_map" in Rg:
+        _m = Rg["_elasticity_map"]
+        w(f"Does the bound that holds the pool predict the elasticity? Across the "
+          f"{_m['cells']} sources it sorts them coarsely: "
+          + "; ".join(f"{k}, {v['n']} sources, {v['lo']:+.2f} to {v['hi']:+.2f}"
+                      for k, v in _m["by_bound"].items())
+          + f". The Spearman correlation of the elasticity with the share of the pool "
+            f"spent is {_m['rho_spent']:+.2f} (P = {_m['p_spent']:.2g}), and with the "
+            f"units reached {_m['rho_units']:+.2f} (P = {_m['p_units']:.2g}). The size "
+            f"a source reaches orders the elasticity; the label of its bound does "
+            f"not.\n")
     if "renewal_flips" in meta:
         w("Each axis is asked the same question: holding the other two "
           "fixed, in how many of those settings does moving along this axis "
