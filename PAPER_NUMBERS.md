@@ -1,6 +1,6 @@
 # Numbers the paper uses
 
-Model version 4.69.0, commit ee2507b, generated 2026-11-26 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.70.0, commit 0e57e69, generated 2026-11-26 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b024.
 
@@ -494,38 +494,40 @@ Measured, ablated over control. Without a proliferative response (Cebrian et al.
 
 Capacity is the units reached, at a given perfusion threshold and in a given domain, by a source whose pool cannot run out (the renewing source at ten times its pool). It is measured independently of the source it is set against, and it is operational: it belongs to a domain, a threshold and the branching rules, not to a tissue. Elasticities are to the seeded pool, paired over 24 seeds.
 
+Whether it is a capacity. Units of the saturating source at the reference threshold with its pool at 26,000, 52,000, 104,000: 267, 308, 371. Its gain over the last 40 days is 3.9%. At 280 days instead of 140: domain scale 0.4, 155 to 162 (+5%); domain scale 0.8, 565 to 612 (+8%).
+
 The perfusion threshold changed inside each source. Size and capacity fall together, so their ratio hardly moves.
 
 | source | threshold | units | capacity | units / capacity | elasticity |
 |---|---|---|---|---|---|
-| liver | 0.3 | 352.2 | 476.9 | 0.74 | +0.14 ± 0.05 |
-| liver | 0.4 | 314.7 | 417.4 | 0.75 | +0.06 ± 0.06 |
-| liver | 0.5 | 269.7 | 363.1 | 0.74 | +0.09 ± 0.04 |
-| liver | 0.6 | 208.1 | 266.9 | 0.78 | +0.07 ± 0.06 |
-| liver | 0.7 | 191.0 | 239.6 | 0.80 | +0.37 ± 0.14 |
-| kidney | 0.3 | 121.0 | 476.9 | 0.25 | +0.43 ± 0.04 |
-| kidney | 0.4 | 110.1 | 417.4 | 0.26 | +0.37 ± 0.04 |
-| kidney | 0.5 | 98.0 | 363.1 | 0.27 | +0.40 ± 0.03 |
-| kidney | 0.6 | 89.0 | 266.9 | 0.33 | +0.37 ± 0.03 |
-| kidney | 0.7 | 73.3 | 239.6 | 0.31 | +0.38 ± 0.04 |
-| pancreas | 0.3 | 54.9 | 476.9 | 0.12 | +0.87 ± 0.04 |
-| pancreas | 0.4 | 51.8 | 417.4 | 0.12 | +0.79 ± 0.04 |
-| pancreas | 0.5 | 48.2 | 363.1 | 0.13 | +0.80 ± 0.04 |
-| pancreas | 0.6 | 45.0 | 266.9 | 0.17 | +0.71 ± 0.05 |
-| pancreas | 0.7 | 40.0 | 239.6 | 0.17 | +0.70 ± 0.06 |
+| liver | 0.3 | 352.2 | 518.4 | 0.68 | +0.14 ± 0.05 |
+| liver | 0.4 | 314.7 | 461.1 | 0.68 | +0.06 ± 0.06 |
+| liver | 0.5 | 269.7 | 385.2 | 0.70 | +0.09 ± 0.04 |
+| liver | 0.6 | 208.1 | 308.2 | 0.68 | +0.07 ± 0.06 |
+| liver | 0.7 | 191.0 | 222.8 | 0.86 | +0.37 ± 0.14 |
+| kidney | 0.3 | 121.0 | 518.4 | 0.23 | +0.43 ± 0.04 |
+| kidney | 0.4 | 110.1 | 461.1 | 0.24 | +0.37 ± 0.04 |
+| kidney | 0.5 | 98.0 | 385.2 | 0.25 | +0.40 ± 0.03 |
+| kidney | 0.6 | 89.0 | 308.2 | 0.29 | +0.37 ± 0.03 |
+| kidney | 0.7 | 73.3 | 222.8 | 0.33 | +0.38 ± 0.04 |
+| pancreas | 0.3 | 54.9 | 518.4 | 0.11 | +0.87 ± 0.04 |
+| pancreas | 0.4 | 51.8 | 461.1 | 0.11 | +0.79 ± 0.04 |
+| pancreas | 0.5 | 48.2 | 385.2 | 0.13 | +0.80 ± 0.04 |
+| pancreas | 0.6 | 45.0 | 308.2 | 0.15 | +0.71 ± 0.05 |
+| pancreas | 0.7 | 40.0 | 222.8 | 0.18 | +0.70 ± 0.06 |
 
 The domain changed, with the same pool and threshold. A source held far below capacity by its pool keeps its size while its ratio to capacity moves.
 
 | source | domain scale | units | capacity | units / capacity | elasticity |
 |---|---|---|---|---|---|
-| kidney | 0.4 | 68.7 | 156.6 | 0.44 | +0.25 ± 0.03 |
-| kidney | 0.6 | 89.0 | 266.9 | 0.33 | +0.37 ± 0.03 |
-| kidney | 0.8 | 95.1 | 492.9 | 0.19 | +0.41 ± 0.04 |
-| pancreas | 0.4 | 44.4 | 156.6 | 0.28 | +0.67 ± 0.05 |
-| pancreas | 0.6 | 45.0 | 266.9 | 0.17 | +0.71 ± 0.05 |
-| pancreas | 0.8 | 45.9 | 492.9 | 0.09 | +0.78 ± 0.04 |
+| kidney | 0.4 | 68.7 | 155.3 | 0.44 | +0.25 ± 0.03 |
+| kidney | 0.6 | 89.0 | 308.2 | 0.29 | +0.37 ± 0.03 |
+| kidney | 0.8 | 95.1 | 564.8 | 0.17 | +0.41 ± 0.04 |
+| pancreas | 0.4 | 44.4 | 155.3 | 0.29 | +0.67 ± 0.05 |
+| pancreas | 0.6 | 45.0 | 308.2 | 0.15 | +0.71 ± 0.05 |
+| pancreas | 0.8 | 45.9 | 564.8 | 0.08 | +0.78 ± 0.04 |
 
-Elasticity in the largest domain minus the smallest, with a 95 % bootstrap interval: kidney-like +0.17 [+0.07, +0.26]; pancreas-like +0.11 [-0.01, +0.22]. Over all 19 points of both interventions, the Spearman correlation of the elasticity with units over capacity is -0.92, and with units alone -0.80.
+Elasticity in the largest domain minus the smallest, with a 95 % bootstrap interval: kidney-like +0.17 [+0.07, +0.26]; pancreas-like +0.11 [-0.01, +0.22]. Over all 19 points of both interventions, the Spearman correlation of the elasticity with units over capacity is -0.91, and with units alone -0.80.
 
 
 ## The kidney-like dividing source with and without the coupling
@@ -538,6 +540,8 @@ The extension of the section above with branching coupled to the cap, and the sa
 | reference | free | 0.60 [0.56, 0.64] | 0.92 [0.88, 0.96] | 0.79 [0.69, 0.93] | 0.91 [0.87, 0.96] |
 | threshold quartered, law slowed | coupled | 0.57 [0.53, 0.62] | 0.74 [0.63, 0.86] | 0.58 [0.51, 0.66] | 0.64 [0.57, 0.70] |
 | threshold quartered, law slowed | free | 0.61 [0.55, 0.68] | 0.88 [0.83, 0.92] | 0.80 [0.65, 0.95] | 0.87 [0.81, 0.92] |
+
+Coupled minus free, paired over seeds, with a 95 % bootstrap interval: reference: tips -0.26 [-0.36, -0.15], units -0.11 [-0.21, +0.05]; threshold quartered, law slowed: tips -0.14 [-0.25, -0.03], units -0.23 [-0.32, -0.15].
 
 
 ## Predictions for ablations that have not been done
