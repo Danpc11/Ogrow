@@ -43,6 +43,7 @@ so and checks the rest.
 | Figure 3 | `Fig8_injury.pdf` | `figures/fig_injury.py` |
 | Figure 4 | `Fig9_transcriptome.pdf` | `figures/fig_transcriptome.py` |
 | Figure 5 | `Fig6_scaling.pdf` | `figures/fig_design.py` |
+| Figure 6 | `Fig10_validation.pdf` | `figures/fig_validation.py` |
 
 File names are historical and do not follow the manuscript's numbering.
 

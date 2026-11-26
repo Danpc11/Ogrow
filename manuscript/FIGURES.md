@@ -11,6 +11,7 @@ manuscript number in their heading.
 | Figure 3 | `Fig8_injury.pdf` | `figures/fig_injury.py` | injury after arrest, and what the boundary condition does |
 | Figure 4 | `Fig9_transcriptome.pdf` | `figures/fig_transcriptome.py` | when three developing tissues lose the pool they are named for |
 | Figure 5 | `Fig6_scaling.pdf` | `figures/fig_design.py` | what domain size costs in density and in reproducibility |
+| Figure 6 | `Fig10_validation.pdf` | `figures/fig_validation.py` | three numbers of the model beside published measurements |
 
 The repository also builds these, which the current manuscript does not use.
 They belong to the earlier framing kept in `PAPER.md` and are available as
@@ -98,6 +99,25 @@ and the $V^{1}$ that a conserved unit density would require. (B) Share of the
 pool held by perfusion and held by room against domain scale, domain scaled
 alone. (C) Coefficient of variation of the unit count across seeds against
 domain scale, for both sweeps.
+
+**Figure 6. Three numbers of the model beside measurements.** Filled symbols
+are the model, open symbols are measurements, and nothing is fitted. (A) Share
+of the organ that results against the share of the progenitor pool left.
+Model: mass of the pancreas-like and liver-like constructs at day 140 as a
+ratio to the reference, 24 paired seeds, bars the 95 % bootstrap interval.
+Measured: weight of the mouse pancreas at birth after 8 % and 61 % of its
+progenitors were removed, with 95 % intervals, and of the liver four days
+after at least 65 % of its progenitors were removed [2]. The dashed line is an
+organ in proportion to its pool. (B) The same for the kidney-like construct,
+in units, against glomerular number in two mouse studies that each removed
+about 40 % of nephron progenitors: through a CITED1 driver, counted three and
+ten days after birth [15], and through a Gdnf driver, counted at birth and in
+the adult [14]. The two are offset sideways to be told apart. (C) How far one
+organ sits from the other grown like it: the kidney-like construct across 24
+seeds, as the deviation of log mass from the mean, and the two kidneys of each
+of 48 people, as the deviation of log volume from the pair with the mean
+difference between sides removed [16]. Bars span one standard deviation
+either side of zero.
 
 **Supplementary. Three regimes from one law.** (A) Units, (B) supply per unit
 relative to the threshold and (C) progenitor pool relative to its initial

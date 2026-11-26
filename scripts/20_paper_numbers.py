@@ -637,20 +637,31 @@ if (RES / "validation.json").exists():
             f"{np.log(v['mass']['value']) / np.log(float(k)):+.2f}"]
            for reg in ("pancreas", "kidney", "liver")
            for k, v in sorted(Va["ablation"][reg].items(), key=lambda kv: -float(kv[0]))])
-    w("Published, in mouse: the pancreas ends smaller in proportion to the "
-      "progenitors removed and the liver is not limited by them (Stanger, Tanaka "
-      "and Melton 2007); about 40 % of nephron progenitors removed leaves 10 to "
-      "20 % fewer nephrons. The three regimes were named with the first of these "
-      "in view, so agreement with it is consistency and not a prediction.\n")
+    w("What the experiments measured, as a share of the littermate control, with "
+      "the model at the same share of the pool. The model column is mass for "
+      "pancreas and liver and units for the kidney, to match what was measured. "
+      "The numbers are typed from the papers; `scripts/36_validation.py` says "
+      "which figure each is read from.\n")
+    table(["regime", "pool left", "measured", "what, and by whom", "model"],
+          [[reg, f"{r['kept']:.2f}",
+            f"{r['left']:.2f}" + (f" [{r['lo']:.2f}, {r['hi']:.2f}]" if "lo" in r else ""),
+            f"{r['at']}, {r['study']}",
+            _ci(Va["ablation"][reg][f"{r['kept']:g}"]["N" if reg == "kidney" else "mass"])]
+           for reg in ("pancreas", "kidney", "liver") for r in Va["published"][reg]])
+    w("The regime parameters were fixed before this comparison was computed and "
+      "were not adjusted to it. The two kidney studies removed the same share of "
+      "progenitors and differ twofold in what was left; the model agrees with one "
+      "and has the mechanism of neither.\n")
     w("Variation across 24 seeds grown from identical parameters, which is what "
       "two organs of one individual share.\n")
-    table(["regime", "CV of units", "CV of mass"],
-          [[reg, f"{Va['contingent'][reg]['N']:.3f}", f"{Va['contingent'][reg]['mass']:.3f}"]
+    table(["regime", "CV of units", "CV of mass", "s.d. of log mass"],
+          [[reg, f"{Va['contingent'][reg]['N']:.3f}", f"{Va['contingent'][reg]['mass']:.3f}",
+            f"{Va['contingent'][reg]['log_mass']:.3f}"]
            for reg in ("pancreas", "kidney", "liver")])
     _p = Va.get("pairs")
     if _p:
         w(f"The two kidneys of one person, CT volume, {_p['pairs']} pairs (TRUSTED): "
-          f"left-right coefficient of variation {_p['cv']:.3f} with the mean "
+          f"left-right standard deviation of log volume, per kidney, {_p['cv']:.3f} with the mean "
           f"difference between sides ({100 * _p['side_offset']:+.1f} %) removed and "
           f"{_p['cv_with_offset']:.3f} with it left in; between people "
           f"{_p['cv_between']:.3f}. The left-right difference against kidney size "

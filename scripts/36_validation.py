@@ -6,11 +6,10 @@ three places where a number the model gives can be set beside a number someone
 measured, without fitting anything.
 
     ablation  Seed a fraction of the reference pool and read what is left of
-              the construct. In mouse, removing pancreatic progenitors leaves
-              a pancreas smaller in proportion and removing hepatic ones does
-              not limit the liver (Stanger, Tanaka and Melton 2007); removing
-              about 40 % of nephron progenitors leaves 10 to 20 % fewer
-              nephrons (Cebrian et al. 2014 report a permanent deficit).
+              the construct. Three mouse experiments removed progenitors with
+              diphtheria toxin and measured the organ afterwards; the shares
+              seeded here are the shares they left, and `PUBLISHED` holds what
+              they measured, with the figure each number is read from.
     pairs     Two constructs grown from identical parameters differ only by
               their realisation. So do the two kidneys of one person. The
               coefficient of variation across seeds is set beside the
@@ -20,11 +19,12 @@ measured, without fitting anything.
               the same 48 pairs.
 
 What each comparison can and cannot carry is said where the manuscript uses
-it. Two cautions belong here because they are about this script. The three
-regimes were named with the first of these experiments in view, so agreeing
-with it is consistency and not a prediction; the kidney ablation and the pairs
-were not. And the model's reading is a unit count or a mass in model units,
-while the measurements are organ weights, nephron counts and CT volumes.
+it. Two cautions belong here because they are about this script. The regime
+parameters were fixed before any of this was computed and were not adjusted
+to it, but the pancreas and liver experiment was known when the regimes were
+described, so agreeing with it is a check passed and not a blind prediction.
+And the model's reading is a unit count or a mass in model units, while the
+measurements are organ weights, glomerular counts and CT volumes.
 
 The script also writes the sentences of the manuscript that quote these
 numbers, between `<!-- auto:NAME -->` and `<!-- /auto:NAME -->` markers in
@@ -58,10 +58,46 @@ FIX = dict(R_unit=650.0, units_per_branch=650 / 600.0, max_vessels=6000)
 REG = {"liver": dict(P0=2600.0, rho=0.10, delta=0.10, q_set=0.6, renewal=1.0),
        "kidney": dict(P0=300.0, rho=0.00, delta=0.05, q_set=0.6, renewal=0.0),
        "pancreas": dict(P0=60.0, rho=0.00, delta=0.00, q_set=0.6, renewal=0.0)}
-#: the share of the reference pool that is seeded. A half and a quarter for
-#: the two tissues of the mouse experiment; 0.6 for the kidney because the
-#: published ablations removed about 40 %, and a half beside it.
-KEPT = {"pancreas": (0.5, 0.25), "liver": (0.5, 0.25), "kidney": (0.6, 0.5)}
+#: The share of the reference pool that is seeded. A half and a quarter in
+#: every regime, and beside them the shares the published ablations left:
+#: 0.92 and 0.39 of pancreatic progenitors, at most 0.35 of hepatic ones, and
+#: 0.6 of nephron progenitors.
+KEPT = {"pancreas": (0.92, 0.5, 0.39, 0.25), "liver": (0.5, 0.35, 0.25),
+        "kidney": (0.6, 0.5)}
+
+#: What the experiments measured, as a share of the littermate control. Typed
+#: from the papers and not computed here; `at` says where each number stands.
+#:
+#: Stanger, Tanaka and Melton 2007 (Nature 445, 886). Pancreas: ablation
+#: through E9.5 removed 8 % of the Pdx1+ pool and through E10.5 removed 61 %
+#: (text and Supplementary Fig. 2); newborn pancreas weight 77 % (95 % CI 53 to
+#: 102, n = 12) and 36 % (19 to 53, n = 32) of control (Fig. 2b, c), with no
+#: catch-up to 11 weeks (Fig. 3). Liver: ablation through E13.5 removed at
+#: least 65 % of hepatic progenitors; liver weight was about 35 % of control at
+#: E13.5 and about 96 % at E17.5 (Fig. 6b, read from the fitted curve).
+#:
+#: Muthukrishnan et al. 2018 (Dis. Model. Mech. 11, dmm030544). About 40 % of
+#: CITED1+ nephron progenitors removed at E15.5; glomerular number down by
+#: about 12 % at P3 and 21 % at P10 (text, Fig. 2E, H).
+#:
+#: Cebrian et al. 2014 (Cell Rep. 7, 127). Cap mesenchyme per tip reduced to
+#: 60 % of control one day after tamoxifen at E12.5 (Fig. 6C); glomeruli per
+#: kidney 48.3 % of control at E19.5 and 57.6 % at P50 (Fig. 4B).
+PUBLISHED = {
+    "pancreas": [
+        dict(kept=0.92, left=0.77, lo=0.53, hi=1.02, at="weight at birth",
+             study="Stanger 2007"),
+        dict(kept=0.39, left=0.36, lo=0.19, hi=0.53, at="weight at birth",
+             study="Stanger 2007")],
+    "liver": [
+        dict(kept=0.35, left=0.96, at="weight four days after the ablation ended",
+             study="Stanger 2007")],
+    "kidney": [
+        dict(kept=0.6, left=0.88, at="glomeruli at P3", study="Muthukrishnan 2018"),
+        dict(kept=0.6, left=0.79, at="glomeruli at P10", study="Muthukrishnan 2018"),
+        dict(kept=0.6, left=0.483, at="glomeruli at E19.5", study="Cebrian 2014"),
+        dict(kept=0.6, left=0.576, at="glomeruli at P50", study="Cebrian 2014")],
+}
 NBOOT, BOOT_SEED = 4000, 2026
 
 
@@ -114,6 +150,11 @@ def cv(a):
     return float(a.std(ddof=1) / a.mean())
 
 
+def log_sd(a):
+    """Standard deviation of the logarithm, the scale the pairs are read on."""
+    return float(np.log(np.asarray(a, float)).std(ddof=1))
+
+
 def paired_variation(left, right):
     """How much two organs of one person differ, as a coefficient of variation.
 
@@ -129,6 +170,7 @@ def paired_variation(left, right):
     from scipy.stats import spearmanr
     rho, p = spearmanr(mean_pair, dev)
     return dict(pairs=int(len(d)),
+                deviation=[float(v) for v in (d - d.mean()) / np.sqrt(2.0)],
                 side_offset=float(np.expm1(d.mean())),
                 cv=float(d.std(ddof=1) / np.sqrt(2.0)),
                 cv_with_offset=float(np.sqrt(np.mean(d ** 2) / 2.0)),
@@ -169,9 +211,9 @@ def sentences(res):
     strings, so the check and the prose cannot disagree.
     """
     a, s = res["ablation"], {}
-    s["pancreas-like, half the pool, mass"] = f"{ci(a['pancreas']['0.5']['mass'])} of its mass"
-    s["pancreas-like, half the pool, units"] = f"{a['pancreas']['0.5']['N']['value']:.2f} of its units"
-    s["liver-like, half the pool, mass"] = f"{ci(a['liver']['0.5']['mass'])} of its mass"
+    s["pancreas-like, 39 % of the pool, mass"] = f"{ci(a['pancreas']['0.39']['mass'])} of its mass"
+    s["pancreas-like, 92 % of the pool, mass"] = f"it ends with {ci(a['pancreas']['0.92']['mass'])}"
+    s["liver-like, 35 % of the pool, mass"] = f"{ci(a['liver']['0.35']['mass'])} of its mass"
     s["pancreas-like, a quarter of the pool, mass"] = (
         f"keeps {a['pancreas']['0.25']['mass']['value']:.2f} of its mass on a quarter of the pool")
     s["liver-like, a quarter of the pool, mass"] = (
@@ -185,10 +227,13 @@ def sentences(res):
     s["kidney-like, variation across seeds, mass"] = (
         f"coefficient of variation of {c['mass']:.3f} in mass")
     s["kidney-like, variation across seeds, units"] = f"and of {c['N']:.3f} in unit count"
+    s["kidney-like, spread of log mass"] = (
+        f"the standard deviation of its log mass is {c['log_mass']:.3f}")
     p = res.get("pairs")
     if p:
         s["paired kidneys, left-right variation"] = (
-            f"coefficient of variation of {p['cv']:.3f} over {p['pairs']} pairs")
+            f"standard deviation of log volume of {p['cv']:.3f} per kidney, over "
+            f"{p['pairs']} pairs")
         s["paired kidneys, mean difference between sides"] = (
             f"the left smaller by {abs(100 * p['side_offset']):.1f} % on average"
             if p["side_offset"] < 0 else
@@ -198,46 +243,68 @@ def sentences(res):
     return s
 
 
+def _pub(reg, kept):
+    return next(r for r in PUBLISHED[reg] if abs(r["kept"] - kept) < 1e-9)
+
+
 def blocks(res):
-    """The two passages of the manuscript this script owns."""
+    """The two passages of the manuscript this script owns.
+
+    They carry the model's numbers and, beside each, the measurement it is set
+    against, so that the two are read in one sentence. The measurements are the
+    constants of `PUBLISHED`; the citations are in the paragraphs that follow
+    the block in the manuscript.
+    """
     s, p = sentences(res), res.get("pairs")
+    hi, lo, lv = _pub("pancreas", 0.92), _pub("pancreas", 0.39), _pub("liver", 0.35)
+    kid = sorted(100 * (1 - r["left"]) for r in PUBLISHED["kidney"])
     body = (
-        "\nSeeded with half its reference pool, the pancreas-like construct ends with "
-        f"{s['pancreas-like, half the pool, mass']} and "
-        f"{s['pancreas-like, half the pool, units']}, and the liver-like construct with "
-        f"{s['liver-like, half the pool, mass']} (ratio of means over 24 paired seeds, "
-        "95 % bootstrap interval). The pancreas-like construct "
+        "\nSeeded with 39 % of its reference pool, the share of pancreatic progenitors "
+        "the mouse ablation left, the pancreas-like construct ends with "
+        f"{s['pancreas-like, 39 % of the pool, mass']}; the newborn pancreas weighed "
+        f"{lo['left']:.2f} of control (95 % interval {lo['lo']:.2f} to {lo['hi']:.2f}). "
+        f"Seeded with 92 %, {s['pancreas-like, 92 % of the pool, mass']}, against "
+        f"{hi['left']:.2f} ({hi['lo']:.2f} to {hi['hi']:.2f}) measured. Seeded with 35 %, "
+        "the liver-like construct ends with "
+        f"{s['liver-like, 35 % of the pool, mass']}; the liver, at about a third of "
+        f"control weight when its ablation ended, stood at about {lv['left']:.2f} four "
+        "days later. Model values are ratios of means over 24 paired seeds with a 95 % "
+        "bootstrap interval. The pancreas-like construct "
         f"{s['pancreas-like, a quarter of the pool, mass']}, "
-        f"{s['liver-like, a quarter of the pool, mass']}. With 40 % of the "
-        "kidney-like pool removed the construct ends with "
+        f"{s['liver-like, a quarter of the pool, mass']}. With 40 % of the kidney-like "
+        "pool removed the construct ends with "
         f"{s['kidney-like, 40 % of the pool removed, units']}, "
-        f"{s['kidney-like, 40 % of the pool removed, deficit']}. Grown 24 times from "
-        "identical parameters, the kidney-like construct has a "
+        f"{s['kidney-like, 40 % of the pool removed, deficit']}; the two published "
+        f"ablations of that size left {kid[0]:.0f} % and {kid[1]:.0f} % fewer glomeruli "
+        f"in one study and {kid[2]:.0f} % and {kid[3]:.0f} % fewer in the other. Grown "
+        "24 times from identical parameters, the kidney-like construct has a "
         f"{s['kidney-like, variation across seeds, mass']} "
-        f"{s['kidney-like, variation across seeds, units']}.")
+        f"{s['kidney-like, variation across seeds, units']}; on the scale the human "
+        f"pairs are read on, {s['kidney-like, spread of log mass']}.")
     if p:
         body += (
             " In the human cohort the volumes of a person's two kidneys differ with a "
-            f"{s['paired kidneys, left-right variation']}, once the mean difference "
-            f"between sides is removed ({s['paired kidneys, mean difference between sides']}); "
+            f"{s['paired kidneys, left-right variation']}, once the mean "
+            f"difference between sides is removed "
+            f"({s['paired kidneys, mean difference between sides']}); "
             "that difference does not rise detectably with kidney size "
             f"({s['paired kidneys, variation against size']}, Spearman, over volumes "
             f"from {p['smallest']:.0f} to {p['largest']:.0f} cm$^3$).")
     body += "\n"
-    k = res["ablation"]["kidney"]["0.6"]["N"]
+    a, k = res["ablation"], res["ablation"]["kidney"]["0.6"]["N"]
     short = (
-        "Halving the seeded pool leaves "
-        f"{res['ablation']['pancreas']['0.5']['mass']['value']:.2f} of the mass in the "
-        "pancreas-like regime and "
-        f"{res['ablation']['liver']['0.5']['mass']['value']:.2f} in the liver-like one, as "
-        "progenitor ablation does in mouse; removing 40 % of the kidney-like pool "
-        f"costs {100 * (1 - k['value']):.0f} % of the units, against 10 to 20 % of "
-        "nephrons measured")
+        "Seeded with the share of progenitors a mouse ablation left, the pancreas-like "
+        f"construct keeps {a['pancreas']['0.39']['mass']['value']:.2f} of its mass "
+        f"against {lo['left']:.2f} measured, and the liver-like one "
+        f"{a['liver']['0.35']['mass']['value']:.2f} against about {lv['left']:.2f}; "
+        "removing 40 % of the kidney-like pool costs "
+        f"{100 * (1 - k['value']):.0f} % of the units, where one experiment measured "
+        f"{kid[0]:.0f} to {kid[1]:.0f} % and another {kid[2]:.0f} to {kid[3]:.0f} %")
     if p:
         short += (
             "; and two constructs grown alike differ by "
-            f"{res['contingent']['kidney']['mass']:.3f} in mass, against "
-            f"{p['cv']:.3f} between a person's two kidneys")
+            f"{res['contingent']['kidney']['log_mass']:.3f} in log mass, against "
+            f"{p['cv']:.3f} in log volume between a person's two kidneys")
     short += "."
     return {"validation": body, "validation-abstract": short}
 
@@ -268,7 +335,7 @@ if __name__ == "__main__":
             list(ex.map(_warm, todo))
 
     res = dict(seeds=list(SEEDS), kept={k: list(v) for k, v in KEPT.items()},
-               ablation={}, contingent={})
+               published=PUBLISHED, ablation={}, contingent={}, seedwise={})
     print("\nWhat is left of the construct when a share of the reference pool is "
           "seeded,\nratio of means over 24 paired seeds with a 95 % bootstrap "
           "interval:\n")
@@ -277,7 +344,10 @@ if __name__ == "__main__":
         ref = [run(reg, 1.0, s) for s in SEEDS]
         res["contingent"][reg] = dict(N=cv([r["N"] for r in ref]),
                                       mass=cv([r["mass"] for r in ref]),
+                                      log_mass=log_sd([r["mass"] for r in ref]),
                                       N_mean=float(np.mean([r["N"] for r in ref])))
+        res["seedwise"][reg] = dict(N=[r["N"] for r in ref],
+                                    mass=[r["mass"] for r in ref])
         res["ablation"][reg] = {}
         for kept in KEPT[reg]:
             cut = [run(reg, kept, s) for s in SEEDS]
@@ -286,16 +356,24 @@ if __name__ == "__main__":
             res["ablation"][reg][f"{kept:g}"] = dict(N=rn, mass=rm)
             print(f"{reg:>9} {kept:>10.2f} {ci(rn):>20} {ci(rm):>20}  "
                   f"{np.log(rm['value']) / np.log(kept):+.2f}")
-    print("\n  Published: a pancreas smaller in proportion to the progenitors removed "
-          "and a liver\n  that is not limited by them (Stanger et al. 2007); 10 to "
-          "20 % fewer nephrons after\n  about 40 % of nephron progenitors are "
-          "removed.")
+    print("\nWhat the experiments measured, as a share of the littermate control:\n")
+    print(f"{'regime':>9} {'pool kept':>10} {'left':>6}  {'model':>20}  measured, and by whom")
+    for reg in ("pancreas", "kidney", "liver"):
+        for r in PUBLISHED[reg]:
+            m = res["ablation"][reg][f"{r['kept']:g}"]["N" if reg == "kidney" else "mass"]
+            rng = f" [{r['lo']:.2f}, {r['hi']:.2f}]" if "lo" in r else ""
+            print(f"{reg:>9} {r['kept']:>10.2f} {r['left']:>6.2f}  {ci(m):>20}  "
+                  f"{r['at']}{rng}, {r['study']}")
+    print("\n  The model column is mass for pancreas and liver and units for the "
+          "kidney, to match\n  what was measured. The two kidney studies removed the "
+          "same share and differ\n  twofold in what was left; the model has the "
+          "mechanism of neither.")
 
     print("\nVariation across 24 seeds grown from identical parameters:\n")
-    print(f"{'regime':>9} {'CV of units':>12} {'CV of mass':>11}")
+    print(f"{'regime':>9} {'CV of units':>12} {'CV of mass':>11} {'s.d. of log mass':>17}")
     for reg in ("pancreas", "kidney", "liver"):
         c = res["contingent"][reg]
-        print(f"{reg:>9} {c['N']:>12.3f} {c['mass']:>11.3f}")
+        print(f"{reg:>9} {c['N']:>12.3f} {c['mass']:>11.3f} {c['log_mass']:>17.3f}")
 
     lr = read_pairs()
     if lr is None:

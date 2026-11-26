@@ -22,7 +22,7 @@ structure here is Introduction, Methods, Results, Discussion; the Cell Press
 form (a summary of 150 words, highlights, STAR Methods after the Discussion)
 is applied at submission and is listed in the notes at the end.
 
-Reference model version 4.63.0 (`src/organgrow/closed.py`). Every model number
+Reference model version 4.64.0 (`src/organgrow/closed.py`). Every model number
 quoted below is taken from `PAPER_NUMBERS.md`, which `make paper` regenerates
 with the version and commit that produced it, and is checked against the
 result files by `scripts/29_check_manuscript.py`. No model number in this file
@@ -53,9 +53,9 @@ unit requires before seeding more cells; hold the delivered flow, not the
 pressure, to set the size regained after injury; judge recovery by units and
 not only by mass; and check that a specification is jointly reachable at the
 volume intended, which here holds only at small volume and for a tree rooted
-at depth. Three numbers are set beside existing measurements.
-<!-- auto:validation-abstract -->Halving the seeded pool leaves 0.53 of the mass in the pancreas-like regime and 0.92 in the liver-like one, as progenitor ablation does in mouse; removing 40 % of the kidney-like pool costs 20 % of the units, against 10 to 20 % of nephrons measured; and two constructs grown alike differ by 0.096 in mass, against 0.098 between a person's two kidneys.<!-- /auto:validation-abstract -->
-Parameters are chosen and not fitted, renal compensation is overstated, and no
+at depth. Three numbers are set beside measurements, with nothing fitted.
+<!-- auto:validation-abstract -->Seeded with the share of progenitors a mouse ablation left, the pancreas-like construct keeps 0.44 of its mass against 0.36 measured, and the liver-like one 0.86 against about 0.96; removing 40 % of the kidney-like pool costs 20 % of the units, where one experiment measured 12 to 21 % and another 42 to 52 %; and two constructs grown alike differ by 0.104 in log mass, against 0.098 in log volume between a person's two kidneys.<!-- /auto:validation-abstract -->
+Parameters are chosen, renal compensation after injury is overstated, and no
 criterion has been tested in a construct; we state the measurement that would
 decide each.
 
@@ -67,9 +67,16 @@ perfusion, tissue engineering, computational model, scale-up
 ## 1. Introduction
 
 Kidney, liver and pancreas are among the organs for which replacement tissue
-is most needed, and they answer a loss in opposite ways. A liver regains its
-mass after most of it is removed. A kidney forms no nephron once nephrogenesis
-has ended, and a pancreas recovers little. Why they differ, and what would
+is most needed. Kidney and liver are the two most transplanted organs, 110 467
+and 42 497 of the 173 727 solid organ transplants reported worldwide in 2024,
+an activity estimated to cover at most a tenth of the need [17]; the pancreas
+is transplanted far less often, 2 066 in the same year, and what is sought
+there is mostly its endocrine tissue. The three answer a loss in opposite
+ways. A liver regains its mass after most of it is removed. A kidney forms no
+nephron once nephrogenesis has ended, and a pancreas recovers little. In
+liver and pancreas no dedicated stem-cell niche does the work of repair, which
+falls to differentiated resident cells [18], so the difference between them is
+not one of having or lacking a stem cell. Why they differ, and what would
 have to be supplied to a tissue of each kind for it to grow or to grow back,
 are the questions this paper puts to a model.
 
@@ -250,15 +257,18 @@ reasons given in Section 3.6.
 
 Three numbers of the model are set beside published measurements (Section
 3.10). The seeded pool of each regime was reduced to a half and a quarter of
-its reference value (pancreas-like and liver-like) or to 0.6 and a half
-(kidney-like), over the same 24 seeds as the reference, and mass and unit
-count at day 140 are reported as ratios of means with a paired bootstrap
-interval. They are compared with progenitor ablation in mouse pancreas and
-liver [2] and in mouse kidney [14, 15]. The variation across seeds grown from
-identical parameters is compared with the left-right variation of kidney
-volume in 48 people, 96 kidneys segmented from clinical CT [16]: the standard
-deviation of the log ratio of the two sides, divided by $\sqrt{2}$, after the
-mean difference between sides is removed.
+its reference value, and to the shares that three mouse experiments left after
+removing progenitors with diphtheria toxin: 0.92 and 0.39 of pancreatic
+progenitors and at most 0.35 of hepatic ones [2], and 0.6 of nephron
+progenitors [14, 15]. Each reduced pool was grown over the same 24 seeds as
+the reference, and mass and unit count at day 140 are reported as ratios of
+means with a paired bootstrap interval. They are compared with organ weight
+for pancreas and liver and with glomerular number for kidney, each as a share
+of littermate controls, read from the figures and text of those papers. The
+variation across seeds grown from identical parameters is compared with the
+left-right variation of kidney volume in 48 people, 96 kidneys segmented from
+clinical CT [16]: the standard deviation of the log ratio of the two sides,
+divided by $\sqrt{2}$, after the mean difference between sides is removed.
 
 ### 2.6 Code and data availability
 
@@ -791,45 +801,65 @@ boundary of the model.
 ### 3.10 Three numbers set beside measurements
 
 Everything above is the model read against itself. Three of its numbers can be
-set beside measurements that already exist, with nothing fitted
-(`PAPER_NUMBERS.md`, Against published perturbations and paired human
+set beside measurements that already exist, with nothing fitted (Figure 6;
+`PAPER_NUMBERS.md`, Against published perturbations and paired human
 kidneys).
 
 <!-- auto:validation -->
-Seeded with half its reference pool, the pancreas-like construct ends with 0.53 [0.42, 0.64] of its mass and 0.58 of its units, and the liver-like construct with 0.92 [0.90, 0.95] of its mass (ratio of means over 24 paired seeds, 95 % bootstrap interval). The pancreas-like construct keeps 0.17 of its mass on a quarter of the pool, and the liver-like one 0.77. With 40 % of the kidney-like pool removed the construct ends with 0.80 [0.77, 0.83] of the units, a deficit of 20 % [17, 23]. Grown 24 times from identical parameters, the kidney-like construct has a coefficient of variation of 0.096 in mass and of 0.088 in unit count. In the human cohort the volumes of a person's two kidneys differ with a coefficient of variation of 0.098 over 48 pairs, once the mean difference between sides is removed (the left smaller by 7.4 % on average); that difference does not rise detectably with kidney size ($\rho = +0.25$, $P = 0.09$, Spearman, over volumes from 109 to 553 cm$^3$).
+Seeded with 39 % of its reference pool, the share of pancreatic progenitors the mouse ablation left, the pancreas-like construct ends with 0.44 [0.37, 0.52] of its mass; the newborn pancreas weighed 0.36 of control (95 % interval 0.19 to 0.53). Seeded with 92 %, it ends with 0.81 [0.72, 0.90], against 0.77 (0.53 to 1.02) measured. Seeded with 35 %, the liver-like construct ends with 0.86 [0.84, 0.89] of its mass; the liver, at about a third of control weight when its ablation ended, stood at about 0.96 four days later. Model values are ratios of means over 24 paired seeds with a 95 % bootstrap interval. The pancreas-like construct keeps 0.17 of its mass on a quarter of the pool, and the liver-like one 0.77. With 40 % of the kidney-like pool removed the construct ends with 0.80 [0.77, 0.83] of the units, a deficit of 20 % [17, 23]; the two published ablations of that size left 12 % and 21 % fewer glomeruli in one study and 42 % and 52 % fewer in the other. Grown 24 times from identical parameters, the kidney-like construct has a coefficient of variation of 0.096 in mass and of 0.088 in unit count; on the scale the human pairs are read on, the standard deviation of its log mass is 0.104. In the human cohort the volumes of a person's two kidneys differ with a standard deviation of log volume of 0.098 per kidney, over 48 pairs, once the mean difference between sides is removed (the left smaller by 7.4 % on average); that difference does not rise detectably with kidney size ($\rho = +0.25$, $P = 0.09$, Spearman, over volumes from 109 to 553 cm$^3$).
 <!-- /auto:validation -->
 
-*Removing progenitors from pancreas and liver.* In mouse, a pancreas built
-from fewer progenitors ends smaller in proportion and does not catch up, while
-a liver deprived of progenitors is not limited by them [2]. The model gives
-the same contrast: the pancreas-like construct loses about as much mass as it
-loses pool, and the liver-like one loses little. Two qualifications travel
-with it. The regimes were set up knowing that result, so the agreement is a
-check of consistency and not a blind prediction. And the liver-like construct
-does not recover in full: its shortfall grows as the pool is cut further,
-where the experiment reports a liver of normal size.
+*Removing progenitors from pancreas and liver.* Stanger and colleagues killed
+pancreatic progenitors in the mouse embryo over a controlled window and
+weighed the organ at birth [2]. Removing 61 % of the pool left a pancreas at
+0.36 of control weight; removing 8 % left one at 0.77, not distinguishable
+from control; and the small pancreas stayed proportionately small to eleven
+weeks of age. Seeded with the same shares of its pool, the pancreas-like
+construct ends close to both (Figure 6A). The same method removed at least
+65 % of hepatic progenitors: the liver weighed about a third of control when
+the ablation ended and was back to control weight four days later [2]. The
+liver-like construct recovers most of the way and not all of it, and its
+shortfall grows as the pool is cut further. Three qualifications. The regime
+parameters were fixed before this comparison was computed and were not
+adjusted to it, but the experiment was known when the regimes were described
+(Section 3.2), so the agreement is a check passed and not a blind prediction.
+The embryonic liver was already built when its progenitors were removed, which
+makes that experiment closer to an injury than to a smaller seeding, so only
+the outcome is compared. And the liver values are read from a fitted curve in
+the published figure.
 
-*Removing nephron progenitors.* Removing about 40 % of the nephron progenitors
-of a mouse embryo leaves 10 to 20 % fewer nephrons [15], and a 40 % ablation
-by another route leaves a permanent deficit [14]. The kidney-like regime was
-not built with either experiment in view, and its deficit sits at the upper
-edge of the measured range. It arrives there by a different route. In the
-embryo the surviving progenitors divide faster and refill the niche [15], or
-the tree branches more slowly until the cells at each tip recover [14]; the
-kidney-like source in the model does not divide at all. The model gives the
-size of the deficit and not the mechanism that limits it.
+*Removing nephron progenitors.* Two groups removed about 40 % of nephron
+progenitors in the mouse embryo with the same toxin and found different
+things. Ablating the CITED1-expressing subset at E15.5 left about 12 % fewer
+glomeruli three days after birth and 21 % fewer at ten days; the surviving
+progenitors more than doubled their proliferation and refilled the niche
+[15]. Ablating cap mesenchyme through a Gdnf driver at E12.5 left 52 % fewer
+glomeruli at birth and 42 % fewer in the adult, a deficit in proportion to the
+cells removed; there the survivors did not divide faster, the ureteric tree
+branched more slowly, and nephrogenesis ended on schedule [14]. The
+kidney-like construct with 40 % of its pool removed loses a share of its units
+that sits at the edge of the first range and is less than half of the second
+(Figure 6B). The model has the mechanism of neither experiment. Its
+kidney-like source does not divide, so it cannot refill a niche, and its tree
+does not depend on the pool, so branching cannot slow. We therefore do not
+claim that the kidney-like regime predicts a nephron deficit. What the second
+experiment shows is that where progenitors also drive the branching that
+makes room for them, the deficit is proportional, and that coupling is absent
+from the model.
 
 *Two organs grown alike.* Two constructs grown from identical parameters
 differ only in their realisation, which is the situation of the two kidneys of
-one person. The variation of the kidney-like construct across seeds and the
-left-right variation of kidney volume are close, and nothing in the model was
-set by the cohort. Three things limit what that carries. A mass in model units
-is compared with a CT volume, which includes a segmentation error we do not
-separate. The agreement is at the one domain scale all regimes are reported
-at. And the model's spread rises with the domain (Section 3.8), while the
-pairs show no clear rise with kidney size; people of different size are not
-one construct in a larger domain, so this does not refute the model, but it
-does not support that part of it.
+one person. The spread of the kidney-like construct across seeds and the
+left-right spread of kidney volume are close (Figure 6C), and nothing in the
+model was set by the cohort. Four things limit what that carries. A mass in
+model units is compared with a CT volume. The two raters of the cohort agreed
+to a Dice score above 93 % [16], so part of the left-right spread is
+segmentation and the biological part is smaller than the figure quoted. The
+agreement is at the one domain scale all regimes are reported at. And the
+model's spread rises with the domain (Section 3.8), while the pairs show no
+clear rise with kidney size; people of different size are not one construct in
+a larger domain, so this does not refute the model, but it does not support
+that part of it.
 
 ## 4. Discussion
 
@@ -996,12 +1026,12 @@ reported the change as roughly twofold without giving a spread in the text.
 
 No criterion in this paper has been tested in a construct. Three numbers are
 set beside existing measurements in Section 3.10, and that comparison has the
-limits stated there: the regimes were set up knowing the pancreas and liver
-experiment, the kidney-like deficit is reached without the compensatory
-proliferation an embryo shows, the liver-like construct recovers less
-completely than a liver does, the published sizes for pancreas and liver are
-read as a contrast and not digit for digit, and the paired kidneys are CT
-volumes that carry segmentation error. The model carries no measure of
+limits stated there: the pancreas and liver experiment was known when the
+regimes were described, the liver-like construct recovers less completely
+than a liver does, the kidney-like deficit matches the smaller of two
+published deficits and is less than half the larger, the model has the
+mechanism of neither kidney experiment, and the paired kidneys are CT volumes
+that carry segmentation error. The model carries no measure of
 biological function, so every recovery reported here is structural.
 
 All three regimes are grown in one domain shape and at one set of geometric
@@ -1089,11 +1119,12 @@ the local rule rather than a separate assumption. Neither is a
 property of the scaffold, and neither requires anything in the tissue to
 measure its own size. Scaling the construct up costs unit density and, past an
 intermediate size, costs reproducibility as well. Set beside measurements that
-already exist, the model gives the contrast between pancreas and liver when
-progenitors are removed, the size of the nephron deficit after a partial loss
-of progenitors, and the difference between the two kidneys of one person; it
-overstates renal compensation, and it does not reproduce how an embryo limits
-a deficit. The criteria are those of a model whose parameters are chosen and
+already exist, the model gives the size of the pancreas left when progenitors
+are removed, most of the liver's recovery, and the difference between the two
+kidneys of one person. It gives the smaller of two published nephron deficits
+and not the larger, it overstates renal compensation after injury, and it has
+none of the coupling between progenitors and branching that makes a kidney's
+deficit proportional. The criteria are those of a model whose parameters are chosen and
 not fitted, and each has a measurement that would decide it.
 
 ## Acknowledgements
@@ -1161,31 +1192,44 @@ progenitor cell death elicits a limited compensatory response associated with
 interstitial expansion in the neonatal kidney *Dis. Model. Mech.* **11**
 dmm030544
 
-[16] TRUSTED: kidney segmentations from clinical CT, 96 kidneys of 48 patients,
-dataset, https://doi.org/10.6084/m9.figshare.27981050 (authors, title and year
-to be completed from the record; see the notes)
+[16] Ndzimbong W, Fourniol C, Themyr L, Thome N, Keeza Y, Sauer B, Piéchaud
+P-T, Méjean A, Marescaux J, George D, Mutter D, Hostettler A and Collins T
+2025 TRUSTED: the paired 3D transabdominal ultrasound and CT human data for
+kidney segmentation and registration research *Sci. Data* **12** 615; data at
+https://doi.org/10.6084/m9.figshare.27981050
+
+[17] Martin F, Carmona M, Mahillo B, Alvarez M, Luengo A, Chatzixiros E,
+López-Fraga M, Domínguez-Gil B and Tullius S G 2026 Organ donation and
+transplantation worldwide: the Global Observatory on Donation and
+Transplantation 2024 report *Transplantation* **110** e655–69
+
+[18] Sljukic A, Jenkinson J G, Niksic A, Prior N and Huch M 2026 Advances in
+liver and pancreas organoids: how far we have come and where we go next *Nat.
+Rev. Gastroenterol. Hepatol.* **23** 44–64
 
 ## Notes for the authors, to be removed before submission
 
-**New in this version, and what it still needs.** The paper is reframed around
-criteria for growth, arrest and regeneration, and Section 3.10 sets three
-numbers beside existing measurements. Five things are open. (1) The published
-sizes for pancreas and liver [2] are quoted here as a contrast; the values
-have to be read from that paper's figures before any is quoted as a number.
-(2) Whether the three regimes were chosen knowing the result of [2] is stated
-in Section 3.10 as "set up knowing that result"; if they were not, that
-sentence and the one in Limitations should say so, and the comparison becomes
-stronger. (3) Reference [16] needs its authors, title and year from the
-figshare record, and the cohort's licence has to allow the derived table in
-`source_data/` to be redistributed. (4) The first sentence of the abstract and
-of the Introduction, on the need for replacement kidney, liver and pancreas,
-needs a citation. (5) Section 3.10 has no figure yet; one panel per comparison
-would carry it.
+**The comparison with measurements, and what it still needs.** Section 3.10
+now quotes the published numbers from the papers themselves, and Figure 6
+draws them. Five things are open. (1) The two liver values of [2] are read
+from the fitted curve of its Fig. 6b, and the progenitor shares from its text
+and Supplementary Fig. 2; someone should check them against the supplement.
+(2) Section 3.10 says the regime parameters were fixed before the comparison
+and that the experiment of [2] was known when the regimes were described. If
+the parameters were also chosen before anyone in the group had read [2], say
+so there and in Limitations: the comparison is then a prediction. (3) The
+kidney comparison is the weak one and is written as such. A model in which
+the pool also drives branching is the obvious next step and would be a
+different paper. (4) The figures of [17] are taken from the summary of that
+report; check them against the article, and check that the licence of the
+figshare record of [16] allows the derived table in `source_data/` to be
+redistributed. (5) Reference [18] supports one sentence of the Introduction;
+drop it if a primary source is preferred.
 
 **Format for *Cell Systems*.** A summary of at most 150 words, three or four
 highlights of at most 85 characters each, an eTOC paragraph, and the Methods
 moved after the Discussion as STAR Methods with a key resources table. None of
-that is done here; the abstract above is about 310 words, to be cut to 300 for *Biofabrication*. *Biofabrication*
+that is done here; the abstract above is about 330 words, to be cut to 300 for *Biofabrication*. *Biofabrication*
 takes the manuscript in its present order with an abstract under 300 words.
 Whether *Cell Systems* publishes without charge on its subscription route
 should be confirmed on its author pages before submission.
