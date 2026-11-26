@@ -28,20 +28,21 @@ DOCX = ROOT / "manuscript" / "supplement_A.docx"
 
 #: (number, title, heading in PAPER_NUMBERS.md, heading at which the copy stops or None)
 TABLES = (
-    ("S1", "The factorial of renewal, seeded pool, and turnover, with the elasticity of "
+    # in the order the manuscript first cites them
+    ("S1", "Robustness of the three sources to the auxiliary rules of the model, related "
+           "to Figure 1",
+     "Robustness to the auxiliary rules", "Interventions on the closed state"),
+    ("S2", "The factorial of renewal, seeded pool, and turnover, with the elasticity of "
            "each source, related to Figure 2",
      "What separates the regimes: renewal against pool and turnover", None),
-    ("S2", "Nearness to capacity against size: the perfusion threshold and the domain "
-           "changed inside one source, related to Figure 2",
-     "Nearness to capacity against size", None),
     ("S3", "Elasticities of the final unit count under alternative settings of the "
            "nucleation law, related to Figure 2",
      "Elasticities of the final count (mean ± s.e., paired replicates)", None),
-    ("S4", "Robustness of the three sources to the auxiliary rules of the model, related "
-           "to Figures 1 and 2",
-     "Robustness to the auxiliary rules", "Interventions on the closed state"),
+    ("S4", "Nearness to capacity against size: the perfusion threshold and the domain "
+           "changed inside one source, related to Figure 2",
+     "Nearness to capacity against size", None),
     ("S5", "The reference model beside published progenitor ablations and paired human "
-           "kidneys, related to Figure 3",
+           "kidneys, related to Figure 3 and Figure S1",
      "Against published perturbations and paired human kidneys", None),
     ("S6", "The extension in which progenitors drive branching, in every setting "
            "examined, related to Figure 4 and Table 2",

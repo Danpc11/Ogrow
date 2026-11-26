@@ -30,7 +30,34 @@ All values are from 24 independent seeds of the stochastic model unless stated. 
 
 **How to read the shares of the pool.** The columns *supply*, *room* and *active* divide the progenitors a construct still holds at arrest among tips whose perfusion has fallen to the threshold, tips above it with no free site, and tips that can still form a unit. They are mutually exclusive, and each is given as a share of the pool that was seeded. *Spent* is the part of the seeded pool no longer held, one minus the pool held over the pool seeded, and is set to zero when the pool has grown. In a source that is spent the four add to one. In a source that divides, the pool held can exceed the pool seeded, so the three held shares can add to more than one while *spent* is zero: 0.21 + 1.03 + 0.18 in one row is a pool that has grown to about 1.2 times what was seeded, not an error of accounting. The shares are averaged over seeds after *spent* is set to zero where the pool has grown, so a row can show a spent share above zero beside held shares that add to more than one. The bound named in the last column is the largest of the four.
 
-## Table S1. The factorial of renewal, seeded pool, and turnover, with the elasticity of each source, related to Figure 2
+## Table S1. Robustness of the three sources to the auxiliary rules of the model, related to Figure 1
+
+| variant | kidney pool spent | pancreas pool spent | liver held by supply / room | liver pool elasticity | kidney | pancreas | z, kidney minus liver | z, pancreas minus kidney | z, pancreas minus liver |
+|---|---|---|---|---|---|---|---|---|---|
+| reference | 1.00 | 0.75 | 0.78 / 0.19 | +0.07 ± 0.06 | +0.37 ± 0.03 | +0.71 ± 0.05 | 4.1 | 5.7 | 7.8 |
+| root_surface | 1.00 | 0.73 | 0.77 / 0.27 | +0.10 ± 0.04 | +0.34 ± 0.04 | +0.79 ± 0.06 | 4.8 | 6.0 | 10.0 |
+| root_random | 1.00 | 0.66 | 0.64 / 0.33 | +0.05 ± 0.06 | +0.27 ± 0.05 | +0.71 ± 0.08 | 3.0 | 4.9 | 6.4 |
+| no_deficit | 1.00 | 0.72 | 0.79 / 0.21 | +0.12 ± 0.05 | +0.37 ± 0.03 | +0.73 ± 0.05 | 4.9 | 6.3 | 9.2 |
+| no_load | 1.00 | 0.72 | 0.93 / 0.08 | -0.49 ± 0.45 | +0.26 ± 0.12 | +0.36 ± 0.16 | 1.5 | 0.6 | 1.8 |
+| no_crowding | 1.00 | 0.76 | 0.76 / 0.26 | +0.12 ± 0.04 | +0.38 ± 0.03 | +0.77 ± 0.05 | 5.4 | 6.2 | 8.7 |
+| no_mesenchyme | 1.00 | 0.86 | 0.70 / 0.30 | +0.14 ± 0.04 | +0.34 ± 0.05 | +0.83 ± 0.03 | 3.3 | 8.0 | 13.3 |
+| territory | 1.00 | 0.72 | 0.74 / 0.28 | +0.08 ± 0.06 | +0.27 ± 0.04 | +0.72 ± 0.04 | 2.5 | 8.2 | 8.9 |
+| binomial | 1.00 | 0.71 | 0.73 / 0.25 | +0.15 ± 0.04 | +0.42 ± 0.03 | +0.80 ± 0.05 | 5.7 | 7.9 | 9.8 |
+| binomial_half_day | 1.00 | 0.78 | 0.75 / 0.27 | +0.11 ± 0.04 | +0.37 ± 0.04 | +0.75 ± 0.05 | 4.8 | 6.0 | 10.2 |
+| binomial_quarter_day | 1.00 | 0.80 | 0.78 / 0.22 | +0.14 ± 0.05 | +0.35 ± 0.04 | +0.91 ± 0.04 | 3.4 | 9.0 | 12.7 |
+| competing_fates | 1.00 | 0.75 | 0.78 / 0.21 | +0.07 ± 0.04 | +0.36 ± 0.03 | +0.71 ± 0.05 | 5.7 | 5.9 | 10.5 |
+| no_self_renewal | 1.00 | 0.75 | 0.70 / 0.19 | +0.24 ± 0.04 | +0.37 ± 0.03 | +0.71 ± 0.05 | 2.9 | 5.7 | 7.6 |
+
+**The ordering, counted over the variants**
+
+| statement | variants holding it | sign test P | of those, z at least 2 | at the reference setting |
+|---|---|---|---|---|
+| liver below kidney below pancreas | 13 of 13 | - | - | - |
+| kidney above liver | 13 of 13 | 0.0002 | 12 of 13 | +0.31 ± 0.08, z = 4.1 |
+| pancreas above kidney | 13 of 13 | 0.0002 | 12 of 13 | +0.34 ± 0.06, z = 5.7 |
+| pancreas above liver | 13 of 13 | 0.0002 | 12 of 13 | +0.65 ± 0.08, z = 7.8 |
+
+## Table S2. The factorial of renewal, seeded pool, and turnover, with the elasticity of each source, related to Figure 2
 
 The three regimes differ in several parameters at once, so the binary property cannot be credited with the separation until the others are held fixed. This varies each independently and reports where the pool stands at arrest. Division and loss are one axis rather than two, swept over the pairings the three sources use, because a pool that divides without being lost grows without bound and because the kidney and the pancreas do not divide at all. The last column names the largest of the four shares, which is the bound that ended the growth (`scripts/34_regimes.py`).
 
@@ -73,11 +100,31 @@ The elasticity of the final unit count to the seeded pool is reported elsewhere 
 | 300 | decaying | +0.37 ± 0.03 | +0.34 ± 0.05 | +0.04 |
 | 60 | static | +0.71 ± 0.05 | +0.44 ± 0.12 | +0.28 |
 
-## Table S2. Nearness to capacity against size: the perfusion threshold and the domain changed inside one source, related to Figure 2
+## Table S3. Elasticities of the final unit count under alternative settings of the nucleation law, related to Figure 2
 
-Capacity is the units reached, at a given perfusion threshold and in a given domain, by a source whose pool cannot run out (the renewing source at ten times its pool). It is measured independently of the source it is set against, and it is operational: it belongs to a domain, a threshold and the branching rules, not to a tissue. Elasticities are to the seeded pool, paired over 24 seeds.
+| regime | setting | pool | setpoint | paired replicates |
+|---|---|---|---|---|
+| liver | ref | +0.07 ± 0.06 | -1.83 ± 0.22 | 24 |
+| liver | nu_lo | +0.08 ± 0.06 | -1.54 ± 0.20 | 24 |
+| liver | nu_hi | +0.10 ± 0.05 | -1.91 ± 0.23 | 24 |
+| liver | q_lo | +0.09 ± 0.04 | -1.16 ± 0.04 | 24 |
+| liver | q_hi | +0.37 ± 0.14 | -2.90 ± 0.03 | 24 |
+| kidney | ref | +0.37 ± 0.03 | -1.65 ± 0.06 | 24 |
+| kidney | nu_lo | +0.33 ± 0.04 | -1.54 ± 0.06 | 24 |
+| kidney | nu_hi | +0.36 ± 0.03 | -1.61 ± 0.06 | 24 |
+| kidney | q_lo | +0.40 ± 0.03 | -0.64 ± 0.03 | 24 |
+| kidney | q_hi | +0.38 ± 0.04 | -2.44 ± 0.04 | 24 |
+| pancreas | ref | +0.71 ± 0.05 | -0.77 ± 0.07 | 24 |
+| pancreas | nu_lo | +0.76 ± 0.05 | -1.11 ± 0.09 | 24 |
+| pancreas | nu_hi | +0.72 ± 0.04 | -0.66 ± 0.08 | 24 |
+| pancreas | q_lo | +0.80 ± 0.04 | -0.35 ± 0.04 | 24 |
+| pancreas | q_hi | +0.70 ± 0.06 | -2.52 ± 0.06 | 24 |
 
-Whether it is a capacity. Units of the saturating source at the reference threshold with its pool at 26,000, 52,000, 104,000: 267, 308, 371. Its gain over the last 40 days is 3.9%. At 280 days instead of 140: domain scale 0.4, 155 to 162 (+5%); domain scale 0.8, 565 to 612 (+8%).
+## Table S4. Nearness to capacity against size: the perfusion threshold and the domain changed inside one source, related to Figure 2
+
+Capacity is the units reached, at a given perfusion threshold and in a given domain, by a reference source with a very large pool (the renewing source at twenty times its pool, 52,000). It is measured independently of the source it is set against, and it is operational: it belongs to a domain, a threshold and the branching rules, not to a tissue. Elasticities are to the seeded pool, paired over 24 seeds.
+
+Whether it is a capacity. Units of the saturating source at the reference threshold with its pool at 26,000, 52,000, 104,000: 267, 308, 371. The count is still rising at the last doubling, so the capacity is a reference size at a stated pool and not a ceiling. Its gain over the last 40 days is 3.9%. At 280 days instead of 140: domain scale 0.4, 155 to 162 (+5%); domain scale 0.8, 565 to 612 (+8%).
 
 The perfusion threshold changed inside each source. Size and capacity fall together, so their ratio hardly moves.
 
@@ -112,54 +159,7 @@ The domain changed, with the same pool and threshold. A source held far below ca
 
 Elasticity in the largest domain minus the smallest, with a 95 % bootstrap interval: kidney-like +0.17 [+0.07, +0.26]; pancreas-like +0.11 [-0.01, +0.22]. Over all 19 points of both interventions, the Spearman correlation of the elasticity with units over capacity is -0.91, and with units alone -0.80.
 
-## Table S3. Elasticities of the final unit count under alternative settings of the nucleation law, related to Figure 2
-
-| regime | setting | pool | setpoint | paired replicates |
-|---|---|---|---|---|
-| liver | ref | +0.07 ± 0.06 | -1.83 ± 0.22 | 24 |
-| liver | nu_lo | +0.08 ± 0.06 | -1.54 ± 0.20 | 24 |
-| liver | nu_hi | +0.10 ± 0.05 | -1.91 ± 0.23 | 24 |
-| liver | q_lo | +0.09 ± 0.04 | -1.16 ± 0.04 | 24 |
-| liver | q_hi | +0.37 ± 0.14 | -2.90 ± 0.03 | 24 |
-| kidney | ref | +0.37 ± 0.03 | -1.65 ± 0.06 | 24 |
-| kidney | nu_lo | +0.33 ± 0.04 | -1.54 ± 0.06 | 24 |
-| kidney | nu_hi | +0.36 ± 0.03 | -1.61 ± 0.06 | 24 |
-| kidney | q_lo | +0.40 ± 0.03 | -0.64 ± 0.03 | 24 |
-| kidney | q_hi | +0.38 ± 0.04 | -2.44 ± 0.04 | 24 |
-| pancreas | ref | +0.71 ± 0.05 | -0.77 ± 0.07 | 24 |
-| pancreas | nu_lo | +0.76 ± 0.05 | -1.11 ± 0.09 | 24 |
-| pancreas | nu_hi | +0.72 ± 0.04 | -0.66 ± 0.08 | 24 |
-| pancreas | q_lo | +0.80 ± 0.04 | -0.35 ± 0.04 | 24 |
-| pancreas | q_hi | +0.70 ± 0.06 | -2.52 ± 0.06 | 24 |
-
-## Table S4. Robustness of the three sources to the auxiliary rules of the model, related to Figures 1 and 2
-
-| variant | kidney pool spent | pancreas pool spent | liver held by supply / room | liver pool elasticity | kidney | pancreas | z, kidney minus liver | z, pancreas minus kidney | z, pancreas minus liver |
-|---|---|---|---|---|---|---|---|---|---|
-| reference | 1.00 | 0.75 | 0.78 / 0.19 | +0.07 ± 0.06 | +0.37 ± 0.03 | +0.71 ± 0.05 | 4.1 | 5.7 | 7.8 |
-| root_surface | 1.00 | 0.73 | 0.77 / 0.27 | +0.10 ± 0.04 | +0.34 ± 0.04 | +0.79 ± 0.06 | 4.8 | 6.0 | 10.0 |
-| root_random | 1.00 | 0.66 | 0.64 / 0.33 | +0.05 ± 0.06 | +0.27 ± 0.05 | +0.71 ± 0.08 | 3.0 | 4.9 | 6.4 |
-| no_deficit | 1.00 | 0.72 | 0.79 / 0.21 | +0.12 ± 0.05 | +0.37 ± 0.03 | +0.73 ± 0.05 | 4.9 | 6.3 | 9.2 |
-| no_load | 1.00 | 0.72 | 0.93 / 0.08 | -0.49 ± 0.45 | +0.26 ± 0.12 | +0.36 ± 0.16 | 1.5 | 0.6 | 1.8 |
-| no_crowding | 1.00 | 0.76 | 0.76 / 0.26 | +0.12 ± 0.04 | +0.38 ± 0.03 | +0.77 ± 0.05 | 5.4 | 6.2 | 8.7 |
-| no_mesenchyme | 1.00 | 0.86 | 0.70 / 0.30 | +0.14 ± 0.04 | +0.34 ± 0.05 | +0.83 ± 0.03 | 3.3 | 8.0 | 13.3 |
-| territory | 1.00 | 0.72 | 0.74 / 0.28 | +0.08 ± 0.06 | +0.27 ± 0.04 | +0.72 ± 0.04 | 2.5 | 8.2 | 8.9 |
-| binomial | 1.00 | 0.71 | 0.73 / 0.25 | +0.15 ± 0.04 | +0.42 ± 0.03 | +0.80 ± 0.05 | 5.7 | 7.9 | 9.8 |
-| binomial_half_day | 1.00 | 0.78 | 0.75 / 0.27 | +0.11 ± 0.04 | +0.37 ± 0.04 | +0.75 ± 0.05 | 4.8 | 6.0 | 10.2 |
-| binomial_quarter_day | 1.00 | 0.80 | 0.78 / 0.22 | +0.14 ± 0.05 | +0.35 ± 0.04 | +0.91 ± 0.04 | 3.4 | 9.0 | 12.7 |
-| competing_fates | 1.00 | 0.75 | 0.78 / 0.21 | +0.07 ± 0.04 | +0.36 ± 0.03 | +0.71 ± 0.05 | 5.7 | 5.9 | 10.5 |
-| no_self_renewal | 1.00 | 0.75 | 0.70 / 0.19 | +0.24 ± 0.04 | +0.37 ± 0.03 | +0.71 ± 0.05 | 2.9 | 5.7 | 7.6 |
-
-**The ordering, counted over the variants**
-
-| statement | variants holding it | sign test P | of those, z at least 2 | at the reference setting |
-|---|---|---|---|---|
-| liver below kidney below pancreas | 13 of 13 | - | - | - |
-| kidney above liver | 13 of 13 | 0.0002 | 12 of 13 | +0.31 ± 0.08, z = 4.1 |
-| pancreas above kidney | 13 of 13 | 0.0002 | 12 of 13 | +0.34 ± 0.06, z = 5.7 |
-| pancreas above liver | 13 of 13 | 0.0002 | 12 of 13 | +0.65 ± 0.08, z = 7.8 |
-
-## Table S5. The reference model beside published progenitor ablations and paired human kidneys, related to Figure 3
+## Table S5. The reference model beside published progenitor ablations and paired human kidneys, related to Figure 3 and Figure S1
 
 The only numbers here that are set beside a measurement. A share of the reference pool is seeded and what is left of the construct is read, as a ratio of means over 24 paired seeds with a 95 % bootstrap interval. The elasticity is log(mass ratio) / log(pool kept).
 

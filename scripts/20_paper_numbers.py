@@ -726,8 +726,8 @@ if (RES / "capacity.json").exists():
     Cp = json.load(open(RES / "capacity.json"))
     w("\n## Nearness to capacity against size\n")
     w("Capacity is the units reached, at a given perfusion threshold and in a given "
-      "domain, by a source whose pool cannot run out (the renewing source at ten "
-      "times its pool). It is measured independently of the source it is set "
+      "domain, by a reference source with a very large pool (the renewing source at "
+      "twenty times its pool, 52,000). It is measured independently of the source it is set "
       "against, and it is operational: it belongs to a domain, a threshold and "
       "the branching rules, not to a tissue. Elasticities are to the seeded pool, "
       f"paired over {len(Cp['seeds'])} seeds.\n")
@@ -737,6 +737,8 @@ if (RES / "capacity.json").exists():
           "threshold with its pool at "
           + ", ".join(f"{x:,.0f}" for x in _k["pools"]) + ": "
           + ", ".join(f"{v:.0f}" for v in _k["pool"].values())
+          + ". The count is still rising at the last doubling, so the capacity is a "
+            "reference size at a stated pool and not a ceiling"
           + f". Its gain over the last 40 days is {_k['late_gain']:.1%}. At "
             f"{_k['long_days']} days instead of 140: "
           + "; ".join(f"domain scale {s_}, {v['short']:.0f} to {v['long']:.0f} "

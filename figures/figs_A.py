@@ -215,9 +215,8 @@ def fig1():
              ("space_held", "held: no room", K["room"]))
     for i, reg in enumerate(REG):
         left = 0.0
-        tot = sum(reps[reg]["closure"][k]["mean"] for k, _, _ in parts)
         for k, lab, col in parts:
-            v = reps[reg]["closure"][k]["mean"] / tot
+            v = reps[reg]["closure"][k]["mean"]        # of the pool seeded, as in the text
             e.barh(i, v, left=left, color=col, edgecolor="white", lw=0.6, height=0.62,
                    label=lab if i == 0 else None)
             if v > 0.12:
@@ -228,7 +227,7 @@ def fig1():
     e.set_yticks(range(3)); e.set_yticklabels([NAME[r] for r in REG]); e.invert_yaxis()
     for lab_, reg in zip(e.get_yticklabels(), REG):
         lab_.set_color(K[reg])
-    e.set_xlim(0, 1); e.set_xlabel("Share of the progenitor pool at arrest")
+    e.set_xlim(0, 1.06); e.set_xlabel("Share of the pool seeded, at arrest")
     e.legend(loc="upper center", bbox_to_anchor=(0.45, -0.24), ncol=3, columnspacing=0.8,
              handletextpad=0.4, handlelength=0.9)
     e.set_title("Each stops against a different bound", fontsize=F.SZ["label"])
@@ -356,7 +355,7 @@ def fig2():
                f"{Cp['all']['rho_units']:+.2f} with units alone", transform=d.transAxes,
                ha="right", va="top", fontsize=F.SZ["small"])
         d.set_xlabel("Units at arrest / capacity of the domain")
-        d.set_title("Nearness to capacity, not size, weakens\nthe dependence on progenitors",
+        d.set_title("Dependence on progenitors follows nearness\nto capacity more closely than size",
                     fontsize=F.SZ["label"])
     else:
         d.set_xlabel("Units at arrest")
@@ -561,7 +560,7 @@ def fig4():
     c0 = V["conditions"][low]["0"]
     for key, lab, col in (("pool_by_day", "progenitors, total", K["cells"]),
                           ("cap_by_day", "progenitors per tip", K["ink"]),
-                          ("sites_by_day", "tips", K["supply"])):
+                          ("sites_by_day", "tips holding a cap", K["supply"])):
         y = np.asarray(c0[key])[sl]
         b.plot(t, y, "-", lw=1.1, color=col, label=lab)
         rows += [["b", lab, int(d_), float(v_)] for d_, v_ in zip(t, y)]
@@ -850,7 +849,7 @@ def fig5():
     d.axhline(0, lw=0.8, color=K["ink"], zorder=1)
     d.axvspan(-0.08, 0.5, color=K["supply"], alpha=0.10, lw=0, zorder=0)
     d.axvspan(0.5, 1.55, color=K["cells"], alpha=0.12, lw=0, zorder=0)
-    d.text(0.21, 1.42, "near perfusion-set size:\nsize hardly follows", ha="center", va="top",
+    d.text(0.21, 1.42, "near capacity:\nsize hardly follows", ha="center", va="top",
            fontsize=F.SZ["small"], color=K["supply"], fontweight="bold")
     d.text(1.02, 1.42, "far from it:\nsize follows progenitor number", ha="center", va="top",
            fontsize=F.SZ["small"], color=K["ink"], fontweight="bold")
