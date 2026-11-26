@@ -1,6 +1,6 @@
 # Numbers the paper uses
 
-Model version 4.63.0, commit 304e411, generated 2026-11-25 by `scripts/20_paper_numbers.py`. Do not edit by hand.
+Model version 4.64.0, commit d2958f8, generated 2026-11-25 by `scripts/20_paper_numbers.py`. Do not edit by hand.
 
 Python 3.9.6, numpy 1.26.4, scipy 1.13.1; `config/params.yaml` sha256 4d4c28e4b024.
 
@@ -435,22 +435,37 @@ The only numbers here that are set beside a measurement. A share of the referenc
 
 | regime | pool kept | units | mass | elasticity of mass |
 |---|---|---|---|---|
+| pancreas | 0.92 | 0.90 [0.86, 0.93] | 0.81 [0.72, 0.90] | +2.57 |
 | pancreas | 0.5 | 0.58 [0.56, 0.61] | 0.53 [0.42, 0.64] | +0.91 |
+| pancreas | 0.39 | 0.46 [0.43, 0.48] | 0.44 [0.37, 0.52] | +0.87 |
 | pancreas | 0.25 | 0.32 [0.30, 0.33] | 0.17 [0.12, 0.23] | +1.27 |
 | kidney | 0.6 | 0.80 [0.77, 0.83] | 0.84 [0.79, 0.88] | +0.35 |
 | kidney | 0.5 | 0.74 [0.71, 0.77] | 0.76 [0.73, 0.80] | +0.39 |
 | liver | 0.5 | 0.92 [0.88, 0.97] | 0.92 [0.90, 0.95] | +0.11 |
+| liver | 0.35 | 0.87 [0.82, 0.93] | 0.86 [0.84, 0.89] | +0.14 |
 | liver | 0.25 | 0.80 [0.76, 0.84] | 0.77 [0.75, 0.79] | +0.19 |
 
-Published, in mouse: the pancreas ends smaller in proportion to the progenitors removed and the liver is not limited by them (Stanger, Tanaka and Melton 2007); about 40 % of nephron progenitors removed leaves 10 to 20 % fewer nephrons. The three regimes were named with the first of these in view, so agreement with it is consistency and not a prediction.
+What the experiments measured, as a share of the littermate control, with the model at the same share of the pool. The model column is mass for pancreas and liver and units for the kidney, to match what was measured. The numbers are typed from the papers; `scripts/36_validation.py` says which figure each is read from.
+
+| regime | pool left | measured | what, and by whom | model |
+|---|---|---|---|---|
+| pancreas | 0.92 | 0.77 [0.53, 1.02] | weight at birth, Stanger 2007 | 0.81 [0.72, 0.90] |
+| pancreas | 0.39 | 0.36 [0.19, 0.53] | weight at birth, Stanger 2007 | 0.44 [0.37, 0.52] |
+| kidney | 0.60 | 0.88 | glomeruli at P3, Muthukrishnan 2018 | 0.80 [0.77, 0.83] |
+| kidney | 0.60 | 0.79 | glomeruli at P10, Muthukrishnan 2018 | 0.80 [0.77, 0.83] |
+| kidney | 0.60 | 0.48 | glomeruli at E19.5, Cebrian 2014 | 0.80 [0.77, 0.83] |
+| kidney | 0.60 | 0.58 | glomeruli at P50, Cebrian 2014 | 0.80 [0.77, 0.83] |
+| liver | 0.35 | 0.96 | weight four days after the ablation ended, Stanger 2007 | 0.86 [0.84, 0.89] |
+
+The regime parameters were fixed before this comparison was computed and were not adjusted to it. The two kidney studies removed the same share of progenitors and differ twofold in what was left; the model agrees with one and has the mechanism of neither.
 
 Variation across 24 seeds grown from identical parameters, which is what two organs of one individual share.
 
-| regime | CV of units | CV of mass |
-|---|---|---|
-| pancreas | 0.103 | 0.168 |
-| kidney | 0.088 | 0.096 |
-| liver | 0.086 | 0.057 |
+| regime | CV of units | CV of mass | s.d. of log mass |
+|---|---|---|---|
+| pancreas | 0.103 | 0.168 | 0.172 |
+| kidney | 0.088 | 0.096 | 0.104 |
+| liver | 0.086 | 0.057 | 0.058 |
 
-The two kidneys of one person, CT volume, 48 pairs (TRUSTED): left-right coefficient of variation 0.098 with the mean difference between sides (-7.4 %) removed and 0.111 with it left in; between people 0.322. The left-right difference against kidney size gives Spearman rho = +0.25, P = 0.09, over 109 to 553 cm3. The volumes carry segmentation error, which is not separated here.
+The two kidneys of one person, CT volume, 48 pairs (TRUSTED): left-right standard deviation of log volume, per kidney, 0.098 with the mean difference between sides (-7.4 %) removed and 0.111 with it left in; between people 0.322. The left-right difference against kidney size gives Spearman rho = +0.25, P = 0.09, over 109 to 553 cm3. The volumes carry segmentation error, which is not separated here.
 
