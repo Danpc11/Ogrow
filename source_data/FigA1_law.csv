@@ -1,0 +1,850 @@
+regime,quantity,day,value
+liver,units,1,57.875
+liver,units,2,116.25
+liver,units,3,119.25
+liver,units,4,122.125
+liver,units,5,123.75
+liver,units,6,126.125
+liver,units,7,127.25
+liver,units,8,128.54166666666666
+liver,units,9,130.20833333333334
+liver,units,10,131.08333333333334
+liver,units,11,131.91666666666666
+liver,units,12,132.875
+liver,units,13,133.45833333333334
+liver,units,14,133.66666666666666
+liver,units,15,134.20833333333334
+liver,units,16,135.08333333333334
+liver,units,17,136.08333333333334
+liver,units,18,137.08333333333334
+liver,units,19,137.83333333333334
+liver,units,20,139.20833333333334
+liver,units,21,140.41666666666666
+liver,units,22,141.875
+liver,units,23,143.20833333333334
+liver,units,24,144.625
+liver,units,25,146.45833333333334
+liver,units,26,148.79166666666666
+liver,units,27,150.58333333333334
+liver,units,28,152.91666666666666
+liver,units,29,154.29166666666666
+liver,units,30,155.95833333333334
+liver,units,31,157.66666666666666
+liver,units,32,159.20833333333334
+liver,units,33,160.45833333333334
+liver,units,34,161.70833333333334
+liver,units,35,162.79166666666666
+liver,units,36,164.70833333333334
+liver,units,37,165.58333333333334
+liver,units,38,166.70833333333334
+liver,units,39,167.79166666666666
+liver,units,40,168.875
+liver,units,41,169.875
+liver,units,42,171.29166666666666
+liver,units,43,171.95833333333334
+liver,units,44,172.91666666666666
+liver,units,45,173.54166666666666
+liver,units,46,174.29166666666666
+liver,units,47,175.20833333333334
+liver,units,48,175.83333333333334
+liver,units,49,176.5
+liver,units,50,177.125
+liver,units,51,177.66666666666666
+liver,units,52,178.58333333333334
+liver,units,53,179.04166666666666
+liver,units,54,179.79166666666666
+liver,units,55,180.375
+liver,units,56,181.04166666666666
+liver,units,57,181.66666666666666
+liver,units,58,182.29166666666666
+liver,units,59,182.91666666666666
+liver,units,60,183.41666666666666
+liver,units,61,184.0
+liver,units,62,184.375
+liver,units,63,184.875
+liver,units,64,185.54166666666666
+liver,units,65,186.125
+liver,units,66,186.5
+liver,units,67,187.0
+liver,units,68,187.54166666666666
+liver,units,69,188.125
+liver,units,70,188.75
+liver,units,71,189.16666666666666
+liver,units,72,189.625
+liver,units,73,190.0
+liver,units,74,190.45833333333334
+liver,units,75,190.79166666666666
+liver,units,76,191.08333333333334
+liver,units,77,191.45833333333334
+liver,units,78,191.79166666666666
+liver,units,79,192.04166666666666
+liver,units,80,192.16666666666666
+liver,units,81,192.33333333333334
+liver,units,82,192.79166666666666
+liver,units,83,193.20833333333334
+liver,units,84,193.875
+liver,units,85,194.16666666666666
+liver,units,86,194.79166666666666
+liver,units,87,195.125
+liver,units,88,195.45833333333334
+liver,units,89,195.79166666666666
+liver,units,90,196.0
+liver,units,91,196.45833333333334
+liver,units,92,196.79166666666666
+liver,units,93,197.04166666666666
+liver,units,94,197.45833333333334
+liver,units,95,197.875
+liver,units,96,198.04166666666666
+liver,units,97,198.20833333333334
+liver,units,98,198.45833333333334
+liver,units,99,198.875
+liver,units,100,199.125
+liver,units,101,199.29166666666666
+liver,units,102,199.95833333333334
+liver,units,103,200.04166666666666
+liver,units,104,200.25
+liver,units,105,200.625
+liver,units,106,200.79166666666666
+liver,units,107,201.0
+liver,units,108,201.20833333333334
+liver,units,109,201.54166666666666
+liver,units,110,201.83333333333334
+liver,units,111,202.20833333333334
+liver,units,112,202.33333333333334
+liver,units,113,202.5
+liver,units,114,202.66666666666666
+liver,units,115,203.04166666666666
+liver,units,116,203.33333333333334
+liver,units,117,203.66666666666666
+liver,units,118,203.875
+liver,units,119,204.16666666666666
+liver,units,120,204.41666666666666
+liver,units,121,204.58333333333334
+liver,units,122,204.79166666666666
+liver,units,123,204.91666666666666
+liver,units,124,205.16666666666666
+liver,units,125,205.41666666666666
+liver,units,126,205.58333333333334
+liver,units,127,205.66666666666666
+liver,units,128,205.875
+liver,units,129,206.16666666666666
+liver,units,130,206.33333333333334
+liver,units,131,206.45833333333334
+liver,units,132,206.625
+liver,units,133,206.75
+liver,units,134,206.83333333333334
+liver,units,135,207.08333333333334
+liver,units,136,207.375
+liver,units,137,207.54166666666666
+liver,units,138,207.70833333333334
+liver,units,139,208.0
+liver,units,140,208.08333333333334
+liver,pool over seeded pool,1,1.0
+liver,pool over seeded pool,2,1.0006224906140957
+liver,pool over seeded pool,3,0.9987235606888784
+liver,pool over seeded pool,4,0.9951628718027274
+liver,pool over seeded pool,5,0.9932141413799226
+liver,pool over seeded pool,6,0.9860885870559023
+liver,pool over seeded pool,7,0.9853422164133975
+liver,pool over seeded pool,8,0.9831613712519199
+liver,pool over seeded pool,9,0.9845402617245044
+liver,pool over seeded pool,10,0.9829522917788379
+liver,pool over seeded pool,11,0.9843602531377846
+liver,pool over seeded pool,12,0.9837038564646313
+liver,pool over seeded pool,13,0.981657921346212
+liver,pool over seeded pool,14,0.982520153415225
+liver,pool over seeded pool,15,0.9842057541473533
+liver,pool over seeded pool,16,0.981991547421894
+liver,pool over seeded pool,17,0.9818128652675888
+liver,pool over seeded pool,18,0.9812389773015132
+liver,pool over seeded pool,19,0.9817164377553879
+liver,pool over seeded pool,20,0.9807471865563797
+liver,pool over seeded pool,21,0.9808289358815272
+liver,pool over seeded pool,22,0.9816313398030329
+liver,pool over seeded pool,23,0.9820962711341058
+liver,pool over seeded pool,24,0.982720147701977
+liver,pool over seeded pool,25,0.9839685973928716
+liver,pool over seeded pool,26,0.9802242638891743
+liver,pool over seeded pool,27,0.9800559723732613
+liver,pool over seeded pool,28,0.9750628838445112
+liver,pool over seeded pool,29,0.9741976352102366
+liver,pool over seeded pool,30,0.9732289958856112
+liver,pool over seeded pool,31,0.9751193237842958
+liver,pool over seeded pool,32,0.9731782692405694
+liver,pool over seeded pool,33,0.9713969562838818
+liver,pool over seeded pool,34,0.9712862487434228
+liver,pool over seeded pool,35,0.9707164005881891
+liver,pool over seeded pool,36,0.9693945768833431
+liver,pool over seeded pool,37,0.966203066772508
+liver,pool over seeded pool,38,0.968301612079823
+liver,pool over seeded pool,39,0.9685050411311553
+liver,pool over seeded pool,40,0.9685295174625925
+liver,pool over seeded pool,41,0.9654672266983555
+liver,pool over seeded pool,42,0.9674183209451103
+liver,pool over seeded pool,43,0.9655286861584024
+liver,pool over seeded pool,44,0.966664987538063
+liver,pool over seeded pool,45,0.967631342652909
+liver,pool over seeded pool,46,0.9665492139796198
+liver,pool over seeded pool,47,0.9674029199654615
+liver,pool over seeded pool,48,0.9646412179381335
+liver,pool over seeded pool,49,0.961501527840439
+liver,pool over seeded pool,50,0.9617178066034892
+liver,pool over seeded pool,51,0.9613333013512481
+liver,pool over seeded pool,52,0.9613657181820746
+liver,pool over seeded pool,53,0.961386199845264
+liver,pool over seeded pool,54,0.9604370568506636
+liver,pool over seeded pool,55,0.9597368829494127
+liver,pool over seeded pool,56,0.9588183883183218
+liver,pool over seeded pool,57,0.9593646253520989
+liver,pool over seeded pool,58,0.9591442185026592
+liver,pool over seeded pool,59,0.9590046178028263
+liver,pool over seeded pool,60,0.9606647523211329
+liver,pool over seeded pool,61,0.9606870405409463
+liver,pool over seeded pool,62,0.961148233874675
+liver,pool over seeded pool,63,0.9624085357560741
+liver,pool over seeded pool,64,0.9590107021678547
+liver,pool over seeded pool,65,0.9580444231034195
+liver,pool over seeded pool,66,0.9594022854831269
+liver,pool over seeded pool,67,0.9614049555084966
+liver,pool over seeded pool,68,0.96290491612733
+liver,pool over seeded pool,69,0.9653942465889459
+liver,pool over seeded pool,70,0.966346813261715
+liver,pool over seeded pool,71,0.9673605622760095
+liver,pool over seeded pool,72,0.9695238052711718
+liver,pool over seeded pool,73,0.9686491972300525
+liver,pool over seeded pool,74,0.9694808517123547
+liver,pool over seeded pool,75,0.9711810855762611
+liver,pool over seeded pool,76,0.9697020853277526
+liver,pool over seeded pool,77,0.967282710345125
+liver,pool over seeded pool,78,0.9685017965821916
+liver,pool over seeded pool,79,0.9671544518507561
+liver,pool over seeded pool,80,0.9651773184054258
+liver,pool over seeded pool,81,0.965473193110281
+liver,pool over seeded pool,82,0.9627680528144406
+liver,pool over seeded pool,83,0.9644293792063215
+liver,pool over seeded pool,84,0.9633689843617161
+liver,pool over seeded pool,85,0.9637270399578092
+liver,pool over seeded pool,86,0.9643101287118605
+liver,pool over seeded pool,87,0.9661677897155965
+liver,pool over seeded pool,88,0.9660875620216784
+liver,pool over seeded pool,89,0.9666708977864217
+liver,pool over seeded pool,90,0.9672959700712046
+liver,pool over seeded pool,91,0.9698309695702291
+liver,pool over seeded pool,92,0.9688042120205514
+liver,pool over seeded pool,93,0.968962929161084
+liver,pool over seeded pool,94,0.9690691046724712
+liver,pool over seeded pool,95,0.9681184954323748
+liver,pool over seeded pool,96,0.9686826024282987
+liver,pool over seeded pool,97,0.9698028428225739
+liver,pool over seeded pool,98,0.9700419801462105
+liver,pool over seeded pool,99,0.9730918761220089
+liver,pool over seeded pool,100,0.9754223708066481
+liver,pool over seeded pool,101,0.971541792206208
+liver,pool over seeded pool,102,0.9718854244433853
+liver,pool over seeded pool,103,0.9702808021849507
+liver,pool over seeded pool,104,0.9693341162173393
+liver,pool over seeded pool,105,0.9668113277869317
+liver,pool over seeded pool,106,0.9676282737213069
+liver,pool over seeded pool,107,0.968315314546803
+liver,pool over seeded pool,108,0.968892480799056
+liver,pool over seeded pool,109,0.9697058687990991
+liver,pool over seeded pool,110,0.9708798942160227
+liver,pool over seeded pool,111,0.9717124473104041
+liver,pool over seeded pool,112,0.9713080471337783
+liver,pool over seeded pool,113,0.9746743595784472
+liver,pool over seeded pool,114,0.9744575916608001
+liver,pool over seeded pool,115,0.97252965268209
+liver,pool over seeded pool,116,0.974251620563221
+liver,pool over seeded pool,117,0.9738610125889634
+liver,pool over seeded pool,118,0.9753692382525295
+liver,pool over seeded pool,119,0.9742187076834674
+liver,pool over seeded pool,120,0.9734782249162189
+liver,pool over seeded pool,121,0.9734378893083148
+liver,pool over seeded pool,122,0.9730803291023395
+liver,pool over seeded pool,123,0.972539945221932
+liver,pool over seeded pool,124,0.9728742220295001
+liver,pool over seeded pool,125,0.9753259902380825
+liver,pool over seeded pool,126,0.9770362611959679
+liver,pool over seeded pool,127,0.9787467409121117
+liver,pool over seeded pool,128,0.9794001261508368
+liver,pool over seeded pool,129,0.9756589780123961
+liver,pool over seeded pool,130,0.9740788307778211
+liver,pool over seeded pool,131,0.9757067437696055
+liver,pool over seeded pool,132,0.9738409971707712
+liver,pool over seeded pool,133,0.9732344965791747
+liver,pool over seeded pool,134,0.9717365684601619
+liver,pool over seeded pool,135,0.9667416859682537
+liver,pool over seeded pool,136,0.9682028100498622
+liver,pool over seeded pool,137,0.9708635169451433
+liver,pool over seeded pool,138,0.9700475208678593
+liver,pool over seeded pool,139,0.9716492033665785
+liver,pool over seeded pool,140,0.9729852596202421
+kidney,units,1,31.333333333333332
+kidney,units,2,71.0
+kidney,units,3,76.66666666666667
+kidney,units,4,78.375
+kidney,units,5,79.83333333333333
+kidney,units,6,80.91666666666667
+kidney,units,7,81.70833333333333
+kidney,units,8,82.25
+kidney,units,9,82.54166666666667
+kidney,units,10,82.91666666666667
+kidney,units,11,83.04166666666667
+kidney,units,12,83.5
+kidney,units,13,83.75
+kidney,units,14,83.875
+kidney,units,15,84.04166666666667
+kidney,units,16,84.20833333333333
+kidney,units,17,84.45833333333333
+kidney,units,18,84.58333333333333
+kidney,units,19,84.70833333333333
+kidney,units,20,84.875
+kidney,units,21,85.0
+kidney,units,22,85.29166666666667
+kidney,units,23,85.5
+kidney,units,24,85.58333333333333
+kidney,units,25,85.91666666666667
+kidney,units,26,86.0
+kidney,units,27,86.25
+kidney,units,28,86.41666666666667
+kidney,units,29,86.41666666666667
+kidney,units,30,86.54166666666667
+kidney,units,31,86.58333333333333
+kidney,units,32,86.66666666666667
+kidney,units,33,86.66666666666667
+kidney,units,34,86.91666666666667
+kidney,units,35,87.04166666666667
+kidney,units,36,87.16666666666667
+kidney,units,37,87.16666666666667
+kidney,units,38,87.29166666666667
+kidney,units,39,87.375
+kidney,units,40,87.58333333333333
+kidney,units,41,87.75
+kidney,units,42,87.83333333333333
+kidney,units,43,87.875
+kidney,units,44,87.875
+kidney,units,45,87.95833333333333
+kidney,units,46,88.0
+kidney,units,47,88.20833333333333
+kidney,units,48,88.33333333333333
+kidney,units,49,88.41666666666667
+kidney,units,50,88.5
+kidney,units,51,88.5
+kidney,units,52,88.5
+kidney,units,53,88.54166666666667
+kidney,units,54,88.54166666666667
+kidney,units,55,88.54166666666667
+kidney,units,56,88.625
+kidney,units,57,88.625
+kidney,units,58,88.66666666666667
+kidney,units,59,88.70833333333333
+kidney,units,60,88.70833333333333
+kidney,units,61,88.70833333333333
+kidney,units,62,88.70833333333333
+kidney,units,63,88.70833333333333
+kidney,units,64,88.70833333333333
+kidney,units,65,88.75
+kidney,units,66,88.75
+kidney,units,67,88.75
+kidney,units,68,88.75
+kidney,units,69,88.75
+kidney,units,70,88.875
+kidney,units,71,88.875
+kidney,units,72,88.875
+kidney,units,73,88.875
+kidney,units,74,88.875
+kidney,units,75,88.91666666666667
+kidney,units,76,88.91666666666667
+kidney,units,77,88.91666666666667
+kidney,units,78,88.91666666666667
+kidney,units,79,88.91666666666667
+kidney,units,80,88.91666666666667
+kidney,units,81,88.95833333333333
+kidney,units,82,88.95833333333333
+kidney,units,83,88.95833333333333
+kidney,units,84,88.95833333333333
+kidney,units,85,88.95833333333333
+kidney,units,86,88.95833333333333
+kidney,units,87,88.95833333333333
+kidney,units,88,88.95833333333333
+kidney,units,89,88.95833333333333
+kidney,units,90,88.95833333333333
+kidney,units,91,88.95833333333333
+kidney,units,92,89.0
+kidney,units,93,89.04166666666667
+kidney,units,94,89.04166666666667
+kidney,units,95,89.04166666666667
+kidney,units,96,89.04166666666667
+kidney,units,97,89.04166666666667
+kidney,units,98,89.04166666666667
+kidney,units,99,89.04166666666667
+kidney,units,100,89.04166666666667
+kidney,units,101,89.04166666666667
+kidney,units,102,89.04166666666667
+kidney,units,103,89.04166666666667
+kidney,units,104,89.04166666666667
+kidney,units,105,89.04166666666667
+kidney,units,106,89.04166666666667
+kidney,units,107,89.04166666666667
+kidney,units,108,89.04166666666667
+kidney,units,109,89.04166666666667
+kidney,units,110,89.04166666666667
+kidney,units,111,89.04166666666667
+kidney,units,112,89.04166666666667
+kidney,units,113,89.04166666666667
+kidney,units,114,89.04166666666667
+kidney,units,115,89.04166666666667
+kidney,units,116,89.04166666666667
+kidney,units,117,89.04166666666667
+kidney,units,118,89.04166666666667
+kidney,units,119,89.04166666666667
+kidney,units,120,89.04166666666667
+kidney,units,121,89.04166666666667
+kidney,units,122,89.04166666666667
+kidney,units,123,89.04166666666667
+kidney,units,124,89.04166666666667
+kidney,units,125,89.04166666666667
+kidney,units,126,89.04166666666667
+kidney,units,127,89.04166666666667
+kidney,units,128,89.04166666666667
+kidney,units,129,89.04166666666667
+kidney,units,130,89.04166666666667
+kidney,units,131,89.04166666666667
+kidney,units,132,89.04166666666667
+kidney,units,133,89.04166666666667
+kidney,units,134,89.04166666666667
+kidney,units,135,89.04166666666667
+kidney,units,136,89.04166666666667
+kidney,units,137,89.04166666666667
+kidney,units,138,89.04166666666667
+kidney,units,139,89.04166666666667
+kidney,units,140,89.04166666666667
+kidney,pool over seeded pool,1,1.0
+kidney,pool over seeded pool,2,0.8060415075822686
+kidney,pool over seeded pool,3,0.7483334428609957
+kidney,pool over seeded pool,4,0.7039491180402981
+kidney,pool over seeded pool,5,0.6614648669551949
+kidney,pool over seeded pool,6,0.6212590292396503
+kidney,pool over seeded pool,7,0.5851814778061659
+kidney,pool over seeded pool,8,0.5557737223303577
+kidney,pool over seeded pool,9,0.5274773658053065
+kidney,pool over seeded pool,10,0.49966478564306677
+kidney,pool over seeded pool,11,0.4729990097148378
+kidney,pool over seeded pool,12,0.44585768373162576
+kidney,pool over seeded pool,13,0.421913285519437
+kidney,pool over seeded pool,14,0.4014282390672779
+kidney,pool over seeded pool,15,0.37975742453552885
+kidney,pool over seeded pool,16,0.35989204187091084
+kidney,pool over seeded pool,17,0.34023185431784436
+kidney,pool over seeded pool,18,0.3274493959572197
+kidney,pool over seeded pool,19,0.30939024749067795
+kidney,pool over seeded pool,20,0.29381627324080334
+kidney,pool over seeded pool,21,0.2793650741280071
+kidney,pool over seeded pool,22,0.26229892597642046
+kidney,pool over seeded pool,23,0.2443108321577211
+kidney,pool over seeded pool,24,0.23183583543507882
+kidney,pool over seeded pool,25,0.21789055841496763
+kidney,pool over seeded pool,26,0.20471463067230386
+kidney,pool over seeded pool,27,0.1930388558902295
+kidney,pool over seeded pool,28,0.18256222977154457
+kidney,pool over seeded pool,29,0.17308544531790315
+kidney,pool over seeded pool,30,0.1643614354563103
+kidney,pool over seeded pool,31,0.15614263345419196
+kidney,pool over seeded pool,32,0.14940698477383627
+kidney,pool over seeded pool,33,0.1416848897974549
+kidney,pool over seeded pool,34,0.13346466396355441
+kidney,pool over seeded pool,35,0.12655168815726212
+kidney,pool over seeded pool,36,0.11931661086024163
+kidney,pool over seeded pool,37,0.11293203365185935
+kidney,pool over seeded pool,38,0.106496671377662
+kidney,pool over seeded pool,39,0.10237560719844047
+kidney,pool over seeded pool,40,0.09779638953257104
+kidney,pool over seeded pool,41,0.09283043093068925
+kidney,pool over seeded pool,42,0.08808219440113442
+kidney,pool over seeded pool,43,0.08315933886775942
+kidney,pool over seeded pool,44,0.07918568019323001
+kidney,pool over seeded pool,45,0.07344006384825466
+kidney,pool over seeded pool,46,0.06867302806237129
+kidney,pool over seeded pool,47,0.06490490475016668
+kidney,pool over seeded pool,48,0.05851195464428818
+kidney,pool over seeded pool,49,0.05507022917995221
+kidney,pool over seeded pool,50,0.05080814869909276
+kidney,pool over seeded pool,51,0.04755159964116162
+kidney,pool over seeded pool,52,0.04624781786947249
+kidney,pool over seeded pool,53,0.04312729957190654
+kidney,pool over seeded pool,54,0.04082947859597813
+kidney,pool over seeded pool,55,0.03886232595360273
+kidney,pool over seeded pool,56,0.03640177401168634
+kidney,pool over seeded pool,57,0.034764849876818
+kidney,pool over seeded pool,58,0.032460333335582334
+kidney,pool over seeded pool,59,0.03164323844183561
+kidney,pool over seeded pool,60,0.030339729559305275
+kidney,pool over seeded pool,61,0.029203464820616445
+kidney,pool over seeded pool,62,0.028059552786443783
+kidney,pool over seeded pool,63,0.02626756347802842
+kidney,pool over seeded pool,64,0.02461223026704419
+kidney,pool over seeded pool,65,0.022636832246819696
+kidney,pool over seeded pool,66,0.021319616193906984
+kidney,pool over seeded pool,67,0.020172708517197227
+kidney,pool over seeded pool,68,0.019515736309032583
+kidney,pool over seeded pool,69,0.01787006236449019
+kidney,pool over seeded pool,70,0.016403143265273545
+kidney,pool over seeded pool,71,0.016062275998568954
+kidney,pool over seeded pool,72,0.015232848235591137
+kidney,pool over seeded pool,73,0.01393130982747573
+kidney,pool over seeded pool,74,0.01343564045757987
+kidney,pool over seeded pool,75,0.012601820463005994
+kidney,pool over seeded pool,76,0.011787963562500581
+kidney,pool over seeded pool,77,0.01048252248488238
+kidney,pool over seeded pool,78,0.009653026437924246
+kidney,pool over seeded pool,79,0.009319023760548073
+kidney,pool over seeded pool,80,0.008987645755087913
+kidney,pool over seeded pool,81,0.007998505531914517
+kidney,pool over seeded pool,82,0.007667796870497195
+kidney,pool over seeded pool,83,0.007505036453830528
+kidney,pool over seeded pool,84,0.006685241525909464
+kidney,pool over seeded pool,85,0.006524985115653054
+kidney,pool over seeded pool,86,0.005870621351168863
+kidney,pool over seeded pool,87,0.005545723950348069
+kidney,pool over seeded pool,88,0.005545723950348069
+kidney,pool over seeded pool,89,0.0052173905911617165
+kidney,pool over seeded pool,90,0.0048865725253446745
+kidney,pool over seeded pool,91,0.004565431416312627
+kidney,pool over seeded pool,92,0.004401389421561971
+kidney,pool over seeded pool,93,0.0042386290048953045
+kidney,pool over seeded pool,94,0.003914355151209686
+kidney,pool over seeded pool,95,0.0035842587238335143
+kidney,pool over seeded pool,96,0.003258718021072523
+kidney,pool over seeded pool,97,0.003098461610816112
+kidney,pool over seeded pool,98,0.003098461610816112
+kidney,pool over seeded pool,99,0.0027688285067927637
+kidney,pool over seeded pool,100,0.0027688285067927637
+kidney,pool over seeded pool,101,0.0022784774443537297
+kidney,pool over seeded pool,102,0.0022784774443537297
+kidney,pool over seeded pool,103,0.002109100750586792
+kidney,pool over seeded pool,104,0.002109100750586792
+kidney,pool over seeded pool,105,0.002109100750586792
+kidney,pool over seeded pool,106,0.0019488443403303819
+kidney,pool over seeded pool,107,0.0016226852308532577
+kidney,pool over seeded pool,108,0.0012996878148325858
+kidney,pool over seeded pool,109,0.0012996878148325858
+kidney,pool over seeded pool,110,0.0011375607071801863
+kidney,pool over seeded pool,111,0.0011375607071801863
+kidney,pool over seeded pool,112,0.0011375607071801863
+kidney,pool over seeded pool,113,0.0011375607071801863
+kidney,pool over seeded pool,114,0.0009748002905135197
+kidney,pool over seeded pool,115,0.0009748002905135197
+kidney,pool over seeded pool,116,0.0009748002905135197
+kidney,pool over seeded pool,117,0.0009748002905135197
+kidney,pool over seeded pool,118,0.0009748002905135197
+kidney,pool over seeded pool,119,0.0009748002905135197
+kidney,pool over seeded pool,120,0.0006486311881104642
+kidney,pool over seeded pool,121,0.0006486311881104642
+kidney,pool over seeded pool,122,0.0006486311881104642
+kidney,pool over seeded pool,123,0.0006486311881104642
+kidney,pool over seeded pool,124,0.0006486311881104642
+kidney,pool over seeded pool,125,0.0006486311881104642
+kidney,pool over seeded pool,126,0.0006486311881104642
+kidney,pool over seeded pool,127,0.0006486311881104642
+kidney,pool over seeded pool,128,0.0006486311881104642
+kidney,pool over seeded pool,129,0.0006486311881104642
+kidney,pool over seeded pool,130,0.0006486311881104642
+kidney,pool over seeded pool,131,0.0006486311881104642
+kidney,pool over seeded pool,132,0.0006486311881104642
+kidney,pool over seeded pool,133,0.0006486311881104642
+kidney,pool over seeded pool,134,0.0006486311881104642
+kidney,pool over seeded pool,135,0.0006486311881104642
+kidney,pool over seeded pool,136,0.0004889887870887529
+kidney,pool over seeded pool,137,0.0004889887870887529
+kidney,pool over seeded pool,138,0.0004889887870887529
+kidney,pool over seeded pool,139,0.0004889887870887529
+kidney,pool over seeded pool,140,0.0004889887870887529
+pancreas,units,1,16.25
+pancreas,units,2,33.333333333333336
+pancreas,units,3,35.125
+pancreas,units,4,36.125
+pancreas,units,5,37.041666666666664
+pancreas,units,6,37.583333333333336
+pancreas,units,7,37.833333333333336
+pancreas,units,8,38.041666666666664
+pancreas,units,9,38.416666666666664
+pancreas,units,10,38.666666666666664
+pancreas,units,11,38.791666666666664
+pancreas,units,12,38.916666666666664
+pancreas,units,13,39.083333333333336
+pancreas,units,14,39.166666666666664
+pancreas,units,15,39.291666666666664
+pancreas,units,16,39.416666666666664
+pancreas,units,17,39.5
+pancreas,units,18,39.583333333333336
+pancreas,units,19,39.875
+pancreas,units,20,39.916666666666664
+pancreas,units,21,40.041666666666664
+pancreas,units,22,40.083333333333336
+pancreas,units,23,40.208333333333336
+pancreas,units,24,40.416666666666664
+pancreas,units,25,40.458333333333336
+pancreas,units,26,40.625
+pancreas,units,27,40.875
+pancreas,units,28,41.083333333333336
+pancreas,units,29,41.291666666666664
+pancreas,units,30,41.333333333333336
+pancreas,units,31,41.458333333333336
+pancreas,units,32,41.541666666666664
+pancreas,units,33,41.666666666666664
+pancreas,units,34,41.666666666666664
+pancreas,units,35,41.791666666666664
+pancreas,units,36,41.916666666666664
+pancreas,units,37,42.0
+pancreas,units,38,42.125
+pancreas,units,39,42.166666666666664
+pancreas,units,40,42.333333333333336
+pancreas,units,41,42.416666666666664
+pancreas,units,42,42.541666666666664
+pancreas,units,43,42.708333333333336
+pancreas,units,44,42.75
+pancreas,units,45,42.791666666666664
+pancreas,units,46,42.875
+pancreas,units,47,42.958333333333336
+pancreas,units,48,43.041666666666664
+pancreas,units,49,43.125
+pancreas,units,50,43.166666666666664
+pancreas,units,51,43.208333333333336
+pancreas,units,52,43.25
+pancreas,units,53,43.25
+pancreas,units,54,43.25
+pancreas,units,55,43.25
+pancreas,units,56,43.25
+pancreas,units,57,43.375
+pancreas,units,58,43.375
+pancreas,units,59,43.375
+pancreas,units,60,43.416666666666664
+pancreas,units,61,43.416666666666664
+pancreas,units,62,43.458333333333336
+pancreas,units,63,43.5
+pancreas,units,64,43.5
+pancreas,units,65,43.541666666666664
+pancreas,units,66,43.666666666666664
+pancreas,units,67,43.666666666666664
+pancreas,units,68,43.666666666666664
+pancreas,units,69,43.708333333333336
+pancreas,units,70,43.75
+pancreas,units,71,43.833333333333336
+pancreas,units,72,43.916666666666664
+pancreas,units,73,43.916666666666664
+pancreas,units,74,43.916666666666664
+pancreas,units,75,43.958333333333336
+pancreas,units,76,44.041666666666664
+pancreas,units,77,44.041666666666664
+pancreas,units,78,44.125
+pancreas,units,79,44.125
+pancreas,units,80,44.125
+pancreas,units,81,44.208333333333336
+pancreas,units,82,44.291666666666664
+pancreas,units,83,44.291666666666664
+pancreas,units,84,44.291666666666664
+pancreas,units,85,44.291666666666664
+pancreas,units,86,44.333333333333336
+pancreas,units,87,44.375
+pancreas,units,88,44.416666666666664
+pancreas,units,89,44.416666666666664
+pancreas,units,90,44.458333333333336
+pancreas,units,91,44.458333333333336
+pancreas,units,92,44.5
+pancreas,units,93,44.5
+pancreas,units,94,44.5
+pancreas,units,95,44.5
+pancreas,units,96,44.541666666666664
+pancreas,units,97,44.541666666666664
+pancreas,units,98,44.583333333333336
+pancreas,units,99,44.583333333333336
+pancreas,units,100,44.583333333333336
+pancreas,units,101,44.583333333333336
+pancreas,units,102,44.625
+pancreas,units,103,44.666666666666664
+pancreas,units,104,44.666666666666664
+pancreas,units,105,44.666666666666664
+pancreas,units,106,44.75
+pancreas,units,107,44.75
+pancreas,units,108,44.75
+pancreas,units,109,44.75
+pancreas,units,110,44.75
+pancreas,units,111,44.75
+pancreas,units,112,44.75
+pancreas,units,113,44.75
+pancreas,units,114,44.75
+pancreas,units,115,44.75
+pancreas,units,116,44.75
+pancreas,units,117,44.75
+pancreas,units,118,44.75
+pancreas,units,119,44.75
+pancreas,units,120,44.791666666666664
+pancreas,units,121,44.833333333333336
+pancreas,units,122,44.833333333333336
+pancreas,units,123,44.833333333333336
+pancreas,units,124,44.833333333333336
+pancreas,units,125,44.833333333333336
+pancreas,units,126,44.833333333333336
+pancreas,units,127,44.875
+pancreas,units,128,44.916666666666664
+pancreas,units,129,44.916666666666664
+pancreas,units,130,44.916666666666664
+pancreas,units,131,44.916666666666664
+pancreas,units,132,44.916666666666664
+pancreas,units,133,44.916666666666664
+pancreas,units,134,44.916666666666664
+pancreas,units,135,44.916666666666664
+pancreas,units,136,44.958333333333336
+pancreas,units,137,44.958333333333336
+pancreas,units,138,44.958333333333336
+pancreas,units,139,44.958333333333336
+pancreas,units,140,44.958333333333336
+pancreas,pool over seeded pool,1,1.0
+pancreas,pool over seeded pool,2,0.610840196907903
+pancreas,pool over seeded pool,3,0.5696551326873647
+pancreas,pool over seeded pool,4,0.5469494868252985
+pancreas,pool over seeded pool,5,0.5262262510860481
+pancreas,pool over seeded pool,6,0.5139773773214389
+pancreas,pool over seeded pool,7,0.508091794453389
+pancreas,pool over seeded pool,8,0.5032593764921793
+pancreas,pool over seeded pool,9,0.4944164065406586
+pancreas,pool over seeded pool,10,0.4888326132643735
+pancreas,pool over seeded pool,11,0.4858942958377208
+pancreas,pool over seeded pool,12,0.4829559784110684
+pancreas,pool over seeded pool,13,0.47914215587252396
+pancreas,pool over seeded pool,14,0.4771314969577953
+pancreas,pool over seeded pool,15,0.4742415728722189
+pancreas,pool over seeded pool,16,0.47131152488403144
+pancreas,pool over seeded pool,17,0.4693735403879074
+pancreas,pool over seeded pool,18,0.4673628814731787
+pancreas,pool over seeded pool,19,0.4605392380166124
+pancreas,pool over seeded pool,20,0.45957024576855027
+pancreas,pool over seeded pool,21,0.4567283578975927
+pancreas,pool over seeded pool,22,0.4557120977349911
+pancreas,pool over seeded pool,23,0.4527544691232928
+pancreas,pool over seeded pool,24,0.44790845919007355
+pancreas,pool over seeded pool,25,0.44693946694201153
+pancreas,pool over seeded pool,26,0.44305401867777156
+pancreas,pool over seeded pool,27,0.4373632326702699
+pancreas,pool over seeded pool,28,0.43266058895525844
+pancreas,pool over seeded pool,29,0.42781240490259337
+pancreas,pool over seeded pool,30,0.42684341265453135
+pancreas,pool over seeded pool,31,0.42397438569351076
+pancreas,pool over seeded pool,32,0.4221014900706152
+pancreas,pool over seeded pool,33,0.41924282627989556
+pancreas,pool over seeded pool,34,0.41924282627989556
+pancreas,pool over seeded pool,35,0.4164210672334146
+pancreas,pool over seeded pool,36,0.41344157721124164
+pancreas,pool over seeded pool,37,0.41168699683299104
+pancreas,pool over seeded pool,38,0.40894415192792416
+pancreas,pool over seeded pool,39,0.40792789176532246
+pancreas,pool over seeded pool,40,0.4041802067929156
+pancreas,pool over seeded pool,41,0.40230541744340426
+pancreas,pool over seeded pool,42,0.3993731953357709
+pancreas,pool over seeded pool,43,0.39549722634352297
+pancreas,pool over seeded pool,44,0.39452823409546095
+pancreas,pool over seeded pool,45,0.393602308169535
+pancreas,pool over seeded pool,46,0.39172751882002377
+pancreas,pool over seeded pool,47,0.389811556874992
+pancreas,pool over seeded pool,48,0.38780089796026335
+pancreas,pool over seeded pool,49,0.38583984222013773
+pancreas,pool over seeded pool,50,0.3848708499720758
+pancreas,pool over seeded pool,51,0.38385458980947423
+pancreas,pool over seeded pool,52,0.3829076201125045
+pancreas,pool over seeded pool,53,0.3829076201125045
+pancreas,pool over seeded pool,54,0.3829076201125045
+pancreas,pool over seeded pool,55,0.3829076201125045
+pancreas,pool over seeded pool,56,0.3829076201125045
+pancreas,pool over seeded pool,57,0.3801413180314184
+pancreas,pool over seeded pool,58,0.3801413180314184
+pancreas,pool over seeded pool,59,0.3801413180314184
+pancreas,pool over seeded pool,60,0.37919434833444865
+pancreas,pool over seeded pool,61,0.37919434833444865
+pancreas,pool over seeded pool,62,0.37822535608638663
+pancreas,pool over seeded pool,63,0.37723329259432314
+pancreas,pool over seeded pool,64,0.37723329259432314
+pancreas,pool over seeded pool,65,0.37621703243172155
+pancreas,pool over seeded pool,66,0.37328698444353403
+pancreas,pool over seeded pool,67,0.37328698444353403
+pancreas,pool over seeded pool,68,0.37328698444353403
+pancreas,pool over seeded pool,69,0.37243664430747964
+pancreas,pool over seeded pool,70,0.371420384144878
+pancreas,pool over seeded pool,71,0.369482399648754
+pancreas,pool over seeded pool,72,0.36761579935009786
+pancreas,pool over seeded pool,73,0.36761579935009786
+pancreas,pool over seeded pool,74,0.36761579935009786
+pancreas,pool over seeded pool,75,0.36664680710203584
+pancreas,pool over seeded pool,76,0.3646361481873071
+pancreas,pool over seeded pool,77,0.3646361481873071
+pancreas,pool over seeded pool,78,0.36276135883779587
+pancreas,pool over seeded pool,79,0.36276135883779587
+pancreas,pool over seeded pool,80,0.36276135883779587
+pancreas,pool over seeded pool,81,0.36077610642713226
+pancreas,pool over seeded pool,82,0.3588381219310082
+pancreas,pool over seeded pool,83,0.3588381219310082
+pancreas,pool over seeded pool,84,0.3588381219310082
+pancreas,pool over seeded pool,85,0.3588381219310082
+pancreas,pool over seeded pool,86,0.35779645526434156
+pancreas,pool over seeded pool,87,0.35682746301627954
+pancreas,pool over seeded pool,88,0.3559771228802251
+pancreas,pool over seeded pool,89,0.3559771228802251
+pancreas,pool over seeded pool,90,0.3550081306321631
+pancreas,pool over seeded pool,91,0.3550081306321631
+pancreas,pool over seeded pool,92,0.35403913838410106
+pancreas,pool over seeded pool,93,0.35403913838410106
+pancreas,pool over seeded pool,94,0.35403913838410106
+pancreas,pool over seeded pool,95,0.35403913838410106
+pancreas,pool over seeded pool,96,0.35307014613603904
+pancreas,pool over seeded pool,97,0.35307014613603904
+pancreas,pool over seeded pool,98,0.352101153887977
+pancreas,pool over seeded pool,99,0.352101153887977
+pancreas,pool over seeded pool,100,0.352101153887977
+pancreas,pool over seeded pool,101,0.352101153887977
+pancreas,pool over seeded pool,102,0.351132161639915
+pancreas,pool over seeded pool,103,0.3502263645384658
+pancreas,pool over seeded pool,104,0.3502263645384658
+pancreas,pool over seeded pool,105,0.3502263645384658
+pancreas,pool over seeded pool,106,0.3483735977400468
+pancreas,pool over seeded pool,107,0.3483735977400468
+pancreas,pool over seeded pool,108,0.3483735977400468
+pancreas,pool over seeded pool,109,0.3483735977400468
+pancreas,pool over seeded pool,110,0.3483735977400468
+pancreas,pool over seeded pool,111,0.3483735977400468
+pancreas,pool over seeded pool,112,0.3483735977400468
+pancreas,pool over seeded pool,113,0.3483735977400468
+pancreas,pool over seeded pool,114,0.3483735977400468
+pancreas,pool over seeded pool,115,0.3483735977400468
+pancreas,pool over seeded pool,116,0.3483735977400468
+pancreas,pool over seeded pool,117,0.3483735977400468
+pancreas,pool over seeded pool,118,0.3483735977400468
+pancreas,pool over seeded pool,119,0.3483735977400468
+pancreas,pool over seeded pool,120,0.34746780063859756
+pancreas,pool over seeded pool,121,0.3466174605025431
+pancreas,pool over seeded pool,122,0.3466174605025431
+pancreas,pool over seeded pool,123,0.3466174605025431
+pancreas,pool over seeded pool,124,0.3466174605025431
+pancreas,pool over seeded pool,125,0.3466174605025431
+pancreas,pool over seeded pool,126,0.3466174605025431
+pancreas,pool over seeded pool,127,0.3456484682544811
+pancreas,pool over seeded pool,128,0.34467947600641907
+pancreas,pool over seeded pool,129,0.34467947600641907
+pancreas,pool over seeded pool,130,0.34467947600641907
+pancreas,pool over seeded pool,131,0.34467947600641907
+pancreas,pool over seeded pool,132,0.34467947600641907
+pancreas,pool over seeded pool,133,0.34467947600641907
+pancreas,pool over seeded pool,134,0.34467947600641907
+pancreas,pool over seeded pool,135,0.34467947600641907
+pancreas,pool over seeded pool,136,0.34371048375835705
+pancreas,pool over seeded pool,137,0.34371048375835705
+pancreas,pool over seeded pool,138,0.34371048375835705
+pancreas,pool over seeded pool,139,0.34371048375835705
+pancreas,pool over seeded pool,140,0.34371048375835705
+liver,spent or lost,,0.060282391557467306
+liver,held: no perfusion,,0.7567364046575681
+liver,held: no room,,0.18298120378496463
+kidney,spent or lost,,0.9995833333333334
+kidney,held: no perfusion,,0.00041666666666666675
+kidney,held: no room,,0.0
+pancreas,spent or lost,,0.7493875198155353
+pancreas,held: no perfusion,,0.24863830592582176
+pancreas,held: no room,,0.0019741742586428723

@@ -1,0 +1,389 @@
+panel,series,x,y
+b,"progenitors, total",0,0.5938166311300639
+b,"progenitors, total",1,0.6008273009307136
+b,"progenitors, total",2,0.5971043434847729
+b,"progenitors, total",3,0.592326139088729
+b,"progenitors, total",4,0.5875576036866359
+b,"progenitors, total",5,0.5885231316725978
+b,"progenitors, total",6,0.5939108061749571
+b,"progenitors, total",7,0.5993404781533389
+b,"progenitors, total",8,0.5996055226824458
+b,"progenitors, total",9,0.5962850644427596
+b,"progenitors, total",10,0.5972423802612482
+b,"progenitors, total",11,0.5930031174229303
+b,"progenitors, total",12,0.5865257595772787
+b,"progenitors, total",13,0.585727818124408
+b,"progenitors, total",14,0.5852187028657616
+b,"progenitors, total",15,0.5809056821459475
+b,"progenitors, total",16,0.5759824127507557
+b,"progenitors, total",17,0.5776021080368906
+b,"progenitors, total",18,0.5771643663739021
+b,"progenitors, total",19,0.5742243436754176
+b,"progenitors, total",20,0.5727582292849035
+b,"progenitors, total",21,0.5657525372489743
+b,"progenitors, total",22,0.5656192236598891
+b,"progenitors, total",23,0.5641726899785114
+b,"progenitors, total",24,0.5595835657185351
+b,"progenitors, total",25,0.5510095642933049
+b,"progenitors, total",26,0.5516483516483517
+b,"progenitors, total",27,0.5513853092783505
+b,"progenitors, total",28,0.5475716255553853
+b,"progenitors, total",29,0.5479212253829322
+b,"progenitors, total",30,0.5462732058742034
+b,"progenitors, total",31,0.5429888084265965
+b,"progenitors, total",32,0.5437822854982992
+b,"progenitors, total",33,0.5429436705027256
+b,"progenitors, total",34,0.5401050788091069
+b,"progenitors, total",35,0.5388316920322292
+b,"progenitors, total",36,0.5394469947688694
+b,"progenitors, total",37,0.5369745320650506
+b,"progenitors, total",38,0.5365925345351229
+b,"progenitors, total",39,0.5350515463917526
+b,"progenitors, total",40,0.5397225725094578
+b,"progenitors, total",41,0.5403260588286034
+b,"progenitors, total",42,0.5426657846866214
+b,"progenitors, total",43,0.5448682219921969
+b,"progenitors, total",44,0.546267971856837
+b,"progenitors, total",45,0.542664121016302
+b,"progenitors, total",46,0.542907551164432
+b,"progenitors, total",47,0.5437419529714711
+b,"progenitors, total",48,0.5390812812682737
+b,"progenitors, total",49,0.5403904934190006
+b,"progenitors, total",50,0.5387467113130829
+b,"progenitors, total",51,0.5433652846749046
+b,"progenitors, total",52,0.5508583570989207
+b,"progenitors, total",53,0.5565701318348822
+b,"progenitors, total",54,0.5604738154613467
+b,"progenitors, total",55,0.5598386373823397
+b,"progenitors, total",56,0.5607132613060521
+b,"progenitors, total",57,0.558135274991986
+b,"progenitors, total",58,0.5580874604847208
+b,"progenitors, total",59,0.5587244081219984
+b,"progenitors, total",60,0.5587547382853456
+b,"progenitors, total",61,0.562023749661548
+b,"progenitors, total",62,0.5650621233539171
+b,"progenitors, total",63,0.5708390152874471
+b,"progenitors, total",64,0.575658235273819
+b,"progenitors, total",65,0.5804738833211656
+b,"progenitors, total",66,0.5807783955520254
+b,"progenitors, total",67,0.5768750190473289
+b,"progenitors, total",68,0.57625434674615
+b,"progenitors, total",69,0.5732633459906188
+b,"progenitors, total",70,0.5723376380310686
+b,"progenitors, total",71,0.5720097223998976
+b,"progenitors, total",72,0.5704533777005701
+b,"progenitors, total",73,0.570919408164701
+b,"progenitors, total",74,0.571245647534539
+b,"progenitors, total",75,0.5706312919913281
+b,progenitors per tip,0,0.6927860696517412
+b,progenitors per tip,1,0.9012409513960705
+b,progenitors per tip,2,0.8956565152271594
+b,progenitors per tip,3,0.8884892086330934
+b,progenitors per tip,4,0.8813364055299537
+b,progenitors per tip,5,0.8827846975088968
+b,progenitors per tip,6,0.8908662092624355
+b,progenitors per tip,7,1.1154392232298251
+b,progenitors per tip,8,1.115932500547885
+b,progenitors per tip,9,1.4410222390700027
+b,progenitors per tip,10,1.4599258184163846
+b,progenitors per tip,11,1.466035484740022
+b,progenitors per tip,12,1.4322140640840526
+b,progenitors per tip,13,1.138915201908571
+b,progenitors per tip,14,1.2029495558907324
+b,progenitors per tip,15,1.2048414148212245
+b,progenitors per tip,16,1.1946301894089748
+b,progenitors per tip,17,1.1762079290933045
+b,progenitors per tip,18,1.086992890004182
+b,progenitors per tip,19,0.8888678196619478
+b,progenitors per tip,20,0.8448183881952327
+b,progenitors per tip,21,0.8521211054861093
+b,progenitors per tip,22,0.8589032655576093
+b,progenitors per tip,23,0.9193925318168334
+b,progenitors per tip,24,0.9305434575993619
+b,progenitors per tip,25,1.0215345854875877
+b,progenitors per tip,26,0.9724934858955476
+b,progenitors per tip,27,1.0014957658321062
+b,progenitors per tip,28,1.016918733174287
+b,progenitors per tip,29,0.9706033135354799
+b,progenitors per tip,30,0.9936969744949794
+b,progenitors per tip,31,0.8961522610617814
+b,progenitors per tip,32,0.8491369535088826
+b,progenitors per tip,33,0.8104811313301556
+b,progenitors per tip,34,0.8414680575649129
+b,progenitors per tip,35,0.8009660286965569
+b,progenitors per tip,36,0.7985235119933923
+b,progenitors per tip,37,0.7387467804773727
+b,progenitors per tip,38,0.744725396415413
+b,progenitors per tip,39,0.7477828841137747
+b,progenitors per tip,40,0.7885766927683096
+b,progenitors per tip,41,0.7992989035926085
+b,progenitors per tip,42,0.8002020892836621
+b,progenitors per tip,43,0.7922678471129783
+b,progenitors per tip,44,0.7196030013883332
+b,progenitors per tip,45,0.7484135507855162
+b,progenitors per tip,46,0.7496108848646514
+b,progenitors per tip,47,0.7473457679607884
+b,progenitors per tip,48,0.7542409154586811
+b,progenitors per tip,49,0.7588462248011499
+b,progenitors per tip,50,0.8002304707788471
+b,progenitors per tip,51,0.8139479972862944
+b,progenitors per tip,52,0.8373935509124723
+b,progenitors per tip,53,0.8305069935973634
+b,progenitors per tip,54,0.7928156880525957
+b,progenitors per tip,55,0.8053818993921378
+b,progenitors per tip,56,0.8277195762136959
+b,progenitors per tip,57,0.8124985642506287
+b,progenitors per tip,58,0.8135130693586055
+b,progenitors per tip,59,0.8070463672873311
+b,progenitors per tip,60,0.8641402108617207
+b,progenitors per tip,61,0.8623050101950036
+b,progenitors per tip,62,0.8788120868736334
+b,progenitors per tip,63,0.9255203234527143
+b,progenitors per tip,64,0.9365631392537782
+b,progenitors per tip,65,0.9412696804731682
+b,progenitors per tip,66,0.9046477596598608
+b,progenitors per tip,67,0.8888051764054998
+b,progenitors per tip,68,0.9106876729827549
+b,progenitors per tip,69,0.9248158679976862
+b,progenitors per tip,70,0.9110680768657827
+b,progenitors per tip,71,0.9453573855231842
+b,progenitors per tip,72,0.9817625910917476
+b,progenitors per tip,73,0.961886732705256
+b,progenitors per tip,74,0.9620436627251351
+b,progenitors per tip,75,0.9826995148529905
+b,tips,0,0.8571428571428571
+b,tips,1,0.6666666666666666
+b,tips,2,0.6666666666666666
+b,tips,3,0.6666666666666666
+b,tips,4,0.6666666666666666
+b,tips,5,0.6666666666666666
+b,tips,6,0.6666666666666666
+b,tips,7,0.5373134328358209
+b,tips,8,0.5373134328358209
+b,tips,9,0.41379310344827586
+b,tips,10,0.4090909090909091
+b,tips,11,0.4044943820224719
+b,tips,12,0.40952380952380957
+b,tips,13,0.5142857142857142
+b,tips,14,0.4864864864864865
+b,tips,15,0.4821428571428571
+b,tips,16,0.4821428571428571
+b,tips,17,0.4910714285714285
+b,tips,18,0.5309734513274337
+b,tips,19,0.6460176991150443
+b,tips,20,0.6779661016949152
+b,tips,21,0.6639344262295083
+b,tips,22,0.6585365853658537
+b,tips,23,0.6136363636363636
+b,tips,24,0.6013513513513513
+b,tips,25,0.5393939393939394
+b,tips,26,0.5672514619883041
+b,tips,27,0.5505617977528089
+b,tips,28,0.5384615384615384
+b,tips,29,0.5645161290322581
+b,tips,30,0.5497382198952879
+b,tips,31,0.605911330049261
+b,tips,32,0.6403940886699507
+b,tips,33,0.6699029126213591
+b,tips,34,0.641860465116279
+b,tips,35,0.6727272727272728
+b,tips,36,0.6755555555555556
+b,tips,37,0.7268722466960352
+b,tips,38,0.7205240174672489
+b,tips,39,0.7155172413793104
+b,tips,40,0.6844262295081968
+b,tips,41,0.676
+b,tips,42,0.6781609195402298
+b,tips,43,0.6877323420074348
+b,tips,44,0.7591240875912408
+b,tips,45,0.7250859106529209
+b,tips,46,0.7242524916943522
+b,tips,47,0.7275641025641026
+b,tips,48,0.7147335423197493
+b,tips,49,0.712121212121212
+b,tips,50,0.6732394366197184
+b,tips,51,0.6675675675675675
+b,tips,52,0.6578249336870027
+b,tips,53,0.6701570680628273
+b,tips,54,0.7069408740359898
+b,tips,55,0.6951219512195123
+b,tips,56,0.6774193548387097
+b,tips,57,0.6869369369369369
+b,tips,58,0.6860215053763441
+b,tips,59,0.6923076923076923
+b,tips,60,0.6466019417475729
+b,tips,61,0.6517690875232774
+b,tips,62,0.6429840142095915
+b,tips,63,0.6167763157894737
+b,tips,64,0.6146496815286624
+b,tips,65,0.616692426584235
+b,tips,66,0.6419939577039275
+b,tips,67,0.6490455212922174
+b,tips,68,0.632768361581921
+b,tips,69,0.6198675496688741
+b,tips,70,0.6282051282051282
+b,tips,71,0.605072463768116
+b,tips,72,0.5810502283105022
+b,tips,73,0.5935412026726058
+b,tips,74,0.5937834941050375
+b,tips,75,0.5806772908366534
+c,survivors divide as before,0,0.9973591549295775
+c,survivors divide as before,1,0.9874131944444445
+c,survivors divide as before,2,0.9824109824109825
+c,survivors divide as before,3,0.982089552238806
+c,survivors divide as before,4,0.9763713080168777
+c,survivors divide as before,5,0.9711659005432511
+c,survivors divide as before,6,0.9636213311285655
+c,survivors divide as before,7,0.956237218813906
+c,survivors divide as before,8,0.9532139951179821
+c,survivors divide as before,9,0.949939442874445
+c,survivors divide as before,10,0.9462279293739968
+c,survivors divide as before,11,0.9465283320031922
+c,survivors divide as before,12,0.9522102747909199
+c,survivors divide as before,13,0.9534606205250596
+c,survivors divide as before,14,0.9575228265184598
+c,survivors divide as before,15,0.9615232050773502
+c,survivors divide as before,16,0.964314036478985
+c,survivors divide as before,17,0.9722442505947662
+c,survivors divide as before,18,0.9742472266244057
+c,survivors divide as before,19,0.9762282091917591
+c,survivors divide as before,20,0.9801901743264658
+c,survivors divide as before,21,0.9857369255150554
+c,survivors divide as before,22,0.9869255150554676
+c,survivors divide as before,23,0.9893069306930693
+c,survivors divide as before,24,0.9924752475247526
+c,survivors divide as before,25,1.0047524752475248
+c,survivors divide as before,26,1.0083168316831683
+c,survivors divide as before,27,1.010688836104513
+c,survivors divide as before,28,1.01187648456057
+c,survivors divide as before,29,1.013064133016627
+c,survivors divide as before,30,1.0158353127474269
+c,survivors divide as before,31,1.0166270783847982
+c,survivors divide as before,32,1.0105263157894737
+c,survivors divide as before,33,1.0056775170325511
+c,survivors divide as before,34,0.9930479326747164
+c,survivors divide as before,35,0.98067287043665
+c,survivors divide as before,36,0.9739252995066949
+c,survivors divide as before,37,0.9745467224546722
+c,survivors divide as before,38,0.9624701467076083
+c,survivors divide as before,39,0.9490679094540613
+c,survivors divide as before,40,0.9347684279191129
+c,survivors divide as before,41,0.9329680953915567
+c,survivors divide as before,42,0.9237314843996217
+c,survivors divide as before,43,0.8972499244484738
+c,survivors divide as before,44,0.8738344988344988
+c,survivors divide as before,45,0.8851331996562589
+c,survivors divide as before,46,0.872364039955605
+c,survivors divide as before,47,0.8630581867388362
+c,survivors divide as before,48,0.8595988538681948
+c,survivors divide as before,49,0.8540979446840903
+c,survivors divide as before,50,0.8493557978196234
+c,survivors divide as before,51,0.8065490013934047
+c,survivors divide as before,52,0.7715224534501642
+c,survivors divide as before,53,0.7446808510638298
+c,survivors divide as before,54,0.730800160836349
+c,survivors divide as before,55,0.7242459851155504
+c,survivors divide as before,56,0.7184706106144189
+c,survivors divide as before,57,0.7139431943932129
+c,survivors divide as before,58,0.7116729424421732
+c,survivors divide as before,59,0.70653685674548
+c,survivors divide as before,60,0.6945424013434089
+c,survivors divide as before,61,0.6822247519921939
+c,survivors divide as before,62,0.6672935276602413
+c,survivors divide as before,63,0.6429526214169018
+c,survivors divide as before,64,0.6287185354691076
+c,survivors divide as before,65,0.6161294784894177
+c,survivors divide as before,66,0.6158421194917546
+c,survivors divide as before,67,0.633149316508938
+c,survivors divide as before,68,0.6382326650491635
+c,survivors divide as before,69,0.6406601650412603
+c,survivors divide as before,70,0.6375015190181067
+c,survivors divide as before,71,0.6362989323843417
+c,survivors divide as before,72,0.6346910437398751
+c,survivors divide as before,73,0.6349870041812634
+c,survivors divide as before,74,0.6331014684774208
+c,survivors divide as before,75,0.6361762152777778
+c,survivors divide twice as fast,0,1.0
+c,survivors divide twice as fast,1,1.0
+c,survivors divide twice as fast,2,1.0
+c,survivors divide twice as fast,3,1.0
+c,survivors divide twice as fast,4,1.0
+c,survivors divide twice as fast,5,1.0
+c,survivors divide twice as fast,6,1.0
+c,survivors divide twice as fast,7,1.0
+c,survivors divide twice as fast,8,0.99025069637883
+c,survivors divide twice as fast,9,0.9578195976638547
+c,survivors divide twice as fast,10,0.9473684210526315
+c,survivors divide twice as fast,11,0.927159209157128
+c,survivors divide twice as fast,12,0.912066438690767
+c,survivors divide twice as fast,13,0.8836265223274695
+c,survivors divide twice as fast,14,0.855505525992632
+c,survivors divide twice as fast,15,0.8333920394505107
+c,survivors divide twice as fast,16,0.8111077204760452
+c,survivors divide twice as fast,17,0.822742474916388
+c,survivors divide twice as fast,18,0.8080142023839716
+c,survivors divide twice as fast,19,0.8034392166228802
+c,survivors divide twice as fast,20,0.8092355973996861
+c,survivors divide twice as fast,21,0.8045616237706633
+c,survivors divide twice as fast,22,0.8022294829905824
+c,survivors divide twice as fast,23,0.7974363603538545
+c,survivors divide twice as fast,24,0.7880952380952382
+c,survivors divide twice as fast,25,0.7863969417011788
+c,survivors divide twice as fast,26,0.786388847249288
+c,survivors divide twice as fast,27,0.7848011363636365
+c,survivors divide twice as fast,28,0.7821525885558583
+c,survivors divide twice as fast,29,0.7808666144609763
+c,survivors divide twice as fast,30,0.791235160394039
+c,survivors divide twice as fast,31,0.7965504676302684
+c,survivors divide twice as fast,32,0.8006796344035622
+c,survivors divide twice as fast,33,0.7995694538862452
+c,survivors divide twice as fast,34,0.7982629727352683
+c,survivors divide twice as fast,35,0.80393414581997
+c,survivors divide twice as fast,36,0.8066694369416165
+c,survivors divide twice as fast,37,0.8044771604315822
+c,survivors divide twice as fast,38,0.8010018662213929
+c,survivors divide twice as fast,39,0.8012606245821793
+c,survivors divide twice as fast,40,0.8037409268565048
+c,survivors divide twice as fast,41,0.8044307245324133
+c,survivors divide twice as fast,42,0.8045406172401561
+c,survivors divide twice as fast,43,0.8056399132321042
+c,survivors divide twice as fast,44,0.804224757076468
+c,survivors divide twice as fast,45,0.8065636108125982
+c,survivors divide twice as fast,46,0.8099247146442159
+c,survivors divide twice as fast,47,0.8133227597145123
+c,survivors divide twice as fast,48,0.8175533980582523
+c,survivors divide twice as fast,49,0.8195962355798421
+c,survivors divide twice as fast,50,0.820588889712972
+c,survivors divide twice as fast,51,0.8221690590111643
+c,survivors divide twice as fast,52,0.8267906580535245
+c,survivors divide twice as fast,53,0.8320552147239265
+c,survivors divide twice as fast,54,0.8348485884202612
+c,survivors divide twice as fast,55,0.8374966424926135
+c,survivors divide twice as fast,56,0.8424530795664815
+c,survivors divide twice as fast,57,0.8465137435830787
+c,survivors divide twice as fast,58,0.846085239217685
+c,survivors divide twice as fast,59,0.8469815451986238
+c,survivors divide twice as fast,60,0.8485109524981542
+c,survivors divide twice as fast,61,0.8489221665358372
+c,survivors divide twice as fast,62,0.8496062525904434
+c,survivors divide twice as fast,63,0.8535094866720987
+c,survivors divide twice as fast,64,0.8587871499742312
+c,survivors divide twice as fast,65,0.8582832087244926
+c,survivors divide twice as fast,66,0.859679203539823
+c,survivors divide twice as fast,67,0.8622718605284665
+c,survivors divide twice as fast,68,0.8654857756307032
+c,survivors divide twice as fast,69,0.8683835558604676
+c,survivors divide twice as fast,70,0.8670116429495471
+c,survivors divide twice as fast,71,0.8657602354015524
+c,survivors divide twice as fast,72,0.8638870943696269
+c,survivors divide twice as fast,73,0.8621126486065095
+c,survivors divide twice as fast,74,0.8609901937335567
+c,survivors divide twice as fast,75,0.861267870579383
+d,"reference, response 0",0,0.8050485436893203
+d,"reference, response 1",0,0.8549418866564555
+d,"threshold halved, response 0",1,0.7344902386117137
+d,"threshold halved, response 1",1,0.8751567355394428
+d,"threshold halved, law slowed, response 0",2,0.7948286110560729
+d,"threshold halved, law slowed, response 1",2,0.8769426616453615
+d,"threshold quartered, law slowed, response 0",3,0.6361762152777778
+d,"threshold quartered, law slowed, response 1",3,0.861267870579383
